@@ -4,7 +4,6 @@ import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.model.DonutChartModel;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -21,10 +20,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.text.TextAlignment;
 
 import java.util.List;
-import java.util.Locale;
 
 
 public class DonutChart<T extends YData> extends Region implements Chart {
@@ -114,26 +111,24 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     // ******************** Draw Chart ****************************************
     private void drawChart() {
         if (null == model) return;
-        List<T> items    = model.getItems();
-        double  canvasSize  = canvas.getWidth();
-        int     noOfItems   = items.size();
-        double  center      = canvasSize * 0.5;
-        double  innerRadius = canvasSize * 0.275;
-        double  outerRadius = canvasSize * 0.4;
-        double  barWidth    = canvasSize * 0.1;
-        double  sum            = items.stream().mapToDouble(T::getY).sum();
-        double  stepSize       = 360.0 / sum;
-        double  angle          = 0;
-        double  startAngle     = 90;
-        double  xy             = canvasSize * 0.1;
-        double  wh             = canvasSize * 0.8;
+        List<T> items       = model.getItems();
+        //int     noOfItems   = items.size();
+        //double  center      = size * 0.5;
+        //double  innerRadius = size * 0.275;
+        //double  outerRadius = size * 0.4;
+        double  barWidth    = size * 0.1;
+        double  sum         = items.stream().mapToDouble(T::getY).sum();
+        double  stepSize    = 360.0 / sum;
+        double  angle       = 0;
+        double  startAngle  = 90;
+        double  xy          = size * 0.1;
+        double  wh          = size * 0.8;
 
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
         ctx.setLineCap(StrokeLineCap.BUTT);
 
-        for (int i = 0 ; i < noOfItems ; i++) {
-            T      data  = items.get(i);
+        for (T data : items) {
             double value = data.getY();
             startAngle -= angle;
             angle = value * stepSize;
@@ -144,12 +139,12 @@ public class DonutChart<T extends YData> extends Region implements Chart {
             ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
 
             // Percentage
-            double x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            double y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            //double x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            //double y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
 
             // Value
-            x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            //x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            //y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
         }
     }
     
@@ -173,8 +168,9 @@ public class DonutChart<T extends YData> extends Region implements Chart {
             pane.setPrefSize(width, height);
             pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
-            canvas.setWidth(width);
-            canvas.setHeight(height);
+            canvas.setWidth(size);
+            canvas.setHeight(size);
+            canvas.relocate((width - size) * 0.5, (height - size) * 0.5);
             
             redraw();
         }
