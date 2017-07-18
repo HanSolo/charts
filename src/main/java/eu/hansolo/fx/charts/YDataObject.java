@@ -1,5 +1,6 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.YData;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -9,45 +10,33 @@ import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
 
-/**
- * Created by hansolo on 16.07.17.
- */
-public class DataObject implements XYData {
-    private DoubleProperty        x;
+public class YDataObject implements YData {
     private DoubleProperty        y;
     private StringProperty        name;
     private ObjectProperty<Color> color;
 
 
     // ******************** Constructors **********************************
-    public DataObject() {
-        this(0, 0, "", Color.RED);
+    public YDataObject() {
+        this(0, "", Color.RED);
     }
-    public DataObject(final double X, final double Y, final String NAME, final Color COLOR) {
-        x    = new DoublePropertyBase(X) {
-            @Override public Object getBean() { return DataObject.this; }
-            @Override public String getName() { return "x"; }
-        };
-        y    = new DoublePropertyBase(Y) {
-            @Override public Object getBean() { return DataObject.this; }
+    public YDataObject(final double Y, final String NAME, final Color COLOR) {
+        y     = new DoublePropertyBase(Y) {
+            @Override public Object getBean() { return YDataObject.this; }
             @Override public String getName() { return "y"; }
         };
-        name = new StringPropertyBase(NAME) {
-            @Override public Object getBean() { return DataObject.this; }
+        name  = new StringPropertyBase(NAME) {
+            @Override public Object getBean() { return YDataObject.this; }
             @Override public String getName() { return "name"; }
         };
         color = new ObjectPropertyBase<Color>(COLOR) {
-            @Override public Object getBean() { return DataObject.this; }
+            @Override public Object getBean() { return YDataObject.this; }
             @Override public String getName() { return "color"; }
         };
     }
 
 
     // ******************** Methods ***************************************
-    @Override public double getX() { return x.get(); }
-    public void setX(final double X) { x.set(X); }
-    public DoubleProperty xProperty() { return x; }
-
     @Override public double getY() { return y.get(); }
     public void setY(final double Y) { y.set(Y); }
     public DoubleProperty yProperty() { return y; }
@@ -63,7 +52,6 @@ public class DataObject implements XYData {
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":").append(getName()).append(",\n")
-                                  .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append("\n")
                                   .append("  \"color\":").append(getColor().toString().replace("0x", "#")).append("\n")
                                   .append("}")

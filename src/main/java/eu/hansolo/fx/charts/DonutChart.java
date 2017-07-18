@@ -1,9 +1,10 @@
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.model.XYChartModel;
+import eu.hansolo.fx.charts.data.YData;
+import eu.hansolo.fx.charts.model.DonutChartModel;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -18,36 +19,39 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.ArcType;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.TextAlignment;
+
+import java.util.List;
+import java.util.Locale;
 
 
-/**
- * Created by hansolo on 16.07.17.
- */
-public class XYChart<T extends XYData> extends Region implements Chart {
+public class DonutChart<T extends YData> extends Region implements Chart {
     private static final double          PREFERRED_WIDTH  = 250;
     private static final double          PREFERRED_HEIGHT = 250;
     private static final double          MINIMUM_WIDTH    = 0;
     private static final double          MINIMUM_HEIGHT   = 0;
     private static final double          MAXIMUM_WIDTH    = 4096;
     private static final double          MAXIMUM_HEIGHT   = 4096;
-    private static       double          aspectRatio;
-    private              boolean         keepAspect;
-    private              double          size;
-    private              double          width;
-    private              double          height;
-    private              Pane            pane;
-    private              Paint           backgroundPaint;
-    private              Paint           borderPaint;
-    private              double          borderWidth;
-    private              XYChartModel<T> model;
-    private              Canvas          canvas;
-    private              GraphicsContext ctx;
-    private              double          scaleX;
-    private              double          scaleY;
+    private static double             aspectRatio;
+    private        boolean            keepAspect;
+    private        double             size;
+    private        double             width;
+    private        double             height;
+    private        Pane               pane;
+    private        Paint              backgroundPaint;
+    private        Paint              borderPaint;
+    private        double             borderWidth;
+    private        DonutChartModel<T> model;
+    private        Canvas             canvas;
+    private        GraphicsContext    ctx;
+    private        double             scaleX;
+    private        double             scaleY;
 
 
     // ******************** Constructors **************************************
-    public XYChart(final XYChartModel<T> MODEL) {
+    public DonutChart(final DonutChartModel<T> MODEL) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
         aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect      = false;
@@ -74,7 +78,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
             }
         }
 
-        getStyleClass().setAll("chart", "xy-chart");
+        getStyleClass().setAll("chart", "donut-chart");
 
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
@@ -104,20 +108,51 @@ public class XYChart<T extends XYData> extends Region implements Chart {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public XYChartModel<T> getModel() { return model; }
+    public DonutChartModel<T> getModel() { return model; }
 
 
     // ******************** Draw Chart ****************************************
     private void drawChart() {
         if (null == model) return;
+        List<T> items    = model.getItems();
+        double  canvasSize  = canvas.getWidth();
+        int     noOfItems   = items.size();
+        double  center      = canvasSize * 0.5;
+        double  innerRadius = canvasSize * 0.275;
+        double  outerRadius = canvasSize * 0.4;
+        double  barWidth    = canvasSize * 0.1;
+        double  sum            = items.stream().mapToDouble(T::getY).sum();
+        double  stepSize       = 360.0 / sum;
+        double  angle          = 0;
+        double  startAngle     = 90;
+        double  xy             = canvasSize * 0.1;
+        double  wh             = canvasSize * 0.8;
+
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
-        model.getItems().forEach(item -> {
-            ctx.setFill(((T)item).getColor());
-            ctx.fillOval(((T)item).getX() * scaleX, height - ((T)item).getY() * scaleY, 1, 1);
-        });
-    }
+        ctx.setLineCap(StrokeLineCap.BUTT);
 
+        for (int i = 0 ; i < noOfItems ; i++) {
+            T      data  = items.get(i);
+            double value = data.getY();
+            startAngle -= angle;
+            angle = value * stepSize;
+
+            // Segment
+            ctx.setLineWidth(barWidth);
+            ctx.setStroke(data.getColor());
+            ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
+
+            // Percentage
+            double x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            double y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+
+            // Value
+            x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+        }
+    }
+    
 
     // ******************** Resizing ******************************************
     private void resize() {
@@ -140,10 +175,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
 
             canvas.setWidth(width);
             canvas.setHeight(height);
-
-            scaleX = width / model.getItems().size();
-            scaleY = height / model.getRangeY();
-
+            
             redraw();
         }
     }

@@ -1,6 +1,6 @@
 package eu.hansolo.fx.charts.model;
 
-import eu.hansolo.fx.charts.XYData;
+import eu.hansolo.fx.charts.data.XYData;
 
 import java.util.Comparator;
 import java.util.List;
