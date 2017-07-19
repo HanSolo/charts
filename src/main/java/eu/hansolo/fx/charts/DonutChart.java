@@ -4,6 +4,7 @@ import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.model.DonutChartModel;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -20,8 +21,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.TextAlignment;
 
 import java.util.List;
+import java.util.Locale;
 
 
 public class DonutChart<T extends YData> extends Region implements Chart {
@@ -112,10 +115,10 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     private void drawChart() {
         if (null == model) return;
         List<T> items       = model.getItems();
-        //int     noOfItems   = items.size();
-        //double  center      = size * 0.5;
-        //double  innerRadius = size * 0.275;
-        //double  outerRadius = size * 0.4;
+        int     noOfItems   = items.size();
+        double  center      = size * 0.5;
+        double  innerRadius = size * 0.275;
+        double  outerRadius = size * 0.4;
         double  barWidth    = size * 0.1;
         double  sum         = items.stream().mapToDouble(T::getY).sum();
         double  stepSize    = 360.0 / sum;
@@ -123,10 +126,14 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         double  startAngle  = 90;
         double  xy          = size * 0.1;
         double  wh          = size * 0.8;
+        double  x;
+        double  y;
 
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
         ctx.setLineCap(StrokeLineCap.BUTT);
+        ctx.setTextAlign(TextAlignment.CENTER);
+        ctx.setTextBaseline(VPos.CENTER);
 
         for (T data : items) {
             double value = data.getY();
@@ -139,12 +146,16 @@ public class DonutChart<T extends YData> extends Region implements Chart {
             ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
 
             // Percentage
-            //double x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            //double y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            //x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            //y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            //ctx.setFill(Color.BLACK);
+            //ctx.fillText(String.format(Locale.US, "%.0f%%", (value / sum * 100.0)), center + x, center + y, barWidth);
 
             // Value
-            //x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            //y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            ctx.setFill(Color.WHITE);
+            ctx.fillText(String.format(Locale.US, "%.0f", value), center + x, center + y, barWidth);
         }
     }
     
