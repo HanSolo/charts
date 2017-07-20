@@ -8,7 +8,6 @@ import eu.hansolo.fx.charts.model.YChartModel;
 import eu.hansolo.fx.charts.model.XYChartModel;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -27,7 +26,9 @@ public class ChartTest extends Application {
     private static final Color[]       COLORS           = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
     private static final Random        RND              = new Random();
     private XYChartModel<XYDataObject> xyChartModel;
-    private XYChart<XYDataObject>      xyChart;
+    private XYChart<XYDataObject>      scatterChart;
+    private XYChart<XYDataObject>      lineChart;
+    private XYChart<XYDataObject>      areaChart;
     private YChartModel<YDataObject>   yChartModel;
     private DonutChart<YDataObject>    donutChart;
 
@@ -39,14 +40,16 @@ public class ChartTest extends Application {
         List<XYDataObject> xyData = new ArrayList<>(1000);
         List<YDataObject>  yData  = new ArrayList<>(20);
         for (int i = 0 ; i < 1000 ; i++) {
-            xyData.add(new XYDataObject(i, RND.nextDouble() * 20, "P" + i, COLORS[RND.nextInt(3)], Symbol.NONE));
+            xyData.add(new XYDataObject(i, RND.nextDouble() * 20, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
             yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         xyChartModel = new XYChartModel(xyData);
-        xyChart      = new XYChart(xyChartModel, ChartType.AREA, Color.BLACK, Color.rgb(255, 0, 0, 0.5));
+        scatterChart = new XYChart(xyChartModel, ChartType.SCATTER);
+        lineChart    = new XYChart(xyChartModel, ChartType.LINE);
+        areaChart    = new XYChart(xyChartModel, ChartType.AREA, Color.BLACK, Color.rgb(255, 0, 0, 0.5));
 
         yChartModel  = new YChartModel(yData);
         donutChart   = new DonutChart(yChartModel);
@@ -70,7 +73,8 @@ public class ChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        HBox pane = new HBox(xyChart, donutChart);
+        HBox pane = new HBox(scatterChart, lineChart, areaChart, donutChart);
+        pane.setSpacing(10);
 
         Scene scene = new Scene(new StackPane(pane));
 
