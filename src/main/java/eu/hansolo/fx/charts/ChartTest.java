@@ -26,7 +26,6 @@ import java.util.Random;
 public class ChartTest extends Application {
     private static final Color[]       COLORS           = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
     private static final Random        RND              = new Random();
-    private static final int           NUMBER_OF_VALUES = 1000;
     private XYChartModel<XYDataObject> xyChartModel;
     private XYChart<XYDataObject>      xyChart;
     private YChartModel<YDataObject>   yChartModel;
@@ -37,10 +36,12 @@ public class ChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYDataObject> xyData = new ArrayList<>(NUMBER_OF_VALUES);
-        List<YDataObject>  yData  = new ArrayList<>(NUMBER_OF_VALUES);
-        for (int i = 0 ; i < NUMBER_OF_VALUES ; i++) {
+        List<XYDataObject> xyData = new ArrayList<>(1000);
+        List<YDataObject>  yData  = new ArrayList<>(20);
+        for (int i = 0 ; i < 1000 ; i++) {
             xyData.add(new XYDataObject(i, RND.nextDouble() * 20, "P" + i, COLORS[RND.nextInt(3)], Symbol.NONE));
+        }
+        for (int i = 0 ; i < 20 ; i++) {
             yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
@@ -57,11 +58,11 @@ public class ChartTest extends Application {
                     List<XYData> xyItems = xyChartModel.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
-                    //List<YData> yItems = yChartModel.getItems();
-                    //yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
+                    List<YData> yItems = yChartModel.getItems();
+                    yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyChartModel.refresh();
-                    //yChartModel.refresh();
+                    yChartModel.refresh();
                     lastTimerCall = now;
                 }
             }
@@ -69,10 +70,9 @@ public class ChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(xyChart);
-        pane.setPadding(new Insets(10));
+        HBox pane = new HBox(xyChart, donutChart);
 
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(new StackPane(pane));
 
         stage.setTitle("Charts");
         stage.setScene(scene);
