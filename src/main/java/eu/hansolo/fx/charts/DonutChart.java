@@ -1,7 +1,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.YData;
-import eu.hansolo.fx.charts.model.DonutChartModel;
+import eu.hansolo.fx.charts.model.YChartModel;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -34,24 +34,22 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     private static final double             MINIMUM_HEIGHT   = 0;
     private static final double             MAXIMUM_WIDTH    = 4096;
     private static final double             MAXIMUM_HEIGHT   = 4096;
-    private static       double             aspectRatio;
-    private              boolean            keepAspect;
-    private              double             size;
-    private              double             width;
-    private              double             height;
-    private              Pane               pane;
-    private              Paint              backgroundPaint;
-    private              Paint              borderPaint;
-    private              double             borderWidth;
-    private              DonutChartModel<T> model;
-    private              Canvas             canvas;
-    private              GraphicsContext    ctx;
-    private              double             scaleX;
-    private              double             scaleY;
+    private static double          aspectRatio;
+    private        boolean         keepAspect;
+    private        double          size;
+    private        double          width;
+    private        double          height;
+    private        Pane            pane;
+    private        Paint           backgroundPaint;
+    private        Paint           borderPaint;
+    private        double          borderWidth;
+    private        YChartModel<T>  model;
+    private        Canvas          canvas;
+    private        GraphicsContext ctx;
 
 
     // ******************** Constructors **************************************
-    public DonutChart(final DonutChartModel<T> MODEL) {
+    public DonutChart(final YChartModel<T> MODEL) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
         aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect      = false;
@@ -59,8 +57,6 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         borderPaint     = Color.TRANSPARENT;
         borderWidth     = 0d;
         model           = MODEL;
-        scaleX          = 1;
-        scaleY          = 1;
 
         initGraphics();
         registerListeners();
@@ -108,26 +104,29 @@ public class DonutChart<T extends YData> extends Region implements Chart {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public DonutChartModel<T> getModel() { return model; }
+    @Override public ChartType getChartType() { return ChartType.DONUT; }
+    @Override public void setChartType(final ChartType TYPE) {}
+
+    public YChartModel<T> getModel() { return model; }
 
 
     // ******************** Draw Chart ****************************************
     private void drawChart() {
         if (null == model) return;
-        List<T> items       = model.getItems();
-        int     noOfItems   = items.size();
-        double  center      = size * 0.5;
-        double  innerRadius = size * 0.275;
-        double  outerRadius = size * 0.4;
-        double  barWidth    = size * 0.1;
-        double  sum         = items.stream().mapToDouble(T::getY).sum();
-        double  stepSize    = 360.0 / sum;
-        double  angle       = 0;
-        double  startAngle  = 90;
-        double  xy          = size * 0.1;
-        double  wh          = size * 0.8;
-        double  x;
-        double  y;
+        List<YData> items       = model.getItems();
+        int         noOfItems   = items.size();
+        double      center      = size * 0.5;
+        double      innerRadius = size * 0.275;
+        double      outerRadius = size * 0.4;
+        double      barWidth    = size * 0.1;
+        double      sum         = items.stream().mapToDouble(YData::getY).sum();
+        double      stepSize    = 360.0 / sum;
+        double      angle       = 0;
+        double      startAngle  = 90;
+        double      xy          = size * 0.1;
+        double      wh          = size * 0.8;
+        double      x;
+        double      y;
 
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
@@ -135,7 +134,7 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
 
-        for (T data : items) {
+        for (YData data : items) {
             double value = data.getY();
             startAngle -= angle;
             angle = value * stepSize;

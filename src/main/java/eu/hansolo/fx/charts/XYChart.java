@@ -45,10 +45,19 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private              double          scaleX;
     private              double          scaleY;
     private              double          symbolSize;
+    private              ChartType       chartType;
+    private              Color           strokeColor;
+    private              Color           fillColor;
 
 
     // ******************** Constructors **************************************
     public XYChart(final XYChartModel<T> MODEL) {
+        this(MODEL, ChartType.SCATTER);
+    }
+    public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE) {
+        this(MODEL, TYPE, Color.BLACK, Color.TRANSPARENT);
+    }
+    public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
         aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect      = false;
@@ -59,6 +68,9 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         scaleX          = 1;
         scaleY          = 1;
         symbolSize      = 2;
+        chartType       = TYPE;
+        strokeColor     = STROKE_COLOR;
+        fillColor       = FILL_COLOR;
 
         initGraphics();
         registerListeners();
@@ -106,6 +118,24 @@ public class XYChart<T extends XYData> extends Region implements Chart {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
+    @Override public ChartType getChartType() { return chartType; }
+    @Override public void setChartType(final ChartType TYPE) {
+        chartType = TYPE;
+        redraw();
+    }
+
+    public Color getStrokeColor() { return strokeColor; }
+    public void setStrokeColor(final Color COLOR) {
+        strokeColor = COLOR;
+        redraw();
+    }
+
+    public Color getFillColor() { return fillColor; }
+    public void setFillColor(final Color COLOR) {
+        fillColor = COLOR;
+        redraw();
+    }
+
     public XYChartModel<T> getModel() { return model; }
 
 
@@ -113,28 +143,94 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private void drawChart() {
         if (null == model) return;
         double halfSymbolSize = symbolSize * 0.5;
+        double oldX           = 0;
+        double oldY           = height;
 
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
-        model.getItems().forEach(item -> {
-            XYData data = (XYData) item;
-            ctx.setFill(data.getColor());
-            switch(data.getSymbol()) {
-                case SQUARE:
-                    ctx.fillRect(data.getX() * scaleX - halfSymbolSize, height - data.getY() * scaleY - halfSymbolSize, symbolSize, symbolSize);
+        if (ChartType.AREA == chartType) {
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+        }
+        for (XYData item : model.getItems()) {
+            double x = item.getX() * scaleX;
+            double y = item.getY() * scaleY;
+            switch(chartType) {
+                case LINE:
+                    ctx.setStroke(strokeColor);
+                    ctx.setFill(Color.TRANSPARENT);
+                    ctx.strokeLine(oldX, oldY, x, y);
+                    drawSymbol(x, y, item.getColor(), item.getSymbol());
                     break;
-                case TRIANGLE:
+                case AREA:
+                    ctx.lineTo(x, y);
+                    drawSymbol(x, y, item.getColor(), item.getSymbol());
                     break;
-                case STAR:
+                case BAR:
                     break;
-                case CROSS:
+                case BUBBLE:
+                    halfSymbolSize = item.getZ() * 0.5;
+                    ctx.setStroke(Color.TRANSPARENT);
+                    ctx.setFill(item.getColor());
+                    ctx.fillOval(x - halfSymbolSize, height - y - halfSymbolSize, symbolSize, symbolSize);
                     break;
-                case CIRCLE:
-                default    :
-                    ctx.fillOval(data.getX() * scaleX - halfSymbolSize, height - data.getY() * scaleY - halfSymbolSize, symbolSize, symbolSize);
+                case SCATTER:
+                default     :
+                    drawSymbol(x, y, item.getColor(), item.getSymbol());
                     break;
             }
-        });
+            oldX = x;
+            oldY = y;
+        }
+        if (ChartType.AREA == chartType) {
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.setFill(fillColor);
+            ctx.fill();
+        }
+    }
+
+    private void drawSymbol(final double X, final double Y, final Color COLOR, final Symbol SYMBOL) {
+        double halfSymbolSize = symbolSize * 0.5;
+        ctx.save();
+        switch(SYMBOL) {
+            case NONE:
+                break;
+            case SQUARE:
+                ctx.setStroke(Color.TRANSPARENT);
+                ctx.setFill(COLOR);
+                ctx.fillRect(X - halfSymbolSize, height - Y - halfSymbolSize, symbolSize, symbolSize);
+                break;
+            case TRIANGLE:
+                ctx.setStroke(COLOR);
+                ctx.setFill(null);
+                ctx.strokeLine(X, Y - halfSymbolSize, X + halfSymbolSize, Y + halfSymbolSize);
+                ctx.strokeLine(X + halfSymbolSize, Y + halfSymbolSize, X - halfSymbolSize, Y + halfSymbolSize);
+                ctx.strokeLine(X - halfSymbolSize, Y + halfSymbolSize, X, Y - halfSymbolSize);
+                break;
+            case STAR:
+                ctx.setStroke(COLOR);
+                ctx.setFill(null);
+                ctx.strokeLine(X - halfSymbolSize, Y, X + halfSymbolSize, Y);
+                ctx.strokeLine(X, Y - halfSymbolSize, X, Y + halfSymbolSize);
+                ctx.strokeLine(X - halfSymbolSize, Y - halfSymbolSize, X + halfSymbolSize, Y + halfSymbolSize);
+                ctx.strokeLine(X + halfSymbolSize, Y - halfSymbolSize, X - halfSymbolSize, Y + halfSymbolSize);
+                break;
+            case CROSS:
+                ctx.setStroke(COLOR);
+                ctx.setFill(null);
+                ctx.strokeLine(X - halfSymbolSize, Y, X + halfSymbolSize, Y);
+                ctx.strokeLine(X, Y - halfSymbolSize, X, Y + halfSymbolSize);
+                break;
+            case CIRCLE:
+            default    :
+                ctx.setStroke(Color.TRANSPARENT);
+                ctx.setFill(COLOR);
+                ctx.fillOval(X - halfSymbolSize, height - Y - halfSymbolSize, symbolSize, symbolSize);
+                break;
+        }
+        ctx.restore();
     }
 
 

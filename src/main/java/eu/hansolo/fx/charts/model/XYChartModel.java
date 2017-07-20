@@ -1,6 +1,7 @@
 package eu.hansolo.fx.charts.model;
 
 import eu.hansolo.fx.charts.data.XYData;
+import javafx.collections.ObservableList;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +26,8 @@ public class XYChartModel<T extends XYData> extends ChartModel {
 
 
     // ******************** Methods *******************************************
+    @Override public ObservableList<XYData> getItems() { return items; }
+
     public double getMinX() { return ((XYData) items.stream().min(Comparator.comparingDouble(XYData::getX)).get()).getX(); }
     public double getMaxX() { return ((XYData) items.stream().max(Comparator.comparingDouble(XYData::getX)).get()).getX(); }
 
