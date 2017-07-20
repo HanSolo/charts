@@ -44,6 +44,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private              GraphicsContext ctx;
     private              double          scaleX;
     private              double          scaleY;
+    private              double          symbolSize;
 
 
     // ******************** Constructors **************************************
@@ -57,6 +58,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         model           = MODEL;
         scaleX          = 1;
         scaleY          = 1;
+        symbolSize      = 2;
 
         initGraphics();
         registerListeners();
@@ -110,11 +112,28 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     // ******************** Draw Chart ****************************************
     private void drawChart() {
         if (null == model) return;
+        double halfSymbolSize = symbolSize * 0.5;
+
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
         model.getItems().forEach(item -> {
-            ctx.setFill(((T)item).getColor());
-            ctx.fillOval(((T)item).getX() * scaleX, height - ((T)item).getY() * scaleY, 1, 1);
+            XYData data = (XYData) item;
+            ctx.setFill(data.getColor());
+            switch(data.getSymbol()) {
+                case SQUARE:
+                    ctx.fillRect(data.getX() * scaleX - halfSymbolSize, height - data.getY() * scaleY - halfSymbolSize, symbolSize, symbolSize);
+                    break;
+                case TRIANGLE:
+                    break;
+                case STAR:
+                    break;
+                case CROSS:
+                    break;
+                case CIRCLE:
+                default    :
+                    ctx.fillOval(data.getX() * scaleX - halfSymbolSize, height - data.getY() * scaleY - halfSymbolSize, symbolSize, symbolSize);
+                    break;
+            }
         });
     }
 

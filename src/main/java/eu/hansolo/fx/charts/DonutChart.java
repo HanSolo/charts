@@ -28,26 +28,26 @@ import java.util.Locale;
 
 
 public class DonutChart<T extends YData> extends Region implements Chart {
-    private static final double          PREFERRED_WIDTH  = 250;
-    private static final double          PREFERRED_HEIGHT = 250;
-    private static final double          MINIMUM_WIDTH    = 0;
-    private static final double          MINIMUM_HEIGHT   = 0;
-    private static final double          MAXIMUM_WIDTH    = 4096;
-    private static final double          MAXIMUM_HEIGHT   = 4096;
-    private static double             aspectRatio;
-    private        boolean            keepAspect;
-    private        double             size;
-    private        double             width;
-    private        double             height;
-    private        Pane               pane;
-    private        Paint              backgroundPaint;
-    private        Paint              borderPaint;
-    private        double             borderWidth;
-    private        DonutChartModel<T> model;
-    private        Canvas             canvas;
-    private        GraphicsContext    ctx;
-    private        double             scaleX;
-    private        double             scaleY;
+    private static final double             PREFERRED_WIDTH  = 250;
+    private static final double             PREFERRED_HEIGHT = 250;
+    private static final double             MINIMUM_WIDTH    = 0;
+    private static final double             MINIMUM_HEIGHT   = 0;
+    private static final double             MAXIMUM_WIDTH    = 4096;
+    private static final double             MAXIMUM_HEIGHT   = 4096;
+    private static       double             aspectRatio;
+    private              boolean            keepAspect;
+    private              double             size;
+    private              double             width;
+    private              double             height;
+    private              Pane               pane;
+    private              Paint              backgroundPaint;
+    private              Paint              borderPaint;
+    private              double             borderWidth;
+    private              DonutChartModel<T> model;
+    private              Canvas             canvas;
+    private              GraphicsContext    ctx;
+    private              double             scaleX;
+    private              double             scaleY;
 
 
     // ******************** Constructors **************************************
