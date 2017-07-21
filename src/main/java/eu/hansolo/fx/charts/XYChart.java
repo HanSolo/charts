@@ -142,9 +142,8 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     // ******************** Draw Chart ****************************************
     private void drawChart() {
         if (null == model) return;
-        double halfSymbolSize = symbolSize * 0.5;
-        double oldX           = 0;
-        double oldY           = height;
+        double oldX = 0;
+        double oldY = height;
 
         ctx.setFill(Color.WHITE);
         ctx.clearRect(0, 0, width, height);
@@ -167,12 +166,6 @@ public class XYChart<T extends XYData> extends Region implements Chart {
                     drawSymbol(x, y, item.getColor(), item.getSymbol());
                     break;
                 case BAR:
-                    break;
-                case BUBBLE:
-                    halfSymbolSize = item.getZ() * 0.5;
-                    ctx.setStroke(Color.TRANSPARENT);
-                    ctx.setFill(item.getColor());
-                    ctx.fillOval(x - halfSymbolSize, height - y - halfSymbolSize, symbolSize, symbolSize);
                     break;
                 case SCATTER:
                 default     :

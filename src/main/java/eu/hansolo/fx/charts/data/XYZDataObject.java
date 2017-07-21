@@ -10,46 +10,48 @@ import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
 
-/**
- * Created by hansolo on 16.07.17.
- */
-public class XYDataObject implements XYData {
+public class XYZDataObject implements XYZData {
     private DoubleProperty         x;
     private DoubleProperty         y;
+    private DoubleProperty         z;
     private StringProperty         name;
     private ObjectProperty<Color>  color;
     private ObjectProperty<Symbol> symbol;
 
 
     // ******************** Constructors **********************************
-    public XYDataObject() {
-        this(0, 0, "", Color.RED, Symbol.CIRCLE);
+    public XYZDataObject() {
+        this(0, 0, 0, "", Color.RED, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME) {
-        this(X, Y, NAME, Color.RED, Symbol.CIRCLE);
+    public XYZDataObject(final double X, final double Y, final double Z, final String NAME) {
+        this(X, Y, Z, NAME, Color.RED, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME, final Color COLOR) {
-        this(X, Y, NAME, COLOR, Symbol.CIRCLE);
+    public XYZDataObject(final double X, final double Y, final double Z, final String NAME, final Color COLOR) {
+        this(X, Y, Z, NAME, COLOR, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public XYZDataObject(final double X, final double Y, final double Z, final String NAME, final Color COLOR, final Symbol SYMBOL) {
         x      = new DoublePropertyBase(X) {
-            @Override public Object getBean() { return XYDataObject.this; }
+            @Override public Object getBean() { return XYZDataObject.this; }
             @Override public String getName() { return "x"; }
         };
         y      = new DoublePropertyBase(Y) {
-            @Override public Object getBean() { return XYDataObject.this; }
+            @Override public Object getBean() { return XYZDataObject.this; }
             @Override public String getName() { return "y"; }
         };
+        z      = new DoublePropertyBase(Z) {
+            @Override public Object getBean() { return XYZDataObject.this; }
+            @Override public String getName() { return "value"; }
+        };
         name   = new StringPropertyBase(NAME) {
-            @Override public Object getBean() { return XYDataObject.this; }
+            @Override public Object getBean() { return XYZDataObject.this; }
             @Override public String getName() { return "name"; }
         };
         color  = new ObjectPropertyBase<Color>(COLOR) {
-            @Override public Object getBean() { return XYDataObject.this; }
+            @Override public Object getBean() { return XYZDataObject.this; }
             @Override public String getName() { return "color"; }
         };
         symbol = new ObjectPropertyBase<Symbol>(SYMBOL) {
-            @Override public Object getBean() {  return XYDataObject.this;  }
+            @Override public Object getBean() {  return XYZDataObject.this;  }
             @Override public String getName() {  return "symbol";  }
         };
     }
@@ -63,6 +65,10 @@ public class XYDataObject implements XYData {
     @Override public double getY() { return y.get(); }
     @Override public void setY(final double Y) { y.set(Y); }
     public DoubleProperty yProperty() { return y; }
+
+    @Override public double getZ() { return z.get(); }
+    @Override public void setZ(final double Z) { z.set(Z); }
+    public DoubleProperty zProperty() { return z; }
 
     @Override public String getName() { return name.get(); }
     public void setName(final String NAME) { name.set(NAME); }
@@ -81,6 +87,7 @@ public class XYDataObject implements XYData {
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
+                                  .append("  \"z\":").append(getZ()).append(",\n")
                                   .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
