@@ -5,9 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 
@@ -17,27 +15,42 @@ import javafx.scene.Scene;
  * Time: 14:12
  */
 public class AxisTest extends Application {
-    private Axis xAxis;
-    private Axis yAxis;
+    private Axis xAxisBottom;
+    private Axis xAxisTop;
+    private Axis yAxisLeft;
+    private Axis yAxisRight;
 
     @Override public void init() {
-        xAxis = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
-        xAxis.setPrefHeight(20);
-        AnchorPane.setLeftAnchor(xAxis, 20d);
-        AnchorPane.setRightAnchor(xAxis, 20d);
-        AnchorPane.setBottomAnchor(xAxis, 0d);
+        xAxisBottom = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
+        xAxisBottom.setPrefHeight(20);
+        xAxisBottom.setMaxValue(20);
+        AnchorPane.setLeftAnchor(xAxisBottom, 20d);
+        AnchorPane.setRightAnchor(xAxisBottom, 20d);
+        AnchorPane.setBottomAnchor(xAxisBottom, 0d);
 
-        yAxis = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
-        yAxis.setPrefWidth(20);
-        AnchorPane.setLeftAnchor(yAxis, 0d);
-        AnchorPane.setTopAnchor(yAxis, 20d);
-        AnchorPane.setBottomAnchor(yAxis, 20d);
+        xAxisTop = new Axis(Orientation.HORIZONTAL, Pos.TOP_CENTER);
+        xAxisTop.setPrefHeight(20);
+        AnchorPane.setLeftAnchor(xAxisTop, 20d);
+        AnchorPane.setRightAnchor(xAxisTop, 20d);
+        AnchorPane.setTopAnchor(xAxisTop, 0d);
+
+        yAxisLeft = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
+        yAxisLeft.setPrefWidth(20);
+        AnchorPane.setLeftAnchor(yAxisLeft, 0d);
+        AnchorPane.setTopAnchor(yAxisLeft, 20d);
+        AnchorPane.setBottomAnchor(yAxisLeft, 20d);
+
+        yAxisRight = new Axis(Orientation.VERTICAL, Pos.CENTER_RIGHT);
+        yAxisRight.setPrefWidth(20);
+        yAxisRight.setMaxValue(20);
+        AnchorPane.setRightAnchor(yAxisRight, 0d);
+        AnchorPane.setTopAnchor(yAxisRight, 20d);
+        AnchorPane.setBottomAnchor(yAxisRight, 20d);
     }
 
     @Override public void start(Stage stage) {
-        AnchorPane pane = new AnchorPane(xAxis, yAxis);
+        AnchorPane pane = new AnchorPane(xAxisBottom, xAxisTop, yAxisLeft, yAxisRight);
         pane.setPrefSize(400, 400);
-        pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);
 
