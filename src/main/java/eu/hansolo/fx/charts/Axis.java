@@ -497,9 +497,9 @@ public class Axis extends Region {
             maxPosition = width;
         }
 
-        double anchorX           = getLayoutX();
+        double anchorX           = 0;
         double anchorXPlusOffset = anchorX + width;
-        double anchorY           = getLayoutY();
+        double anchorY           = 0;
         double anchorYPlusOffset = anchorY + height;
         double majorTickSpace    = getMajorTickSpace();
         double minorTickSpace    = getMinorTickSpace();
