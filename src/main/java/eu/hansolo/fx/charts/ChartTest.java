@@ -1,5 +1,6 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis.AxisType;
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.data.XYDataObject;
 import eu.hansolo.fx.charts.data.XYZData;
@@ -11,7 +12,10 @@ import eu.hansolo.fx.charts.model.YChartModel;
 import eu.hansolo.fx.charts.model.XYChartModel;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -26,8 +30,8 @@ import java.util.Random;
  * Created by hansolo on 16.07.17.
  */
 public class ChartTest extends Application {
-    private static final Color[]         COLORS           = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
-    private static final Random          RND              = new Random();
+    private static final Color[]         COLORS = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
+    private static final Random          RND    = new Random();
     private XYChartModel<XYDataObject>   xyChartModel;
     private XYChart<XYDataObject>        scatterChart;
     private XYChart<XYDataObject>        lineChart;
@@ -36,6 +40,8 @@ public class ChartTest extends Application {
     private DonutChart<YDataObject>      donutChart;
     private XYZChartModel<XYZDataObject> xyzChartModel;
     private XYZChart<XYZDataObject>      bubbleChart;
+    private Axis                         xAxis;
+    private Axis                         yAxis;
 
     private long                         lastTimerCall;
     private AnimationTimer               timer;
@@ -64,10 +70,22 @@ public class ChartTest extends Application {
         xyzChartModel = new XYZChartModel<>(xyzData);
         bubbleChart   = new XYZChart<>(xyzChartModel, ChartType.BUBBLE);
 
+        xAxis = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
+        xAxis.setMinValue(0);
+        xAxis.setMaxValue(20);
+        xAxis.prefWidthProperty().bind(lineChart.widthProperty());
+        xAxis.setPrefHeight(25);
+
+        yAxis = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
+        yAxis.setMinValue(0);
+        yAxis.setMaxValue(20);
+        yAxis.prefHeightProperty().bind(lineChart.heightProperty());
+        yAxis.setPrefWidth(25);
+
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
-                if (now > lastTimerCall) {
+                if (now > lastTimerCall + 100_000_000l) {
                     List<XYData> xyItems = xyChartModel.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
@@ -80,6 +98,7 @@ public class ChartTest extends Application {
                     xyChartModel.refresh();
                     yChartModel.refresh();
                     xyzChartModel.refresh();
+
                     lastTimerCall = now;
                 }
             }
@@ -87,8 +106,13 @@ public class ChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        HBox pane = new HBox(scatterChart, lineChart, areaChart, donutChart, bubbleChart);
-        pane.setSpacing(10);
+        //HBox pane = new HBox(scatterChart, lineChart, areaChart, donutChart, bubbleChart);
+        //pane.setSpacing(10);
+
+        BorderPane pane = new BorderPane();
+        pane.setLeft(yAxis);
+        pane.setBottom(xAxis);
+        pane.setCenter(lineChart);
 
         Scene scene = new Scene(new StackPane(pane));
 

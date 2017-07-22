@@ -36,12 +36,10 @@ import java.util.Locale;
 @DefaultProperty("children")
 public class Axis extends Region {
     public               enum                        AxisType { LINEAR, LOGARITHMIC }
-    private static final double                      PREFERRED_WIDTH  = 250;
-    private static final double                      PREFERRED_HEIGHT = 250;
-    private static final double                      MINIMUM_WIDTH    = 50;
-    private static final double                      MINIMUM_HEIGHT   = 50;
-    private static final double                      MAXIMUM_WIDTH    = 1024;
-    private static final double                      MAXIMUM_HEIGHT   = 1024;
+    private static final double                      MINIMUM_WIDTH  = 0;
+    private static final double                      MINIMUM_HEIGHT = 0;
+    private static final double                      MAXIMUM_WIDTH  = 4096;
+    private static final double                      MAXIMUM_HEIGHT = 4096;
     private              double                      size;
     private              double                      width;
     private              double                      height;
@@ -74,9 +72,7 @@ public class Axis extends Region {
     private              Color                       _tickMarkColor;
     private              ObjectProperty<Color>       tickMarkColor;
     private              double                      _majorTickSpace;
-    private              DoubleProperty              majorTickSpace;
     private              double                      _minorTickSpace;
-    private              DoubleProperty              minorTickSpace;
     private              Locale                      _locale;
     private              ObjectProperty<Locale>      locale;
     private              int                         _decimals;
@@ -89,6 +85,13 @@ public class Axis extends Region {
         this(Orientation.VERTICAL, Pos.CENTER_LEFT);
     }
     public Axis(final Orientation ORIENTATION, final Pos POSITION) {
+        if (Orientation.VERTICAL == ORIENTATION) {
+            if (Pos.CENTER_LEFT != POSITION &&
+                Pos.CENTER_RIGHT != POSITION) {
+                throw new IllegalArgumentException("Wrong combination of orientation and position!");
+            }
+        }
+
         getStylesheets().add(Axis.class.getResource("chart.css").toExternalForm());
         _minValue             = 0;
         _maxValue             = 100;
@@ -115,16 +118,18 @@ public class Axis extends Region {
     private void initGraphics() {
         if (Double.compare(getPrefWidth(), 0.0) <= 0 || Double.compare(getPrefHeight(), 0.0) <= 0 || Double.compare(getWidth(), 0.0) <= 0 ||
             Double.compare(getHeight(), 0.0) <= 0) {
-            if (getPrefWidth() > 0 && getPrefHeight() > 0) {
-                setPrefSize(getPrefWidth(), getPrefHeight());
-            } else {
-                setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+            if (getPrefWidth() != 0 && getPrefHeight() != 0) {
+                if (Orientation.VERTICAL == getOrientation()) {
+                    setPrefSize(20, 250);
+                } else {
+                    setPrefSize(250, 20);
+                }
             }
         }
 
         getStyleClass().add("axis");
 
-        canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+        canvas = new Canvas(width, height);
         ctx    = canvas.getGraphicsContext2D();
 
         pane   = new Pane(canvas);
@@ -134,16 +139,10 @@ public class Axis extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        // add listeners to your propertes like
-        //value.addListener(o -> handleControlPropertyChanged("VALUE"));
     }
 
 
     // ******************** Methods *******************************************
-    @Override public void layoutChildren() {
-        super.layoutChildren();
-    }
-
     @Override protected double computeMinWidth(final double HEIGHT) { return MINIMUM_WIDTH; }
     @Override protected double computeMinHeight(final double WIDTH) { return MINIMUM_HEIGHT; }
     @Override protected double computePrefWidth(final double HEIGHT) { return super.computePrefWidth(HEIGHT); }
@@ -151,27 +150,21 @@ public class Axis extends Region {
     @Override protected double computeMaxWidth(final double HEIGHT) { return MAXIMUM_WIDTH; }
     @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
 
-    private void handleControlPropertyChanged(final String PROPERTY) {
-        if ("".equals(PROPERTY)) {
-
-        }
-    }
-
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public double getMinValue() {  return null == minValue ? _minValue : minValue.get();  }
-    public void setMinValue(final double MIN_VALUE) {
+    public void setMinValue(final double VALUE) {
         if (null == minValue) {
-            _minValue = MIN_VALUE;
-            redraw();
+            if (VALUE > getMaxValue()) { setMaxValue(VALUE); }
+            _minValue = Helper.clamp(-Double.MAX_VALUE, getMaxValue(), VALUE);
         } else {
-            minValue.set(MIN_VALUE);
+            minValue.set(VALUE);
         }
     }
     public DoubleProperty minValueProperty() {
         if (null == minValue) {
             minValue = new DoublePropertyBase(_minValue) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { if (getValue() > getMaxValue()) setMaxValue(getValue()); }
                 @Override public Object getBean() {  return Axis.this;  }
                 @Override public String getName() {  return "minValue"; }
             };
@@ -180,18 +173,18 @@ public class Axis extends Region {
     }
 
     public double getMaxValue() { return null == maxValue ? _maxValue : maxValue.get(); }
-    public void setMaxValue(final double MAX_VALUE) {
+    public void setMaxValue(final double VALUE) {
         if (null == maxValue) {
-            _maxValue = MAX_VALUE;
-            redraw();
+            if (VALUE < getMinValue()) { setMinValue(VALUE); }
+            _maxValue = Helper.clamp(getMinValue(), Double.MAX_VALUE, VALUE);
         } else {
-            maxValue.set(MAX_VALUE);
+            maxValue.set(VALUE);
         }
     }
     public DoubleProperty maxValueProperty() {
         if (null == maxValue) {
             maxValue = new DoublePropertyBase(_maxValue) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { if (get() < getMinValue()) setMinValue(get()); }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "maxValue"; }
             };
@@ -206,10 +199,10 @@ public class Axis extends Region {
     }
 
     public boolean isAutoScale() { return null == autoScale ? _autoScale : autoScale.get(); }
-    public void set_autoScale(final boolean AUTO_SCALE) {
+    public void setAutoScale(final boolean AUTO_SCALE) {
         if (null == autoScale) {
             _autoScale = AUTO_SCALE;
-            recalc();
+            redraw();
         } else {
             autoScale.set(AUTO_SCALE);
         }
@@ -217,7 +210,7 @@ public class Axis extends Region {
     public BooleanProperty autoScaleProperty() {
         if (null == autoScale) {
             autoScale = new BooleanPropertyBase(_autoScale) {
-                @Override protected void invalidated() { recalc(); }
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "autoScale"; }
             };
@@ -271,7 +264,7 @@ public class Axis extends Region {
     public void setType(final AxisType TYPE) {
         if (null == type) {
             _type = TYPE;
-            recalc();
+            redraw();
         } else {
             type.set(TYPE);
         }
@@ -279,7 +272,7 @@ public class Axis extends Region {
     public ObjectProperty<AxisType> typeProperty() {
         if (null == type) {
             type = new ObjectPropertyBase<AxisType>(_type) {
-                @Override protected void invalidated() { recalc(); }
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() {  return Axis.this;  }
                 @Override public String getName() {  return "axisType";  }
             };
@@ -414,45 +407,11 @@ public class Axis extends Region {
         return tickMarkColor;
     }
 
-    public double getMajorTickSpace() { return null == majorTickSpace ? _majorTickSpace : majorTickSpace.get(); }
-    public void setMajorTickSpace(final double SPACE) {
-        if (null == majorTickSpace) {
-            _majorTickSpace = SPACE;
-            recalc();
-        } else {
-            majorTickSpace.set(SPACE);
-        }
-    }
-    public DoubleProperty majorTickSpaceProperty() {
-        if (null == majorTickSpace) {
-            majorTickSpace = new DoublePropertyBase(_majorTickSpace) {
-                @Override protected void invalidated() { recalc(); }
-                @Override public Object getBean() { return Axis.this; }
-                @Override public String getName() { return "majorTickSpace"; }
-            };
-        }
-        return majorTickSpace;
-    }
+    private double getMajorTickSpace() { return _majorTickSpace; }
+    private void setMajorTickSpace(final double SPACE) { _majorTickSpace = SPACE; }
 
-    public double getMinorTickSpace() { return null == minorTickSpace ? _minorTickSpace : minorTickSpace.get(); }
-    public void setMinorTickSpace(final double SPACE) {
-        if (null == minorTickSpace) {
-            _minorTickSpace = SPACE;
-            recalc();
-        } else {
-            minorTickSpace.set(SPACE);
-        }
-    }
-    public DoubleProperty minorTickSpaceProperty() {
-        if (null == minorTickSpace) {
-            minorTickSpace = new DoublePropertyBase(_minorTickSpace) {
-                @Override protected void invalidated() { recalc(); }
-                @Override public Object getBean() { return Axis.this; }
-                @Override public String getName() { return "minorTickSpace"; }
-            };
-        }
-        return minorTickSpace;
-    }
+    private double getMinorTickSpace() { return _minorTickSpace; }
+    private void setMinorTickSpace(final double SPACE) { _minorTickSpace = SPACE; }
 
     public Locale getLocale() { return null == locale ? _locale : locale.get(); }
     public void setLocale(final Locale LOCALE) {
@@ -504,24 +463,22 @@ public class Axis extends Region {
         double maxNoOfMinorTicks = 10;
         double niceRange         = (Helper.calcNiceNumber(getRange(), false));
         setMajorTickSpace(Helper.calcNiceNumber(niceRange / (maxNoOfMajorTicks - 1), true));
+        setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), true));
         double niceMinValue = (Math.floor(getMinValue() / getMajorTickSpace()) * getMajorTickSpace());
         double niceMaxValue = (Math.ceil(getMaxValue() / getMajorTickSpace()) * getMajorTickSpace());
-        setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), true));
         setMinValue(niceMinValue);
         setMaxValue(niceMaxValue);
     }
 
-    private void recalc() {
-        if (isAutoScale()) { calcAutoScale(); }
-        redraw();
-    }
-
-    private void drawAxis(final GraphicsContext CTX) {
+    private void drawAxis() {
         if (Double.compare(stepSize, 0) <= 0) return;
 
-        CTX.setFont(Fonts.latoLight(0.06 * size));
-        CTX.setStroke(getTickMarkColor());
-        CTX.setFill(getTickLabelColor());
+        ctx.setFill(getAxisBackgroundColor());
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.setFont(Fonts.latoLight(0.4 * size));
+        ctx.setStroke(getTickMarkColor());
+        ctx.setFill(getTickLabelColor());
 
         Point2D innerPoint;
         Point2D innerMediumPoint;
@@ -532,56 +489,82 @@ public class Axis extends Region {
         double minPosition;
         double maxPosition;
         if (Orientation.VERTICAL == getOrientation()) {
-            minPosition = getLayoutY() + size * 0.0035;
+            minPosition = getLayoutY();
             maxPosition = getLayoutY() + getLayoutBounds().getHeight();
         } else {
             minPosition = getLayoutX();
             maxPosition = getLayoutX() + getLayoutBounds().getWidth();
         }
 
-        double anchorX        = getLayoutX() - 0.075 * width;
-        double anchorY        = getLayoutY() + getHeight() + 0.075 * height;
+        double anchorX        = getLayoutX();
+        double anchorY        = getLayoutY();
         double majorTickSpace = getMajorTickSpace();
         double minorTickSpace = getMinorTickSpace();
         double minValue       = getMinValue();
         double maxValue       = getMaxValue();
 
         int counter = 0;
+        ctx.setStroke(getTickMarkColor());
+        ctx.setLineWidth(size * 0.007);
         for (double i = minPosition ; Double.compare(i, maxPosition + 1) <= 0 ; i += stepSize) {
             if (Orientation.VERTICAL == getOrientation()) {
-                innerPoint       = new Point2D(anchorX, i);
-                innerMediumPoint = new Point2D(anchorX + 0.015 * width, i);
-                innerMinorPoint  = new Point2D(anchorX + 0.03 * width, i);
-                outerPoint       = new Point2D(anchorX + 0.05 * width, i);
-                textPoint        = new Point2D(anchorX - 0.02 * width, i);
+                if (Pos.CENTER_LEFT == getPosition()) {
+                    innerPoint       = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.5 * width, i);
+                    innerMediumPoint = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.4 * width, i);
+                    innerMinorPoint  = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.3 * width, i);
+                    outerPoint       = new Point2D(anchorX + getLayoutBounds().getWidth(), i);
+                    textPoint        = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.6 * width, i);
+
+                    ctx.strokeLine(anchorX + getLayoutBounds().getWidth(), anchorY, anchorX + getLayoutBounds().getWidth(), anchorY + getLayoutBounds().getHeight());
+                } else {
+                    innerPoint       = new Point2D(anchorX + 0.5 * width, i);
+                    innerMediumPoint = new Point2D(anchorX + 0.4 * width, i);
+                    innerMinorPoint  = new Point2D(anchorX + 0.3 * width, i);
+                    outerPoint       = new Point2D(anchorX, i);
+                    textPoint        = new Point2D(anchorX + 0.8 * width, i);
+
+                    ctx.strokeLine(anchorX, anchorY, anchorX, anchorY + getLayoutBounds().getHeight());
+                }
             } else {
-                innerPoint       = new Point2D(i, anchorY);
-                innerMediumPoint = new Point2D(i, anchorY - 0.015 * height);
-                innerMinorPoint  = new Point2D(i, anchorY - 0.03 * height);
-                outerPoint       = new Point2D(i, anchorY - 0.05 * height);
-                textPoint        = new Point2D(i, anchorY + 0.05 * height);
+                if (Pos.BOTTOM_CENTER == getPosition()) {
+                    innerPoint       = new Point2D(i, anchorY + 0.5 * height);
+                    innerMediumPoint = new Point2D(i, anchorY + 0.4 * height);
+                    innerMinorPoint  = new Point2D(i, anchorY + 0.3 * height);
+                    outerPoint       = new Point2D(i, anchorY);
+                    textPoint        = new Point2D(i, anchorY + 0.8 * height);
+
+                    ctx.strokeLine(anchorX, anchorY, anchorX + getLayoutBounds().getWidth(), anchorY);
+                } else {
+                    innerPoint       = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.5 * height);
+                    innerMediumPoint = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.4 * height);
+                    innerMinorPoint  = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.3 * height);
+                    outerPoint       = new Point2D(i, anchorY + getLayoutBounds().getHeight());
+                    textPoint        = new Point2D(i, anchorY + 0.2 * height);
+
+                    ctx.strokeLine(anchorX, anchorY + getLayoutBounds().getHeight(), anchorX + getLayoutBounds().getWidth(), anchorY + getLayoutBounds().getHeight());
+                }
             }
 
             if (counter % majorTickSpace == 0) {
                 // Draw major tickmark
-                CTX.setLineWidth(size * 0.007);
-                CTX.strokeLine(innerPoint.getX(), innerPoint.getY(), outerPoint.getX(), outerPoint.getY());
+                ctx.setLineWidth(size * 0.007);
+                ctx.strokeLine(innerPoint.getX(), innerPoint.getY(), outerPoint.getX(), outerPoint.getY());
 
                 // Draw text
-                CTX.setTextBaseline(VPos.CENTER);
+                ctx.setTextBaseline(VPos.CENTER);
                 if (Orientation.VERTICAL == getOrientation()) {
-                    CTX.setTextAlign(TextAlignment.RIGHT);
-                    CTX.fillText(String.format(getLocale(), tickLabelFormatString, (maxValue -= majorTickSpace) + majorTickSpace), textPoint.getX(), textPoint.getY());
+                    ctx.setTextAlign(TextAlignment.RIGHT);
+                    ctx.fillText(String.format(getLocale(), tickLabelFormatString, (maxValue -= majorTickSpace) + majorTickSpace), textPoint.getX(), textPoint.getY());
                 } else {
-                    CTX.setTextAlign(TextAlignment.CENTER);
-                    CTX.fillText(String.format(getLocale(), tickLabelFormatString, (minValue += majorTickSpace) - majorTickSpace), textPoint.getX(), textPoint.getY());
+                    ctx.setTextAlign(TextAlignment.CENTER);
+                    ctx.fillText(String.format(getLocale(), tickLabelFormatString, (minValue += majorTickSpace) - majorTickSpace), textPoint.getX(), textPoint.getY());
                 }
             } else if (minorTickSpace % 2 != 0 && counter % 5 == 0) {
-                CTX.setLineWidth(size * 0.006);
-                CTX.strokeLine(innerMediumPoint.getX(), innerMediumPoint.getY(), outerPoint.getX(), outerPoint.getY());
+                ctx.setLineWidth(size * 0.006);
+                ctx.strokeLine(innerMediumPoint.getX(), innerMediumPoint.getY(), outerPoint.getX(), outerPoint.getY());
             } else if (counter % minorTickSpace == 0) {
-                CTX.setLineWidth(size * 0.005);
-                CTX.strokeLine(innerMinorPoint.getX(), innerMinorPoint.getY(), outerPoint.getX(), outerPoint.getY());
+                ctx.setLineWidth(size * 0.005);
+                ctx.strokeLine(innerMinorPoint.getX(), innerMinorPoint.getY(), outerPoint.getX(), outerPoint.getY());
             }
             counter++;
         }
@@ -598,13 +581,13 @@ public class Axis extends Region {
 
         if (width > 0 && height > 0) {
             if (Orientation.VERTICAL == getOrientation()) {
-                width    = height / aspectRatio;
+                width    = height * aspectRatio;
                 size     = width < height ? width : height;
-                stepSize = Math.abs((0.66793 * height) / getRange());
+                stepSize = Math.abs(height / getRange());
             } else {
                 height   = width / aspectRatio;
                 size     = width < height ? width : height;
-                stepSize = Math.abs(0.9 * width / getRange());
+                stepSize = Math.abs(width / getRange());
             }
             pane.setMaxSize(width, height);
             pane.setPrefSize(width, height);
@@ -618,6 +601,7 @@ public class Axis extends Region {
     }
 
     private void redraw() {
-        drawAxis(ctx);
+        if (isAutoScale()) { calcAutoScale(); }
+        drawAxis();
     }
 }
