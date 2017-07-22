@@ -20,6 +20,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -489,19 +490,21 @@ public class Axis extends Region {
         double minPosition;
         double maxPosition;
         if (Orientation.VERTICAL == getOrientation()) {
-            minPosition = getLayoutY();
-            maxPosition = getLayoutY() + getLayoutBounds().getHeight();
+            minPosition = 0;
+            maxPosition = height;
         } else {
-            minPosition = getLayoutX();
-            maxPosition = getLayoutX() + getLayoutBounds().getWidth();
+            minPosition = 0;
+            maxPosition = width;
         }
 
-        double anchorX        = getLayoutX();
-        double anchorY        = getLayoutY();
-        double majorTickSpace = getMajorTickSpace();
-        double minorTickSpace = getMinorTickSpace();
-        double minValue       = getMinValue();
-        double maxValue       = getMaxValue();
+        double anchorX           = getLayoutX();
+        double anchorXPlusOffset = anchorX + width;
+        double anchorY           = getLayoutY();
+        double anchorYPlusOffset = anchorY + height;
+        double majorTickSpace    = getMajorTickSpace();
+        double minorTickSpace    = getMinorTickSpace();
+        double minValue          = getMinValue();
+        double maxValue          = getMaxValue();
 
         int counter = 0;
         ctx.setStroke(getTickMarkColor());
@@ -509,13 +512,13 @@ public class Axis extends Region {
         for (double i = minPosition ; Double.compare(i, maxPosition + 1) <= 0 ; i += stepSize) {
             if (Orientation.VERTICAL == getOrientation()) {
                 if (Pos.CENTER_LEFT == getPosition()) {
-                    innerPoint       = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.5 * width, i);
-                    innerMediumPoint = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.4 * width, i);
-                    innerMinorPoint  = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.3 * width, i);
-                    outerPoint       = new Point2D(anchorX + getLayoutBounds().getWidth(), i);
-                    textPoint        = new Point2D(anchorX + getLayoutBounds().getWidth() - 0.6 * width, i);
+                    innerPoint       = new Point2D(anchorXPlusOffset - 0.5 * width, i);
+                    innerMediumPoint = new Point2D(anchorXPlusOffset - 0.4 * width, i);
+                    innerMinorPoint  = new Point2D(anchorXPlusOffset - 0.3 * width, i);
+                    outerPoint       = new Point2D(anchorXPlusOffset, i);
+                    textPoint        = new Point2D(anchorXPlusOffset - 0.6 * width, i);
 
-                    ctx.strokeLine(anchorX + getLayoutBounds().getWidth(), anchorY, anchorX + getLayoutBounds().getWidth(), anchorY + getLayoutBounds().getHeight());
+                    ctx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
                 } else {
                     innerPoint       = new Point2D(anchorX + 0.5 * width, i);
                     innerMediumPoint = new Point2D(anchorX + 0.4 * width, i);
@@ -523,7 +526,7 @@ public class Axis extends Region {
                     outerPoint       = new Point2D(anchorX, i);
                     textPoint        = new Point2D(anchorX + 0.8 * width, i);
 
-                    ctx.strokeLine(anchorX, anchorY, anchorX, anchorY + getLayoutBounds().getHeight());
+                    ctx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
                 }
             } else {
                 if (Pos.BOTTOM_CENTER == getPosition()) {
@@ -533,15 +536,15 @@ public class Axis extends Region {
                     outerPoint       = new Point2D(i, anchorY);
                     textPoint        = new Point2D(i, anchorY + 0.8 * height);
 
-                    ctx.strokeLine(anchorX, anchorY, anchorX + getLayoutBounds().getWidth(), anchorY);
+                    ctx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
                 } else {
-                    innerPoint       = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.5 * height);
-                    innerMediumPoint = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.4 * height);
-                    innerMinorPoint  = new Point2D(i, anchorY + getLayoutBounds().getHeight() - 0.3 * height);
-                    outerPoint       = new Point2D(i, anchorY + getLayoutBounds().getHeight());
+                    innerPoint       = new Point2D(i, anchorYPlusOffset - 0.5 * height);
+                    innerMediumPoint = new Point2D(i, anchorYPlusOffset - 0.4 * height);
+                    innerMinorPoint  = new Point2D(i, anchorYPlusOffset - 0.3 * height);
+                    outerPoint       = new Point2D(i, anchorYPlusOffset);
                     textPoint        = new Point2D(i, anchorY + 0.2 * height);
 
-                    ctx.strokeLine(anchorX, anchorY + getLayoutBounds().getHeight(), anchorX + getLayoutBounds().getWidth(), anchorY + getLayoutBounds().getHeight());
+                    ctx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
                 }
             }
 
