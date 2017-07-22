@@ -2,23 +2,16 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.model.YChartModel;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
@@ -28,35 +21,32 @@ import java.util.Locale;
 
 
 public class DonutChart<T extends YData> extends Region implements Chart {
-    private static final double             PREFERRED_WIDTH  = 250;
-    private static final double             PREFERRED_HEIGHT = 250;
-    private static final double             MINIMUM_WIDTH    = 0;
-    private static final double             MINIMUM_HEIGHT   = 0;
-    private static final double             MAXIMUM_WIDTH    = 4096;
-    private static final double             MAXIMUM_HEIGHT   = 4096;
-    private static double          aspectRatio;
-    private        boolean         keepAspect;
-    private        double          size;
-    private        double          width;
-    private        double          height;
-    private        Pane            pane;
-    private        Paint           backgroundPaint;
-    private        Paint           borderPaint;
-    private        double          borderWidth;
-    private        YChartModel<T>  model;
-    private        Canvas          canvas;
-    private        GraphicsContext ctx;
+    private static final double                PREFERRED_WIDTH  = 250;
+    private static final double                PREFERRED_HEIGHT = 250;
+    private static final double                MINIMUM_WIDTH    = 0;
+    private static final double                MINIMUM_HEIGHT   = 0;
+    private static final double                MAXIMUM_WIDTH    = 4096;
+    private static final double                MAXIMUM_HEIGHT   = 4096;
+    private static       double                aspectRatio;
+    private              boolean               keepAspect;
+    private              double                size;
+    private              double                width;
+    private              double                height;
+    private              Pane                  pane;
+    private              Color                 _chartBackgroundColor;
+    private              ObjectProperty<Color> chartBackgroundColor;
+    private              YChartModel<T>        model;
+    private              Canvas                canvas;
+    private              GraphicsContext       ctx;
 
 
     // ******************** Constructors **************************************
     public DonutChart(final YChartModel<T> MODEL) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
-        aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect      = false;
-        backgroundPaint = Color.TRANSPARENT;
-        borderPaint     = Color.TRANSPARENT;
-        borderWidth     = 0d;
-        model           = MODEL;
+        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect            = false;
+        _chartBackgroundColor = Color.WHITE;
+        model                 = MODEL;
 
         initGraphics();
         registerListeners();
@@ -80,8 +70,6 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         ctx    = canvas.getGraphicsContext2D();
 
         pane = new Pane(canvas);
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth))));
 
         getChildren().setAll(pane);
     }
@@ -107,6 +95,27 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     @Override public ChartType getChartType() { return ChartType.DONUT; }
     @Override public void setChartType(final ChartType TYPE) {}
 
+    public Color getChartBackgroundColor() { return null == chartBackgroundColor ? _chartBackgroundColor : chartBackgroundColor.get(); }
+    public void setChartBackgroundColor(final Color COLOR) {
+        if (null == chartBackgroundColor) {
+            _chartBackgroundColor = COLOR;
+            redraw();
+        } else {
+            chartBackgroundColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> chartBackgroundProperty() {
+        if (null == chartBackgroundColor) {
+            chartBackgroundColor = new ObjectPropertyBase<Color>(_chartBackgroundColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return DonutChart.this; }
+                @Override public String getName() { return "chartBackgroundColor"; }
+            };
+            _chartBackgroundColor = null;
+        }
+        return chartBackgroundColor;
+    }
+
     public YChartModel<T> getModel() { return model; }
 
 
@@ -128,7 +137,7 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         double      x;
         double      y;
 
-        ctx.setFill(Color.WHITE);
+        ctx.setFill(getChartBackgroundColor());
         ctx.clearRect(0, 0, width, height);
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.CENTER);
@@ -187,9 +196,6 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     }
 
     private void redraw() {
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth / PREFERRED_WIDTH * size))));
-
         drawChart();
     }
 }

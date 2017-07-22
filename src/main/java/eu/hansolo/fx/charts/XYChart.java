@@ -2,52 +2,44 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.model.XYChartModel;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 
 /**
  * Created by hansolo on 16.07.17.
  */
 public class XYChart<T extends XYData> extends Region implements Chart {
-    private static final double          PREFERRED_WIDTH  = 250;
-    private static final double          PREFERRED_HEIGHT = 250;
-    private static final double          MINIMUM_WIDTH    = 0;
-    private static final double          MINIMUM_HEIGHT   = 0;
-    private static final double          MAXIMUM_WIDTH    = 4096;
-    private static final double          MAXIMUM_HEIGHT   = 4096;
-    private static       double          aspectRatio;
-    private              boolean         keepAspect;
-    private              double          size;
-    private              double          width;
-    private              double          height;
-    private              Pane            pane;
-    private              Paint           backgroundPaint;
-    private              Paint           borderPaint;
-    private              double          borderWidth;
-    private              XYChartModel<T> model;
-    private              Canvas          canvas;
-    private              GraphicsContext ctx;
-    private              double          scaleX;
-    private              double          scaleY;
-    private              double          symbolSize;
-    private              ChartType       chartType;
-    private              Color           strokeColor;
-    private              Color           fillColor;
+    private static final double                PREFERRED_WIDTH  = 250;
+    private static final double                PREFERRED_HEIGHT = 250;
+    private static final double                MINIMUM_WIDTH    = 0;
+    private static final double                MINIMUM_HEIGHT   = 0;
+    private static final double                MAXIMUM_WIDTH    = 4096;
+    private static final double                MAXIMUM_HEIGHT   = 4096;
+    private static       double                aspectRatio;
+    private              boolean               keepAspect;
+    private              double                size;
+    private              double                width;
+    private              double                height;
+    private              Pane                  pane;
+    private              Color                 _chartBackgroundColor;
+    private              ObjectProperty<Color> chartBackgroundColor;
+    private              XYChartModel<T>       model;
+    private              Canvas                canvas;
+    private              GraphicsContext       ctx;
+    private              double                scaleX;
+    private              double                scaleY;
+    private              double                symbolSize;
+    private              ChartType             chartType;
+    private              Color                 strokeColor;
+    private              Color                 fillColor;
 
 
     // ******************** Constructors **************************************
@@ -59,18 +51,16 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     }
     public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
-        aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect      = false;
-        backgroundPaint = Color.TRANSPARENT;
-        borderPaint     = Color.TRANSPARENT;
-        borderWidth     = 0d;
-        model           = MODEL;
-        scaleX          = 1;
-        scaleY          = 1;
-        symbolSize      = 2;
-        chartType       = TYPE;
-        strokeColor     = STROKE_COLOR;
-        fillColor       = FILL_COLOR;
+        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect            = false;
+        _chartBackgroundColor = Color.WHITE;
+        model                 = MODEL;
+        scaleX                = 1;
+        scaleY                = 1;
+        symbolSize            = 2;
+        chartType             = TYPE;
+        strokeColor           = STROKE_COLOR;
+        fillColor             = FILL_COLOR;
 
         initGraphics();
         registerListeners();
@@ -94,8 +84,6 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         ctx    = canvas.getGraphicsContext2D();
 
         pane = new Pane(canvas);
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth))));
 
         getChildren().setAll(pane);
     }
@@ -124,6 +112,27 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         redraw();
     }
 
+    public Color getChartBackgroundColor() { return null == chartBackgroundColor ? _chartBackgroundColor : chartBackgroundColor.get(); }
+    public void setChartBackgroundColor(final Color COLOR) {
+        if (null == chartBackgroundColor) {
+            _chartBackgroundColor = COLOR;
+            redraw();
+        } else {
+            chartBackgroundColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> chartBackgroundProperty() {
+        if (null == chartBackgroundColor) {
+            chartBackgroundColor = new ObjectPropertyBase<Color>(_chartBackgroundColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "chartBackgroundColor"; }
+            };
+            _chartBackgroundColor = null;
+        }
+        return chartBackgroundColor;
+    }
+
     public Color getStrokeColor() { return strokeColor; }
     public void setStrokeColor(final Color COLOR) {
         strokeColor = COLOR;
@@ -145,7 +154,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         double oldX = 0;
         double oldY = height;
 
-        ctx.setFill(Color.WHITE);
+        ctx.setFill(getChartBackgroundColor());
         ctx.clearRect(0, 0, width, height);
         if (ChartType.AREA == chartType) {
             ctx.beginPath();
@@ -257,9 +266,6 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     }
 
     private void redraw() {
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth / PREFERRED_WIDTH * size))));
-
         drawChart();
     }
 }

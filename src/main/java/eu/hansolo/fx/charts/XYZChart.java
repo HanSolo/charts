@@ -2,47 +2,39 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYZData;
 import eu.hansolo.fx.charts.model.XYZChartModel;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 
 public class XYZChart<T extends XYZData> extends Region implements Chart {
-    private static final double           PREFERRED_WIDTH  = 250;
-    private static final double           PREFERRED_HEIGHT = 250;
-    private static final double           MINIMUM_WIDTH    = 0;
-    private static final double           MINIMUM_HEIGHT   = 0;
-    private static final double           MAXIMUM_WIDTH    = 4096;
-    private static final double           MAXIMUM_HEIGHT   = 4096;
-    private static       double           aspectRatio;
-    private              boolean          keepAspect;
-    private              double           size;
-    private              double           width;
-    private              double           height;
-    private              Pane             pane;
-    private              Paint            backgroundPaint;
-    private              Paint            borderPaint;
-    private              double           borderWidth;
-    private              XYZChartModel<T> model;
-    private              Canvas           canvas;
-    private              GraphicsContext  ctx;
-    private              double           scaleX;
-    private              double           scaleY;
-    private              double           scaleZ;
-    private              ChartType        chartType;
+    private static final double                PREFERRED_WIDTH  = 250;
+    private static final double                PREFERRED_HEIGHT = 250;
+    private static final double                MINIMUM_WIDTH    = 0;
+    private static final double                MINIMUM_HEIGHT   = 0;
+    private static final double                MAXIMUM_WIDTH    = 4096;
+    private static final double                MAXIMUM_HEIGHT   = 4096;
+    private static       double                aspectRatio;
+    private              boolean               keepAspect;
+    private              double                size;
+    private              double                width;
+    private              double                height;
+    private              Pane                  pane;
+    private              Color                 _chartBackgroundColor;
+    private              ObjectProperty<Color> chartBackgroundColor;
+    private              XYZChartModel<T>      model;
+    private              Canvas                canvas;
+    private              GraphicsContext       ctx;
+    private              double                scaleX;
+    private              double                scaleY;
+    private              double                scaleZ;
+    private              ChartType             chartType;
 
 
     // ******************** Constructors **************************************
@@ -54,16 +46,14 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
     }
     public XYZChart(final XYZChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
-        aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect      = false;
-        backgroundPaint = Color.TRANSPARENT;
-        borderPaint     = Color.TRANSPARENT;
-        borderWidth     = 0d;
-        model           = MODEL;
-        scaleX          = 1;
-        scaleY          = 1;
-        scaleZ          = 1;
-        chartType       = TYPE;
+        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect            = false;
+        _chartBackgroundColor = Color.WHITE;
+        model                 = MODEL;
+        scaleX                = 1;
+        scaleY                = 1;
+        scaleZ                = 1;
+        chartType             = TYPE;
 
         initGraphics();
         registerListeners();
@@ -87,8 +77,6 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
         ctx    = canvas.getGraphicsContext2D();
 
         pane = new Pane(canvas);
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth))));
 
         getChildren().setAll(pane);
     }
@@ -117,6 +105,27 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
         redraw();
     }
 
+    public Color getChartBackgroundColor() { return null == chartBackgroundColor ? _chartBackgroundColor : chartBackgroundColor.get(); }
+    public void setChartBackgroundColor(final Color COLOR) {
+        if (null == chartBackgroundColor) {
+            _chartBackgroundColor = COLOR;
+            redraw();
+        } else {
+            chartBackgroundColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> chartBackgroundProperty() {
+        if (null == chartBackgroundColor) {
+            chartBackgroundColor = new ObjectPropertyBase<Color>(_chartBackgroundColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZChart.this; }
+                @Override public String getName() { return "chartBackgroundColor"; }
+            };
+            _chartBackgroundColor = null;
+        }
+        return chartBackgroundColor;
+    }
+
     public XYZChartModel<T> getModel() { return model; }
 
 
@@ -124,7 +133,7 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
     private void drawChart() {
         if (null == model) return;
 
-        ctx.setFill(Color.WHITE);
+        ctx.setFill(getChartBackgroundColor());
         ctx.clearRect(0, 0, width, height);
         for (XYZData item : model.getItems()) {
             double x = item.getX() * scaleX;
@@ -174,9 +183,6 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
     }
 
     private void redraw() {
-        pane.setBackground(new Background(new BackgroundFill(backgroundPaint, CornerRadii.EMPTY, Insets.EMPTY)));
-        pane.setBorder(new Border(new BorderStroke(borderPaint, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, new BorderWidths(borderWidth / PREFERRED_WIDTH * size))));
-
         drawChart();
     }
 }
