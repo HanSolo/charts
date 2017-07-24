@@ -14,6 +14,7 @@ import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -104,13 +105,21 @@ public class ChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        //HBox pane = new HBox(scatterChart, lineChart, areaChart, donutChart, bubbleChart);
-        //pane.setSpacing(10);
+        AnchorPane pane = new AnchorPane(yAxis, xAxis, lineChart);
 
-        BorderPane pane = new BorderPane();
-        pane.setLeft(yAxis);
-        pane.setBottom(xAxis);
-        pane.setCenter(lineChart);
+        AnchorPane.setTopAnchor(yAxis, 0d);
+        AnchorPane.setBottomAnchor(yAxis, 25d);
+        AnchorPane.setLeftAnchor(yAxis, 0d);
+
+        AnchorPane.setBottomAnchor(xAxis, 0d);
+        AnchorPane.setLeftAnchor(xAxis, 25d);
+        AnchorPane.setRightAnchor(xAxis, 0d);
+
+        AnchorPane.setTopAnchor(lineChart, 0d);
+        AnchorPane.setRightAnchor(lineChart, 0d);
+        AnchorPane.setLeftAnchor(lineChart, 25d);
+        AnchorPane.setBottomAnchor(lineChart, 25d);
+
 
         Scene scene = new Scene(new StackPane(pane));
 
