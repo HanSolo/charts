@@ -32,7 +32,7 @@ public class AxisTest extends Application {
 
         xAxisTop = new Axis(Orientation.HORIZONTAL, Pos.TOP_CENTER);
         xAxisTop.setPrefHeight(20);
-        xAxisTop.setMaxValue(20);
+        xAxisTop.setMaxValue(100);
         AnchorPane.setLeftAnchor(xAxisTop, 20d);
         AnchorPane.setRightAnchor(xAxisTop, 20d);
         AnchorPane.setTopAnchor(xAxisTop, 0d);
