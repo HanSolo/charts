@@ -823,7 +823,7 @@ public class Axis extends Region {
                         } else {
                             ctx.setTextAlign(TextAlignment.CENTER);
                         }
-                        ctx.fillText(String.format(locale, tickLabelFormatString, -(maxValue - counter + minValue)), textPointX, textPointY);
+                        ctx.fillText(String.format(locale, tickLabelFormatString, (minValue - i)), textPointX, textPointY);
                     }
                 }
             } else if (mediumTickMarksVisible &&
