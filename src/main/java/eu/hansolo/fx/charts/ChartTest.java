@@ -1,6 +1,5 @@
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.Axis.AxisType;
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.data.XYDataObject;
 import eu.hansolo.fx.charts.data.XYZData;
@@ -16,7 +15,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;

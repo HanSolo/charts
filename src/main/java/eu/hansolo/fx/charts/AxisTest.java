@@ -20,9 +20,11 @@ public class AxisTest extends Application {
     private Axis yAxisLeft;
     private Axis yAxisRight;
 
+
     @Override public void init() {
         xAxisBottom = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
         xAxisBottom.setPrefHeight(20);
+        xAxisBottom.setMinValue(-20);
         xAxisBottom.setMaxValue(20);
         AnchorPane.setLeftAnchor(xAxisBottom, 20d);
         AnchorPane.setRightAnchor(xAxisBottom, 20d);
@@ -30,12 +32,15 @@ public class AxisTest extends Application {
 
         xAxisTop = new Axis(Orientation.HORIZONTAL, Pos.TOP_CENTER);
         xAxisTop.setPrefHeight(20);
+        xAxisTop.setMaxValue(20);
         AnchorPane.setLeftAnchor(xAxisTop, 20d);
         AnchorPane.setRightAnchor(xAxisTop, 20d);
         AnchorPane.setTopAnchor(xAxisTop, 0d);
 
         yAxisLeft = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
         yAxisLeft.setPrefWidth(20);
+        yAxisLeft.setMinValue(-20);
+        yAxisLeft.setMaxValue(20);
         AnchorPane.setLeftAnchor(yAxisLeft, 0d);
         AnchorPane.setTopAnchor(yAxisLeft, 20d);
         AnchorPane.setBottomAnchor(yAxisLeft, 20d);
@@ -50,6 +55,7 @@ public class AxisTest extends Application {
 
     @Override public void start(Stage stage) {
         AnchorPane pane = new AnchorPane(xAxisBottom, xAxisTop, yAxisLeft, yAxisRight);
+        pane.setPadding(new Insets(10));
         pane.setPrefSize(400, 400);
 
         Scene scene = new Scene(pane);

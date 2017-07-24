@@ -1,6 +1,12 @@
 package eu.hansolo.fx.charts;
 
+import javafx.scene.canvas.GraphicsContext;
+
+
 public class Helper {
+    public static final double MAX_TICK_MARK_LENGTH = 0.125;
+    public static final double MAX_TICK_MARK_WIDTH  = 0.02;
+
     public static final int clamp(final int MIN, final int MAX, final int VALUE) {
         if (VALUE < MIN) return MIN;
         if (VALUE > MAX) return MAX;
@@ -17,31 +23,6 @@ public class Helper {
         return VALUE;
     }
 
-    public static final double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
-        double maxNoOfMajorTicks = 10;
-        double maxNoOfMinorTicks = 10;
-        double niceMinValue;
-        double niceMaxValue;
-        double niceRange;
-        double majorTickSpace;
-        double minorTickSpace;
-        niceRange      = (calcNiceNumber((MAX_VALUE - MIN_VALUE), false));
-        majorTickSpace = calcNiceNumber(niceRange / (maxNoOfMajorTicks - 1), true);
-        niceMinValue   = (Math.floor(MIN_VALUE / majorTickSpace) * majorTickSpace);
-        niceMaxValue   = (Math.ceil(MAX_VALUE / majorTickSpace) * majorTickSpace);
-        minorTickSpace = calcNiceNumber(majorTickSpace / (maxNoOfMinorTicks - 1), true);
-        return new double[]{ niceMinValue, niceMaxValue, majorTickSpace, minorTickSpace };
-    }
-
-    /**
-     * Returns a "niceScaling" number approximately equal to the range.
-     * Rounds the number if ROUND == true.
-     * Takes the ceiling if ROUND = false.
-     *
-     * @param RANGE the value range (maxValue - minValue)
-     * @param ROUND whether to round the result or ceil
-     * @return a "niceScaling" number to be used for the value range
-     */
     public static final double calcNiceNumber(final double RANGE, final boolean ROUND) {
         double niceFraction;
         double exponent = Math.floor(Math.log10(RANGE));   // exponent of range
@@ -69,5 +50,27 @@ public class Helper {
             }
         }
         return niceFraction * Math.pow(10, exponent);
+    }
+
+    public static final void rotateContextForText(final GraphicsContext CTX, final double START_ANGLE, final double ANGLE, final TickLabelOrientation ORIENTATION) {
+        switch (ORIENTATION) {
+            case ORTHOGONAL:
+                if ((360 - START_ANGLE - ANGLE) % 360 > 90 && (360 - START_ANGLE - ANGLE) % 360 < 270) {
+                    CTX.rotate((180 - START_ANGLE - ANGLE) % 360);
+                } else {
+                    CTX.rotate((360 - START_ANGLE - ANGLE) % 360);
+                }
+                break;
+            case TANGENT:
+                if ((360 - START_ANGLE - ANGLE - 90) % 360 > 90 && (360 - START_ANGLE - ANGLE - 90) % 360 < 270) {
+                    CTX.rotate((90 - START_ANGLE - ANGLE) % 360);
+                } else {
+                    CTX.rotate((270 - START_ANGLE - ANGLE) % 360);
+                }
+                break;
+            case HORIZONTAL:
+            default:
+                break;
+        }
     }
 }
