@@ -47,11 +47,11 @@ public class ChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYDataObject> xyData   = new ArrayList<>(1000);
+        List<XYDataObject> xyData   = new ArrayList<>(20);
         List<YDataObject>  yData    = new ArrayList<>(20);
         List<XYZDataObject> xyzData = new ArrayList<>(20);
-        for (int i = 0 ; i < 1000 ; i++) {
-            xyData.add(new XYDataObject(i, RND.nextDouble() * 20, "P" + i, COLORS[RND.nextInt(3)]));
+        for (int i = 0 ; i < 20 ; i++) {
+            xyData.add(new XYDataObject(i, RND.nextDouble() * 15 + 2, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
             yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
@@ -60,7 +60,7 @@ public class ChartTest extends Application {
 
         xyChartModel  = new XYChartModel(xyData);
         scatterChart  = new XYChart(xyChartModel, ChartType.SCATTER);
-        lineChart     = new XYChart(xyChartModel, ChartType.LINE);
+        lineChart     = new XYChart(xyChartModel, ChartType.SMOOTH_LINE);
         areaChart     = new XYChart(xyChartModel, ChartType.AREA, Color.BLACK, Color.rgb(255, 0, 0, 0.5));
 
         yChartModel   = new YChartModel(yData);
@@ -81,12 +81,15 @@ public class ChartTest extends Application {
         yAxis.prefHeightProperty().bind(lineChart.heightProperty());
         yAxis.setPrefWidth(25);
 
+        lineChart.setRangeX(xAxis.getRange());
+        lineChart.setRangeY(yAxis.getRange());
+
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
-                if (now > lastTimerCall + 100_000_000l) {
+                if (now > lastTimerCall + 1_000_000_000l) {
                     List<XYData> xyItems = xyChartModel.getItems();
-                    xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
+                    xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
 
                     List<YData> yItems = yChartModel.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
@@ -127,7 +130,7 @@ public class ChartTest extends Application {
         stage.setScene(scene);
         stage.show();
 
-        timer.start();
+        //timer.start();
     }
 
     @Override public void stop() {
