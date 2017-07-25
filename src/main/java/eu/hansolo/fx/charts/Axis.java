@@ -36,10 +36,13 @@ import java.util.Locale;
 @DefaultProperty("children")
 public class Axis extends Region {
     public               enum                                 AxisType { LINEAR, LOGARITHMIC }
-    private static final double                               MINIMUM_WIDTH  = 0;
-    private static final double                               MINIMUM_HEIGHT = 0;
-    private static final double                               MAXIMUM_WIDTH  = 4096;
-    private static final double                               MAXIMUM_HEIGHT = 4096;
+    private static final double                               MINIMUM_WIDTH         = 0;
+    private static final double                               MINIMUM_HEIGHT        = 0;
+    private static final double                               MAXIMUM_WIDTH         = 4096;
+    private static final double                               MAXIMUM_HEIGHT        = 4096;
+    private static final double                               MIN_MAJOR_LINE_WIDTH  = 1;
+    private static final double                               MIN_MEDIUM_LINE_WIDTH = 0.75;
+    private static final double                               MIN_MINOR_LINE_WIDTH  = 0.5;
     private              double                               size;
     private              double                               width;
     private              double                               height;
@@ -681,6 +684,9 @@ public class Axis extends Region {
         BigDecimal  counterBD                          = BigDecimal.valueOf(minValue);
         double      counter                            = minValue;
         double      range                              = getRange();
+        double      majorLineWidth                     = size * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : size * 0.007;
+        double      mediumLineWidth                    = size * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : size * 0.005;
+        double      minorLineWidth                     = size * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : size * 0.003;
         boolean     isMinValue;
         boolean     isZero;
         boolean     isMaxValue;
@@ -695,7 +701,7 @@ public class Axis extends Region {
         double      textPointX;
         double      textPointY;
 
-        ctx.setLineWidth(size * 0.007);
+        ctx.setLineWidth(majorLineWidth);
 
         // Draw axis
         if (Orientation.VERTICAL == orientation) {
@@ -769,7 +775,7 @@ public class Axis extends Region {
                 }
             }
 
-            if (Double.compare(counterBD.remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+            if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw major tick mark
                 isMinValue = Double.compare(minValue, counter) == 0;
                 isZero     = Double.compare(0.0, counter) == 0;
@@ -779,10 +785,10 @@ public class Axis extends Region {
                     ctx.setStroke(zeroColor);
                 }
                 if (majorTickMarksVisible) {
-                    ctx.setLineWidth(size * 0.007);
+                    ctx.setLineWidth(majorLineWidth);
                     ctx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
                 } else if (minorTickMarksVisible) {
-                    ctx.setLineWidth(size * 0.005);
+                    ctx.setLineWidth(minorLineWidth);
                     ctx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
                 }
 
@@ -827,14 +833,14 @@ public class Axis extends Region {
                     }
                 }
             } else if (mediumTickMarksVisible &&
-                       Double.compare(minorTickSpaceBD.remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                       Double.compare(counterBD.remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                       Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                       Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                 // Draw medium tick mark
-                ctx.setLineWidth(size * 0.006);
+                ctx.setLineWidth(mediumLineWidth);
                 ctx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
-            } else if (minorTickMarksVisible && Double.compare(counterBD.remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+            } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw minor tick mark
-                ctx.setLineWidth(size * 0.005);
+                ctx.setLineWidth(minorLineWidth);
                 ctx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
             }
 
