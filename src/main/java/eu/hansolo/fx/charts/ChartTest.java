@@ -9,13 +9,13 @@ import eu.hansolo.fx.charts.data.YDataObject;
 import eu.hansolo.fx.charts.model.XYZChartModel;
 import eu.hansolo.fx.charts.model.YChartModel;
 import eu.hansolo.fx.charts.model.XYChartModel;
+import eu.hansolo.fx.charts.unit.Unit;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -39,8 +39,9 @@ public class ChartTest extends Application {
     private DonutChart<YDataObject>      donutChart;
     private XYZChartModel<XYZDataObject> xyzChartModel;
     private XYZChart<XYZDataObject>      bubbleChart;
-    private Axis                         xAxis;
-    private Axis                         yAxis;
+    private Axis                         xAxisBottom;
+    private Axis                         yAxisLeft;
+    private Axis                         yAxisRight;
 
     private long                         lastTimerCall;
     private AnimationTimer               timer;
@@ -69,20 +70,31 @@ public class ChartTest extends Application {
         xyzChartModel = new XYZChartModel<>(xyzData);
         bubbleChart   = new XYZChart<>(xyzChartModel, ChartType.BUBBLE);
 
-        xAxis = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
-        xAxis.setMinValue(0);
-        xAxis.setMaxValue(20);
-        xAxis.prefWidthProperty().bind(lineChart.widthProperty());
-        xAxis.setPrefHeight(25);
+        xAxisBottom = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
+        xAxisBottom.setMinValue(0);
+        xAxisBottom.setMaxValue(20);
+        xAxisBottom.prefWidthProperty().bind(lineChart.widthProperty());
+        xAxisBottom.setPrefHeight(25);
 
-        yAxis = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
-        yAxis.setMinValue(0);
-        yAxis.setMaxValue(20);
-        yAxis.prefHeightProperty().bind(lineChart.heightProperty());
-        yAxis.setPrefWidth(25);
+        yAxisLeft = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
+        yAxisLeft.setMinValue(0);
+        yAxisLeft.setMaxValue(20);
+        yAxisLeft.prefHeightProperty().bind(lineChart.heightProperty());
+        yAxisLeft.setPrefWidth(25);
 
-        lineChart.setRangeX(xAxis.getRange());
-        lineChart.setRangeY(yAxis.getRange());
+        Unit   tempUnit          = new Unit(Unit.Type.TEMPERATURE, Unit.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
+        double tempFahrenheitMin = tempUnit.convert(0, Unit.Definition.FAHRENHEIT);
+        double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
+
+        yAxisRight = new Axis(Orientation.VERTICAL, Pos.CENTER_RIGHT);
+        yAxisRight.setMinValue(tempFahrenheitMin);
+        yAxisRight.setMaxValue(tempFahrenheitMax);
+        yAxisRight.setPrefWidth(25);
+        yAxisRight.setAutoScale(false);
+
+
+        lineChart.setRangeX(xAxisBottom.getRange());
+        lineChart.setRangeY(yAxisLeft.getRange());
 
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
@@ -108,18 +120,22 @@ public class ChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        AnchorPane pane = new AnchorPane(yAxis, xAxis, lineChart);
+        AnchorPane pane = new AnchorPane(yAxisLeft, yAxisRight, xAxisBottom, lineChart);
 
-        AnchorPane.setTopAnchor(yAxis, 0d);
-        AnchorPane.setBottomAnchor(yAxis, 25d);
-        AnchorPane.setLeftAnchor(yAxis, 0d);
+        AnchorPane.setTopAnchor(yAxisLeft, 0d);
+        AnchorPane.setBottomAnchor(yAxisLeft, 25d);
+        AnchorPane.setLeftAnchor(yAxisLeft, 0d);
 
-        AnchorPane.setBottomAnchor(xAxis, 0d);
-        AnchorPane.setLeftAnchor(xAxis, 25d);
-        AnchorPane.setRightAnchor(xAxis, 0d);
+        AnchorPane.setRightAnchor(yAxisRight, 0d);
+        AnchorPane.setTopAnchor(yAxisRight, 0d);
+        AnchorPane.setBottomAnchor(yAxisRight, 25d);
+
+        AnchorPane.setBottomAnchor(xAxisBottom, 0d);
+        AnchorPane.setLeftAnchor(xAxisBottom, 25d);
+        AnchorPane.setRightAnchor(xAxisBottom, 25d);
 
         AnchorPane.setTopAnchor(lineChart, 0d);
-        AnchorPane.setRightAnchor(lineChart, 0d);
+        AnchorPane.setRightAnchor(lineChart, 25d);
         AnchorPane.setLeftAnchor(lineChart, 25d);
         AnchorPane.setBottomAnchor(lineChart, 25d);
 
