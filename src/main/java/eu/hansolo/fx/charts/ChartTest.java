@@ -51,7 +51,7 @@ public class ChartTest extends Application {
         List<YDataObject>  yData    = new ArrayList<>(20);
         List<XYZDataObject> xyzData = new ArrayList<>(20);
         for (int i = 0 ; i < 20 ; i++) {
-            xyData.add(new XYDataObject(i, RND.nextDouble() * 15 + 2, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
             yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));

@@ -274,13 +274,11 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         ctx.beginPath();
         //ctx.moveTo(POINTS.get(0), POINTS.get(1));
         for(int i = 2 ; i < curvePoints.size() - 1 ; i += 2) {
-            ctx.lineTo(curvePoints.get(i) * scaleX, curvePoints.get(i + 1) * scaleY);
+            ctx.lineTo(curvePoints.get(i) * scaleX, height - curvePoints.get(i + 1) * scaleY);
         }
         ctx.stroke();
 
-        if (SHOW_POINTS) {
-            model.getItems().forEach(item -> drawSymbol(item.getX() * scaleX, item.getY() * scaleY, item.getColor(), item.getSymbol()));
-        }
+        if (SHOW_POINTS) { drawSymbols(); }
     }
 
     private List<Double> getCurvePoints(final Double[] POINTS, final double TENSION, final boolean IS_CLOSED, final int NUMBER_OF_SEGMENTS) {
