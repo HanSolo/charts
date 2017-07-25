@@ -1,5 +1,6 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.unit.Unit;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -45,9 +46,15 @@ public class AxisTest extends Application {
         AnchorPane.setTopAnchor(yAxisLeft, 20d);
         AnchorPane.setBottomAnchor(yAxisLeft, 20d);
 
+        Unit tempUnit = new Unit(Unit.Type.TEMPERATURE, Unit.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
+        double tempFahrenheitMin = tempUnit.convert(-20, Unit.Definition.FAHRENHEIT);
+        double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
+
         yAxisRight = new Axis(Orientation.VERTICAL, Pos.CENTER_RIGHT);
         yAxisRight.setPrefWidth(20);
-        yAxisRight.setMaxValue(20);
+        yAxisRight.setAutoScale(false);
+        yAxisRight.setMinValue(tempFahrenheitMin);
+        yAxisRight.setMaxValue(tempFahrenheitMax);
         AnchorPane.setRightAnchor(yAxisRight, 0d);
         AnchorPane.setTopAnchor(yAxisRight, 20d);
         AnchorPane.setBottomAnchor(yAxisRight, 20d);
