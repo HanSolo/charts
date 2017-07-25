@@ -210,7 +210,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         ctx.setFill(Color.TRANSPARENT);
 
         if (ChartType.SMOOTH_LINE == chartType) {
-            drawSmoothLine(0.5, false , 32, true);
+            drawSmoothLine(0.5, false , 16, true);
         } else if (ChartType.LINE == chartType) {
             drawLine();
             drawSymbols();
@@ -260,7 +260,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         }
     }
 
-    private void drawSmoothLine(final double TENSION, final boolean IS_CLOSED, final int NUMBER_OF_SEGMENTS, final boolean SHOW_POINTS) {
+    private void drawSmoothLine(final double TENSION, final boolean IS_CLOSED, final int SMOOTHNESS, final boolean SHOW_POINTS) {
         List<Double> pointList = new ArrayList<>(model.getItems().size() * 2);
         model.getItems().forEach(item -> {
             pointList.add(item.getX());
@@ -269,7 +269,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         Double[] points = new Double[pointList.size()];
         points = pointList.toArray(points);
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, IS_CLOSED, NUMBER_OF_SEGMENTS);
+        List<Double> curvePoints = getCurvePoints(points, TENSION, IS_CLOSED, SMOOTHNESS);
 
         ctx.beginPath();
         //ctx.moveTo(POINTS.get(0), POINTS.get(1));
