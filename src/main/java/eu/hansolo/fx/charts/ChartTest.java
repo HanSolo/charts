@@ -172,6 +172,7 @@ public class ChartTest extends Application {
         gridPane.add(smoothLineChart, 0, 1);
         gridPane.add(smoothAreaChart, 1, 1);
         gridPane.add(scatterChart, 0, 2);
+        gridPane.add(donutChart, 1, 2);
 
         Scene scene = new Scene(new StackPane(gridPane));
 
