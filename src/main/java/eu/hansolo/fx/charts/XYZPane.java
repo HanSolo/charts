@@ -14,7 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 
-public class XYZChart<T extends XYZData> extends Region implements Chart {
+public class XYZPane<T extends XYZData> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -39,14 +39,14 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
 
 
     // ******************** Constructors **************************************
-    public XYZChart(final XYZChartModel<T> MODEL) {
+    public XYZPane(final XYZChartModel<T> MODEL) {
         this(MODEL, ChartType.SCATTER);
     }
-    public XYZChart(final XYZChartModel<T> MODEL, final ChartType TYPE) {
+    public XYZPane(final XYZChartModel<T> MODEL, final ChartType TYPE) {
         this(MODEL, TYPE, Color.BLACK, Color.TRANSPARENT);
     }
-    public XYZChart(final XYZChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
-        getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
+    public XYZPane(final XYZChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
+        getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
         _chartBackgroundPaint = Color.WHITE;
@@ -119,7 +119,7 @@ public class XYZChart<T extends XYZData> extends Region implements Chart {
         if (null == chartBackgroundPaint) {
             chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
                 @Override protected void invalidated() { redraw(); }
-                @Override public Object getBean() { return XYZChart.this; }
+                @Override public Object getBean() { return XYZPane.this; }
                 @Override public String getName() { return "chartBackgroundPaint"; }
             };
             _chartBackgroundPaint = null;

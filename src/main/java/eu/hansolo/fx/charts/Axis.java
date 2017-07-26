@@ -66,8 +66,8 @@ public class Axis extends Region {
     private              ObjectProperty<AxisType>             type;
     private              Orientation                          _orientation;
     private              ObjectProperty<Orientation>          orientation;
-    private              Pos                                  _position;
-    private              ObjectProperty<Pos>                  position;
+    private              Position                             _position;
+    private              ObjectProperty<Position>             position;
     private              Color                                _axisBackgroundColor;
     private              ObjectProperty<Color>                axisBackgroundColor;
     private              Color                                _axisColor;
@@ -103,11 +103,11 @@ public class Axis extends Region {
 
     // ******************** Constructors **************************************
     public Axis() {
-        this(Orientation.VERTICAL, Pos.CENTER_LEFT);
+        this(Orientation.VERTICAL, Position.LEFT);
     }
-    public Axis(final Orientation ORIENTATION, final Pos POSITION) {
+    public Axis(final Orientation ORIENTATION, final Position POSITION) {
         if (Orientation.VERTICAL == ORIENTATION) {
-            if (Pos.CENTER_LEFT != POSITION && Pos.CENTER_RIGHT != POSITION) {
+            if (Position.LEFT != POSITION && Position.RIGHT != POSITION) {
                 throw new IllegalArgumentException("Wrong combination of orientation and position!");
             }
         }
@@ -332,8 +332,8 @@ public class Axis extends Region {
         return orientation;
     }
 
-    public Pos getPosition() { return null == position ? _position : position.get(); }
-    public void setPosition(final Pos POSITION) {
+    public Position getPosition() { return null == position ? _position : position.get(); }
+    public void setPosition(final Position POSITION) {
         if (null == position) {
             _position = POSITION;
             redraw();
@@ -341,9 +341,9 @@ public class Axis extends Region {
             position.set(POSITION);
         }
     }
-    public ObjectProperty<Pos> positionProperty() {
+    public ObjectProperty<Position> positionProperty() {
         if (null == position) {
-            position = new ObjectPropertyBase<Pos>(_position) {
+            position = new ObjectPropertyBase<Position>(_position) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "position"; }
@@ -686,7 +686,7 @@ public class Axis extends Region {
 
         Locale      locale                             = getLocale();
         Orientation orientation                        = getOrientation();
-        Pos         position                           = getPosition();
+        Position    position                           = getPosition();
         double      anchorX                            = 0;
         double      anchorXPlusOffset                  = anchorX + width;
         double      anchorY                            = 0;
@@ -734,15 +734,15 @@ public class Axis extends Region {
 
         // Draw axis
         if (Orientation.VERTICAL == orientation) {
-            if (Pos.CENTER_LEFT == position) {
+            if (Position.LEFT == position) {
                 axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
-            } else if (Pos.CENTER_RIGHT == position) {
+            } else if (Position.RIGHT == position) {
                 axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
             }
         } else {
-            if (Pos.BOTTOM_CENTER == position) {
+            if (Position.BOTTOM == position) {
                 axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
-            } else if (Pos.TOP_CENTER == position){
+            } else if (Position.TOP == position){
                 axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
             }
         }
@@ -755,7 +755,7 @@ public class Axis extends Region {
             double fixedPosition = (counter - minValue) * stepSize;
             axisCtx.setStroke(tickMarkColor);
             if (Orientation.VERTICAL == orientation) {
-                if (Pos.CENTER_LEFT == position) {
+                if (Position.LEFT == position) {
                     innerPointX  = anchorXPlusOffset - 0.5 * width;
                     innerPointY  = fixedPosition;
                     mediumPointX = anchorXPlusOffset - 0.4 * width;
@@ -781,7 +781,7 @@ public class Axis extends Region {
                     maxTextWidth = width;
                 }
             } else {
-                if (Pos.BOTTOM_CENTER == position) {
+                if (Position.BOTTOM == position) {
                     innerPointX  = fixedPosition;
                     innerPointY  = anchorY + 0.5 * height;
                     mediumPointX = fixedPosition;

@@ -6,7 +6,7 @@ import javafx.scene.paint.Paint;
 /**
  * Created by hansolo on 16.07.17.
  */
-public interface Chart {
+public interface ChartArea {
 
     ChartType getChartType();
     void      setChartType(ChartType chartType);

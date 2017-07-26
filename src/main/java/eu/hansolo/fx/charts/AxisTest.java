@@ -23,7 +23,7 @@ public class AxisTest extends Application {
 
 
     @Override public void init() {
-        xAxisBottom = new Axis(Orientation.HORIZONTAL, Pos.BOTTOM_CENTER);
+        xAxisBottom = new Axis(Orientation.HORIZONTAL, Position.BOTTOM);
         xAxisBottom.setPrefHeight(20);
         xAxisBottom.setMinValue(-20);
         xAxisBottom.setMaxValue(20);
@@ -31,14 +31,14 @@ public class AxisTest extends Application {
         AnchorPane.setRightAnchor(xAxisBottom, 20d);
         AnchorPane.setBottomAnchor(xAxisBottom, 0d);
 
-        xAxisTop = new Axis(Orientation.HORIZONTAL, Pos.TOP_CENTER);
+        xAxisTop = new Axis(Orientation.HORIZONTAL, Position.TOP);
         xAxisTop.setPrefHeight(20);
         xAxisTop.setMaxValue(100);
         AnchorPane.setLeftAnchor(xAxisTop, 20d);
         AnchorPane.setRightAnchor(xAxisTop, 20d);
         AnchorPane.setTopAnchor(xAxisTop, 0d);
 
-        yAxisLeft = new Axis(Orientation.VERTICAL, Pos.CENTER_LEFT);
+        yAxisLeft = new Axis(Orientation.VERTICAL, Position.LEFT);
         yAxisLeft.setPrefWidth(20);
         yAxisLeft.setMinValue(-20);
         yAxisLeft.setMaxValue(20);
@@ -50,7 +50,7 @@ public class AxisTest extends Application {
         double tempFahrenheitMin = tempUnit.convert(-20, Unit.Definition.FAHRENHEIT);
         double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
 
-        yAxisRight = new Axis(Orientation.VERTICAL, Pos.CENTER_RIGHT);
+        yAxisRight = new Axis(Orientation.VERTICAL, Position.RIGHT);
         yAxisRight.setPrefWidth(20);
         yAxisRight.setAutoScale(false);
         yAxisRight.setMinValue(tempFahrenheitMin);

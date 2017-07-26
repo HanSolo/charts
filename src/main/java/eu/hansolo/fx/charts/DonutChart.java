@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class DonutChart<T extends YData> extends Region implements Chart {
+public class DonutChart<T extends YData> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -43,7 +43,7 @@ public class DonutChart<T extends YData> extends Region implements Chart {
 
     // ******************** Constructors **************************************
     public DonutChart(final YChartModel<T> MODEL) {
-        getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
+        getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
         _chartBackgroundPaint = Color.WHITE;
