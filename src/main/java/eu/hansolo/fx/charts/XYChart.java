@@ -18,6 +18,8 @@ import javafx.scene.paint.Paint;
 import java.util.ArrayList;
 import java.util.List;
 
+import static eu.hansolo.fx.charts.Helper.clamp;
+
 
 /**
  * Created by hansolo on 16.07.17.
@@ -29,6 +31,8 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private static final double                MINIMUM_HEIGHT   = 0;
     private static final double                MAXIMUM_WIDTH    = 4096;
     private static final double                MAXIMUM_HEIGHT   = 4096;
+    private static final double                MIN_SYMBOL_SIZE  = 2;
+    private static final double                MAX_SYMBOL_SIZE  = 6;
     private static       double                aspectRatio;
     private              boolean               keepAspect;
     private              double                size;
@@ -484,7 +488,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
             canvas.setWidth(width);
             canvas.setHeight(height);
 
-            symbolSize = size * 0.016;
+            symbolSize = clamp(MIN_SYMBOL_SIZE, MAX_SYMBOL_SIZE, size * 0.016);
 
             scaleX = width / getRangeX();
             scaleY = height / getRangeY();
