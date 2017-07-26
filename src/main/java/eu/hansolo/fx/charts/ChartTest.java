@@ -34,9 +34,10 @@ import java.util.Random;
  */
 public class ChartTest extends Application {
     private enum Alignment { TOP, RIGHT, BOTTOM, LEFT, CENTER }
-    private static final Double          AXIS_WIDTH = 25d;
-    private static final Color[]         COLORS     = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
-    private static final Random          RND        = new Random();
+    private static final Double          AXIS_WIDTH     = 25d;
+    private static final Color[]         COLORS         = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
+    private static final Random          RND            = new Random();
+    private static final int             NO_OF_X_VALUES = 50;
     private XYChartModel<XYDataObject>   xyChartModel;
 
     private XYChart<XYDataObject>        lineChart;
@@ -75,7 +76,7 @@ public class ChartTest extends Application {
         List<XYDataObject> xyData   = new ArrayList<>(20);
         List<YDataObject>  yData    = new ArrayList<>(20);
         List<XYZDataObject> xyzData = new ArrayList<>(20);
-        for (int i = 0 ; i < 20 ; i++) {
+        for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
             xyData.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
@@ -96,7 +97,7 @@ public class ChartTest extends Application {
         double tempFahrenheitMin = tempUnit.convert(0, Unit.Definition.FAHRENHEIT);
         double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
 
-        lineChartXAxisBottom = createBottomXAxis(0, 20, true);
+        lineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         lineChartYAxisLeft   = createLeftYAxis(0, 20, true);
         lineChartYAxisRight  = createRightYAxis(tempFahrenheitMin, tempFahrenheitMax, false);
         lineChart = new XYChart<>(new XYPane(xyChartModel, ChartType.LINE),
@@ -104,7 +105,7 @@ public class ChartTest extends Application {
 
 
         // AreaChart
-        areaChartXAxisBottom = createBottomXAxis(0, 20, true);
+        areaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         areaChartYAxisLeft   = createLeftYAxis(0, 20, true);
         areaChart            = new XYChart<>(new XYPane(xyChartModel, ChartType.AREA, Color.BLACK, Color.rgb(255, 0, 0, 0.5)),
                                              areaChartXAxisBottom, areaChartYAxisLeft);
@@ -114,13 +115,13 @@ public class ChartTest extends Application {
         areaChart.getXYPane().setChartBackgroundPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(50, 50, 50, 0.25)), new Stop(1.0, Color.rgb(25, 25, 25, 0.8))));
 
         // SmoothLineChart
-        smoothLineChartXAxisBottom = createBottomXAxis(0, 20, true);
+        smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothLineChartYAxisLeft   = createLeftYAxis(0, 20, true);
         smoothLineChart            = new XYChart<>(new XYPane(xyChartModel, ChartType.SMOOTH_LINE),
                                                    smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
 
         // SmoothAreaChart
-        smoothAreaChartXAxisBottom = createBottomXAxis(0, 20, true);
+        smoothAreaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothAreaChartYAxisLeft   = createLeftYAxis(0, 20, true);
         smoothAreaChart            = new XYChart<>(new XYPane(xyChartModel, ChartType.SMOOTH_AREA),
                                                    smoothAreaChartYAxisLeft, smoothAreaChartXAxisBottom);
@@ -131,7 +132,7 @@ public class ChartTest extends Application {
 
 
         // ScatterChart
-        scatterChartXAxisBottom = createBottomXAxis(0, 20, true);
+        scatterChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         scatterChartYAxisLeft   = createLeftYAxis(0, 20, true);
         scatterChart            = new XYChart<>(new XYPane(xyChartModel, ChartType.SCATTER),
                                                 scatterChartXAxisBottom, scatterChartYAxisLeft);
