@@ -98,8 +98,8 @@ public class ChartTest extends Application {
 
         lineChart.setRangeX(xAxisBottom.getRange());
         lineChart.setRangeY(yAxisLeft.getRange());
-        lineChart.setFillPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.8)), new Stop(1.0, Color.TRANSPARENT)));
-        lineChart.setStrokePaint(Color.TRANSPARENT);
+        lineChart.setFillPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
+        lineChart.setStrokePaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 1.0)), new Stop(1.0, Color.TRANSPARENT)));
         lineChart.setChartBackgroundPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(50, 50, 50, 0.25)), new Stop(1.0, Color.rgb(25, 25, 25, 0.8))));
 
         lastTimerCall = System.nanoTime();
