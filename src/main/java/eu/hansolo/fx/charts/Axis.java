@@ -10,6 +10,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.collections.ObservableList;
@@ -22,6 +23,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
@@ -46,8 +48,8 @@ public class Axis extends Region {
     private              double                               size;
     private              double                               width;
     private              double                               height;
-    private              Canvas                               canvas;
-    private              GraphicsContext                      ctx;
+    private              Canvas                               axisCanvas;
+    private              GraphicsContext                      axisCtx;
     private              Pane                                 pane;
     private              double                               _minValue;
     private              DoubleProperty                       minValue;
@@ -76,6 +78,8 @@ public class Axis extends Region {
     private              ObjectProperty<Color>                tickMarkColor;
     private              Color                                _zeroColor;
     private              ObjectProperty<Color>                zeroColor;
+    private              double                               _zeroPosition;
+    private              DoubleProperty                       zeroPosition;
     private              double                               _minorTickSpace;
     private              double                               _majorTickSpace;
     private              boolean                              _majorTickMarksVisible;
@@ -122,6 +126,7 @@ public class Axis extends Region {
         _tickLabelColor                   = Color.BLACK;
         _tickMarkColor                    = Color.BLACK;
         _zeroColor                        = Color.BLACK;
+        _zeroPosition                     = 0;
         _minorTickSpace                   = 1;
         _majorTickSpace                   = 10;
         _majorTickMarksVisible            = true;
@@ -154,10 +159,10 @@ public class Axis extends Region {
 
         getStyleClass().add("axis");
 
-        canvas = new Canvas(width, height);
-        ctx    = canvas.getGraphicsContext2D();
+        axisCanvas = new Canvas(width, height);
+        axisCtx    = axisCanvas.getGraphicsContext2D();
 
-        pane   = new Pane(canvas);
+        pane = new Pane(axisCanvas);
 
         getChildren().setAll(pane);
     }
@@ -453,6 +458,24 @@ public class Axis extends Region {
         return zeroColor;
     }
 
+    public double getZeroPosition() { return null == zeroPosition ? _zeroPosition : zeroPosition.get(); }
+    private void setZeroPosition(final double POSITION) {
+        if (null == zeroPosition) {
+            _zeroPosition = POSITION;
+        } else {
+            zeroPosition.set(POSITION);
+        }
+    }
+    public ReadOnlyDoubleProperty zeroPositionProperty() {
+        if (null == zeroPosition) {
+            zeroPosition = new DoublePropertyBase(_zeroPosition) {
+                @Override public Object getBean() { return Axis.this; }
+                @Override public String getName() { return "zeroPosition"; }
+            };
+        }
+        return zeroPosition;
+    }
+
     protected double getMajorTickSpace() { return _majorTickSpace; }
     protected void setMajorTickSpace(final double SPACE) { _majorTickSpace = SPACE; }
 
@@ -637,14 +660,19 @@ public class Axis extends Region {
         setMaxValue(niceMaxValue);
     }
 
+    private double calcLabelWidth(final double VALUE) {
+        Text text = new Text(String.format(getLocale(), tickLabelFormatString, VALUE));
+        text.setFont(Fonts.latoLight(0.3 * size));
+        return text.getBoundsInParent().getWidth();
+    }
+
     private void drawAxis() {
         if (Double.compare(stepSize, 0) <= 0) return;
 
-        ctx.setFill(getAxisBackgroundColor());
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.setFont(Fonts.latoLight(0.3 * size));
-        ctx.setTextBaseline(VPos.CENTER);
+        axisCtx.setFill(getAxisBackgroundColor());
+        axisCtx.clearRect(0, 0, width, height);
+        axisCtx.setFont(Fonts.latoLight(0.3 * size));
+        axisCtx.setTextBaseline(VPos.CENTER);
 
         double minPosition;
         double maxPosition;
@@ -700,21 +728,22 @@ public class Axis extends Region {
         double      minorPointY;
         double      textPointX;
         double      textPointY;
+        double      maxTextWidth;
 
-        ctx.setLineWidth(majorLineWidth);
+        axisCtx.setLineWidth(majorLineWidth);
 
         // Draw axis
         if (Orientation.VERTICAL == orientation) {
             if (Pos.CENTER_LEFT == position) {
-                ctx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
+                axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
             } else if (Pos.CENTER_RIGHT == position) {
-                ctx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
+                axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
             }
         } else {
             if (Pos.BOTTOM_CENTER == position) {
-                ctx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
+                axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
             } else if (Pos.TOP_CENTER == position){
-                ctx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
+                axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
             }
         }
 
@@ -724,7 +753,7 @@ public class Axis extends Region {
         double     tmpStep   = tmpStepBD.doubleValue();
         for (double i = 0 ; Double.compare(-range - tmpStep, i) <= 0 ; i -= tmpStep) {
             double fixedPosition = (counter - minValue) * stepSize;
-            ctx.setStroke(tickMarkColor);
+            axisCtx.setStroke(tickMarkColor);
             if (Orientation.VERTICAL == orientation) {
                 if (Pos.CENTER_LEFT == position) {
                     innerPointX  = anchorXPlusOffset - 0.5 * width;
@@ -737,6 +766,7 @@ public class Axis extends Region {
                     outerPointY  = fixedPosition;
                     textPointX   = anchorXPlusOffset - 0.6 * width;
                     textPointY   = fixedPosition;
+                    maxTextWidth = 0.6 * width;
                 } else {
                     innerPointX  = anchorX + 0.5 * width;
                     innerPointY  = fixedPosition;
@@ -748,6 +778,7 @@ public class Axis extends Region {
                     outerPointY  = fixedPosition;
                     textPointX   = anchorXPlusOffset;
                     textPointY   = fixedPosition;
+                    maxTextWidth = width;
                 }
             } else {
                 if (Pos.BOTTOM_CENTER == position) {
@@ -761,6 +792,7 @@ public class Axis extends Region {
                     outerPointY  = anchorY;
                     textPointX   = fixedPosition;
                     textPointY   = anchorY + 0.8 * height;
+                    maxTextWidth = majorTickSpace * stepSize;
                 } else {
                     innerPointX  = fixedPosition;
                     innerPointY  = anchorYPlusOffset - 0.5 * height;
@@ -772,6 +804,7 @@ public class Axis extends Region {
                     outerPointY  = anchorYPlusOffset;
                     textPointX   = fixedPosition;
                     textPointY   = anchorY + 0.2 * height;
+                    maxTextWidth = majorTickSpace * stepSize;
                 }
             }
 
@@ -780,68 +813,71 @@ public class Axis extends Region {
                 isMinValue = Double.compare(minValue, counter) == 0;
                 isZero     = Double.compare(0.0, counter) == 0;
                 isMaxValue = Double.compare(maxValue, counter) == 0;
+
+                if (isZero) { setZeroPosition(fixedPosition); }
+
                 if (fullRange && isZero) {
-                    ctx.setFill(zeroColor);
-                    ctx.setStroke(zeroColor);
+                    axisCtx.setFill(zeroColor);
+                    axisCtx.setStroke(zeroColor);
                 }
                 if (majorTickMarksVisible) {
-                    ctx.setLineWidth(majorLineWidth);
-                    ctx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
+                    axisCtx.setLineWidth(majorLineWidth);
+                    axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
                 } else if (minorTickMarksVisible) {
-                    ctx.setLineWidth(minorLineWidth);
-                    ctx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+                    axisCtx.setLineWidth(minorLineWidth);
+                    axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
                 }
 
-                // Draw text
+                // Draw tick labels
                 if (tickLabelsVisible) {
                     if (!isOnlyFirstAndLastTickLabelVisible) {
                         if (isZero) {
-                            ctx.setFill(fullRange ? zeroColor : tickLabelColor);
+                            axisCtx.setFill(fullRange ? zeroColor : tickLabelColor);
                         } else {
-                            ctx.setFill(tickLabelColor);
+                            axisCtx.setFill(tickLabelColor);
                         }
                     } else {
                         if (isMinValue || isMaxValue) {
                             if (isZero) {
-                                ctx.setFill(fullRange ? zeroColor : tickLabelColor);
+                                axisCtx.setFill(fullRange ? zeroColor : tickLabelColor);
                             } else {
-                                ctx.setFill(tickLabelColor);
+                                axisCtx.setFill(tickLabelColor);
                             }
                         } else {
-                            ctx.setFill(Color.TRANSPARENT);
+                            axisCtx.setFill(Color.TRANSPARENT);
                         }
                     }
 
                     if (Orientation.VERTICAL == orientation) {
-                        ctx.setTextAlign(TextAlignment.RIGHT);
+                        axisCtx.setTextAlign(TextAlignment.RIGHT);
                         if (isMinValue) {
-                            ctx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY + size * 0.15);
+                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY + size * 0.15, maxTextWidth);
                         } else if (isMaxValue) {
-                            ctx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY - size * 0.15);
+                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY - size * 0.15, maxTextWidth);
                         } else {
-                            ctx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY);
+                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY, maxTextWidth);
                         }
                     } else {
                         if (isMinValue) {
-                            ctx.setTextAlign(TextAlignment.LEFT);
+                            axisCtx.setTextAlign(TextAlignment.LEFT);
                         } else if (isMaxValue) {
-                            ctx.setTextAlign(TextAlignment.RIGHT);
+                            axisCtx.setTextAlign(TextAlignment.RIGHT);
                         } else {
-                            ctx.setTextAlign(TextAlignment.CENTER);
+                            axisCtx.setTextAlign(TextAlignment.CENTER);
                         }
-                        ctx.fillText(String.format(locale, tickLabelFormatString, (minValue - i)), textPointX, textPointY);
+                        axisCtx.fillText(String.format(locale, tickLabelFormatString, (minValue - i)), textPointX, textPointY, maxTextWidth);
                     }
                 }
             } else if (mediumTickMarksVisible &&
                        Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                        Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                 // Draw medium tick mark
-                ctx.setLineWidth(mediumLineWidth);
-                ctx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
+                axisCtx.setLineWidth(mediumLineWidth);
+                axisCtx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
             } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw minor tick mark
-                ctx.setLineWidth(minorLineWidth);
-                ctx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+                axisCtx.setLineWidth(minorLineWidth);
+                axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
             }
 
             counterBD = counterBD.add(minorTickSpaceBD);
@@ -873,8 +909,8 @@ public class Axis extends Region {
             pane.setPrefSize(width, height);
             pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
-            canvas.setWidth(width);
-            canvas.setHeight(height);
+            axisCanvas.setWidth(width);
+            axisCanvas.setHeight(height);
 
             redraw();
         }

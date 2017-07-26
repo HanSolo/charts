@@ -12,6 +12,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
@@ -33,8 +34,8 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     private              double                width;
     private              double                height;
     private              Pane                  pane;
-    private              Color                 _chartBackgroundColor;
-    private              ObjectProperty<Color> chartBackgroundColor;
+    private              Paint                 _chartBackgroundPaint;
+    private              ObjectProperty<Paint> chartBackgroundPaint;
     private              YChartModel<T>        model;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
@@ -45,7 +46,7 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
-        _chartBackgroundColor = Color.WHITE;
+        _chartBackgroundPaint = Color.WHITE;
         model                 = MODEL;
 
         initGraphics();
@@ -95,25 +96,25 @@ public class DonutChart<T extends YData> extends Region implements Chart {
     @Override public ChartType getChartType() { return ChartType.DONUT; }
     @Override public void setChartType(final ChartType TYPE) {}
 
-    public Color getChartBackgroundColor() { return null == chartBackgroundColor ? _chartBackgroundColor : chartBackgroundColor.get(); }
-    public void setChartBackgroundColor(final Color COLOR) {
-        if (null == chartBackgroundColor) {
-            _chartBackgroundColor = COLOR;
+    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
+    public void setChartBackgroundPaint(final Paint PAINT) {
+        if (null == chartBackgroundPaint) {
+            _chartBackgroundPaint = PAINT;
             redraw();
         } else {
-            chartBackgroundColor.set(COLOR);
+            chartBackgroundPaint.set(PAINT);
         }
     }
-    public ObjectProperty<Color> chartBackgroundProperty() {
-        if (null == chartBackgroundColor) {
-            chartBackgroundColor = new ObjectPropertyBase<Color>(_chartBackgroundColor) {
+    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
+        if (null == chartBackgroundPaint) {
+            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return DonutChart.this; }
-                @Override public String getName() { return "chartBackgroundColor"; }
+                @Override public String getName() { return "chartBackgroundPaint"; }
             };
-            _chartBackgroundColor = null;
+            _chartBackgroundPaint = null;
         }
-        return chartBackgroundColor;
+        return chartBackgroundPaint;
     }
 
     public YChartModel<T> getModel() { return model; }
@@ -137,8 +138,9 @@ public class DonutChart<T extends YData> extends Region implements Chart {
         double      x;
         double      y;
 
-        ctx.setFill(getChartBackgroundColor());
         ctx.clearRect(0, 0, width, height);
+        ctx.setFill(getChartBackgroundPaint());
+        ctx.fillRect(0, 0, width, height);
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);

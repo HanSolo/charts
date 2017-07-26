@@ -18,6 +18,9 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -61,7 +64,7 @@ public class ChartTest extends Application {
 
         xyChartModel  = new XYChartModel(xyData);
         scatterChart  = new XYChart(xyChartModel, ChartType.SCATTER);
-        lineChart     = new XYChart(xyChartModel, ChartType.SMOOTH_LINE);
+        lineChart     = new XYChart(xyChartModel, ChartType.SMOOTH_AREA);
         areaChart     = new XYChart(xyChartModel, ChartType.AREA, Color.BLACK, Color.rgb(255, 0, 0, 0.5));
 
         yChartModel   = new YChartModel(yData);
@@ -95,6 +98,9 @@ public class ChartTest extends Application {
 
         lineChart.setRangeX(xAxisBottom.getRange());
         lineChart.setRangeY(yAxisLeft.getRange());
+        lineChart.setFillPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.8)), new Stop(1.0, Color.TRANSPARENT)));
+        lineChart.setStrokePaint(Color.TRANSPARENT);
+        lineChart.setChartBackgroundPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(50, 50, 50, 0.25)), new Stop(1.0, Color.rgb(25, 25, 25, 0.8))));
 
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {

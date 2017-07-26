@@ -1,7 +1,6 @@
 package eu.hansolo.fx.charts;
 
-
-import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 
 /**
@@ -12,6 +11,6 @@ public interface Chart {
     ChartType getChartType();
     void      setChartType(ChartType chartType);
 
-    Color getChartBackgroundColor();
-    void  setChartBackgroundColor(Color color);
+    Paint getChartBackgroundPaint();
+    void  setChartBackgroundPaint(Paint paint);
 }

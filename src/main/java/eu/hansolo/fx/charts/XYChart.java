@@ -13,6 +13,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,8 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private              double                width;
     private              double                height;
     private              Pane                  pane;
-    private              Color                 _chartBackgroundColor;
-    private              ObjectProperty<Color> chartBackgroundColor;
+    private              Paint                 _chartBackgroundPaint;
+    private              ObjectProperty<Paint> chartBackgroundPaint;
     private              XYChartModel<T>       model;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
@@ -43,8 +44,10 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private              double                scaleY;
     private              double                symbolSize;
     private              ChartType             chartType;
-    private              Color                 strokeColor;
-    private              Color                 fillColor;
+    private              Paint                 _strokePaint;
+    private              ObjectProperty<Paint> strokePaint;
+    private              Paint                 _fillPaint;
+    private              ObjectProperty<Paint> fillPaint;
     private              double                _rangeX;
     private              DoubleProperty        rangeX;
     private              double                _rangeY;
@@ -53,23 +56,23 @@ public class XYChart<T extends XYData> extends Region implements Chart {
 
     // ******************** Constructors **************************************
     public XYChart(final XYChartModel<T> MODEL) {
-        this(MODEL, ChartType.SCATTER);
+        this(MODEL, ChartType.SCATTER, Color.BLACK, Color.TRANSPARENT);
     }
     public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE) {
         this(MODEL, TYPE, Color.BLACK, Color.TRANSPARENT);
     }
-    public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
+    public XYChart(final XYChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Paint FILL_PAINT) {
         getStylesheets().add(XYChart.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
-        _chartBackgroundColor = Color.WHITE;
+        _chartBackgroundPaint = Color.WHITE;
         model                 = MODEL;
         scaleX                = 1;
         scaleY                = 1;
         symbolSize            = 2;
         chartType             = TYPE;
-        strokeColor           = STROKE_COLOR;
-        fillColor             = FILL_COLOR;
+        _strokePaint          = STROKE_COLOR;
+        _fillPaint            = FILL_PAINT;
         _rangeX               = 100;
         _rangeY               = 100;
 
@@ -123,37 +126,67 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         redraw();
     }
 
-    public Color getChartBackgroundColor() { return null == chartBackgroundColor ? _chartBackgroundColor : chartBackgroundColor.get(); }
-    public void setChartBackgroundColor(final Color COLOR) {
-        if (null == chartBackgroundColor) {
-            _chartBackgroundColor = COLOR;
+    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
+    public void setChartBackgroundPaint(final Paint PAINT) {
+        if (null == chartBackgroundPaint) {
+            _chartBackgroundPaint = PAINT;
             redraw();
         } else {
-            chartBackgroundColor.set(COLOR);
+            chartBackgroundPaint.set(PAINT);
         }
     }
-    public ObjectProperty<Color> chartBackgroundProperty() {
-        if (null == chartBackgroundColor) {
-            chartBackgroundColor = new ObjectPropertyBase<Color>(_chartBackgroundColor) {
+    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
+        if (null == chartBackgroundPaint) {
+            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return XYChart.this; }
-                @Override public String getName() { return "chartBackgroundColor"; }
+                @Override public String getName() { return "chartBackgroundPaint"; }
             };
-            _chartBackgroundColor = null;
+            _chartBackgroundPaint = null;
         }
-        return chartBackgroundColor;
+        return chartBackgroundPaint;
     }
 
-    public Color getStrokeColor() { return strokeColor; }
-    public void setStrokeColor(final Color COLOR) {
-        strokeColor = COLOR;
-        redraw();
+    public Paint getStrokePaint() { return null == strokePaint ? _strokePaint : strokePaint.get(); }
+    public void setStrokePaint(final Paint PAINT) {
+        if (null == strokePaint) {
+            _strokePaint = PAINT;
+            redraw();
+        } else {
+            strokePaint.set(PAINT);
+        }
+    }
+    public ObjectProperty<Paint> strokePaintProperty() {
+        if (null == strokePaint) {
+            strokePaint = new ObjectPropertyBase<Paint>(_strokePaint) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() {  return XYChart.this; }
+                @Override public String getName() { return "strokePaint"; }
+            };
+            _strokePaint = null;
+        }
+        return strokePaint;
     }
 
-    public Color getFillColor() { return fillColor; }
-    public void setFillColor(final Color COLOR) {
-        fillColor = COLOR;
-        redraw();
+    public Paint getFillPaint() { return null == fillPaint ? _fillPaint : fillPaint.get(); }
+    public void setFillPaint(final Paint PAINT) {
+        if (null == fillPaint) {
+            _fillPaint = PAINT;
+            redraw();
+        } else {
+            fillPaint.set(PAINT);
+        }
+    }
+    public ObjectProperty<Paint> fillPaintProperty() {
+        if (null == fillPaint) {
+            fillPaint = new ObjectPropertyBase<Paint>(_fillPaint) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "fillPaint"; }
+            };
+            _fillPaint = null;
+        }
+        return fillPaint;
     }
 
     public double getRangeX() {  return null == rangeX ? _rangeX : rangeX.get();  }
@@ -203,20 +236,23 @@ public class XYChart<T extends XYData> extends Region implements Chart {
     private void drawChart() {
         if (null == model) return;
 
-        ctx.setFill(getChartBackgroundColor());
         ctx.clearRect(0, 0, width, height);
+        ctx.setFill(getChartBackgroundPaint());
+        ctx.fillRect(0, 0, width, height);
 
-        ctx.setStroke(strokeColor);
+        ctx.setStroke(getStrokePaint());
         ctx.setFill(Color.TRANSPARENT);
 
         if (ChartType.SMOOTH_LINE == chartType) {
-            drawSmoothLine(0.5, false , 16, true);
+            drawSmoothLine(0.5, 16, true);
         } else if (ChartType.LINE == chartType) {
             drawLine();
             drawSymbols();
         } else if (ChartType.AREA == chartType) {
             drawArea();
             drawSymbols();
+        } else if (ChartType.SMOOTH_AREA == chartType) {
+            drawSmoothArea(0.5, 16, true);
         } else if (ChartType.SCATTER == chartType) {
             drawScatter();
         }
@@ -236,6 +272,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
 
     private void drawArea() {
         double oldX = 0;
+        ctx.setFill(getFillPaint());
         ctx.beginPath();
         ctx.moveTo(model.getItems().get(0).getX() * scaleX, height);
         for (XYData item : model.getItems()) {
@@ -247,7 +284,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         ctx.lineTo(oldX, height);
         ctx.lineTo(0, height);
         ctx.closePath();
-        ctx.setFill(fillColor);
+        ctx.setFill(getFillPaint());
         ctx.fill();
         ctx.stroke();
     }
@@ -260,7 +297,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         }
     }
 
-    private void drawSmoothLine(final double TENSION, final boolean IS_CLOSED, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+    private void drawSmoothLine(final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
         List<Double> pointList = new ArrayList<>(model.getItems().size() * 2);
         model.getItems().forEach(item -> {
             pointList.add(item.getX());
@@ -269,7 +306,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         Double[] points = new Double[pointList.size()];
         points = pointList.toArray(points);
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, IS_CLOSED, SMOOTHNESS);
+        List<Double> curvePoints = getCurvePoints(points, TENSION, SMOOTHNESS);
 
         ctx.beginPath();
         //ctx.moveTo(POINTS.get(0), POINTS.get(1));
@@ -281,7 +318,35 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         if (SHOW_POINTS) { drawSymbols(); }
     }
 
-    private List<Double> getCurvePoints(final Double[] POINTS, final double TENSION, final boolean IS_CLOSED, final int NUMBER_OF_SEGMENTS) {
+    private void drawSmoothArea(final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+        double oldX = 0;
+        List<Double> pointList = new ArrayList<>(model.getItems().size() * 2);
+        model.getItems().forEach(item -> {
+            pointList.add(item.getX());
+            pointList.add(item.getY());
+        });
+        Double[] points = new Double[pointList.size()];
+        points = pointList.toArray(points);
+
+        List<Double> curvePoints = getCurvePoints(points, TENSION, SMOOTHNESS);
+        ctx.setFill(getFillPaint());
+        ctx.beginPath();
+        ctx.moveTo(model.getItems().get(0).getX() * scaleX, height);
+        //ctx.moveTo(POINTS.get(0), POINTS.get(1));
+        for(int i = 2 ; i < curvePoints.size() - 1 ; i += 2) {
+            ctx.lineTo(curvePoints.get(i) * scaleX, height - curvePoints.get(i + 1) * scaleY);
+            oldX = curvePoints.get(i) * scaleX;
+        }
+        ctx.lineTo(oldX, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        if (SHOW_POINTS) { drawSymbols(); }
+    }
+
+    private List<Double> getCurvePoints(final Double[] POINTS, final double TENSION, final int NUMBER_OF_SEGMENTS) {
         List<Double> _pts = new ArrayList<>();
         List<Double> res  = new ArrayList<>();
 
@@ -292,6 +357,7 @@ public class XYChart<T extends XYData> extends Region implements Chart {
         // Check if we will draw closed or open curve.
         // If closed, copy end points to beginning and first points to end
         // If open, duplicate first points to beginning, end points to end
+        /*
         if (IS_CLOSED) {
             _pts.add(0, POINTS[POINTS.length - 1]);
             _pts.add(0, POINTS[POINTS.length - 2]);
@@ -305,6 +371,12 @@ public class XYChart<T extends XYData> extends Region implements Chart {
             _pts.add(POINTS[POINTS.length - 2]);	//copy last point and append
             _pts.add(POINTS[POINTS.length - 1]);
         }
+        */
+
+        _pts.add(0, POINTS[1]);	        //copy 1. point and insert at beginning
+        _pts.add(0, POINTS[0]);
+        _pts.add(POINTS[POINTS.length - 2]);	//copy last point and append
+        _pts.add(POINTS[POINTS.length - 1]);
 
         // 1. loop goes through point array
         // 2. loop goes through each segment between the 2 POINTS + 1e point before and after
