@@ -13,7 +13,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -27,7 +26,6 @@ import java.util.Random;
 
 
 public class SingleChartTest extends Application {
-    private enum Alignment { TOP, RIGHT, BOTTOM, LEFT, CENTER }
     private static final Double    AXIS_WIDTH      = 25d;
     private static final Color[]   COLORS          = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
     private static final Random    RND             = new Random();
