@@ -66,7 +66,7 @@ public class ChartTest extends Application {
     private Axis                         scatterChartYAxisLeft;
 
     private YSeries<YDataObject>         ySeries;
-    private DonutChart<YDataObject>      donutChart;
+    private YPane<YDataObject>           donutChart;
 
     private XYZSeries<XYZDataObject>     xyzSeries;
     private XYZPane<XYZDataObject>       bubbleChart;
@@ -105,7 +105,7 @@ public class ChartTest extends Application {
 
 
         ySeries    = new YSeries(yData, ChartType.DONUT);
-        donutChart = new DonutChart(ySeries);
+        donutChart = new YPane(ySeries);
 
         xyzSeries   = new XYZSeries(xyzData, ChartType.BUBBLE);
         bubbleChart = new XYZPane(xyzSeries);

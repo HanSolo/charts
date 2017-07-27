@@ -18,19 +18,19 @@ public class XYSeries<T extends XYData> extends Series {
 
     // ******************** Constructors **************************************
     public XYSeries() {
-        this(null, ChartType.SCATTER, "", "");
+        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", "");
+        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE, final Paint FILL) {
-        this(ITEMS, TYPE, "", "", STROKE, FILL);
+        this(ITEMS, TYPE, "", STROKE, FILL);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE) {
-        this(ITEMS, TYPE, TITLE, SUB_TITLE, Color.BLACK, Color.TRANSPARENT);
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
+        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE, final Paint STROKE, final Paint FILL) {
-        super(ITEMS, TYPE, TITLE, SUB_TITLE, STROKE, FILL);
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
+        super(ITEMS, TYPE, NAME, STROKE, FILL);
         _showPoints = true;
     }
 

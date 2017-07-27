@@ -2,18 +2,14 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.StringPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,35 +21,37 @@ import java.util.List;
  */
 @DefaultProperty("children")
 public class XYChart<T extends XYData> extends Region {
-    private static final double     PREFERRED_WIDTH  = 400;
-    private static final double     PREFERRED_HEIGHT = 250;
-    private static final double     MINIMUM_WIDTH    = 50;
-    private static final double     MINIMUM_HEIGHT   = 50;
-    private static final double     MAXIMUM_WIDTH    = 4096;
-    private static final double     MAXIMUM_HEIGHT   = 4096;
-    private static final Double     AXIS_WIDTH       = 25d;
-    private              double     width;
-    private              double     height;
-    private              XYPane<T>  xyPane;
-    private              List<Axis> axis;
-    private              Axis       yAxisL;
-    private              Axis       yAxisR;
-    private              Axis       xAxisT;
-    private              Axis       xAxisB;
-    private              boolean    hasLeftYAxis;
-    private              boolean    hasRightYAxis;
-    private              boolean    hasTopXAxis;
-    private              boolean    hasBottomXAxis;
-    private              boolean    showPoints;
-    private              AnchorPane pane;
+    private static final double         PREFERRED_WIDTH  = 400;
+    private static final double         PREFERRED_HEIGHT = 250;
+    private static final double         MINIMUM_WIDTH    = 50;
+    private static final double         MINIMUM_HEIGHT   = 50;
+    private static final double         MAXIMUM_WIDTH    = 4096;
+    private static final double         MAXIMUM_HEIGHT   = 4096;
+    private static final Double         AXIS_WIDTH       = 25d;
+    private              double         width;
+    private              double         height;
+    private              XYPane<T>      xyPane;
+    private              List<Axis>     axis;
+    private              Axis           yAxisL;
+    private              Axis           yAxisR;
+    private              Axis           xAxisT;
+    private              Axis           xAxisB;
+    private              boolean        hasLeftYAxis;
+    private              boolean        hasRightYAxis;
+    private              boolean        hasTopXAxis;
+    private              boolean        hasBottomXAxis;
+    private              String         _title;
+    private              StringProperty title;
+    private              String         _subTitle;
+    private              StringProperty subTitle;
+    private              AnchorPane     pane;
 
 
     // ******************** Constructors **************************************
     public XYChart(final XYPane<T> XY_PANE, final Axis... AXIS) {
         if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
-        xyPane     = XY_PANE;
-        axis       = Arrays.asList(AXIS);
-        showPoints = true;
+        xyPane = XY_PANE;
+        axis   = Arrays.asList(AXIS);
         initGraphics();
         registerListeners();
     }
@@ -100,7 +98,51 @@ public class XYChart<T extends XYData> extends Region {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
+    public String getTitle() { return null == title ? _title : title.get(); }
+    public void setTitle(final String TITLE) {
+        if (null == title) {
+            _title = TITLE;
+            xyPane.redraw();
+        } else {
+            title.set(TITLE);
+        }
+    }
+    public StringProperty titleProperty() {
+        if (null == title) {
+            title = new StringPropertyBase(_title) {
+                @Override protected void invalidated() { xyPane.redraw(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "title"; }
+            };
+            _title = null;
+        }
+        return title;
+    }
+
+    public String getSubTitle() { return null == subTitle ? _subTitle : subTitle.get(); }
+    public void setSubTitle(final String SUB_TITLE) {
+        if (null == subTitle) {
+            _subTitle = SUB_TITLE;
+            xyPane.redraw();
+        } else {
+            subTitle.set(SUB_TITLE);
+        }
+    }
+    public StringProperty subTitleProperty() {
+        if (null == subTitle) {
+            subTitle = new StringPropertyBase(_subTitle) {
+                @Override protected void invalidated() { xyPane.redraw(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "subTitle"; }
+            };
+            _subTitle = null;
+        }
+        return subTitle;
+    }
+
     public XYPane<T> getXYPane() { return xyPane; }
+
+    public void refresh() { xyPane.redraw(); }
 
     private void checkForAxis() {
         axis.forEach(axis -> {
@@ -173,6 +215,7 @@ public class XYChart<T extends XYData> extends Region {
             }
         });
     }
+
 
     // ******************** Resizing ******************************************
     private void resize() {

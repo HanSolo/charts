@@ -23,10 +23,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public abstract class Series<T> {
     public    final SeriesEvent REFRESH = new SeriesEvent(Series.this, SeriesEventType.REDRAW);
-    protected String                                    _title;
-    protected StringProperty                            title;
-    protected String                                    _subTitle;
-    protected StringProperty                            subTitle;
+    protected String                                    _name;
+    protected StringProperty                            name;
     protected Paint                                     _stroke;
     protected ObjectProperty<Paint>                     stroke;
     protected Paint                                     _fill;
@@ -40,17 +38,16 @@ public abstract class Series<T> {
 
     // ******************** Constructors **************************************
     public Series() {
-        this(null, ChartType.SCATTER, "", "", Color.BLACK, Color.TRANSPARENT);
+        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", "", Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
     }
-    public Series(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE) {
-        this(ITEMS, TYPE, TITLE, SUB_TITLE, Color.BLACK, Color.TRANSPARENT);
+    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
+        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
     }
-    public Series(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE, final Paint STROKE, final Paint FILL) {
-        _title    = TITLE;
-        _subTitle = SUB_TITLE;
+    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
+        _name     = NAME;
         _stroke   = STROKE;
         _fill     = FILL;
         chartType = TYPE;
@@ -75,46 +72,25 @@ public abstract class Series<T> {
     public ObservableList<T> getItems() { return items; }
     public void setItems(final List<T> ITEMS) { items.setAll(ITEMS); }
 
-    public String getTitle() { return null == title ? _title : title.get(); }
-    public void setTitle(final String TITLE) {
-        if (null == title) {
-            _title = TITLE;
+    public String getName() { return null == name ? _name : name.get(); }
+    public void setName(final String NAME) {
+        if (null == name) {
+            _name = NAME;
             fireSeriesEvent(REFRESH);
         } else {
-            title.set(TITLE);
+            name.set(NAME);
         }
     }
-    public StringProperty titleProperty() {
-        if (null == title) {
-            title = new StringPropertyBase(_title) {
+    public StringProperty nameProperty() {
+        if (null == name) {
+            name = new StringPropertyBase(_name) {
                 @Override protected void invalidated() { fireSeriesEvent(REFRESH); }
                 @Override public Object getBean() { return Series.this; }
-                @Override public String getName() { return "title"; }
+                @Override public String getName() { return "name"; }
             };
-            _title = null;
+            _name = null;
         }
-        return title;
-    }
-
-    public String getSubTitle() { return null == subTitle ? _subTitle : subTitle.get(); }
-    public void setSubTitle(final String SUB_TITLE) {
-        if (null == subTitle) {
-            _subTitle = SUB_TITLE;
-            fireSeriesEvent(REFRESH);
-        } else {
-            subTitle.set(SUB_TITLE);
-        }
-    }
-    public StringProperty subTitleProperty() {
-        if (null == subTitle) {
-            subTitle = new StringPropertyBase(_subTitle) {
-                @Override protected void invalidated() { fireSeriesEvent(REFRESH); }
-                @Override public Object getBean() { return Series.this; }
-                @Override public String getName() { return "subTitle"; }
-            };
-            _subTitle = null;
-        }
-        return subTitle;
+        return name;
     }
 
     public Paint getStroke() { return null == stroke ? _stroke : stroke.get(); }

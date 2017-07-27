@@ -447,7 +447,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
     }
 
-    private void redraw() {
+    protected void redraw() {
         drawChart();
     }
 }

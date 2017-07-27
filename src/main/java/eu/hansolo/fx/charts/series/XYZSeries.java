@@ -13,13 +13,13 @@ public class XYZSeries<T extends XYZData> extends Series {
 
     // ******************** Constructors **************************************
     public XYZSeries() {
-        this(null, ChartType.BUBBLE, "", "");
+        this(null, ChartType.BUBBLE, "");
     }
     public XYZSeries(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", "");
+        this(ITEMS, TYPE, "");
     }
-    public XYZSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE) {
-        super(ITEMS, TYPE, TITLE, SUB_TITLE);
+    public XYZSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
+        super(ITEMS, TYPE, NAME);
     }
 
 
