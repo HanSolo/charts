@@ -16,11 +16,15 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -230,7 +234,11 @@ public class YPane<T extends YData> extends Region implements ChartArea {
 
         // draw the chart data
         ctx.save();
-        ctx.setFill(SERIES.getFill());
+        if (SERIES.getFill() instanceof RadialGradient) {
+            ctx.setFill(new RadialGradient(0, 0, size  * 0.5, size * 0.5, size * 0.45, false, CycleMethod.NO_CYCLE, ((RadialGradient) SERIES.getFill()).getStops()));
+        } else {
+            ctx.setFill(SERIES.getFill());
+        }
         ctx.setStroke(SERIES.getStroke());
 
         switch(SERIES.getChartType()) {
@@ -288,20 +296,10 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         final double angleStep   = 360.0 / NO_OF_SECTORS;
         double radius;
 
-        // clear the chartCanvas
-        //ctx.clearRect(0, 0, size, size);
-
-        // draw center point
-        ctx.save();
-        ctx.setFill(CHART_BKG);
-        ctx.translate(CENTER_X - OFFSET, CENTER_Y - OFFSET);
-        ctx.fillOval(0, 0, 2 * OFFSET, 2 * OFFSET);
-        ctx.restore();
-
         // draw concentric rings
         ctx.setLineWidth(1);
         ctx.setStroke(Color.GRAY);
-        double ringStepSize = (CIRCLE_SIZE - CIRCLE_SIZE * 0.28571) / 20.0;
+        double ringStepSize = size / 20.0;
         double pos          = 0.5 * (size - CIRCLE_SIZE);
         double ringSize     = CIRCLE_SIZE;
         for (int i = 0 ; i < 11 ; i++) {
@@ -313,7 +311,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         // draw star lines
         ctx.save();
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
-            ctx.strokeLine(CENTER_X, 0.37 * size, CENTER_X, 0.5 * (size - CIRCLE_SIZE));
+            ctx.strokeLine(CENTER_X, 0.05 * size, CENTER_X, 0.5 * size);
             ctx.translate(CENTER_X, CENTER_Y);
             ctx.rotate(angleStep);
             ctx.translate(-CENTER_X, -CENTER_Y);
