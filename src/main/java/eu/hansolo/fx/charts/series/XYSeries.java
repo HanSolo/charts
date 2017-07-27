@@ -23,6 +23,9 @@ public class XYSeries<T extends XYData> extends Series {
     public XYSeries(final List<T> ITEMS, final ChartType TYPE) {
         this(ITEMS, TYPE, "", "");
     }
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE, final Paint FILL) {
+        this(ITEMS, TYPE, "", "", STROKE, FILL);
+    }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE) {
         this(ITEMS, TYPE, TITLE, SUB_TITLE, Color.BLACK, Color.TRANSPARENT);
     }
