@@ -16,21 +16,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Paint;
-import javafx.scene.paint.RadialGradient;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
-
-import static eu.hansolo.fx.charts.Helper.clamp;
 
 
 public class YPane<T extends YData> extends Region implements ChartArea {
