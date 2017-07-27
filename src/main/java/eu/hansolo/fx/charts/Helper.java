@@ -1,6 +1,14 @@
 package eu.hansolo.fx.charts;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.WritableImage;
+
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 
 
 public class Helper {
@@ -71,6 +79,18 @@ public class Helper {
             case HORIZONTAL:
             default:
                 break;
+        }
+    }
+
+    public static void saveAsPng(final Node NODE, final String FILE_NAME) {
+        final WritableImage SNAPSHOT = NODE.snapshot(new SnapshotParameters(), null);
+        final String        NAME     = FILE_NAME.replace("\\.[a-zA-Z]{3,4}", "");
+        final File          FILE     = new File(NAME + ".png");
+
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(SNAPSHOT, null), "png", FILE);
+        } catch (IOException exception) {
+            // handle exception here
         }
     }
 }

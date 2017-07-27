@@ -1,11 +1,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.model.XYChartModel;
+import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -41,17 +42,12 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              Pane                  pane;
     private              Paint                 _chartBackgroundPaint;
     private              ObjectProperty<Paint> chartBackgroundPaint;
-    private              XYChartModel<T>       model;
+    private              List<XYSeries<T>>     listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
     private              double                scaleX;
     private              double                scaleY;
     private              double                symbolSize;
-    private              ChartType             chartType;
-    private              Paint                 _strokePaint;
-    private              ObjectProperty<Paint> strokePaint;
-    private              Paint                 _fillPaint;
-    private              ObjectProperty<Paint> fillPaint;
     private              double                _rangeX;
     private              DoubleProperty        rangeX;
     private              double                _rangeY;
@@ -59,24 +55,18 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
 
 
     // ******************** Constructors **************************************
-    public XYPane(final XYChartModel<T> MODEL) {
-        this(MODEL, ChartType.SCATTER, Color.BLACK, Color.TRANSPARENT);
+    public XYPane(final XYSeries<T>... SERIES) {
+        this(Color.WHITE, SERIES);
     }
-    public XYPane(final XYChartModel<T> MODEL, final ChartType TYPE) {
-        this(MODEL, TYPE, Color.BLACK, Color.TRANSPARENT);
-    }
-    public XYPane(final XYChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Paint FILL_PAINT) {
+    public XYPane(final Paint BACKGROUND, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
-        _chartBackgroundPaint = Color.WHITE;
-        model                 = MODEL;
+        _chartBackgroundPaint = BACKGROUND;
+        listOfSeries          = FXCollections.observableArrayList(SERIES);
         scaleX                = 1;
         scaleY                = 1;
         symbolSize            = 2;
-        chartType             = TYPE;
-        _strokePaint          = STROKE_COLOR;
-        _fillPaint            = FILL_PAINT;
         _rangeX               = 100;
         _rangeY               = 100;
 
@@ -110,7 +100,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
 
-        model.setOnModelEvent(modelEvent -> redraw());
+        listOfSeries.forEach(series -> series.setOnSeriesEvent(seriesEvent -> redraw()));
     }
 
 
@@ -123,12 +113,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     @Override protected double computeMaxHeight(final double WIDTH)  { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
-
-    @Override public ChartType getChartType() { return chartType; }
-    @Override public void setChartType(final ChartType TYPE) {
-        chartType = TYPE;
-        redraw();
-    }
 
     public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
     public void setChartBackgroundPaint(final Paint PAINT) {
@@ -149,48 +133,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             _chartBackgroundPaint = null;
         }
         return chartBackgroundPaint;
-    }
-
-    public Paint getStrokePaint() { return null == strokePaint ? _strokePaint : strokePaint.get(); }
-    public void setStrokePaint(final Paint PAINT) {
-        if (null == strokePaint) {
-            _strokePaint = PAINT;
-            redraw();
-        } else {
-            strokePaint.set(PAINT);
-        }
-    }
-    public ObjectProperty<Paint> strokePaintProperty() {
-        if (null == strokePaint) {
-            strokePaint = new ObjectPropertyBase<Paint>(_strokePaint) {
-                @Override protected void invalidated() { redraw(); }
-                @Override public Object getBean() {  return XYPane.this; }
-                @Override public String getName() { return "strokePaint"; }
-            };
-            _strokePaint = null;
-        }
-        return strokePaint;
-    }
-
-    public Paint getFillPaint() { return null == fillPaint ? _fillPaint : fillPaint.get(); }
-    public void setFillPaint(final Paint PAINT) {
-        if (null == fillPaint) {
-            _fillPaint = PAINT;
-            redraw();
-        } else {
-            fillPaint.set(PAINT);
-        }
-    }
-    public ObjectProperty<Paint> fillPaintProperty() {
-        if (null == fillPaint) {
-            fillPaint = new ObjectPropertyBase<Paint>(_fillPaint) {
-                @Override protected void invalidated() { redraw(); }
-                @Override public Object getBean() { return XYPane.this; }
-                @Override public String getName() { return "fillPaint"; }
-            };
-            _fillPaint = null;
-        }
-        return fillPaint;
     }
 
     public double getRangeX() {  return null == rangeX ? _rangeX : rangeX.get();  }
@@ -233,53 +175,53 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         return rangeY;
     }
 
-    public XYChartModel<T> getModel() { return model; }
+    public List<XYSeries<T>> getListOfSeries() { return listOfSeries; }
 
 
     // ******************** Draw Chart ****************************************
     private void drawChart() {
-        if (null == model) return;
+        if (null == listOfSeries || listOfSeries.isEmpty()) return;
 
         ctx.clearRect(0, 0, width, height);
         ctx.setFill(getChartBackgroundPaint());
         ctx.fillRect(0, 0, width, height);
 
-        ctx.setStroke(getStrokePaint());
-        ctx.setFill(Color.TRANSPARENT);
-
-        if (ChartType.SMOOTH_LINE == chartType) {
-            drawSmoothLine(0.5, 16, true);
-        } else if (ChartType.LINE == chartType) {
-            drawLine();
-            drawSymbols();
-        } else if (ChartType.AREA == chartType) {
-            drawArea();
-            drawSymbols();
-        } else if (ChartType.SMOOTH_AREA == chartType) {
-            drawSmoothArea(0.5, 16, true);
-        } else if (ChartType.SCATTER == chartType) {
-            drawScatter();
-        }
+        listOfSeries.forEach(series -> {
+            final ChartType TYPE        = series.getChartType();
+            final boolean   SHOW_POINTS = series.isShowPoints();
+            switch(TYPE) {
+                case LINE       : drawLine(series, SHOW_POINTS);break;
+                case SMOOTH_LINE: drawSmoothLine(series, 0.5, 16, SHOW_POINTS);break;
+                case AREA       : drawArea(series, SHOW_POINTS);break;
+                case SMOOTH_AREA: drawSmoothArea(series, 0.5, 16, SHOW_POINTS);break;
+                case SCATTER    : drawScatter(series);break;
+            }
+        });
     }
 
-    private void drawLine() {
+    private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         double oldX = 0;
         double oldY = height;
-        for (XYData item : model.getItems()) {
+        ctx.setStroke(SERIES.getStroke());
+        ctx.setFill(Color.TRANSPARENT);
+        for (XYData item : SERIES.getItems()) {
             double x = item.getX() * scaleX;
             double y = height - item.getY() * scaleY;
             ctx.strokeLine(oldX, oldY, x, y);
             oldX = x;
             oldY = y;
         }
+
+        if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
-    private void drawArea() {
+    private void drawArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         double oldX = 0;
-        ctx.setFill(getFillPaint());
+        ctx.setStroke(SERIES.getStroke());
+        ctx.setFill(SERIES.getFill());
         ctx.beginPath();
-        ctx.moveTo(model.getItems().get(0).getX() * scaleX, height);
-        for (XYData item : model.getItems()) {
+        ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
+        for (XYData item : SERIES.getItems()) {
             double x = item.getX() * scaleX;
             double y = height - item.getY() * scaleY;
             ctx.lineTo(x, y);
@@ -288,22 +230,28 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.lineTo(oldX, height);
         ctx.lineTo(0, height);
         ctx.closePath();
-        ctx.setFill(getFillPaint());
         ctx.fill();
         ctx.stroke();
+
+        if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
-    private void drawScatter() {
-        for (XYData item : model.getItems()) {
+    private void drawScatter(final XYSeries<T> SERIES) {
+        ctx.setStroke(Color.TRANSPARENT);
+        ctx.setFill(Color.TRANSPARENT);
+        for (XYData item : SERIES.getItems()) {
             double x = item.getX() * scaleX;
             double y = item.getY() * scaleY;
             drawSymbol(x, height - y, item.getColor(), item.getSymbol());
         }
     }
 
-    private void drawSmoothLine(final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
-        List<Double> pointList = new ArrayList<>(model.getItems().size() * 2);
-        model.getItems().forEach(item -> {
+    private void drawSmoothLine(final XYSeries<T> SERIES, final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+        ctx.setStroke(SERIES.getStroke());
+        ctx.setFill(Color.TRANSPARENT);
+
+        List<Double> pointList = new ArrayList<>(SERIES.getItems().size() * 2);
+        SERIES.getItems().forEach(item -> {
             pointList.add(item.getX());
             pointList.add(item.getY());
         });
@@ -319,13 +267,15 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
         ctx.stroke();
 
-        if (SHOW_POINTS) { drawSymbols(); }
+        if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
-    private void drawSmoothArea(final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+    private void drawSmoothArea(final XYSeries<T> SERIES, final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+        ctx.setStroke(SERIES.getStroke());
+        ctx.setFill(SERIES.getFill());
         double oldX = 0;
-        List<Double> pointList = new ArrayList<>(model.getItems().size() * 2);
-        model.getItems().forEach(item -> {
+        List<Double> pointList = new ArrayList<>(SERIES.getItems().size() * 2);
+        SERIES.getItems().forEach(item -> {
             pointList.add(item.getX());
             pointList.add(item.getY());
         });
@@ -333,9 +283,9 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         points = pointList.toArray(points);
 
         List<Double> curvePoints = getCurvePoints(points, TENSION, SMOOTHNESS);
-        ctx.setFill(getFillPaint());
+
         ctx.beginPath();
-        ctx.moveTo(model.getItems().get(0).getX() * scaleX, height);
+        ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
         //ctx.moveTo(POINTS.get(0), POINTS.get(1));
         for(int i = 2 ; i < curvePoints.size() - 1 ; i += 2) {
             ctx.lineTo(curvePoints.get(i) * scaleX, height - curvePoints.get(i + 1) * scaleY);
@@ -347,7 +297,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.fill();
         ctx.stroke();
 
-        if (SHOW_POINTS) { drawSymbols(); }
+        if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
     private List<Double> getCurvePoints(final Double[] POINTS, final double TENSION, final int NUMBER_OF_SEGMENTS) {
@@ -376,12 +326,12 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             _pts.add(POINTS[POINTS.length - 1]);
         }
         */
-
-        _pts.add(0, POINTS[1]);	        //copy 1. point and insert at beginning
-        _pts.add(0, POINTS[0]);
-        _pts.add(POINTS[POINTS.length - 2]);	//copy last point and append
-        _pts.add(POINTS[POINTS.length - 1]);
-
+        if (POINTS.length > 0) {
+            _pts.add(0, POINTS[1]);            //copy 1. point and insert at beginning
+            _pts.add(0, POINTS[0]);
+            _pts.add(POINTS[POINTS.length - 2]);    //copy last point and append
+            _pts.add(POINTS[POINTS.length - 1]);
+        }
         // 1. loop goes through point array
         // 2. loop goes through each segment between the 2 POINTS + 1e point before and after
         for (int i = 2 ; i < (_pts.size() - 4) ; i += 2) {
@@ -415,8 +365,8 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         return res;
     }
 
-    private void drawSymbols() {
-        for (XYData item : model.getItems()) {
+    private void drawSymbols(final XYSeries<T> SERIES) {
+        for (XYData item : SERIES.getItems()) {
             double x = item.getX() * scaleX;
             double y = item.getY() * scaleY;
             drawSymbol(x, height - y, item.getColor(), item.getSymbol());

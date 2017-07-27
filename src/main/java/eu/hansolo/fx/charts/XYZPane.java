@@ -1,9 +1,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYZData;
-import eu.hansolo.fx.charts.model.XYZChartModel;
+import eu.hansolo.fx.charts.series.XYZSeries;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -12,6 +15,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+
+import java.util.List;
 
 
 public class XYZPane<T extends XYZData> extends Region implements ChartArea {
@@ -29,32 +34,33 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
     private              Pane                  pane;
     private              Paint                 _chartBackgroundPaint;
     private              ObjectProperty<Paint> chartBackgroundPaint;
-    private              XYZChartModel<T>      model;
+    private              List<XYZSeries<T>>    listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
     private              double                scaleX;
     private              double                scaleY;
     private              double                scaleZ;
-    private              ChartType             chartType;
+    private              double                _rangeX;
+    private              DoubleProperty        rangeX;
+    private              double                _rangeY;
+    private              DoubleProperty        rangeY;
 
 
     // ******************** Constructors **************************************
-    public XYZPane(final XYZChartModel<T> MODEL) {
-        this(MODEL, ChartType.SCATTER);
+    public XYZPane(final XYZSeries<T>... SERIES) {
+        this(Color.WHITE, SERIES);
     }
-    public XYZPane(final XYZChartModel<T> MODEL, final ChartType TYPE) {
-        this(MODEL, TYPE, Color.BLACK, Color.TRANSPARENT);
-    }
-    public XYZPane(final XYZChartModel<T> MODEL, final ChartType TYPE, final Color STROKE_COLOR, final Color FILL_COLOR) {
+    public XYZPane(final Paint BACKGROUND, final XYZSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
-        _chartBackgroundPaint = Color.WHITE;
-        model                 = MODEL;
+        _chartBackgroundPaint = BACKGROUND;
+        listOfSeries          = FXCollections.observableArrayList(SERIES);
         scaleX                = 1;
         scaleY                = 1;
         scaleZ                = 1;
-        chartType             = TYPE;
+        _rangeX               = 100;
+        _rangeY               = 100;
 
         initGraphics();
         registerListeners();
@@ -86,7 +92,7 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
 
-        model.setOnModelEvent(modelEvent -> redraw());
+        listOfSeries.forEach(series -> series.setOnSeriesEvent(seriesEvent -> redraw()));
     }
 
 
@@ -99,12 +105,6 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
     @Override protected double computeMaxHeight(final double WIDTH)  { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
-
-    @Override public ChartType getChartType() { return chartType; }
-    @Override public void setChartType(final ChartType TYPE) {
-        chartType = TYPE;
-        redraw();
-    }
 
     public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
     public void setChartBackgroundPaint(final Paint PAINT) {
@@ -127,31 +127,75 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
         return chartBackgroundPaint;
     }
 
-    public XYZChartModel<T> getModel() { return model; }
+    public double getRangeX() {  return null == rangeX ? _rangeX : rangeX.get();  }
+    public void setRangeX(final double VALUE) {
+        if (null == rangeX) {
+            _rangeX = VALUE;
+            resize();
+        } else {
+            rangeX.set(VALUE);
+        }
+    }
+    public DoubleProperty rangeXProperty() {
+        if (null == rangeX) {
+            rangeX = new DoublePropertyBase(_rangeX) {
+                @Override protected void invalidated() { resize(); }
+                @Override public Object getBean() {  return XYZPane.this;  }
+                @Override public String getName() {  return "rangeX"; }
+            };
+        }
+        return rangeX;
+    }
+
+    public double getRangeY() { return null == rangeY ? _rangeY : rangeY.get(); }
+    public void setRangeY(final double VALUE) {
+        if (null == rangeY) {
+            _rangeY = VALUE;
+            resize();
+        } else {
+            rangeY.set(VALUE);
+        }
+    }
+    public DoubleProperty rangeYProperty() {
+        if (null == rangeY) {
+            rangeY = new DoublePropertyBase(_rangeY) {
+                @Override protected void invalidated() { resize(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "rangeY"; }
+            };
+        }
+        return rangeY;
+    }
+
+    public List<XYZSeries<T>> getListOfSeries() { return listOfSeries; }
 
 
     // ******************** Draw Chart ****************************************
     private void drawChart() {
-        if (null == model) return;
+        if (null == listOfSeries || listOfSeries.isEmpty()) return;
 
         ctx.clearRect(0, 0, width, height);
         ctx.setFill(getChartBackgroundPaint());
         ctx.fillRect(0, 0, width, height);
 
-        for (XYZData item : model.getItems()) {
-            double x = item.getX() * scaleX;
-            double y = item.getY() * scaleY;
-            double z = item.getZ() * scaleZ;
-            switch(chartType) {
-                case BUBBLE:
-                    double halfZ = z * 0.5;
-                    ctx.setStroke(Color.TRANSPARENT);
-                    ctx.setFill(item.getColor());
-                    ctx.fillOval(x - halfZ, height - y - halfZ, z, z);
-                    break;
-                default     :
-                    break;
+        listOfSeries.forEach(series -> {
+            final ChartType TYPE = series.getChartType();
+            switch(TYPE) {
+                case BUBBLE: drawBubble(series); break;
             }
+        });
+    }
+
+    private void drawBubble(final XYZSeries<T> SERIES) {
+        for (XYZData item : SERIES.getItems()) {
+            double x     = item.getX() * scaleX;
+            double y     = item.getY() * scaleY;
+            double z     = item.getZ() * scaleZ;
+            double halfZ = z * 0.5;
+            ctx.setStroke(Color.TRANSPARENT);
+            ctx.setFill(item.getColor());
+            ctx.fillOval(x - halfZ, height - y - halfZ, z, z);
+
         }
     }
 
@@ -178,8 +222,8 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
             canvas.setWidth(width);
             canvas.setHeight(height);
 
-            scaleX = width / model.getItems().size();
-            scaleY = height / model.getRangeY();
+            scaleX = width / getRangeX();
+            scaleY = height / getRangeY();
 
             redraw();
         }

@@ -1,7 +1,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.YData;
-import eu.hansolo.fx.charts.model.YChartModel;
+import eu.hansolo.fx.charts.series.YSeries;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
@@ -28,21 +28,21 @@ public class DonutChart<T extends YData> extends Region implements ChartArea {
     private static final double                MINIMUM_HEIGHT   = 0;
     private static final double                MAXIMUM_WIDTH    = 4096;
     private static final double                MAXIMUM_HEIGHT   = 4096;
-    private static       double                aspectRatio;
-    private              boolean               keepAspect;
-    private              double                size;
-    private              double                width;
-    private              double                height;
-    private              Pane                  pane;
-    private              Paint                 _chartBackgroundPaint;
-    private              ObjectProperty<Paint> chartBackgroundPaint;
-    private              YChartModel<T>        model;
-    private              Canvas                canvas;
-    private              GraphicsContext       ctx;
+    private static double                aspectRatio;
+    private        boolean               keepAspect;
+    private        double                size;
+    private        double                width;
+    private        double                height;
+    private        Pane                  pane;
+    private        Paint                 _chartBackgroundPaint;
+    private        ObjectProperty<Paint> chartBackgroundPaint;
+    private        YSeries<T>            model;
+    private        Canvas                canvas;
+    private        GraphicsContext       ctx;
 
 
     // ******************** Constructors **************************************
-    public DonutChart(final YChartModel<T> MODEL) {
+    public DonutChart(final YSeries<T> MODEL) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
@@ -79,7 +79,7 @@ public class DonutChart<T extends YData> extends Region implements ChartArea {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
 
-        model.setOnModelEvent(modelEvent -> redraw());
+        model.setOnSeriesEvent(modelEvent -> redraw());
     }
 
 
@@ -92,9 +92,6 @@ public class DonutChart<T extends YData> extends Region implements ChartArea {
     @Override protected double computeMaxHeight(final double WIDTH)  { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
-
-    @Override public ChartType getChartType() { return ChartType.DONUT; }
-    @Override public void setChartType(final ChartType TYPE) {}
 
     public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
     public void setChartBackgroundPaint(final Paint PAINT) {
@@ -117,7 +114,7 @@ public class DonutChart<T extends YData> extends Region implements ChartArea {
         return chartBackgroundPaint;
     }
 
-    public YChartModel<T> getModel() { return model; }
+    public YSeries<T> getModel() { return model; }
 
 
     // ******************** Draw Chart ****************************************

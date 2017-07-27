@@ -8,9 +8,6 @@ import javafx.scene.paint.Paint;
  */
 public interface ChartArea {
 
-    ChartType getChartType();
-    void      setChartType(ChartType chartType);
-
     Paint getChartBackgroundPaint();
     void  setChartBackgroundPaint(Paint paint);
 }

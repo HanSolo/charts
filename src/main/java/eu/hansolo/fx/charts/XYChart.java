@@ -3,11 +3,17 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.XYData;
 import javafx.beans.DefaultProperty;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,14 +44,16 @@ public class XYChart<T extends XYData> extends Region {
     private              boolean    hasRightYAxis;
     private              boolean    hasTopXAxis;
     private              boolean    hasBottomXAxis;
+    private              boolean    showPoints;
     private              AnchorPane pane;
 
 
     // ******************** Constructors **************************************
     public XYChart(final XYPane<T> XY_PANE, final Axis... AXIS) {
         if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
-        xyPane = XY_PANE;
-        axis   = Arrays.asList(AXIS);
+        xyPane     = XY_PANE;
+        axis       = Arrays.asList(AXIS);
+        showPoints = true;
         initGraphics();
         registerListeners();
     }

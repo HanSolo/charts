@@ -1,7 +1,10 @@
-package eu.hansolo.fx.charts.model;
+package eu.hansolo.fx.charts.series;
 
+import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.data.XYData;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.Comparator;
 import java.util.List;
@@ -10,18 +13,22 @@ import java.util.List;
 /**
  * Created by hansolo on 16.07.17.
  */
-public class XYChartModel<T extends XYData> extends ChartModel {
-
+public class XYSeries<T extends XYData> extends Series {
+    private boolean _showPoints;
 
     // ******************** Constructors **************************************
-    public XYChartModel() {
-        this(null, "", "");
+    public XYSeries() {
+        this(null, ChartType.SCATTER, "", "");
     }
-    public XYChartModel(final List<T> ITEMS) {
-        this(ITEMS, "", "");
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE) {
+        this(ITEMS, TYPE, "", "");
     }
-    public XYChartModel(final List<T> ITEMS, final String TITLE, final String SUB_TITLE) {
-        super(ITEMS, TITLE, SUB_TITLE);
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE) {
+        this(ITEMS, TYPE, TITLE, SUB_TITLE, Color.BLACK, Color.TRANSPARENT);
+    }
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String TITLE, final String SUB_TITLE, final Paint STROKE, final Paint FILL) {
+        super(ITEMS, TYPE, TITLE, SUB_TITLE, STROKE, FILL);
+        _showPoints = true;
     }
 
 
@@ -36,4 +43,7 @@ public class XYChartModel<T extends XYData> extends ChartModel {
 
     public double getRangeX() { return getMaxX() - getMinX(); }
     public double getRangeY() { return getMaxY() - getMinY(); }
+
+    public boolean isShowPoints() { return _showPoints; }
+    public void setShowPoints(final boolean SHOW) { _showPoints = SHOW; }
 }
