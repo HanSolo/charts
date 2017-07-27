@@ -282,19 +282,17 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         }
         ctx.restore();
 
-        drawRadarOverlay(NO_OF_SECTORS, MIN_VALUE, TYPE);
+        drawRadarOverlay(NO_OF_SECTORS, TYPE);
     }
     
-    private void drawRadarOverlay(final int NO_OF_SECTORS, final double MIN_VALUE, final ChartType TYPE) {
-        final Paint  CHART_BKG   = getChartBackgroundPaint();
+    private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {
         final double CENTER_X    = 0.5 * size;
         final double CENTER_Y    = CENTER_X;
         final double CIRCLE_SIZE = 0.90 * size;
-        final double DATA_RANGE  = getRangeY();
-        final double RANGE       = 0.35714 * CIRCLE_SIZE;
-        final double OFFSET      = 0.14286 * CIRCLE_SIZE;
+        //final double DATA_RANGE  = getRangeY();
+        //final double RANGE       = 0.35714 * CIRCLE_SIZE;
+        //final double OFFSET      = 0.14286 * CIRCLE_SIZE;
         final double angleStep   = 360.0 / NO_OF_SECTORS;
-        double radius;
 
         // draw concentric rings
         ctx.setLineWidth(1);
@@ -340,7 +338,6 @@ public class YPane<T extends YData> extends Region implements ChartArea {
 
         // draw text
         ctx.save();
-        //ctx.setFont(Fonts.robotoLight(0.04 * size));
         ctx.setFont(Fonts.latoRegular(0.04 * size));
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
