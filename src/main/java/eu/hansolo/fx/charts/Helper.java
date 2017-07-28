@@ -1,5 +1,7 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.tools.CatmullRomSpline2D;
+import eu.hansolo.fx.charts.tools.Point;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
@@ -9,6 +11,9 @@ import javafx.scene.image.WritableImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class Helper {
@@ -92,5 +97,45 @@ public class Helper {
         } catch (IOException exception) {
             // handle exception here
         }
+    }
+
+    public static List<Point> subdividePoints(final List<Point> POINTS, final int SUB_DEVISIONS) {
+        Point[] points = POINTS.toArray(new Point[0]);
+        return Arrays.asList(subdividePoints(points, SUB_DEVISIONS));
+    }
+
+    public static Point[] subdividePoints(final Point[] POINTS, final int SUB_DEVISIONS) {
+        assert POINTS != null;
+        assert POINTS.length >= 3;
+        int    noOfPoints = POINTS.length;
+
+        Point[] subdividedPoints = new Point[((noOfPoints - 1) * SUB_DEVISIONS) + 1];
+
+        double increments = 1.0 / (double) SUB_DEVISIONS;
+
+        for (int i = 0 ; i < noOfPoints - 1 ; i++) {
+            Point p0 = i == 0 ? POINTS[i] : POINTS[i - 1];
+            Point p1 = POINTS[i];
+            Point p2 = POINTS[i + 1];
+            Point p3 = (i+2 == noOfPoints) ? POINTS[i + 1] : POINTS[i + 2];
+
+            CatmullRomSpline2D crs = new CatmullRomSpline2D(p0, p1, p2, p3);
+
+            for (int j = 0; j <= SUB_DEVISIONS; j++) {
+                subdividedPoints[(i * SUB_DEVISIONS) + j] = crs.q(j * increments);
+            }
+        }
+
+        return subdividedPoints;
+    }
+
+    public static double[] rotate(final double PX, double PY, final double RX, final double RY, final double ANGLE) {
+        double x = RX + (Math.cos(ANGLE) * (PX - RX) - Math.sin(ANGLE) * (PY - RY));
+        double y = RY + (Math.sin(ANGLE) * (PX - RX) + Math.cos(ANGLE) * (PY - RY));
+        return new double[] {x, y};
+    }
+    public static Point rotate(final Point P1, final Point ROTATION_CENTER, final double ANGLE) {
+        double[] xy = rotate(P1.getX(), P1.getY(), ROTATION_CENTER.getX(), ROTATION_CENTER.getY(), ANGLE);
+        return new Point(xy[0], xy[1]);
     }
 }

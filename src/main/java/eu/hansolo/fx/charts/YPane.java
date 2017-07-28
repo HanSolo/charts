@@ -3,6 +3,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
+import eu.hansolo.fx.charts.tools.Point;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -21,6 +22,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.ArcType;
+import javafx.scene.shape.FillRule;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
@@ -165,9 +167,10 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         listOfSeries.forEach(series -> {
             final ChartType TYPE = series.getChartType();
             switch(TYPE) {
-                case DONUT        : drawDonut(series); break;
-                case RADAR_POLYGON:
-                case RADAR_SECTOR : drawRadar(series, type, minValue); break;
+                case DONUT               : drawDonut(series); break;
+                case RADAR_POLYGON       :
+                case SMOOTH_RADAR_POLYGON:
+                case RADAR_SECTOR        : drawRadar(series, type, minValue); break;
             }
         });
     }
@@ -227,11 +230,6 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         final int    NO_OF_SECTORS = SERIES.getItems().size();
         final double angleStep     = 360.0 / NO_OF_SECTORS;
 
-
-        // draw the chart background
-        //ctx.setFill(getChartFill());
-        //ctx.fillOval((size - CIRCLE_SIZE) * 0.5, (size - CIRCLE_SIZE) * 0.5, CIRCLE_SIZE, CIRCLE_SIZE);
-
         // draw the chart data
         ctx.save();
         if (SERIES.getFill() instanceof RadialGradient) {
@@ -243,13 +241,12 @@ public class YPane<T extends YData> extends Region implements ChartArea {
 
         switch(SERIES.getChartType()) {
             case RADAR_POLYGON:
+                ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(CENTER_X, 0.36239 * size);
                 SERIES.getItems().forEach(item -> {
                     double r1 = (item.getY() - MIN_VALUE) / DATA_RANGE;
-                    //ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - radius * RANGE);
                     ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r1 * RANGE);
-
                     ctx.translate(CENTER_X, CENTER_Y);
                     ctx.rotate(angleStep);
                     ctx.translate(-CENTER_X, -CENTER_Y);
@@ -259,7 +256,42 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
+                ctx.restore();
+                break;
+            case SMOOTH_RADAR_POLYGON:
+                double      radAngle     = Math.toRadians(180);
+                double      radAngleStep = Math.toRadians(angleStep);
+                List<Point> points       = new ArrayList<>();
 
+                double x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (0.36239 * size)));
+                double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.36239 * size)));
+                points.add(new Point(x, y));
+
+                for (YData item : SERIES.getItems()) {
+                    double r1 = ((item.getY() - MIN_VALUE) / DATA_RANGE);
+                    x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - r1 * RANGE)));
+                    y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - r1 * RANGE)));
+                    points.add(new Point(x, y));
+                    radAngle += radAngleStep;
+                }
+
+                x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE)));
+                y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE)));
+                points.add(new Point(x, y));
+
+                Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
+
+                ctx.beginPath();
+                ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());
+                for (int i = 0 ; i < interpolatedPoints.length - 1 ; i++) {
+                    Point point = interpolatedPoints[i];
+                    ctx.lineTo(point.getX(), point.getY());
+                }
+                ctx.lineTo(interpolatedPoints[interpolatedPoints.length - 1].getX(), interpolatedPoints[interpolatedPoints.length - 1].getY());
+                ctx.closePath();
+
+                ctx.fill();
+                ctx.stroke();
                 break;
             case RADAR_SECTOR:
                 ctx.translate(CENTER_X, CENTER_Y);
@@ -284,7 +316,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
 
         drawRadarOverlay(NO_OF_SECTORS, TYPE);
     }
-    
+
     private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {
         final double CENTER_X    = 0.5 * size;
         final double CENTER_Y    = CENTER_X;

@@ -246,7 +246,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
     }
 
-    private void drawSmoothLine(final XYSeries<T> SERIES, final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+    private void drawSmoothLine(final XYSeries<T> SERIES, final double TENSION, final int SUB_DEVISIONS, final boolean SHOW_POINTS) {
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
 
@@ -258,7 +258,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         Double[] points = new Double[pointList.size()];
         points = pointList.toArray(points);
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, SMOOTHNESS);
+        List<Double> curvePoints = getCurvePoints(points, TENSION, SUB_DEVISIONS);
 
         ctx.beginPath();
         //ctx.moveTo(POINTS.get(0), POINTS.get(1));
@@ -270,7 +270,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
-    private void drawSmoothArea(final XYSeries<T> SERIES, final double TENSION, final int SMOOTHNESS, final boolean SHOW_POINTS) {
+    private void drawSmoothArea(final XYSeries<T> SERIES, final double TENSION, final int SUB_DEVISIONS, final boolean SHOW_POINTS) {
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         double oldX = 0;
@@ -282,7 +282,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         Double[] points = new Double[pointList.size()];
         points = pointList.toArray(points);
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, SMOOTHNESS);
+        List<Double> curvePoints = getCurvePoints(points, TENSION, SUB_DEVISIONS);
 
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
