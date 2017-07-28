@@ -93,7 +93,7 @@ public class SingleChartTest extends Application {
 
         ySeries1 = new YSeries(yData1, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))));
         ySeries2 = new YSeries(yData2, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.5))));
-        yChart   = new YChart(new YPane(ySeries1));
+        yChart   = new YChart(new YPane(ySeries1, ySeries2));
 
 
         lastTimerCall = System.nanoTime();
