@@ -136,6 +136,9 @@ public class ChartTest extends Application {
         smoothLineChart            = new XYChart<>(new XYPane(xySeries3),
                                                    smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
 
+        Grid grid = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
+        smoothLineChart.setGrid(grid);
+
         // SmoothAreaChart
         smoothAreaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothAreaChartYAxisLeft   = createLeftYAxis(0, 20, true);

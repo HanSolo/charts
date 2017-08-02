@@ -36,6 +36,7 @@ public class XYChart<T extends XYData> extends Region {
     private              Axis           yAxisR;
     private              Axis           xAxisT;
     private              Axis           xAxisB;
+    private              Grid           grid;
     private              boolean        hasLeftYAxis;
     private              boolean        hasRightYAxis;
     private              boolean        hasTopXAxis;
@@ -52,6 +53,7 @@ public class XYChart<T extends XYData> extends Region {
         if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
         xyPane = XY_PANE;
         axis   = Arrays.asList(AXIS);
+        grid   = null;
         initGraphics();
         registerListeners();
     }
@@ -140,6 +142,14 @@ public class XYChart<T extends XYData> extends Region {
         return subTitle;
     }
 
+    public void setGrid(final Grid GRID) {
+        if (null == GRID) return;
+        if (null != grid) { pane.getChildren().remove(1); }
+        grid = GRID;
+        pane.getChildren().add(1, grid);
+        adjustGridAnchors();
+    }
+
     public XYPane<T> getXYPane() { return xyPane; }
 
     public void refresh() { xyPane.redraw(); }
@@ -214,6 +224,14 @@ public class XYChart<T extends XYData> extends Region {
                 AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? AXIS_WIDTH : 0d);
             }
         });
+    }
+
+    private void adjustGridAnchors() {
+        if (null == grid) return;
+        AnchorPane.setLeftAnchor(grid, hasLeftYAxis ? AXIS_WIDTH : 0d);
+        AnchorPane.setRightAnchor(grid, hasRightYAxis ? AXIS_WIDTH : 0d);
+        AnchorPane.setTopAnchor(grid, hasTopXAxis ? AXIS_WIDTH : 0d);
+        AnchorPane.setBottomAnchor(grid, hasBottomXAxis ? AXIS_WIDTH : 0d);
     }
 
 
