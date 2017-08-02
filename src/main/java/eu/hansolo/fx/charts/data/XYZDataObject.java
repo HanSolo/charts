@@ -1,6 +1,8 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
+import eu.hansolo.fx.charts.event.DataEvent;
+import eu.hansolo.fx.charts.event.DataEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -9,14 +11,24 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 
 public class XYZDataObject implements XYZData {
-    private DoubleProperty         x;
-    private DoubleProperty         y;
-    private DoubleProperty         z;
-    private StringProperty         name;
-    private ObjectProperty<Color>  color;
-    private ObjectProperty<Symbol> symbol;
+    private final DataEvent                         DATA_EVENT = new DataEvent(XYZDataObject.this);
+    private CopyOnWriteArrayList<DataEventListener> listeners;
+    private double                                  _x;
+    private DoubleProperty                          x;
+    private double                                  _y;
+    private DoubleProperty                          y;
+    private double                                  _z;
+    private DoubleProperty                          z;
+    private String                                  _name;
+    private StringProperty                          name;
+    private Color                                   _color;
+    private ObjectProperty<Color>                   color;
+    private Symbol                                  _symbol;
+    private ObjectProperty<Symbol>                  symbol;
 
 
     // ******************** Constructors **********************************
@@ -30,57 +42,150 @@ public class XYZDataObject implements XYZData {
         this(X, Y, Z, NAME, COLOR, Symbol.CIRCLE);
     }
     public XYZDataObject(final double X, final double Y, final double Z, final String NAME, final Color COLOR, final Symbol SYMBOL) {
-        x      = new DoublePropertyBase(X) {
-            @Override public Object getBean() { return XYZDataObject.this; }
-            @Override public String getName() { return "x"; }
-        };
-        y      = new DoublePropertyBase(Y) {
-            @Override public Object getBean() { return XYZDataObject.this; }
-            @Override public String getName() { return "y"; }
-        };
-        z      = new DoublePropertyBase(Z) {
-            @Override public Object getBean() { return XYZDataObject.this; }
-            @Override public String getName() { return "value"; }
-        };
-        name   = new StringPropertyBase(NAME) {
-            @Override public Object getBean() { return XYZDataObject.this; }
-            @Override public String getName() { return "name"; }
-        };
-        color  = new ObjectPropertyBase<Color>(COLOR) {
-            @Override public Object getBean() { return XYZDataObject.this; }
-            @Override public String getName() { return "color"; }
-        };
-        symbol = new ObjectPropertyBase<Symbol>(SYMBOL) {
-            @Override public Object getBean() {  return XYZDataObject.this;  }
-            @Override public String getName() {  return "symbol";  }
-        };
+        _x        = X;
+        _y        = Y;
+        _z        = Z;
+        _name     = NAME;
+        _color    = COLOR;
+        _symbol   = SYMBOL;
+        listeners = new CopyOnWriteArrayList<>();
     }
 
 
     // ******************** Methods ***************************************
-    @Override public double getX() { return x.get(); }
-    @Override public void setX(final double X) { x.set(X); }
-    public DoubleProperty xProperty() { return x; }
+    @Override public double getX() { return null == x ? _x : x.get(); }
+    @Override public void setX(final double X) {
+        if (null == x) {
+            _x = X;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            x.set(X);
+        }
+    }
+    public DoubleProperty xProperty() {
+        if (null == x) {
+            x = new DoublePropertyBase(_x) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override public String getName() { return "x"; }
+            };
+        }
+        return x;
+    }
 
-    @Override public double getY() { return y.get(); }
-    @Override public void setY(final double Y) { y.set(Y); }
-    public DoubleProperty yProperty() { return y; }
+    @Override public double getY() { return null == y ? _y : y.get(); }
+    @Override public void setY(final double Y) {
+        if (null == y) {
+            _y = Y;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            y.set(Y);
+        }
+    }
+    public DoubleProperty yProperty() {
+        if (null == y) {
+            y = new DoublePropertyBase(_y) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override public String getName() { return "y"; }
+            };
+        }
+        return y;
+    }
 
-    @Override public double getZ() { return z.get(); }
-    @Override public void setZ(final double Z) { z.set(Z); }
-    public DoubleProperty zProperty() { return z; }
+    @Override public double getZ() { return null == z ? _z : z.get(); }
+    @Override public void setZ(final double Z) {
+        if (null == z) {
+            _z = Z;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            z.set(Z);
+        }
+    }
+    public DoubleProperty zProperty() {
+        if (null == z) {
+            z = new DoublePropertyBase(_z) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override public String getName() { return "z"; }
+            };
+        }
+        return z;
+    }
 
-    @Override public String getName() { return name.get(); }
-    public void setName(final String NAME) { name.set(NAME); }
-    public StringProperty nameProperty() { return name; }
+    @Override public String getName() { return null == name ? _name : name.get(); }
+    public void setName(final String NAME) {
+        if (null == name) {
+            _name = NAME;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            name.set(NAME);
+        }
+    }
+    public StringProperty nameProperty() {
+        if (null == name) {
+            name = new StringPropertyBase(_name) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override public String getName() { return "name"; }
+            };
+            _name = null;
+        }
+        return name;
+    }
 
-    @Override public Color getColor() { return color.get(); }
-    public void setColor(final Color COLOR) { color.set(COLOR); }
-    public ObjectProperty<Color> colorProperty() { return color; }
+    @Override public Color getColor() { return null == color ? _color : color.get(); }
+    public void setColor(final Color COLOR) {
+        if (null == color) {
+            _color = COLOR;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            color.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> colorProperty() {
+        if (null == color) {
+            color = new ObjectPropertyBase<Color>(_color) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override public String getName() { return "color"; }
+            };
+            _color = null;
+        }
+        return color;
+    }
 
-    @Override public Symbol getSymbol() { return symbol.get(); }
-    public void setSymbol(final Symbol SYMBOL) { symbol.set(SYMBOL); }
-    public ObjectProperty<Symbol> symbolProperty() {  return symbol; }
+    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
+    public void setSymbol(final Symbol SYMBOL) {
+        if (null == symbol) {
+            _symbol = SYMBOL;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            symbol.set(SYMBOL);
+        }
+    }
+    public ObjectProperty<Symbol> symbolProperty() {
+        if (null == symbol) {
+            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
+                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override public Object getBean() {  return XYZDataObject.this;  }
+                @Override public String getName() {  return "symbol";  }
+            };
+            _symbol = null;
+        }
+        return symbol;
+    }
+
+
+    // ******************** Event handling ************************************
+    public void setOnDataEvent(final DataEventListener LISTENER) { addDataEventListener(LISTENER); }
+    public void addDataEventListener(final DataEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeDataEventListener(final DataEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+
+    public void fireDataEvent(final DataEvent EVENT) {
+        for (DataEventListener listener : listeners) { listener.onDataEvent(EVENT); }
+    }
+
 
     @Override public String toString() {
         return new StringBuilder().append("{\n")

@@ -43,6 +43,7 @@ public class SingleChartTest extends Application {
 
     private YSeries<YDataObject>   ySeries1;
     private YSeries<YDataObject>   ySeries2;
+    private YSeries<YDataObject>   ySeries3;
     private YChart<YDataObject>    yChart;
 
     private long                   lastTimerCall;
@@ -86,14 +87,17 @@ public class SingleChartTest extends Application {
         // YChart
         List<YDataObject> yData1 = new ArrayList<>(20);
         List<YDataObject> yData2 = new ArrayList<>(20);
+        List<YDataObject> yData3 = new ArrayList<>(20);
         for (int i = 0 ; i < 20 ; i++) {
             yData1.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
             yData2.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yData3.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         ySeries1 = new YSeries(yData1, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))));
         ySeries2 = new YSeries(yData2, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.5))));
-        yChart   = new YChart(new YPane(ySeries1, ySeries2));
+        ySeries3 = new YSeries(yData3, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(255, 0, 255, 0.5))));
+        yChart   = new YChart(new YPane(ySeries1, ySeries2, ySeries3));
 
 
         lastTimerCall = System.nanoTime();
@@ -116,6 +120,9 @@ public class SingleChartTest extends Application {
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
 
                     yItems = ySeries2.getItems();
+                    yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
+
+                    yItems = ySeries3.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
 
                     // Can be used to update charts but if more than one series is in one xyPane

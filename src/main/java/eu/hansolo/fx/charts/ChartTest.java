@@ -12,7 +12,6 @@ import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.unit.Unit;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -34,47 +33,46 @@ import java.util.Random;
  * Created by hansolo on 16.07.17.
  */
 public class ChartTest extends Application {
-    private enum Alignment { TOP, RIGHT, BOTTOM, LEFT, CENTER }
-    private static final Double          AXIS_WIDTH     = 25d;
-    private static final Color[]         COLORS         = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
-    private static final Random          RND            = new Random();
-    private static final int             NO_OF_X_VALUES = 100;
-    private XYSeries<XYDataObject>       xySeries1;
-    private XYSeries<XYDataObject>       xySeries2;
-    private XYSeries<XYDataObject>       xySeries3;
-    private XYSeries<XYDataObject>       xySeries4;
+    private static final Double      AXIS_WIDTH     = 25d;
+    private static final Color[]     COLORS         = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
+    private static final Random      RND            = new Random();
+    private static final int         NO_OF_X_VALUES = 100;
+    private XYSeries<XYDataObject>   xySeries1;
+    private XYSeries<XYDataObject>   xySeries2;
+    private XYSeries<XYDataObject>   xySeries3;
+    private XYSeries<XYDataObject>   xySeries4;
 
-    private XYChart<XYDataObject>        lineChart;
-    private Axis                         lineChartXAxisBottom;
-    private Axis                         lineChartYAxisLeft;
-    private Axis                         lineChartYAxisRight;
+    private XYChart<XYDataObject>    lineChart;
+    private Axis                     lineChartXAxisBottom;
+    private Axis                     lineChartYAxisLeft;
+    private Axis                     lineChartYAxisRight;
 
-    private XYChart<XYDataObject>        areaChart;
-    private Axis                         areaChartXAxisBottom;
-    private Axis                         areaChartYAxisLeft;
+    private XYChart<XYDataObject>    areaChart;
+    private Axis                     areaChartXAxisBottom;
+    private Axis                     areaChartYAxisLeft;
 
-    private XYChart<XYDataObject>        smoothLineChart;
-    private Axis                         smoothLineChartXAxisBottom;
-    private Axis                         smoothLineChartYAxisLeft;
+    private XYChart<XYDataObject>    smoothLineChart;
+    private Axis                     smoothLineChartXAxisBottom;
+    private Axis                     smoothLineChartYAxisLeft;
 
-    private XYChart<XYDataObject>        smoothAreaChart;
-    private Axis                         smoothAreaChartXAxisBottom;
-    private Axis                         smoothAreaChartYAxisLeft;
+    private XYChart<XYDataObject>    smoothAreaChart;
+    private Axis                     smoothAreaChartXAxisBottom;
+    private Axis                     smoothAreaChartYAxisLeft;
 
-    private XYChart<XYDataObject>        scatterChart;
-    private Axis                         scatterChartXAxisBottom;
-    private Axis                         scatterChartYAxisLeft;
+    private XYChart<XYDataObject>    scatterChart;
+    private Axis                     scatterChartXAxisBottom;
+    private Axis                     scatterChartYAxisLeft;
 
-    private YSeries<YDataObject>         ySeries;
-    private YPane<YDataObject>           donutChart;
+    private YSeries<YDataObject>     ySeries;
+    private YPane<YDataObject>       donutChart;
 
-    private XYZSeries<XYZDataObject>     xyzSeries;
-    private XYZPane<XYZDataObject>       bubbleChart;
+    private XYZSeries<XYZDataObject> xyzSeries;
+    private XYZPane<XYZDataObject>   bubbleChart;
 
-    private Thread                       modificationThread;
+    private Thread                   modificationThread;
 
-    private long                         lastTimerCall;
-    private AnimationTimer               timer;
+    private long                     lastTimerCall;
+    private AnimationTimer           timer;
 
 
     @Override public void init() {

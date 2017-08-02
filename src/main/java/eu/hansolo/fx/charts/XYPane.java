@@ -2,6 +2,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.series.XYSeries;
+import eu.hansolo.fx.charts.tools.Point;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -191,9 +192,9 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             final boolean   SHOW_POINTS = series.isShowPoints();
             switch(TYPE) {
                 case LINE       : drawLine(series, SHOW_POINTS);break;
-                case SMOOTH_LINE: drawSmoothLine(series, 0.5, 16, SHOW_POINTS);break;
+                case SMOOTH_LINE: drawSmoothLine(series, SHOW_POINTS);break;
                 case AREA       : drawArea(series, SHOW_POINTS);break;
-                case SMOOTH_AREA: drawSmoothArea(series, 0.5, 16, SHOW_POINTS);break;
+                case SMOOTH_AREA: drawSmoothArea(series, SHOW_POINTS);break;
                 case SCATTER    : drawScatter(series);break;
             }
         });
@@ -246,51 +247,41 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
     }
 
-    private void drawSmoothLine(final XYSeries<T> SERIES, final double TENSION, final int SUB_DEVISIONS, final boolean SHOW_POINTS) {
+    private void drawSmoothLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
 
-        List<Double> pointList = new ArrayList<>(SERIES.getItems().size() * 2);
-        SERIES.getItems().forEach(item -> {
-            pointList.add(item.getX());
-            pointList.add(item.getY());
-        });
-        Double[] points = new Double[pointList.size()];
-        points = pointList.toArray(points);
+        List<Point> points = new ArrayList<>(SERIES.getItems().size());
+        SERIES.getItems().forEach(item -> points.add(new Point(item.getX(), item.getY())));
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, SUB_DEVISIONS);
+        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
 
         ctx.beginPath();
-        //ctx.moveTo(POINTS.get(0), POINTS.get(1));
-        for(int i = 2 ; i < curvePoints.size() - 1 ; i += 2) {
-            ctx.lineTo(curvePoints.get(i) * scaleX, height - curvePoints.get(i + 1) * scaleY);
+        for(Point p : interpolatedPoints) {
+            ctx.lineTo(p.getX() * scaleX, height - p.getY() * scaleY);
         }
         ctx.stroke();
 
         if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
 
-    private void drawSmoothArea(final XYSeries<T> SERIES, final double TENSION, final int SUB_DEVISIONS, final boolean SHOW_POINTS) {
+    private void drawSmoothArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         double oldX = 0;
-        List<Double> pointList = new ArrayList<>(SERIES.getItems().size() * 2);
-        SERIES.getItems().forEach(item -> {
-            pointList.add(item.getX());
-            pointList.add(item.getY());
-        });
-        Double[] points = new Double[pointList.size()];
-        points = pointList.toArray(points);
 
-        List<Double> curvePoints = getCurvePoints(points, TENSION, SUB_DEVISIONS);
+        List<Point> points = new ArrayList<>(SERIES.getItems().size());
+        SERIES.getItems().forEach(item -> points.add(new Point(item.getX(), item.getY())));
+
+        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
 
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
-        //ctx.moveTo(POINTS.get(0), POINTS.get(1));
-        for(int i = 2 ; i < curvePoints.size() - 1 ; i += 2) {
-            ctx.lineTo(curvePoints.get(i) * scaleX, height - curvePoints.get(i + 1) * scaleY);
-            oldX = curvePoints.get(i) * scaleX;
+        for(Point p : interpolatedPoints) {
+            ctx.lineTo(p.getX() * scaleX, height - p.getY() * scaleY);
+            oldX = p.getX() * scaleX;
         }
+
         ctx.lineTo(oldX, height);
         ctx.lineTo(0, height);
         ctx.closePath();
@@ -298,71 +289,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.stroke();
 
         if (SHOW_POINTS) { drawSymbols(SERIES); }
-    }
-
-    private List<Double> getCurvePoints(final Double[] POINTS, final double TENSION, final int NUMBER_OF_SEGMENTS) {
-        List<Double> _pts = new ArrayList<>();
-        List<Double> res  = new ArrayList<>();
-
-        // clone array so we don't change the original
-        for (double p : POINTS) { _pts.add(p); }
-
-        // The algorithm require a previous and next point to the actual point array.
-        // Check if we will draw closed or open curve.
-        // If closed, copy end points to beginning and first points to end
-        // If open, duplicate first points to beginning, end points to end
-        /*
-        if (IS_CLOSED) {
-            _pts.add(0, POINTS[POINTS.length - 1]);
-            _pts.add(0, POINTS[POINTS.length - 2]);
-            _pts.add(0, POINTS[POINTS.length - 1]);
-            _pts.add(0, POINTS[POINTS.length - 2]);
-            _pts.add(POINTS[0]);
-            _pts.add(POINTS[1]);
-        } else {
-            _pts.add(0, POINTS[1]);	        //copy 1. point and insert at beginning
-            _pts.add(0, POINTS[0]);
-            _pts.add(POINTS[POINTS.length - 2]);	//copy last point and append
-            _pts.add(POINTS[POINTS.length - 1]);
-        }
-        */
-        if (POINTS.length > 0) {
-            _pts.add(0, POINTS[1]);            //copy 1. point and insert at beginning
-            _pts.add(0, POINTS[0]);
-            _pts.add(POINTS[POINTS.length - 2]);    //copy last point and append
-            _pts.add(POINTS[POINTS.length - 1]);
-        }
-        // 1. loop goes through point array
-        // 2. loop goes through each segment between the 2 POINTS + 1e point before and after
-        for (int i = 2 ; i < (_pts.size() - 4) ; i += 2) {
-            for (double t = 0 ; t <= NUMBER_OF_SEGMENTS ; t++) {
-
-                // calc TENSION vectors
-                double t1x = (_pts.get(i + 2) - _pts.get(i - 2)) * TENSION;
-                double t2x = (_pts.get(i + 4) - _pts.get(i)) * TENSION;
-
-                double t1y = (_pts.get(i + 3) - _pts.get(i - 1)) * TENSION;
-                double t2y = (_pts.get(i + 5) - _pts.get(i + 1)) * TENSION;
-
-                // calc step
-                double st = t / NUMBER_OF_SEGMENTS;
-
-                // calc cardinals
-                double c1 =   2 * Math.pow(st, 3) 	- 3 * Math.pow(st, 2) + 1;
-                double c2 = -(2 * Math.pow(st, 3)) + 3 * Math.pow(st, 2);
-                double c3 = 	   Math.pow(st, 3)	- 2 * Math.pow(st, 2) + st;
-                double c4 = 	   Math.pow(st, 3)	- 	  Math.pow(st, 2);
-
-                // calc x and y cords with common control vectors
-                double x = c1 * _pts.get(i)     + c2 * _pts.get(i + 2) + c3 * t1x + c4 * t2x;
-                double y = c1 * _pts.get(i + 1) + c2 * _pts.get(i + 3) + c3 * t1y + c4 * t2y;
-
-                //store points in array
-                res.add(x);
-                res.add(y);
-            }
-        }
-        return res;
     }
 
     private void drawSymbols(final XYSeries<T> SERIES) {
