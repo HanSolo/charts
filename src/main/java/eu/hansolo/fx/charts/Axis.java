@@ -15,7 +15,6 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
@@ -74,8 +73,12 @@ public class Axis extends Region {
     private              ObjectProperty<Color>                axisColor;
     private              Color                                _tickLabelColor;
     private              ObjectProperty<Color>                tickLabelColor;
-    private              Color                                _tickMarkColor;
-    private              ObjectProperty<Color>                tickMarkColor;
+    private              Color                                _minorTickMarkColor;
+    private              ObjectProperty<Color>                minorTickMarkColor;
+    private              Color                                _mediumTickMarkColor;
+    private              ObjectProperty<Color>                mediumTickMarkColor;
+    private              Color                                _majorTickMarkColor;
+    private              ObjectProperty<Color>                majorTickMarkColor;
     private              Color                                _zeroColor;
     private              ObjectProperty<Color>                zeroColor;
     private              double                               _zeroPosition;
@@ -124,7 +127,9 @@ public class Axis extends Region {
         _axisBackgroundColor              = Color.WHITE;
         _axisColor                        = Color.BLACK;
         _tickLabelColor                   = Color.BLACK;
-        _tickMarkColor                    = Color.BLACK;
+        _minorTickMarkColor               = Color.BLACK;
+        _mediumTickMarkColor              = Color.BLACK;
+        _majorTickMarkColor               = Color.BLACK;
         _zeroColor                        = Color.BLACK;
         _zeroPosition                     = 0;
         _minorTickSpace                   = 1;
@@ -416,25 +421,67 @@ public class Axis extends Region {
         return tickLabelColor;
     }
 
-    public Color getTickMarkColor() { return null == tickMarkColor ? _tickMarkColor : tickMarkColor.get(); }
-    public void setTickMarkColor(final Color COLOR) {
-        if (null == tickMarkColor) {
-            _tickMarkColor = COLOR;
+    public Color getMinorTickMarkColor() { return null == minorTickMarkColor ? _minorTickMarkColor : minorTickMarkColor.get(); }
+    public void setMinorTickMarkColor(final Color COLOR) {
+        if (null == minorTickMarkColor) {
+            _minorTickMarkColor = COLOR;
             redraw();
         } else {
-            tickMarkColor.set(COLOR);
+            minorTickMarkColor.set(COLOR);
         }
     }
-    public ObjectProperty<Color> tickMarkColorProperty() {
-        if (null == tickMarkColor) {
-            tickMarkColor = new ObjectPropertyBase<Color>(_tickMarkColor) {
+    public ObjectProperty<Color> minorTickMarkColorProperty() {
+        if (null == minorTickMarkColor) {
+            minorTickMarkColor = new ObjectPropertyBase<Color>(_minorTickMarkColor) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return Axis.this; }
-                @Override public String getName() { return "tickMarkColor"; }
+                @Override public String getName() { return "minorTickMarkColor"; }
             };
-            _tickMarkColor = null;
+            _minorTickMarkColor = null;
         }
-        return tickMarkColor;
+        return minorTickMarkColor;
+    }
+
+    public Color getMediumTickMarkColor() { return null == mediumTickMarkColor ? _mediumTickMarkColor : mediumTickMarkColor.get(); }
+    public void setMediumTickMarkColor(final Color COLOR) {
+        if (null == mediumTickMarkColor) {
+            _mediumTickMarkColor = COLOR;
+            redraw();
+        } else {
+            mediumTickMarkColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> mediumTickMarkColorProperty() {
+        if (null == mediumTickMarkColor) {
+            mediumTickMarkColor = new ObjectPropertyBase<Color>(_mediumTickMarkColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return Axis.this; }
+                @Override public String getName() { return "mediumTickMarkColor"; }
+            };
+            _mediumTickMarkColor = null;
+        }
+        return mediumTickMarkColor;
+    }
+
+    public Color getMajorTickMarkColor() { return null == majorTickMarkColor ? _majorTickMarkColor : majorTickMarkColor.get(); }
+    public void setMajorTickMarkColor(final Color COLOR) {
+        if (null == majorTickMarkColor) {
+            _majorTickMarkColor = COLOR;
+            redraw();
+        } else {
+            majorTickMarkColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> majorTickMarkColorProperty() {
+        if (null == majorTickMarkColor) {
+            majorTickMarkColor = new ObjectPropertyBase<Color>(_majorTickMarkColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return Axis.this; }
+                @Override public String getName() { return "majorTickMarkColor"; }
+            };
+            _majorTickMarkColor = null;
+        }
+        return majorTickMarkColor;
     }
 
     public Color getZeroColor() { return null == zeroColor ? _zeroColor : zeroColor.get(); }
@@ -483,7 +530,7 @@ public class Axis extends Region {
     protected void setMinorTickSpace(final double SPACE) { _minorTickSpace = SPACE; }
 
     public boolean getMajorTickMarksVisible() { return null == majorTickMarksVisible ? _majorTickMarksVisible : majorTickMarksVisible.get(); }
-    public void set_majorTickMarksVisible(final boolean VISIBLE) {
+    public void setMajorTickMarksVisible(final boolean VISIBLE) {
         if (null == majorTickMarksVisible) {
             _majorTickMarksVisible = VISIBLE;
             redraw();
@@ -503,7 +550,7 @@ public class Axis extends Region {
     }
 
     public boolean getMediumTickMarksVisible() { return null == mediumTickMarksVisible ? _mediumTickMarksVisible : mediumTickMarksVisible.get(); }
-    public void set_mediumTickMarksVisible(final boolean VISIBLE) {
+    public void setMediumTickMarksVisible(final boolean VISIBLE) {
         if (null == mediumTickMarksVisible) {
             _mediumTickMarksVisible = VISIBLE;
             redraw();
@@ -523,7 +570,7 @@ public class Axis extends Region {
     }
 
     public boolean getMinorTickMarksVisible() { return null == minorTickMarksVisible ? _minorTickMarksVisible : minorTickMarksVisible.get(); }
-    public void set_minorTickMarksVisible(final boolean VISIBLE) {
+    public void setMinorTickMarksVisible(final boolean VISIBLE) {
         if (null == minorTickMarksVisible) {
             _minorTickMarksVisible = VISIBLE;
             redraw();
@@ -543,7 +590,7 @@ public class Axis extends Region {
     }
 
     public boolean getTickLabelsVisible() { return null == tickLabelsVisible ? _tickLabelsVisible : tickLabelsVisible.get(); }
-    public void set_tickLabelsVisible(final boolean VISIBLE) {
+    public void setTickLabelsVisible(final boolean VISIBLE) {
         if (null == tickLabelsVisible) {
             _tickLabelsVisible = VISIBLE;
             redraw();
@@ -697,7 +744,9 @@ public class Axis extends Region {
         boolean     isOnlyFirstAndLastTickLabelVisible = isOnlyFirstAndLastTickLabelVisible();
         Color       tickLabelColor                     = getTickLabelColor();
         Color       zeroColor                          = getZeroColor();
-        Color       tickMarkColor                      = getTickMarkColor();
+        Color       minorTickMarkColor                 = getMinorTickMarkColor();
+        Color       mediumTickMarkColor                = getMediumTickMarkColor();
+        Color       majorTickMarkColor                 = getMajorTickMarkColor();
         boolean     majorTickMarksVisible              = getMajorTickMarksVisible();
         boolean     mediumTickMarksVisible             = getMediumTickMarksVisible();
         boolean     minorTickMarksVisible              = getMinorTickMarksVisible();
@@ -753,7 +802,6 @@ public class Axis extends Region {
         double     tmpStep   = tmpStepBD.doubleValue();
         for (double i = 0 ; Double.compare(-range - tmpStep, i) <= 0 ; i -= tmpStep) {
             double fixedPosition = (counter - minValue) * stepSize;
-            axisCtx.setStroke(tickMarkColor);
             if (Orientation.VERTICAL == orientation) {
                 if (Position.LEFT == position) {
                     innerPointX  = anchorXPlusOffset - 0.5 * width;
@@ -821,9 +869,11 @@ public class Axis extends Region {
                     axisCtx.setStroke(zeroColor);
                 }
                 if (majorTickMarksVisible) {
+                    axisCtx.setStroke(majorTickMarkColor);
                     axisCtx.setLineWidth(majorLineWidth);
                     axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
                 } else if (minorTickMarksVisible) {
+                    axisCtx.setStroke(minorTickMarkColor);
                     axisCtx.setLineWidth(minorLineWidth);
                     axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
                 }
@@ -872,10 +922,12 @@ public class Axis extends Region {
                        Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                        Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                 // Draw medium tick mark
+                axisCtx.setStroke(mediumTickMarkColor);
                 axisCtx.setLineWidth(mediumLineWidth);
                 axisCtx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
             } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw minor tick mark
+                axisCtx.setStroke(minorTickMarkColor);
                 axisCtx.setLineWidth(minorLineWidth);
                 axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
             }

@@ -46,7 +46,7 @@ public class Grid extends Region {
     public Grid(final Axis X_AXIS, final Axis Y_AXIS) {
         xAxis        = X_AXIS;
         yAxis        = Y_AXIS;
-        _gridOpacity = 0.3;
+        _gridOpacity = 0.25;
         initGraphics();
         registerListeners();
     }
@@ -111,11 +111,18 @@ public class Grid extends Region {
 
     private void drawGrid() {
         ctx.clearRect(0, 0, width, height);
-        ctx.setStroke(Color.rgb(128, 128, 128, getGridOpacity()));
 
         double majorLineWidth  = 25 * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : 25 * 0.007;
         double mediumLineWidth = 25 * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : 25 * 0.005;
         double minorLineWidth  = 25 * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : 25 * 0.003;
+
+        Color minorHGridColor  = Helper.getColorWithOpacity(yAxis.getMinorTickMarkColor(), getGridOpacity());
+        Color mediumHGridColor = Helper.getColorWithOpacity(yAxis.getMediumTickMarkColor(), getGridOpacity());
+        Color majorHGridColor  = Helper.getColorWithOpacity(yAxis.getMajorTickMarkColor(), getGridOpacity());
+
+        Color minorVGridColor  = Helper.getColorWithOpacity(xAxis.getMinorTickMarkColor(), getGridOpacity());
+        Color mediumVGridColor = Helper.getColorWithOpacity(xAxis.getMediumTickMarkColor(), getGridOpacity());
+        Color majorVGridColor  = Helper.getColorWithOpacity(xAxis.getMajorTickMarkColor(), getGridOpacity());
 
         double minX            = xAxis.getMinValue();
         double maxX            = xAxis.getMaxValue();
@@ -159,9 +166,11 @@ public class Grid extends Region {
                 if (isZero) {  }
 
                 if (xAxis.getMajorTickMarksVisible()) {
+                    ctx.setStroke(majorVGridColor);
                     ctx.setLineWidth(majorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 } else if (xAxis.getMinorTickMarksVisible()) {
+                    ctx.setStroke(minorVGridColor);
                     ctx.setLineWidth(minorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 }
@@ -169,10 +178,12 @@ public class Grid extends Region {
                        Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                        Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                 // Draw medium tick grid line
+                ctx.setStroke(mediumVGridColor);
                 ctx.setLineWidth(mediumLineWidth);
                 ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
             } else if (xAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw minor tick grid line
+                ctx.setStroke(minorVGridColor);
                 ctx.setLineWidth(minorLineWidth);
                 ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
             }
@@ -206,9 +217,11 @@ public class Grid extends Region {
                 if (isZero) {  }
 
                 if (yAxis.getMajorTickMarksVisible()) {
+                    ctx.setStroke(majorHGridColor);
                     ctx.setLineWidth(majorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 } else if (yAxis.getMinorTickMarksVisible()) {
+                    ctx.setStroke(minorHGridColor);
                     ctx.setLineWidth(minorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 }
@@ -216,10 +229,12 @@ public class Grid extends Region {
                        Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                        Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                 // Draw medium tick grid line
+                ctx.setStroke(mediumHGridColor);
                 ctx.setLineWidth(mediumLineWidth);
                 ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
             } else if (yAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                 // Draw minor tick grid line
+                ctx.setStroke(minorHGridColor);
                 ctx.setLineWidth(minorLineWidth);
                 ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
             }

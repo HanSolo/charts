@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -137,5 +138,13 @@ public class Helper {
     public static Point rotate(final Point P1, final Point ROTATION_CENTER, final double ANGLE) {
         double[] xy = rotate(P1.getX(), P1.getY(), ROTATION_CENTER.getX(), ROTATION_CENTER.getY(), ANGLE);
         return new Point(xy[0], xy[1]);
+    }
+
+    public static Color getColorWithOpacity(final Color COLOR, final double OPACITY) {
+        double red     = COLOR.getRed();
+        double green   = COLOR.getGreen();
+        double blue    = COLOR.getBlue();
+        double opacity = clamp(0, 1, OPACITY);
+        return Color.color(red, green, blue, opacity);
     }
 }

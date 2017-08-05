@@ -3,8 +3,8 @@ package eu.hansolo.fx.charts;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 
@@ -14,14 +14,22 @@ import javafx.scene.Scene;
  * Time: 17:33
  */
 public class GridTest extends Application {
-    private static final Double    AXIS_WIDTH      = 25d;
-    private Axis xAxis;
-    private Axis yAxis;
-    private Grid grid;
+    private static final Double AXIS_WIDTH = 25d;
+    private              Axis   xAxis;
+    private              Axis   yAxis;
+    private              Grid   grid;
+
 
     @Override public void init() {
         xAxis = createBottomXAxis(0, 50, true);
+        xAxis.setMinorTickMarksVisible(false);
+        xAxis.setMajorTickMarkColor(Color.RED);
+
         yAxis = createLeftYAxis(0, 20, true);
+        yAxis.setMinorTickMarksVisible(false);
+        yAxis.setMediumTickMarkColor(Color.MAGENTA);
+
+
         grid  = new Grid(xAxis, yAxis);
     }
 
