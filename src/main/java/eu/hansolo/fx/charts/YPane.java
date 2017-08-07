@@ -266,15 +266,15 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 points.add(new Point(x, y));
 
                 for (YData item : SERIES.getItems()) {
-                    double r1 = ((item.getY() - MIN_VALUE) / DATA_RANGE);
-                    x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - r1 * RANGE)));
-                    y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - r1 * RANGE)));
+                    double r = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - MIN_VALUE) / DATA_RANGE) * RANGE));
+                    x = CENTER_X + (-Math.sin(radAngle) * r);
+                    y = CENTER_Y + (+Math.cos(radAngle) * r);
                     points.add(new Point(x, y));
                     radAngle += radAngleStep;
                 }
-
-                x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE)));
-                y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE)));
+                double r = (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE));
+                x = CENTER_X + (-Math.sin(radAngle) * r);
+                y = CENTER_Y + (+Math.cos(radAngle) * r);
                 points.add(new Point(x, y));
 
                 Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
