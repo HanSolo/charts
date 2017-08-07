@@ -30,7 +30,7 @@ public class RadarChartTest extends Application {
     private static final Random               RND        = new Random();
     private static final long                 INTERVAL   = 3_000_000_000l;
     private static final double               ANIM_TIME  = INTERVAL / 1_000_000;
-    private static final int                  ELEMENTS   = 24;
+    private static final int                  ELEMENTS   = 30;
     private static final ChartType            CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
     private              YSeries<YDataObject> series1;
     private              YSeries<YDataObject> series2;
