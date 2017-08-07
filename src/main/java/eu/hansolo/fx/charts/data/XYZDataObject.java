@@ -62,7 +62,7 @@ public class XYZDataObject implements XYZData {
             x.set(X);
         }
     }
-    public DoubleProperty xProperty() {
+    @Override public DoubleProperty xProperty() {
         if (null == x) {
             x = new DoublePropertyBase(_x) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
@@ -82,7 +82,7 @@ public class XYZDataObject implements XYZData {
             y.set(Y);
         }
     }
-    public DoubleProperty yProperty() {
+    @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
@@ -102,7 +102,7 @@ public class XYZDataObject implements XYZData {
             z.set(Z);
         }
     }
-    public DoubleProperty zProperty() {
+    @Override public DoubleProperty zProperty() {
         if (null == z) {
             z = new DoublePropertyBase(_z) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }

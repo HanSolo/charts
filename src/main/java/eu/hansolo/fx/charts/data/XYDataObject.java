@@ -63,7 +63,7 @@ public class XYDataObject implements XYData {
             x.set(X);
         }
     }
-    public DoubleProperty xProperty() {
+    @Override public DoubleProperty xProperty() {
         if (null == x) {
             x = new DoublePropertyBase(_x) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
@@ -83,7 +83,7 @@ public class XYDataObject implements XYData {
             y.set(Y);
         }
     }
-    public DoubleProperty yProperty() {
+    @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }

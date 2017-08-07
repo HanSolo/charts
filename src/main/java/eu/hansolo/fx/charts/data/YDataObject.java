@@ -56,7 +56,7 @@ public class YDataObject implements YData {
             y.set(Y);
         }
     }
-    public DoubleProperty yProperty() {
+    @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
