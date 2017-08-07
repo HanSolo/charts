@@ -30,7 +30,7 @@ public class RadarChartTest extends Application {
     private static final Random               RND        = new Random();
     private static final long                 INTERVAL   = 3_000_000_000l;
     private static final double               ANIM_TIME  = INTERVAL / 1_000_000;
-    private static final int                  ELEMENTS   = 100;
+    private static final int                  ELEMENTS   = 24;
     private static final ChartType            CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
     private              YSeries<YDataObject> series1;
     private              YSeries<YDataObject> series2;
@@ -45,12 +45,12 @@ public class RadarChartTest extends Application {
         List<YDataObject> data2 = new ArrayList<>(ELEMENTS);
         List<YDataObject> data3 = new ArrayList<>(ELEMENTS);
         for (int i = 0 ; i < ELEMENTS ; i++) {
-            YDataObject dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
-            dataPoint.yProperty().addListener(o -> chart.refresh());
+            YDataObject dataPoint;
+
+            dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
             data1.add(dataPoint);
 
             dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
-            dataPoint.yProperty().addListener(o -> chart.refresh());
             data2.add(dataPoint);
 
             dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
@@ -76,6 +76,12 @@ public class RadarChartTest extends Application {
                 }
             }
         };
+
+        registerListener();
+    }
+
+    private void registerListener() {
+        timeline.currentTimeProperty().addListener(o -> chart.refresh());
     }
 
     @Override public void start(Stage stage) {
