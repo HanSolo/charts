@@ -26,6 +26,8 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -106,9 +108,18 @@ public class Axis extends Region {
 
     // ******************** Constructors **************************************
     public Axis() {
-        this(Orientation.VERTICAL, Position.LEFT);
+        this(Orientation.VERTICAL, AxisType.LINEAR, Position.LEFT);
     }
     public Axis(final Orientation ORIENTATION, final Position POSITION) {
+        this(0, 100, ORIENTATION, AxisType.LINEAR, POSITION);
+    }
+    public Axis(final Orientation ORIENTATION, final AxisType TYPE, final Position POSITION) {
+        this(0, 100, ORIENTATION, TYPE, POSITION);
+    }
+    public Axis(final double MIN_VALUE, final double MAX_VALUE, final Orientation ORIENTATION, final Position POSITION) {
+        this(MIN_VALUE, MAX_VALUE, ORIENTATION, AxisType.LINEAR, POSITION);
+    }
+    public Axis(final double MIN_VALUE, final double MAX_VALUE, final Orientation ORIENTATION, final AxisType TYPE, final Position POSITION) {
         if (Orientation.VERTICAL == ORIENTATION) {
             if (Position.LEFT != POSITION && Position.RIGHT != POSITION) {
                 throw new IllegalArgumentException("Wrong combination of orientation and position!");
@@ -116,12 +127,12 @@ public class Axis extends Region {
         }
 
         getStylesheets().add(Axis.class.getResource("chart.css").toExternalForm());
-        _minValue                         = 0;
-        _maxValue                         = 100;
+        _minValue                         = MIN_VALUE;
+        _maxValue                         = MAX_VALUE;
+        _type                             = TYPE;
         _autoScale                        = true;
         _title                            = "";
         _unit                             = "";
-        _type                             = AxisType.LINEAR;
         _orientation                      = ORIENTATION;
         _position                         = POSITION;
         _axisBackgroundColor              = Color.WHITE;
@@ -295,7 +306,7 @@ public class Axis extends Region {
         return unit;
     }
 
-    public AxisType getType() { return type.get(); }
+    public AxisType getType() { return null == type ? _type : type.get(); }
     public void setType(final AxisType TYPE) {
         if (null == type) {
             _type = TYPE;
@@ -721,23 +732,6 @@ public class Axis extends Region {
         axisCtx.setFont(Fonts.latoLight(0.3 * size));
         axisCtx.setTextBaseline(VPos.CENTER);
 
-        double minPosition;
-        double maxPosition;
-        if (Orientation.VERTICAL == getOrientation()) {
-            minPosition = 0;
-            maxPosition = height;
-        } else {
-            minPosition = 0;
-            maxPosition = width;
-        }
-
-        Locale      locale                             = getLocale();
-        Orientation orientation                        = getOrientation();
-        Position    position                           = getPosition();
-        double      anchorX                            = 0;
-        double      anchorXPlusOffset                  = anchorX + width;
-        double      anchorY                            = 0;
-        double      anchorYPlusOffset                  = anchorY + height;
         double      minValue                           = getMinValue();
         double      maxValue                           = getMaxValue();
         boolean     tickLabelsVisible                  = getTickLabelsVisible();
@@ -750,20 +744,26 @@ public class Axis extends Region {
         boolean     majorTickMarksVisible              = getMajorTickMarksVisible();
         boolean     mediumTickMarksVisible             = getMediumTickMarksVisible();
         boolean     minorTickMarksVisible              = getMinorTickMarksVisible();
-        boolean     fullRange                          = (minValue < 0 && minValue > 0);
-        double      minorTickSpace                     = getMinorTickSpace();
-        double      majorTickSpace                     = getMajorTickSpace();
-        double      tmpStepSize                        = minorTickSpace;
-        BigDecimal  minorTickSpaceBD                   = BigDecimal.valueOf(minorTickSpace);
-        BigDecimal  majorTickSpaceBD                   = BigDecimal.valueOf(majorTickSpace);
-        BigDecimal  mediumCheck2                       = BigDecimal.valueOf(2 * minorTickSpace);
-        BigDecimal  mediumCheck5                       = BigDecimal.valueOf(5 * minorTickSpace);
-        BigDecimal  counterBD                          = BigDecimal.valueOf(minValue);
-        double      counter                            = minValue;
-        double      range                              = getRange();
         double      majorLineWidth                     = size * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : size * 0.007;
         double      mediumLineWidth                    = size * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : size * 0.005;
         double      minorLineWidth                     = size * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : size * 0.003;
+        double      minPosition;
+        double      maxPosition;
+        if (Orientation.VERTICAL == getOrientation()) {
+            minPosition = 0;
+            maxPosition = height;
+        } else {
+            minPosition = 0;
+            maxPosition = width;
+        }
+
+        Locale      locale            = getLocale();
+        Orientation orientation       = getOrientation();
+        Position    position          = getPosition();
+        double      anchorX           = 0;
+        double      anchorXPlusOffset = anchorX + width;
+        double      anchorY           = 0;
+        double      anchorYPlusOffset = anchorY + height;
         boolean     isMinValue;
         boolean     isZero;
         boolean     isMaxValue;
@@ -779,162 +779,300 @@ public class Axis extends Region {
         double      textPointY;
         double      maxTextWidth;
 
-        axisCtx.setLineWidth(majorLineWidth);
+        if (AxisType.LINEAR == getType()) {
+            // ******************** Linear ************************************
+            boolean    fullRange        = (minValue < 0 && minValue > 0);
+            double     minorTickSpace   = getMinorTickSpace();
+            double     majorTickSpace   = getMajorTickSpace();
+            double     tmpStepSize      = minorTickSpace;
+            BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpace);
+            BigDecimal majorTickSpaceBD = BigDecimal.valueOf(majorTickSpace);
+            BigDecimal mediumCheck2     = BigDecimal.valueOf(2 * minorTickSpace);
+            BigDecimal mediumCheck5     = BigDecimal.valueOf(5 * minorTickSpace);
+            BigDecimal counterBD        = BigDecimal.valueOf(minValue);
+            double     counter          = minValue;
+            double     range            = getRange();
 
-        // Draw axis
-        if (Orientation.VERTICAL == orientation) {
-            if (Position.LEFT == position) {
-                axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
-            } else if (Position.RIGHT == position) {
-                axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
-            }
-        } else {
-            if (Position.BOTTOM == position) {
-                axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
-            } else if (Position.TOP == position){
-                axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
-            }
-        }
+            axisCtx.setLineWidth(majorLineWidth);
 
-        // Main Loop for tick marks and labels
-        BigDecimal tmpStepBD = new BigDecimal(tmpStepSize);
-        tmpStepBD            = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
-        double     tmpStep   = tmpStepBD.doubleValue();
-        for (double i = 0 ; Double.compare(-range - tmpStep, i) <= 0 ; i -= tmpStep) {
-            double fixedPosition = (counter - minValue) * stepSize;
+            // Draw axis
             if (Orientation.VERTICAL == orientation) {
                 if (Position.LEFT == position) {
-                    innerPointX  = anchorXPlusOffset - 0.5 * width;
-                    innerPointY  = fixedPosition;
-                    mediumPointX = anchorXPlusOffset - 0.4 * width;
-                    mediumPointY = fixedPosition;
-                    minorPointX  = anchorXPlusOffset - 0.3 * width;
-                    minorPointY  = fixedPosition;
-                    outerPointX  = anchorXPlusOffset;
-                    outerPointY  = fixedPosition;
-                    textPointX   = anchorXPlusOffset - 0.6 * width;
-                    textPointY   = fixedPosition;
-                    maxTextWidth = 0.6 * width;
-                } else {
-                    innerPointX  = anchorX + 0.5 * width;
-                    innerPointY  = fixedPosition;
-                    mediumPointX = anchorX + 0.4 * width;
-                    mediumPointY = fixedPosition;
-                    minorPointX  = anchorX + 0.3 * width;
-                    minorPointY  = fixedPosition;
-                    outerPointX  = anchorX;
-                    outerPointY  = fixedPosition;
-                    textPointX   = anchorXPlusOffset;
-                    textPointY   = fixedPosition;
-                    maxTextWidth = width;
+                    axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
+                } else if (Position.RIGHT == position) {
+                    axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
                 }
             } else {
                 if (Position.BOTTOM == position) {
-                    innerPointX  = fixedPosition;
-                    innerPointY  = anchorY + 0.5 * height;
-                    mediumPointX = fixedPosition;
-                    mediumPointY = anchorY + 0.4 * height;
-                    minorPointX  = fixedPosition;
-                    minorPointY  = anchorY + 0.3 * height;
-                    outerPointX  = fixedPosition;
-                    outerPointY  = anchorY;
-                    textPointX   = fixedPosition;
-                    textPointY   = anchorY + 0.8 * height;
-                    maxTextWidth = majorTickSpace * stepSize;
-                } else {
-                    innerPointX  = fixedPosition;
-                    innerPointY  = anchorYPlusOffset - 0.5 * height;
-                    mediumPointX = fixedPosition;
-                    mediumPointY = anchorYPlusOffset - 0.4 * height;
-                    minorPointX  = fixedPosition;
-                    minorPointY  = anchorYPlusOffset - 0.3 * height;
-                    outerPointX  = fixedPosition;
-                    outerPointY  = anchorYPlusOffset;
-                    textPointX   = fixedPosition;
-                    textPointY   = anchorY + 0.2 * height;
-                    maxTextWidth = majorTickSpace * stepSize;
+                    axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
+                } else if (Position.TOP == position) {
+                    axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
                 }
             }
 
-            if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw major tick mark
-                isMinValue = Double.compare(minValue, counter) == 0;
-                isZero     = Double.compare(0.0, counter) == 0;
-                isMaxValue = Double.compare(maxValue, counter) == 0;
-
-                if (isZero) { setZeroPosition(fixedPosition); }
-
-                if (fullRange && isZero) {
-                    axisCtx.setFill(zeroColor);
-                    axisCtx.setStroke(zeroColor);
-                }
-                if (majorTickMarksVisible) {
-                    axisCtx.setStroke(majorTickMarkColor);
-                    axisCtx.setLineWidth(majorLineWidth);
-                    axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
-                } else if (minorTickMarksVisible) {
-                    axisCtx.setStroke(minorTickMarkColor);
-                    axisCtx.setLineWidth(minorLineWidth);
-                    axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
-                }
-
-                // Draw tick labels
-                if (tickLabelsVisible) {
-                    if (!isOnlyFirstAndLastTickLabelVisible) {
-                        if (isZero) {
-                            axisCtx.setFill(fullRange ? zeroColor : tickLabelColor);
-                        } else {
-                            axisCtx.setFill(tickLabelColor);
-                        }
+            // Main Loop for tick marks and labels
+            BigDecimal tmpStepBD = new BigDecimal(tmpStepSize);
+            tmpStepBD = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+            double tmpStep = tmpStepBD.doubleValue();
+            for (double i = 0; Double.compare(-range - tmpStep, i) <= 0; i -= tmpStep) {
+                double fixedPosition = (counter - minValue) * stepSize;
+                if (Orientation.VERTICAL == orientation) {
+                    if (Position.LEFT == position) {
+                        innerPointX  = anchorXPlusOffset - 0.5 * width;
+                        innerPointY  = fixedPosition;
+                        mediumPointX = anchorXPlusOffset - 0.4 * width;
+                        mediumPointY = fixedPosition;
+                        minorPointX  = anchorXPlusOffset - 0.3 * width;
+                        minorPointY  = fixedPosition;
+                        outerPointX  = anchorXPlusOffset;
+                        outerPointY  = fixedPosition;
+                        textPointX   = anchorXPlusOffset - 0.6 * width;
+                        textPointY   = fixedPosition;
+                        maxTextWidth = 0.6 * width;
                     } else {
-                        if (isMinValue || isMaxValue) {
+                        innerPointX  = anchorX + 0.5 * width;
+                        innerPointY  = fixedPosition;
+                        mediumPointX = anchorX + 0.4 * width;
+                        mediumPointY = fixedPosition;
+                        minorPointX  = anchorX + 0.3 * width;
+                        minorPointY  = fixedPosition;
+                        outerPointX  = anchorX;
+                        outerPointY  = fixedPosition;
+                        textPointX   = anchorXPlusOffset;
+                        textPointY   = fixedPosition;
+                        maxTextWidth = width;
+                    }
+                } else {
+                    if (Position.BOTTOM == position) {
+                        innerPointX  = fixedPosition;
+                        innerPointY  = anchorY + 0.5 * height;
+                        mediumPointX = fixedPosition;
+                        mediumPointY = anchorY + 0.4 * height;
+                        minorPointX  = fixedPosition;
+                        minorPointY  = anchorY + 0.3 * height;
+                        outerPointX  = fixedPosition;
+                        outerPointY  = anchorY;
+                        textPointX   = fixedPosition;
+                        textPointY   = anchorY + 0.8 * height;
+                        maxTextWidth = majorTickSpace * stepSize;
+                    } else {
+                        innerPointX  = fixedPosition;
+                        innerPointY  = anchorYPlusOffset - 0.5 * height;
+                        mediumPointX = fixedPosition;
+                        mediumPointY = anchorYPlusOffset - 0.4 * height;
+                        minorPointX  = fixedPosition;
+                        minorPointY  = anchorYPlusOffset - 0.3 * height;
+                        outerPointX  = fixedPosition;
+                        outerPointY  = anchorYPlusOffset;
+                        textPointX   = fixedPosition;
+                        textPointY   = anchorY + 0.2 * height;
+                        maxTextWidth = majorTickSpace * stepSize;
+                    }
+                }
+
+                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw major tick mark
+                    isMinValue = Double.compare(minValue, counter) == 0;
+                    isZero     = Double.compare(0.0, counter) == 0;
+                    isMaxValue = Double.compare(maxValue, counter) == 0;
+
+                    if (isZero) { setZeroPosition(fixedPosition); }
+
+                    if (fullRange && isZero) {
+                        axisCtx.setFill(zeroColor);
+                        axisCtx.setStroke(zeroColor);
+                    }
+                    if (majorTickMarksVisible) {
+                        axisCtx.setStroke(majorTickMarkColor);
+                        axisCtx.setLineWidth(majorLineWidth);
+                        axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
+                    } else if (minorTickMarksVisible) {
+                        axisCtx.setStroke(minorTickMarkColor);
+                        axisCtx.setLineWidth(minorLineWidth);
+                        axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+                    }
+
+                    // Draw tick labels
+                    if (tickLabelsVisible) {
+                        if (!isOnlyFirstAndLastTickLabelVisible) {
                             if (isZero) {
                                 axisCtx.setFill(fullRange ? zeroColor : tickLabelColor);
                             } else {
                                 axisCtx.setFill(tickLabelColor);
                             }
                         } else {
-                            axisCtx.setFill(Color.TRANSPARENT);
+                            if (isMinValue || isMaxValue) {
+                                if (isZero) {
+                                    axisCtx.setFill(fullRange ? zeroColor : tickLabelColor);
+                                } else {
+                                    axisCtx.setFill(tickLabelColor);
+                                }
+                            } else {
+                                axisCtx.setFill(Color.TRANSPARENT);
+                            }
                         }
-                    }
 
-                    if (Orientation.VERTICAL == orientation) {
-                        axisCtx.setTextAlign(TextAlignment.RIGHT);
-                        if (isMinValue) {
-                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY + size * 0.15, maxTextWidth);
-                        } else if (isMaxValue) {
-                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY - size * 0.15, maxTextWidth);
-                        } else {
-                            axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY, maxTextWidth);
-                        }
-                    } else {
-                        if (isMinValue) {
-                            axisCtx.setTextAlign(TextAlignment.LEFT);
-                        } else if (isMaxValue) {
+                        if (Orientation.VERTICAL == orientation) {
                             axisCtx.setTextAlign(TextAlignment.RIGHT);
+                            if (isMinValue) {
+                                axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY + size * 0.15, maxTextWidth);
+                            } else if (isMaxValue) {
+                                axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY - size * 0.15, maxTextWidth);
+                            } else {
+                                axisCtx.fillText(String.format(locale, tickLabelFormatString, maxValue - counter + minValue), textPointX, textPointY, maxTextWidth);
+                            }
                         } else {
-                            axisCtx.setTextAlign(TextAlignment.CENTER);
+                            if (isMinValue) {
+                                axisCtx.setTextAlign(TextAlignment.LEFT);
+                            } else if (isMaxValue) {
+                                axisCtx.setTextAlign(TextAlignment.RIGHT);
+                            } else {
+                                axisCtx.setTextAlign(TextAlignment.CENTER);
+                            }
+                            axisCtx.fillText(String.format(locale, tickLabelFormatString, (minValue - i)), textPointX, textPointY, maxTextWidth);
                         }
-                        axisCtx.fillText(String.format(locale, tickLabelFormatString, (minValue - i)), textPointX, textPointY, maxTextWidth);
                     }
+                } else if (mediumTickMarksVisible && Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                    // Draw medium tick mark
+                    axisCtx.setStroke(mediumTickMarkColor);
+                    axisCtx.setLineWidth(mediumLineWidth);
+                    axisCtx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
+                } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw minor tick mark
+                    axisCtx.setStroke(minorTickMarkColor);
+                    axisCtx.setLineWidth(minorLineWidth);
+                    axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
                 }
-            } else if (mediumTickMarksVisible &&
-                       Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                       Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
-                // Draw medium tick mark
-                axisCtx.setStroke(mediumTickMarkColor);
-                axisCtx.setLineWidth(mediumLineWidth);
-                axisCtx.strokeLine(mediumPointX, mediumPointY, outerPointX, outerPointY);
-            } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw minor tick mark
-                axisCtx.setStroke(minorTickMarkColor);
-                axisCtx.setLineWidth(minorLineWidth);
-                axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+
+                counterBD = counterBD.add(minorTickSpaceBD);
+                counter = counterBD.doubleValue();
+                if (counter > maxValue) break;
+            }
+        } else {
+            // ******************** Logarithmic *******************************
+            tickLabelFormatString = "%6.0e";
+            double logLowerBound = Math.log10(getMinValue());
+            double logUpperBound = Math.log10(getMaxValue());
+            double section;
+
+            // Draw axis
+            if (Orientation.VERTICAL == orientation) {
+                section = height / logUpperBound;
+                if (Position.LEFT == position) {
+                    axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
+                } else if (Position.RIGHT == position) {
+                    axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
+                }
+            } else {
+                section = width / logUpperBound;
+                if (Position.BOTTOM == position) {
+                    axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
+                } else if (Position.TOP == position) {
+                    axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
+                }
             }
 
-            counterBD = counterBD.add(minorTickSpaceBD);
-            counter   = counterBD.doubleValue();
-            if (counter > maxValue) break;
+            for (double i = 0; i <= logUpperBound; i += 1) {
+                for (double j = 1; j <= 9; j++) {
+                    BigDecimal value = new BigDecimal(j * Math.pow(10, i));
+                    double stepSize = i > 0 ? (Math.log10(value.doubleValue()) % i) : Math.log10(value.doubleValue());
+                    double fixedPosition;
+                    if (Orientation.VERTICAL == orientation) {
+                        isMinValue    = Double.compare(i, logUpperBound) == 0;
+                        isMaxValue    = i == 0;
+                        fixedPosition = maxPosition - i * section - (stepSize * section);
+                        if (Position.LEFT == position) {
+                            innerPointX  = anchorXPlusOffset - 0.5 * width;
+                            innerPointY  = fixedPosition;
+                            minorPointX  = anchorXPlusOffset - 0.3 * width;
+                            minorPointY  = fixedPosition;
+                            outerPointX  = anchorXPlusOffset;
+                            outerPointY  = fixedPosition;
+                            textPointX   = anchorXPlusOffset - 0.6 * width;
+                            textPointY   = fixedPosition;
+                            maxTextWidth = 0.6 * width;
+                        } else {
+                            innerPointX  = anchorX + 0.5 * width;
+                            innerPointY  = fixedPosition;
+                            minorPointX  = anchorX + 0.3 * width;
+                            minorPointY  = fixedPosition;
+                            outerPointX  = anchorX;
+                            outerPointY  = fixedPosition;
+                            textPointX   = anchorXPlusOffset;
+                            textPointY   = fixedPosition;
+                            maxTextWidth = width;
+                        }
+                    } else {
+                        isMinValue    = i == 0;
+                        isMaxValue    = Double.compare(i, logUpperBound) == 0;
+                        fixedPosition = i * section + (stepSize * section);
+                        if (Position.BOTTOM == position) {
+                            innerPointX  = fixedPosition;
+                            innerPointY  = anchorY + 0.5 * height;
+                            minorPointX  = fixedPosition;
+                            minorPointY  = anchorY + 0.3 * height;
+                            outerPointX  = fixedPosition;
+                            outerPointY  = anchorY;
+                            textPointX   = fixedPosition;
+                            textPointY   = anchorY + 0.8 * height;
+                            maxTextWidth = section;
+                        } else {
+                            innerPointX  = fixedPosition;
+                            innerPointY  = anchorYPlusOffset - 0.5 * height;
+                            minorPointX  = fixedPosition;
+                            minorPointY  = anchorYPlusOffset - 0.3 * height;
+                            outerPointX  = fixedPosition;
+                            outerPointY  = anchorYPlusOffset;
+                            textPointX   = fixedPosition;
+                            textPointY   = anchorY + 0.2 * height;
+                            maxTextWidth = section;
+                        }
+                    }
+
+                    if (Helper.isPowerOf10(value.intValue())) {
+                        if (majorTickMarksVisible) {
+                            axisCtx.setStroke(majorTickMarkColor);
+                            axisCtx.setLineWidth(majorLineWidth);
+                            axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
+                        } else if (minorTickMarksVisible) {
+                            axisCtx.setStroke(minorTickMarkColor);
+                            axisCtx.setLineWidth(minorLineWidth);
+                            axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+                        }
+                        // Draw tick labels
+                        if (tickLabelsVisible) {
+                            axisCtx.setFill(tickLabelColor);
+                            if (Orientation.VERTICAL == orientation) {
+                                axisCtx.setTextAlign(TextAlignment.RIGHT);
+                                if (isMinValue) {
+                                    axisCtx.fillText(String.format(locale, tickLabelFormatString, value), textPointX, textPointY + size * 0.15, maxTextWidth);
+                                } else if (isMaxValue) {
+                                    axisCtx.fillText(String.format(locale, tickLabelFormatString, value), textPointX, textPointY - size * 0.15, maxTextWidth);
+                                } else {
+                                    axisCtx.fillText(String.format(locale, tickLabelFormatString, value), textPointX, textPointY, maxTextWidth);
+                                }
+                            } else {
+                                if (isMinValue) {
+                                    axisCtx.setTextAlign(TextAlignment.LEFT);
+                                } else if (isMaxValue) {
+                                    axisCtx.setTextAlign(TextAlignment.RIGHT);
+                                } else {
+                                    axisCtx.setTextAlign(TextAlignment.CENTER);
+                                }
+                                axisCtx.fillText(String.format(locale, tickLabelFormatString, value), textPointX, textPointY, maxTextWidth);
+                            }
+                        }
+                    } else {
+                        if (minorTickMarksVisible) {
+                            axisCtx.setStroke(minorTickMarkColor);
+                            axisCtx.setLineWidth(minorLineWidth);
+                            axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
+                        }
+                    }
+                }
+            }
+
         }
     }
 

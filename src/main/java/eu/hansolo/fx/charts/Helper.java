@@ -147,4 +147,10 @@ public class Helper {
         double opacity = clamp(0, 1, OPACITY);
         return Color.color(red, green, blue, opacity);
     }
+
+    public static boolean isPowerOf10(final double VALUE) {
+        double value = VALUE;
+        while(value > 9 && value % 10 == 0) { value /= 10; }
+        return value == 1;
+    }
 }
