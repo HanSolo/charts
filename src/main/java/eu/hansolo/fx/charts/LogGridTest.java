@@ -1,56 +1,60 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis.AxisType;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 
 /**
  * User: hansolo
- * Date: 02.08.17
- * Time: 17:33
+ * Date: 08.08.17
+ * Time: 18:25
  */
-public class GridTest extends Application {
+public class LogGridTest extends Application {
     private static final Double AXIS_WIDTH = 25d;
-    private              Axis   xAxis;
-    private              Axis   yAxis;
-    private              Grid   grid;
+
+    private              Axis   xAxisLog;
+    private              Axis   yAxisLog;
+    private              Grid   gridLog;
 
 
     @Override public void init() {
-        xAxis = createBottomXAxis(0, 50, true);
-        xAxis.setMinorTickMarksVisible(false);
-        xAxis.setMajorTickMarkColor(Color.RED);
+        xAxisLog = createBottomXAxis(0, 1000, false);
+        xAxisLog.setMajorTickMarkColor(Color.RED);
+        xAxisLog.setType(AxisType.LOGARITHMIC);
 
-        yAxis = createLeftYAxis(0, 20, true);
-        yAxis.setMinorTickMarksVisible(false);
-        yAxis.setMediumTickMarkColor(Color.MAGENTA);
+        yAxisLog = createLeftYAxis(0, 1000, false);
+        yAxisLog.setMinorTickMarkColor(Color.MAGENTA);
+        yAxisLog.setType(AxisType.LOGARITHMIC);
 
-        grid  = new Grid(xAxis, yAxis);
+
+        gridLog  = new Grid(xAxisLog, yAxisLog);
     }
 
     @Override public void start(Stage stage) {
-        AnchorPane pane = new AnchorPane(xAxis, yAxis, grid);
+        AnchorPane pane = new AnchorPane(xAxisLog, yAxisLog, gridLog);
 
-        AnchorPane.setTopAnchor(yAxis, 0d);
-        AnchorPane.setBottomAnchor(yAxis, 25d);
-        AnchorPane.setLeftAnchor(yAxis, 0d);
+        AnchorPane.setTopAnchor(yAxisLog, 0d);
+        AnchorPane.setBottomAnchor(yAxisLog, 25d);
+        AnchorPane.setLeftAnchor(yAxisLog, 0d);
 
-        AnchorPane.setLeftAnchor(xAxis, 25d);
-        AnchorPane.setRightAnchor(xAxis, 0d);
-        AnchorPane.setBottomAnchor(xAxis, 0d);
+        AnchorPane.setLeftAnchor(xAxisLog, 25d);
+        AnchorPane.setRightAnchor(xAxisLog, 0d);
+        AnchorPane.setBottomAnchor(xAxisLog, 0d);
 
-        AnchorPane.setTopAnchor(grid, 0d);
-        AnchorPane.setRightAnchor(grid, 0d);
-        AnchorPane.setBottomAnchor(grid, 25d);
-        AnchorPane.setLeftAnchor(grid, 25d);
+        AnchorPane.setTopAnchor(gridLog, 0d);
+        AnchorPane.setRightAnchor(gridLog, 0d);
+        AnchorPane.setBottomAnchor(gridLog, 25d);
+        AnchorPane.setLeftAnchor(gridLog, 25d);
 
         Scene scene = new Scene(pane);
 
-        stage.setTitle("GridTest");
+        stage.setTitle("LogGridTest");
         stage.setScene(scene);
         stage.show();
     }

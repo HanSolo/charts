@@ -18,9 +18,7 @@ import javafx.scene.Scene;
  */
 public class LogAxisTest extends Application {
     private Axis xAxisBottom;
-    private Axis xAxisTop;
     private Axis yAxisLeft;
-    private Axis yAxisRight;
     private Axis logAxisX;
 
 

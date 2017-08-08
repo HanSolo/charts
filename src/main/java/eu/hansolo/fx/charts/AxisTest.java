@@ -21,7 +21,6 @@ public class AxisTest extends Application {
     private Axis xAxisTop;
     private Axis yAxisLeft;
     private Axis yAxisRight;
-    private Axis logAxisX;
 
 
     @Override public void init() {

@@ -1,5 +1,6 @@
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis.AxisType;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -124,6 +125,7 @@ public class Grid extends Region {
         Color mediumVGridColor = Helper.getColorWithOpacity(xAxis.getMediumTickMarkColor(), getGridOpacity());
         Color majorVGridColor  = Helper.getColorWithOpacity(xAxis.getMajorTickMarkColor(), getGridOpacity());
 
+        boolean isLinearXAxis  = AxisType.LINEAR == xAxis.getType();
         double minX            = xAxis.getMinValue();
         double maxX            = xAxis.getMaxValue();
         double minorTickSpaceX = xAxis.getMinorTickSpace();
@@ -132,6 +134,7 @@ public class Grid extends Region {
         double stepSizeX       = Math.abs(width / rangeX);
         double zeroPositionX   = xAxis.getZeroPosition();
 
+        boolean isLinearYAxis  = AxisType.LINEAR == yAxis.getType();
         double minY            = yAxis.getMinValue();
         double maxY            = yAxis.getMaxValue();
         double minorTickSpaceY = yAxis.getMinorTickSpace();
@@ -139,109 +142,186 @@ public class Grid extends Region {
         double rangeY          = yAxis.getRange();
         double stepSizeY       = Math.abs(height / rangeY);
         double zeroPositionY   = yAxis.getZeroPosition();
-
+        
         BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpaceX);
         BigDecimal majorTickSpaceBD = BigDecimal.valueOf(majorTickSpaceX);
         BigDecimal mediumCheck2     = BigDecimal.valueOf(2 * minorTickSpaceX);
         BigDecimal mediumCheck5     = BigDecimal.valueOf(5 * minorTickSpaceX);
 
         // Main Loop for grid lines
-        boolean    isZero;
-        double     tmpStepSize = minorTickSpaceX;
-        BigDecimal counterBD   = BigDecimal.valueOf(minX);
-        double     counter     = minX;
-        BigDecimal tmpStepBD   = new BigDecimal(tmpStepSize);
-        tmpStepBD              = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
-        double     tmpStep     = tmpStepBD.doubleValue();
-        for (double i = 0 ; Double.compare(-rangeX - tmpStep, i) <= 0 ; i -= tmpStep) {
-            double startPointX   = width + i * stepSizeX;
-            double startPointY   = 0;
-            double endPointX     = startPointX;
-            double endPointY     = height;
+        if (isLinearXAxis) {
+            // ******************** Linear ************************************
+            boolean    isZero;
+            double     tmpStepSize = minorTickSpaceX;
+            BigDecimal counterBD   = BigDecimal.valueOf(minX);
+            double     counter     = minX;
+            BigDecimal tmpStepBD   = new BigDecimal(tmpStepSize);
+            tmpStepBD = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+            double tmpStep = tmpStepBD.doubleValue();
+            for (double i = 0; Double.compare(-rangeX - tmpStep, i) <= 0; i -= tmpStep) {
+                double startPointX = width + i * stepSizeX;
+                double startPointY = 0;
+                double endPointX   = startPointX;
+                double endPointY   = height;
 
-            if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw major tick grid line
-                isZero = Double.compare(0.0, counter) == 0;
+                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw major tick grid line
+                    isZero = Double.compare(0.0, counter) == 0;
 
-                if (isZero) {  }
+                    if (isZero) { ctx.setStroke(xAxis.getZeroColor()); }
 
-                if (xAxis.getMajorTickMarksVisible()) {
-                    ctx.setStroke(majorVGridColor);
-                    ctx.setLineWidth(majorLineWidth);
+                    if (xAxis.getMajorTickMarksVisible()) {
+                        ctx.setStroke(majorVGridColor);
+                        ctx.setLineWidth(majorLineWidth);
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    } else if (xAxis.getMinorTickMarksVisible()) {
+                        ctx.setStroke(minorVGridColor);
+                        ctx.setLineWidth(minorLineWidth);
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    }
+                } else if (xAxis.getMediumTickMarksVisible() &&
+                           Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                    // Draw medium tick grid line
+                    ctx.setStroke(mediumVGridColor);
+                    ctx.setLineWidth(mediumLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-                } else if (xAxis.getMinorTickMarksVisible()) {
+                } else if (xAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw minor tick grid line
                     ctx.setStroke(minorVGridColor);
                     ctx.setLineWidth(minorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 }
-            } else if (xAxis.getMediumTickMarksVisible() &&
-                       Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                       Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
-                // Draw medium tick grid line
-                ctx.setStroke(mediumVGridColor);
-                ctx.setLineWidth(mediumLineWidth);
-                ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-            } else if (xAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw minor tick grid line
-                ctx.setStroke(minorVGridColor);
-                ctx.setLineWidth(minorLineWidth);
-                ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-            }
 
-            counterBD = counterBD.add(minorTickSpaceBD);
-            counter   = counterBD.doubleValue();
-            if (counter > maxX) break;
+                counterBD = counterBD.add(minorTickSpaceBD);
+                counter = counterBD.doubleValue();
+                if (counter > maxX) break;
+            }
+        } else {
+            // ******************** Logarithmic *******************************
+            double  logUpperBound         = Math.log10(xAxis.getMaxValue());
+            double  section               = width / logUpperBound;
+            boolean majorTickMarksVisible = xAxis.getMajorTickMarksVisible();
+            boolean minorTickMarksVisible = xAxis.getMinorTickMarksVisible();
+
+            for (double i = 0; i <= logUpperBound; i += 1) {
+                for (double j = 1; j <= 9; j++) {
+                    BigDecimal value = new BigDecimal(j * Math.pow(10, i));
+                    double stepSize = i > 0 ? (Math.log10(value.doubleValue()) % i) : Math.log10(value.doubleValue());
+                    double startPointX = i * section + (stepSize * section);
+                    double startPointY = 0;
+                    double endPointX   = startPointX;
+                    double endPointY   = height;
+
+                    if (Helper.isPowerOf10(value.intValue())) {
+                        if (majorTickMarksVisible) {
+                            ctx.setStroke(majorVGridColor);
+                            ctx.setLineWidth(majorLineWidth);
+                        } else if (minorTickMarksVisible) {
+                            ctx.setStroke(minorVGridColor);
+                            ctx.setLineWidth(minorLineWidth);
+                        }
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    } else {
+                        if (minorTickMarksVisible) {
+                            ctx.setStroke(minorVGridColor);
+                            ctx.setLineWidth(minorLineWidth);
+                            ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                        }
+                    }
+                }
+            }
         }
 
+        
         minorTickSpaceBD = BigDecimal.valueOf(minorTickSpaceY);
         majorTickSpaceBD = BigDecimal.valueOf(majorTickSpaceY);
         mediumCheck2     = BigDecimal.valueOf(2 * minorTickSpaceY);
         mediumCheck5     = BigDecimal.valueOf(5 * minorTickSpaceY);
 
-        tmpStepSize = minorTickSpaceY;
-        counterBD   = BigDecimal.valueOf(minY);
-        counter     = minY;
-        tmpStepBD   = new BigDecimal(tmpStepSize);
-        tmpStepBD   = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
-        tmpStep     = tmpStepBD.doubleValue();
-        for (double i = 0 ; Double.compare(-rangeY - tmpStep, i) <= 0 ; i -= tmpStep) {
-            double startPointX   = 0;
-            double startPointY   = height + i * stepSizeY;
-            double endPointX     = width;
-            double endPointY     = startPointY;
+        if (isLinearYAxis) {
+            // ******************** Linear ************************************
+            boolean    isZero;
+            double     tmpStepSize = minorTickSpaceY;
+            BigDecimal counterBD   = BigDecimal.valueOf(minY);
+            double     counter     = minY;
+            BigDecimal tmpStepBD   = new BigDecimal(tmpStepSize);
+            tmpStepBD = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+            double     tmpStep = tmpStepBD.doubleValue();
+            for (double i = 0; Double.compare(-rangeY - tmpStep, i) <= 0; i -= tmpStep) {
+                double startPointX = 0;
+                double startPointY = height + i * stepSizeY;
+                double endPointX   = width;
+                double endPointY   = startPointY;
 
-            if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw major tick grid line
-                isZero = Double.compare(0.0, counter) == 0;
+                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw major tick grid line
+                    isZero = Double.compare(0.0, counter) == 0;
 
-                if (isZero) {  }
+                    if (isZero) { ctx.setStroke(yAxis.getZeroColor()); }
 
-                if (yAxis.getMajorTickMarksVisible()) {
-                    ctx.setStroke(majorHGridColor);
-                    ctx.setLineWidth(majorLineWidth);
+                    if (yAxis.getMajorTickMarksVisible()) {
+                        ctx.setStroke(majorHGridColor);
+                        ctx.setLineWidth(majorLineWidth);
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    } else if (yAxis.getMinorTickMarksVisible()) {
+                        ctx.setStroke(minorHGridColor);
+                        ctx.setLineWidth(minorLineWidth);
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    }
+                } else if (yAxis.getMediumTickMarksVisible() &&
+                           Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                    // Draw medium tick grid line
+                    ctx.setStroke(mediumHGridColor);
+                    ctx.setLineWidth(mediumLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-                } else if (yAxis.getMinorTickMarksVisible()) {
+                } else if (yAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    // Draw minor tick grid line
                     ctx.setStroke(minorHGridColor);
                     ctx.setLineWidth(minorLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                 }
-            } else if (yAxis.getMediumTickMarksVisible() &&
-                       Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                       Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
-                // Draw medium tick grid line
-                ctx.setStroke(mediumHGridColor);
-                ctx.setLineWidth(mediumLineWidth);
-                ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-            } else if (yAxis.getMinorTickMarksVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                // Draw minor tick grid line
-                ctx.setStroke(minorHGridColor);
-                ctx.setLineWidth(minorLineWidth);
-                ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-            }
 
-            counterBD = counterBD.add(minorTickSpaceBD);
-            counter   = counterBD.doubleValue();
-            if (counter > maxY) break;
+                counterBD = counterBD.add(minorTickSpaceBD);
+                counter = counterBD.doubleValue();
+                if (counter > maxY) break;
+            }
+        } else {
+            // ******************** Logarithmic *******************************
+            double  logUpperBound         = Math.log10(yAxis.getMaxValue());
+            double  section               = height / logUpperBound;
+            boolean majorTickMarksVisible = yAxis.getMajorTickMarksVisible();
+            boolean minorTickMarksVisible = yAxis.getMinorTickMarksVisible();
+            double  maxPosition           = height;
+
+            for (double i = 0; i <= logUpperBound; i += 1) {
+                for (double j = 1; j <= 9; j++) {
+                    BigDecimal value = new BigDecimal(j * Math.pow(10, i));
+                    double stepSize = i > 0 ? (Math.log10(value.doubleValue()) % i) : Math.log10(value.doubleValue());
+                    double startPointX = 0;
+                    double startPointY = maxPosition - i * section - (stepSize * section);
+                    double endPointX   = width;
+                    double endPointY   = startPointY;
+
+                    if (Helper.isPowerOf10(value.intValue())) {
+                        if (majorTickMarksVisible) {
+                            ctx.setStroke(majorHGridColor);
+                            ctx.setLineWidth(majorLineWidth);
+                        } else if (minorTickMarksVisible) {
+                            ctx.setStroke(minorHGridColor);
+                            ctx.setLineWidth(minorLineWidth);
+                        }
+                        ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                    } else {
+                        if (minorTickMarksVisible) {
+                            ctx.setStroke(minorHGridColor);
+                            ctx.setLineWidth(minorLineWidth);
+                            ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
+                        }
+                    }
+                }
+            }
         }
     }
 
