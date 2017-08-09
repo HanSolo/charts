@@ -153,4 +153,10 @@ public class Helper {
         while(value > 9 && value % 10 == 0) { value /= 10; }
         return value == 1;
     }
+
+    public static void rotateCtx(final GraphicsContext CTX, final double X, final double Y, final double ANGLE) {
+        CTX.translate(X, Y);
+        CTX.rotate(ANGLE);
+        CTX.translate(-X, -Y);
+    }
 }
