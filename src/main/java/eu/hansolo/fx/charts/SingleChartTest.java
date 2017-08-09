@@ -99,7 +99,6 @@ public class SingleChartTest extends Application {
         ySeries3 = new YSeries(yData3, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(255, 0, 255, 0.5))));
         yChart   = new YChart(new YPane(ySeries1, ySeries2, ySeries3));
 
-
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
