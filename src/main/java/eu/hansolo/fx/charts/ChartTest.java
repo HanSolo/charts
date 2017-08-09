@@ -110,14 +110,21 @@ public class ChartTest extends Application {
 
         // LineChart
         Unit   tempUnit          = new Unit(Unit.Type.TEMPERATURE, Unit.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
-        double tempFahrenheitMin = tempUnit.convert(0, Unit.Definition.FAHRENHEIT);
+        double tempFahrenheitMin = tempUnit.convert(-10, Unit.Definition.FAHRENHEIT);
         double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
 
         lineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
-        lineChartYAxisLeft   = createLeftYAxis(0, 20, true);
+        lineChartYAxisLeft   = createLeftYAxis(-10, 20, true);
         lineChartYAxisRight  = createRightYAxis(tempFahrenheitMin, tempFahrenheitMax, false);
+
+        lineChartXAxisBottom.setZeroColor(Color.BLACK);
+        lineChartYAxisLeft.setZeroColor(Color.BLACK);
+
         lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1),
                                   lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
+
+        Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
+        lineChart.setGrid(grid1);
 
 
         // AreaChart
@@ -136,8 +143,8 @@ public class ChartTest extends Application {
         smoothLineChart            = new XYChart<>(new XYPane(xySeries3),
                                                    smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
 
-        Grid grid = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
-        smoothLineChart.setGrid(grid);
+        Grid grid2 = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
+        smoothLineChart.setGrid(grid2);
 
         // SmoothAreaChart
         smoothAreaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
@@ -172,10 +179,9 @@ public class ChartTest extends Application {
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
-                //if (now > lastTimerCall + 1_000_000_000l) {
-                if (now > lastTimerCall) {
+                if (now > lastTimerCall + 1_000_000_000l) {
                     List<XYData> xyItems = xySeries1.getItems();
-                    xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
+                    xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyItems = xySeries2.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
