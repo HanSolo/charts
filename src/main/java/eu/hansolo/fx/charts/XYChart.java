@@ -196,15 +196,19 @@ public class XYChart<T extends XYData> extends Region {
 
     private void adjustChartRange() {
         if (hasBottomXAxis) {
-            xyPane.setRangeX(xAxisB.getRange());
+            xyPane.setLowerBoundX(xAxisB.getMinValue());
+            xyPane.setUpperBoundX(xAxisB.getMaxValue());
         } else if (hasTopXAxis) {
-            xyPane.setRangeX(xAxisT.getRange());
+            xyPane.setLowerBoundX(xAxisT.getMinValue());
+            xyPane.setUpperBoundX(xAxisT.getMaxValue());
         }
 
         if (hasLeftYAxis) {
-            xyPane.setRangeY(yAxisL.getRange());
+            xyPane.setLowerBoundY(yAxisL.getMinValue());
+            xyPane.setUpperBoundY(yAxisL.getMaxValue());
         } else if (hasRightYAxis) {
-            xyPane.setRangeY(yAxisR.getRange());
+            xyPane.setLowerBoundY(yAxisR.getMinValue());
+            xyPane.setUpperBoundY(yAxisR.getMaxValue());
         }
     }
 

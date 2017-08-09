@@ -121,7 +121,7 @@ public class YChart<T extends YData> extends Region {
 
     private void validateSeries() {
         List<YSeries<T>> listOfSeries = yPane.getListOfSeries();
-        final double     MIN_VALUE    = listOfSeries.stream().mapToDouble(YSeries::getMin).min().getAsDouble();
+        final double     MIN_VALUE    = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
         final ChartType  TYPE         = listOfSeries.get(0).getChartType();
     }
 
