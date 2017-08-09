@@ -40,10 +40,18 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
     private              double                scaleX;
     private              double                scaleY;
     private              double                scaleZ;
-    private              double                _rangeX;
-    private              DoubleProperty        rangeX;
-    private              double                _rangeY;
-    private              DoubleProperty        rangeY;
+    private              double                _lowerBoundX;
+    private              DoubleProperty        lowerBoundX;
+    private              double                _upperBoundX;
+    private              DoubleProperty        upperBoundX;
+    private              double                _lowerBoundY;
+    private              DoubleProperty        lowerBoundY;
+    private              double                _upperBoundY;
+    private              DoubleProperty        upperBoundY;
+    private              double                _lowerBoundZ;
+    private              DoubleProperty        lowerBoundZ;
+    private              double                _upperBoundZ;
+    private              DoubleProperty        upperBoundZ;
 
 
     // ******************** Constructors **************************************
@@ -59,8 +67,12 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
         scaleX                = 1;
         scaleY                = 1;
         scaleZ                = 1;
-        _rangeX               = 100;
-        _rangeY               = 100;
+        _lowerBoundX          = 0;
+        _upperBoundX          = 100;
+        _lowerBoundY          = 0;
+        _upperBoundY          = 100;
+        _lowerBoundZ          = 0;
+        _upperBoundZ          = 100;
 
         initGraphics();
         registerListeners();
@@ -127,45 +139,129 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
         return chartBackgroundPaint;
     }
 
-    public double getRangeX() {  return null == rangeX ? _rangeX : rangeX.get();  }
-    public void setRangeX(final double VALUE) {
-        if (null == rangeX) {
-            _rangeX = VALUE;
-            resize();
+    public double getLowerBoundX() { return null == lowerBoundX ? _lowerBoundX : lowerBoundX.get(); }
+    public void setLowerBoundX(final double VALUE) {
+        if (null == lowerBoundX) {
+            _lowerBoundX = VALUE;
+            redraw();
         } else {
-            rangeX.set(VALUE);
+            lowerBoundX.set(VALUE);
         }
     }
-    public DoubleProperty rangeXProperty() {
-        if (null == rangeX) {
-            rangeX = new DoublePropertyBase(_rangeX) {
-                @Override protected void invalidated() { resize(); }
-                @Override public Object getBean() {  return XYZPane.this;  }
-                @Override public String getName() {  return "rangeX"; }
+    public DoubleProperty lowerBoundXProperty() {
+        if (null == lowerBoundX) {
+            lowerBoundX = new DoublePropertyBase(_lowerBoundX) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "lowerBoundX"; }
             };
         }
-        return rangeX;
+        return lowerBoundX;
     }
 
-    public double getRangeY() { return null == rangeY ? _rangeY : rangeY.get(); }
-    public void setRangeY(final double VALUE) {
-        if (null == rangeY) {
-            _rangeY = VALUE;
-            resize();
+    public double getUpperBoundX() { return null == upperBoundX ? _upperBoundX : upperBoundX.get(); }
+    public void setUpperBoundX(final double VALUE) {
+        if (null == upperBoundX) {
+            _upperBoundX = VALUE;
+            redraw();
         } else {
-            rangeY.set(VALUE);
+            upperBoundX.set(VALUE);
         }
     }
-    public DoubleProperty rangeYProperty() {
-        if (null == rangeY) {
-            rangeY = new DoublePropertyBase(_rangeY) {
-                @Override protected void invalidated() { resize(); }
+    public DoubleProperty upperBoundXProperty() {
+        if (null == upperBoundX) {
+            upperBoundX = new DoublePropertyBase(_upperBoundX) {
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return XYZPane.this; }
-                @Override public String getName() { return "rangeY"; }
+                @Override public String getName() { return "upperBoundX"; }
             };
         }
-        return rangeY;
+        return upperBoundX;
     }
+
+    public double getLowerBoundY() { return null == lowerBoundY ? _lowerBoundY : lowerBoundY.get(); }
+    public void setLowerBoundY(final double VALUE) {
+        if (null == lowerBoundY) {
+            _lowerBoundY = VALUE;
+            redraw();
+        } else {
+            lowerBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty lowerBoundYProperty() {
+        if (null == lowerBoundY) {
+            lowerBoundY = new DoublePropertyBase(_lowerBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "lowerBoundY"; }
+            };
+        }
+        return lowerBoundY;
+    }
+
+    public double getUpperBoundY() { return null == upperBoundY ? _upperBoundY : upperBoundY.get(); }
+    public void setUpperBoundY(final double VALUE) {
+        if (null == upperBoundY) {
+            _upperBoundY = VALUE;
+            redraw();
+        } else {
+            upperBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty upperBoundYProperty() {
+        if (null == upperBoundY) {
+            upperBoundY = new DoublePropertyBase(_upperBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "upperBoundY"; }
+            };
+        }
+        return upperBoundY;
+    }
+
+    public double getLowerBoundZ() { return null == lowerBoundZ ? _lowerBoundZ : lowerBoundZ.get(); }
+    public void setLowerBoundZ(final double VALUE) {
+        if (null == lowerBoundZ) {
+            _lowerBoundZ = VALUE;
+            redraw();
+        } else {
+            lowerBoundZ.set(VALUE);
+        }
+    }
+    public DoubleProperty lowerBoundZProperty() {
+        if (null == lowerBoundZ) {
+            lowerBoundZ = new DoublePropertyBase(_lowerBoundZ) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "lowerBoundZ"; }
+            };
+        }
+        return lowerBoundZ;
+    }
+
+    public double getUpperBoundZ() { return null == upperBoundZ ? _upperBoundZ : upperBoundZ.get(); }
+    public void setUpperBoundZ(final double VALUE) {
+        if (null == upperBoundZ) {
+            _upperBoundZ = VALUE;
+            redraw();
+        } else {
+            upperBoundZ.set(VALUE);
+        }
+    }
+    public DoubleProperty upperBoundZProperty() {
+        if (null == upperBoundZ) {
+            upperBoundZ = new DoublePropertyBase(_upperBoundZ) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYZPane.this; }
+                @Override public String getName() { return "upperBoundZ"; }
+            };
+        }
+        return upperBoundZ;
+    }
+
+    public double getRangeX() {  return getUpperBoundX() - getLowerBoundX();  }
+    public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
+    public double getRangeZ() { return getUpperBoundZ() - getLowerBoundZ(); }
 
     public List<XYZSeries<T>> getListOfSeries() { return listOfSeries; }
 
@@ -187,10 +283,14 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
     }
 
     private void drawBubble(final XYZSeries<T> SERIES) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+        final double LOWER_BOUND_Z = getLowerBoundZ();
+
         for (XYZData item : SERIES.getItems()) {
-            double x     = item.getX() * scaleX;
-            double y     = item.getY() * scaleY;
-            double z     = item.getZ() * scaleZ;
+            double x     = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y     = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            double z     = (item.getZ() - LOWER_BOUND_Z) * scaleZ;
             double halfZ = z * 0.5;
             ctx.setStroke(Color.TRANSPARENT);
             ctx.setFill(item.getColor());

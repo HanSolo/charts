@@ -4,6 +4,8 @@ import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Point;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static eu.hansolo.fx.charts.Helper.clamp;
+
 
 public class YPane<T extends YData> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
@@ -47,8 +51,17 @@ public class YPane<T extends YData> extends Region implements ChartArea {
     private              List<YSeries<T>>      listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
-    private              double                _rangeY;
-    private              DoubleProperty        rangeY;
+    private              double                _thresholdY;
+    private              DoubleProperty        thresholdY;
+    private              boolean               _thresholdYVisible;
+    private              BooleanProperty       thresholdYVisible;
+    private              Color                 _thresholdYColor;
+    private              ObjectProperty<Color> thresholdYColor;
+    private              boolean               valid;
+    private              double                _lowerBoundY;
+    private              DoubleProperty        lowerBoundY;
+    private              double                _upperBoundY;
+    private              DoubleProperty        upperBoundY;
 
 
     // ******************** Constructors **************************************
@@ -61,8 +74,12 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         keepAspect            = false;
         _chartBackgroundPaint = BACKGROUND;
         listOfSeries          = FXCollections.observableArrayList(SERIES);
-        _rangeY               = 100;
-
+        _thresholdY           = 100;
+        _thresholdYVisible    = false;
+        _thresholdYColor      = Color.RED;
+        _lowerBoundY          = 0;
+        _upperBoundY          = 100;
+        valid                 = isChartTypeValid();
         initGraphics();
         registerListeners();
     }
@@ -128,25 +145,108 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         return chartBackgroundPaint;
     }
 
-    public double getRangeY() { return null == rangeY ? _rangeY : rangeY.get(); }
-    public void setRangeY(final double VALUE) {
-        if (null == rangeY) {
-            _rangeY = VALUE;
-            resize();
+    public double getThresholdY() { return null == thresholdY ? _thresholdY : thresholdY.get(); }
+    public void setThresholdY(final double THRESHOLD) {
+        if (null == thresholdY) {
+            _thresholdY = THRESHOLD;
+            redraw();
         } else {
-            rangeY.set(VALUE);
+            thresholdY.set(THRESHOLD);
         }
     }
-    public DoubleProperty rangeYProperty() {
-        if (null == rangeY) {
-            rangeY = new DoublePropertyBase(_rangeY) {
-                @Override protected void invalidated() { resize(); }
+    public DoubleProperty thresholdYProperty() {
+        if (null == thresholdY) {
+            thresholdY = new DoublePropertyBase(_thresholdY) {
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return YPane.this; }
-                @Override public String getName() { return "rangeY"; }
+                @Override public String getName() { return "thresholdY"; }
             };
         }
-        return rangeY;
+        return thresholdY;
     }
+
+    public boolean isThresholdYVisible() { return null == thresholdYVisible ? _thresholdYVisible : thresholdYVisible.get(); }
+    public void setThresholdYVisible(final boolean VISIBLE) {
+        if (null == thresholdYVisible) {
+            _thresholdYVisible = VISIBLE;
+            redraw();
+        } else {
+            thresholdYVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty thresholdYVisibleProperty() {
+        if (null == thresholdYVisible) {
+            thresholdYVisible = new BooleanPropertyBase(_thresholdYVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "thresholdYVisible"; }
+            };
+        }
+        return thresholdYVisible;
+    }
+
+    public Color getThresholdYColor() { return null == thresholdYColor ? _thresholdYColor : thresholdYColor.get(); }
+    public void setThresholdYColor(final Color COLOR) {
+        if (null == thresholdYColor) {
+            _thresholdYColor = COLOR;
+            redraw();
+        } else {
+            thresholdYColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> thresholdYColorProperty() {
+        if (null == thresholdYColor) {
+            thresholdYColor = new ObjectPropertyBase<Color>(_thresholdYColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "thresholdYColor"; }
+            };
+            _thresholdYColor = null;
+        }
+        return thresholdYColor;
+    }
+
+    public double getLowerBoundY() { return null == lowerBoundY ? _lowerBoundY : lowerBoundY.get(); }
+    public void setLowerBoundY(final double VALUE) {
+        if (null == lowerBoundY) {
+            _lowerBoundY = VALUE;
+            redraw();
+        } else {
+            lowerBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty lowerBoundYProperty() {
+        if (null == lowerBoundY) {
+            lowerBoundY = new DoublePropertyBase(_lowerBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "lowerBoundY"; }
+            };
+        }
+        return lowerBoundY;
+    }
+
+    public double getUpperBoundY() { return null == upperBoundY ? _upperBoundY : upperBoundY.get(); }
+    public void setUpperBoundY(final double VALUE) {
+        if (null == upperBoundY) {
+            _upperBoundY = VALUE;
+            redraw();
+        } else {
+            upperBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty upperBoundYProperty() {
+        if (null == upperBoundY) {
+            upperBoundY = new DoublePropertyBase(_upperBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "upperBoundY"; }
+            };
+        }
+        return upperBoundY;
+    }
+
+    public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
 
     public List<YSeries<T>> getListOfSeries() { return listOfSeries; }
 
@@ -159,7 +259,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         ctx.setFill(getChartBackgroundPaint());
         ctx.fillRect(0, 0, width, height);
 
-        double    minValue = listOfSeries.stream().mapToDouble(YSeries::getMin).min().getAsDouble();
+        //double    minValue = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
         ChartType type     = listOfSeries.get(0).getChartType();
 
         listOfSeries.forEach(series -> {
@@ -168,9 +268,22 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 case DONUT               : drawDonut(series); break;
                 case RADAR_POLYGON       :
                 case SMOOTH_RADAR_POLYGON:
-                case RADAR_SECTOR        : drawRadar(series, type, minValue); break;
+                case RADAR_SECTOR        : drawRadar(series); break;
             }
         });
+        boolean containsRadarChart = false;
+        for(YSeries<T> series : listOfSeries) {
+            final ChartType TYPE = series.getChartType();
+            if (ChartType.RADAR_SECTOR         == TYPE ||
+                ChartType.RADAR_POLYGON        == TYPE ||
+                ChartType.SMOOTH_RADAR_POLYGON == TYPE) {
+                containsRadarChart = true;
+                break;
+            }
+        }
+        if (containsRadarChart) {
+            drawRadarOverlay(listOfSeries.get(0).getItems().size(), listOfSeries.get(0).getChartType());
+        }
     }
 
     private void drawDonut(final YSeries<T> SERIES) {
@@ -218,10 +331,11 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         }
     }
 
-    private void drawRadar(final YSeries<T> SERIES, final ChartType TYPE, final double MIN_VALUE) {
+    private void drawRadar(final YSeries<T> SERIES) {
         final double CENTER_X      = 0.5 * size;
         final double CENTER_Y      = CENTER_X;
         final double CIRCLE_SIZE   = 0.9 * size;
+        final double LOWER_BOUND_Y = getLowerBoundY();
         final double DATA_RANGE    = getRangeY();
         final double RANGE         = 0.35714 * CIRCLE_SIZE;
         final double OFFSET        = 0.14286 * CIRCLE_SIZE;
@@ -243,13 +357,11 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 ctx.beginPath();
                 ctx.moveTo(CENTER_X, 0.36239 * size);
                 SERIES.getItems().forEach(item -> {
-                    double r1 = (item.getY() - MIN_VALUE) / DATA_RANGE;
+                    double r1 = (item.getY() - LOWER_BOUND_Y) / DATA_RANGE;
                     ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r1 * RANGE);
-                    ctx.translate(CENTER_X, CENTER_Y);
-                    ctx.rotate(angleStep);
-                    ctx.translate(-CENTER_X, -CENTER_Y);
+                    Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
-                double r2 = ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE);
+                double r2 = ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE);
                 ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r2 * RANGE);
                 ctx.closePath();
                 ctx.fill();
@@ -266,15 +378,15 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 points.add(new Point(x, y));
 
                 for (YData item : SERIES.getItems()) {
-                    double r = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - MIN_VALUE) / DATA_RANGE) * RANGE));
-                    x = CENTER_X + (-Math.sin(radAngle) * r);
-                    y = CENTER_Y + (+Math.cos(radAngle) * r);
+                    double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                    x = CENTER_X + (-Math.sin(radAngle) * r1);
+                    y = CENTER_Y + (+Math.cos(radAngle) * r1);
                     points.add(new Point(x, y));
                     radAngle += radAngleStep;
                 }
-                double r = (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - MIN_VALUE) / DATA_RANGE) * RANGE));
-                x = CENTER_X + (-Math.sin(radAngle) * r);
-                y = CENTER_Y + (+Math.cos(radAngle) * r);
+                double r3 = (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                x = CENTER_X + (-Math.sin(radAngle) * r3);
+                y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
 
                 Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
@@ -292,11 +404,9 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 ctx.stroke();
                 break;
             case RADAR_SECTOR:
-                ctx.translate(CENTER_X, CENTER_Y);
-                ctx.rotate(-90);
-                ctx.translate(-CENTER_X, -CENTER_Y);
+                Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -90);
                 SERIES.getItems().forEach(item -> {
-                    double r1 = (item.getY() - MIN_VALUE) / DATA_RANGE;
+                    double r1 = (item.getY() - LOWER_BOUND_Y) / DATA_RANGE;
                     ctx.beginPath();
                     ctx.moveTo(CENTER_X, CENTER_Y);
                     ctx.arc(CENTER_X, CENTER_Y, r1 * RANGE + OFFSET, r1 * RANGE + OFFSET, 0, -angleStep);
@@ -304,24 +414,23 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                     ctx.fill();
                     ctx.stroke();
 
-                    ctx.translate(CENTER_X, CENTER_Y);
-                    ctx.rotate(angleStep);
-                    ctx.translate(-CENTER_X, -CENTER_Y);
+                    Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
                 break;
         }
         ctx.restore();
 
-        drawRadarOverlay(NO_OF_SECTORS, TYPE);
+        //drawRadarOverlay(NO_OF_SECTORS, TYPE);
     }
 
     private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {
         final double CENTER_X    = 0.5 * size;
         final double CENTER_Y    = CENTER_X;
         final double CIRCLE_SIZE = 0.90 * size;
-        //final double DATA_RANGE  = getRangeY();
-        //final double RANGE       = 0.35714 * CIRCLE_SIZE;
-        //final double OFFSET      = 0.14286 * CIRCLE_SIZE;
+        final double DATA_RANGE  = getRangeY();
+        final double MIN_VALUE   = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
+        final double RANGE       = 0.35714 * CIRCLE_SIZE;
+        final double OFFSET      = 0.14286 * CIRCLE_SIZE;
         final double angleStep   = 360.0 / NO_OF_SECTORS;
 
         // draw concentric rings
@@ -340,30 +449,24 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         ctx.save();
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
             ctx.strokeLine(CENTER_X, 0.05 * size, CENTER_X, 0.5 * size);
-            ctx.translate(CENTER_X, CENTER_Y);
-            ctx.rotate(angleStep);
-            ctx.translate(-CENTER_X, -CENTER_Y);
+            Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
         ctx.restore();
 
         // draw threshold line
-        /*
-        if (isThresholdVisible()) {
-            radius = ((threshold.get() - MIN_VALUE) / DATA_RANGE);
+        if (isThresholdYVisible()) {
+            double r = ((getThresholdY() - MIN_VALUE) / DATA_RANGE);
             ctx.setLineWidth(clamp(1d, 3d, size * 0.005));
-            ctx.setStroke(getThresholdColor());
-            ctx.strokeOval(0.5 * size - OFFSET - radius * RANGE, 0.5 * size - OFFSET - radius * RANGE,
-                                  2 * (radius * RANGE + OFFSET), 2 * (radius * RANGE + OFFSET));
+            ctx.setStroke(getThresholdYColor());
+            ctx.strokeOval(0.5 * size - OFFSET - r * RANGE, 0.5 * size - OFFSET - r * RANGE,
+                                  2 * (r * RANGE + OFFSET), 2 * (r * RANGE + OFFSET));
         }
-        */
 
         // prerotate if sectormode
         ctx.save();
 
         if (ChartType.RADAR_SECTOR == TYPE) {
-            ctx.translate(CENTER_X, CENTER_Y);
-            ctx.rotate(angleStep * 0.5);
-            ctx.translate(-CENTER_X, -CENTER_Y);
+            Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep * 0.5);
         }
 
         // draw text
@@ -374,13 +477,34 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         ctx.setFill(Color.BLACK);
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
             //ctx.fillText(data.get(i).ID, CENTER_X, size * 0.02);
-            ctx.translate(CENTER_X, CENTER_Y);
-            ctx.rotate(angleStep);
-            ctx.translate(-CENTER_X, -CENTER_Y);
+            Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
         ctx.restore();
 
         ctx.restore();
+    }
+
+    private boolean isChartTypeValid() {
+        boolean containsDonut              = false;
+        boolean containsRadarSector        = false;
+        boolean containsRadarPolygon       = false;
+        boolean containsSmoothRadarPolygon = false;
+        for(YSeries<T> series : getListOfSeries()) {
+            final ChartType TYPE = series.getChartType();
+            containsDonut              = ChartType.DONUT                == TYPE && !containsDonut;
+            containsRadarSector        = ChartType.RADAR_SECTOR         == TYPE && !containsRadarSector;
+            containsRadarPolygon       = ChartType.RADAR_POLYGON        == TYPE && !containsRadarPolygon;
+            containsSmoothRadarPolygon = ChartType.SMOOTH_RADAR_POLYGON == TYPE && !containsSmoothRadarPolygon;
+        }
+        boolean valid = false;
+        if (containsDonut && !containsRadarSector && !containsRadarPolygon && !containsSmoothRadarPolygon) {
+            valid = true;
+        } else if (containsRadarSector && !containsDonut && !containsRadarPolygon && !containsSmoothRadarPolygon) {
+            valid = true;
+        } else if (containsRadarPolygon | containsSmoothRadarPolygon && !containsDonut && !containsRadarSector) {
+            valid = true;
+        }
+        return valid;
     }
 
 

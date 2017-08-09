@@ -49,10 +49,14 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              double                scaleX;
     private              double                scaleY;
     private              double                symbolSize;
-    private              double                _rangeX;
-    private              DoubleProperty        rangeX;
-    private              double                _rangeY;
-    private              DoubleProperty        rangeY;
+    private              double                _lowerBoundX;
+    private              DoubleProperty        lowerBoundX;
+    private              double                _upperBoundX;
+    private              DoubleProperty        upperBoundX;
+    private              double                _lowerBoundY;
+    private              DoubleProperty        lowerBoundY;
+    private              double                _upperBoundY;
+    private              DoubleProperty        upperBoundY;
 
 
     // ******************** Constructors **************************************
@@ -68,8 +72,10 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         scaleX                = 1;
         scaleY                = 1;
         symbolSize            = 2;
-        _rangeX               = 100;
-        _rangeY               = 100;
+        _lowerBoundX          = 0;
+        _upperBoundX          = 100;
+        _lowerBoundY          = 0;
+        _upperBoundY          = 100;
 
         initGraphics();
         registerListeners();
@@ -136,46 +142,89 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         return chartBackgroundPaint;
     }
 
-    public double getRangeX() {  return null == rangeX ? _rangeX : rangeX.get();  }
-    public void setRangeX(final double VALUE) {
-        if (null == rangeX) {
-            _rangeX = VALUE;
-            resize();
+    public double getLowerBoundX() { return null == lowerBoundX ? _lowerBoundX : lowerBoundX.get(); }
+    public void setLowerBoundX(final double VALUE) {
+        if (null == lowerBoundX) {
+            _lowerBoundX = VALUE;
+            redraw();
         } else {
-            rangeX.set(VALUE);
+            lowerBoundX.set(VALUE);
         }
     }
-    public DoubleProperty rangeXProperty() {
-        if (null == rangeX) {
-            rangeX = new DoublePropertyBase(_rangeX) {
-                @Override protected void invalidated() { resize(); }
-                @Override public Object getBean() {  return XYPane.this;  }
-                @Override public String getName() {  return "rangeX"; }
-            };
-        }
-        return rangeX;
-    }
-
-    public double getRangeY() { return null == rangeY ? _rangeY : rangeY.get(); }
-    public void setRangeY(final double VALUE) {
-        if (null == rangeY) {
-            _rangeY = VALUE;
-            resize();
-        } else {
-            rangeY.set(VALUE);
-        }
-    }
-    public DoubleProperty rangeYProperty() {
-        if (null == rangeY) {
-            rangeY = new DoublePropertyBase(_rangeY) {
-                @Override protected void invalidated() { resize(); }
+    public DoubleProperty lowerBoundXProperty() {
+        if (null == lowerBoundX) {
+            lowerBoundX = new DoublePropertyBase(_lowerBoundX) {
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return XYPane.this; }
-                @Override public String getName() { return "rangeY"; }
+                @Override public String getName() { return "lowerBoundX"; }
             };
         }
-        return rangeY;
+        return lowerBoundX;
     }
 
+    public double getUpperBoundX() { return null == upperBoundX ? _upperBoundX : upperBoundX.get(); }
+    public void setUpperBoundX(final double VALUE) {
+        if (null == upperBoundX) {
+            _upperBoundX = VALUE;
+            redraw();
+        } else {
+            upperBoundX.set(VALUE);
+        }
+    }
+    public DoubleProperty upperBoundXProperty() {
+        if (null == upperBoundX) {
+            upperBoundX = new DoublePropertyBase(_upperBoundX) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "upperBoundX"; }
+            };
+        }
+        return upperBoundX;
+    }
+
+    public double getLowerBoundY() { return null == lowerBoundY ? _lowerBoundY : lowerBoundY.get(); }
+    public void setLowerBoundY(final double VALUE) {
+        if (null == lowerBoundY) {
+            _lowerBoundY = VALUE;
+            redraw();
+        } else {
+            lowerBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty lowerBoundYProperty() {
+        if (null == lowerBoundY) {
+            lowerBoundY = new DoublePropertyBase(_lowerBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "lowerBoundY"; }
+            };
+        }
+        return lowerBoundY;
+    }
+
+    public double getUpperBoundY() { return null == upperBoundY ? _upperBoundY : upperBoundY.get(); }
+    public void setUpperBoundY(final double VALUE) {
+        if (null == upperBoundY) {
+            _upperBoundY = VALUE;
+            redraw();
+        } else {
+            upperBoundY.set(VALUE);
+        }
+    }
+    public DoubleProperty upperBoundYProperty() {
+        if (null == upperBoundY) {
+            upperBoundY = new DoublePropertyBase(_upperBoundY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "upperBoundY"; }
+            };
+        }
+        return upperBoundY;
+    }
+    
+    public double getRangeX() {  return getUpperBoundX() - getLowerBoundX();  }
+    public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
+    
     public List<XYSeries<T>> getListOfSeries() { return listOfSeries; }
 
 
@@ -201,13 +250,15 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     }
 
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         double oldX = 0;
         double oldY = height;
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
         for (XYData item : SERIES.getItems()) {
-            double x = item.getX() * scaleX;
-            double y = height - item.getY() * scaleY;
+            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.strokeLine(oldX, oldY, x, y);
             oldX = x;
             oldY = y;
@@ -217,14 +268,16 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     }
 
     private void drawArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         double oldX = 0;
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
         for (XYData item : SERIES.getItems()) {
-            double x = item.getX() * scaleX;
-            double y = height - item.getY() * scaleY;
+            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.lineTo(x, y);
             oldX = x;
         }
@@ -238,16 +291,20 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     }
 
     private void drawScatter(final XYSeries<T> SERIES) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
         ctx.setFill(Color.TRANSPARENT);
         for (XYData item : SERIES.getItems()) {
-            double x = item.getX() * scaleX;
-            double y = item.getY() * scaleY;
-            drawSymbol(x, height - y, item.getColor(), item.getSymbol());
+            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            drawSymbol(x, y, item.getColor(), item.getSymbol());
         }
     }
 
     private void drawSmoothLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
 
@@ -258,7 +315,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
 
         ctx.beginPath();
         for(Point p : interpolatedPoints) {
-            ctx.lineTo(p.getX() * scaleX, height - p.getY() * scaleY);
+            ctx.lineTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
         }
         ctx.stroke();
 
@@ -266,6 +323,8 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     }
 
     private void drawSmoothArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         double oldX = 0;
@@ -278,8 +337,8 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
         for(Point p : interpolatedPoints) {
-            ctx.lineTo(p.getX() * scaleX, height - p.getY() * scaleY);
-            oldX = p.getX() * scaleX;
+            ctx.lineTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
+            oldX = (p.getX() - LOWER_BOUND_X) * scaleX;
         }
 
         ctx.lineTo(oldX, height);
@@ -292,10 +351,12 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     }
 
     private void drawSymbols(final XYSeries<T> SERIES) {
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
         for (XYData item : SERIES.getItems()) {
-            double x = item.getX() * scaleX;
-            double y = item.getY() * scaleY;
-            drawSymbol(x, height - y, item.getColor(), item.getSymbol());
+            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            drawSymbol(x, y, item.getColor(), item.getSymbol());
         }
     }
 
