@@ -33,6 +33,6 @@ public class YSeries<T extends YData> extends Series {
     // ******************** Methods *******************************************
     @Override public ObservableList<YData> getItems() { return items; }
 
-    public double getMin() { return ((YData) items.stream().min(Comparator.comparingDouble(YData::getY)).get()).getY(); }
-    public double getMax() { return ((YData) items.stream().max(Comparator.comparingDouble(YData::getY)).get()).getY(); }
+    public double getMinY() { return ((YData) items.stream().min(Comparator.comparingDouble(YData::getY)).get()).getY(); }
+    public double getMaxY() { return ((YData) items.stream().max(Comparator.comparingDouble(YData::getY)).get()).getY(); }
 }
