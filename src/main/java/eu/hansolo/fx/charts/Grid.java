@@ -125,23 +125,25 @@ public class Grid extends Region {
         Color mediumVGridColor = Helper.getColorWithOpacity(xAxis.getMediumTickMarkColor(), getGridOpacity());
         Color majorVGridColor  = Helper.getColorWithOpacity(xAxis.getMajorTickMarkColor(), getGridOpacity());
 
-        boolean isLinearXAxis  = AxisType.LINEAR == xAxis.getType();
-        double minX            = xAxis.getMinValue();
-        double maxX            = xAxis.getMaxValue();
-        double minorTickSpaceX = xAxis.getMinorTickSpace();
-        double majorTickSpaceX = xAxis.getMajorTickSpace();
-        double rangeX          = xAxis.getRange();
-        double stepSizeX       = Math.abs(width / rangeX);
-        double zeroPositionX   = xAxis.getZeroPosition();
+        boolean isLinearXAxis   = AxisType.LINEAR == xAxis.getType();
+        double  minX            = xAxis.getMinValue();
+        double  maxX            = xAxis.getMaxValue();
+        boolean fullRangeX      = (minX < 0 && maxX > 0);
+        double  minorTickSpaceX = xAxis.getMinorTickSpace();
+        double  majorTickSpaceX = xAxis.getMajorTickSpace();
+        double  rangeX          = xAxis.getRange();
+        double  stepSizeX       = Math.abs(width / rangeX);
+        double  zeroPositionX   = xAxis.getZeroPosition();
 
-        boolean isLinearYAxis  = AxisType.LINEAR == yAxis.getType();
-        double minY            = yAxis.getMinValue();
-        double maxY            = yAxis.getMaxValue();
-        double minorTickSpaceY = yAxis.getMinorTickSpace();
-        double majorTickSpaceY = yAxis.getMajorTickSpace();
-        double rangeY          = yAxis.getRange();
-        double stepSizeY       = Math.abs(height / rangeY);
-        double zeroPositionY   = yAxis.getZeroPosition();
+        boolean isLinearYAxis   = AxisType.LINEAR == yAxis.getType();
+        double  minY            = yAxis.getMinValue();
+        double  maxY            = yAxis.getMaxValue();
+        boolean fullRangeY      = (minY < 0 && maxY > 0);
+        double  minorTickSpaceY = yAxis.getMinorTickSpace();
+        double  majorTickSpaceY = yAxis.getMajorTickSpace();
+        double  rangeY          = yAxis.getRange();
+        double  stepSizeY       = Math.abs(height / rangeY);
+        double  zeroPositionY   = yAxis.getZeroPosition();
         
         BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpaceX);
         BigDecimal majorTickSpaceBD = BigDecimal.valueOf(majorTickSpaceX);
@@ -166,16 +168,14 @@ public class Grid extends Region {
 
                 if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick grid line
-                    isZero = Double.compare(0.0, counter) == 0;
-
-                    if (isZero) { ctx.setStroke(xAxis.getZeroColor()); }
+                    isZero = Double.compare(0.0, maxX - counter + minX) == 0;
 
                     if (xAxis.getMajorTickMarksVisible()) {
-                        ctx.setStroke(majorVGridColor);
+                        ctx.setStroke((fullRangeX && isZero) ? xAxis.getZeroColor() : majorVGridColor);
                         ctx.setLineWidth(majorLineWidth);
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     } else if (xAxis.getMinorTickMarksVisible()) {
-                        ctx.setStroke(minorVGridColor);
+                        ctx.setStroke((fullRangeX && isZero) ? xAxis.getZeroColor() : minorVGridColor);
                         ctx.setLineWidth(minorLineWidth);
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     }
@@ -258,14 +258,12 @@ public class Grid extends Region {
                     // Draw major tick grid line
                     isZero = Double.compare(0.0, counter) == 0;
 
-                    if (isZero) { ctx.setStroke(yAxis.getZeroColor()); }
-
                     if (yAxis.getMajorTickMarksVisible()) {
-                        ctx.setStroke(majorHGridColor);
+                        ctx.setStroke((fullRangeY && isZero) ? yAxis.getZeroColor() : majorHGridColor);
                         ctx.setLineWidth(majorLineWidth);
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     } else if (yAxis.getMinorTickMarksVisible()) {
-                        ctx.setStroke(minorHGridColor);
+                        ctx.setStroke((fullRangeY && isZero) ? yAxis.getZeroColor() : minorHGridColor);
                         ctx.setLineWidth(minorLineWidth);
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     }

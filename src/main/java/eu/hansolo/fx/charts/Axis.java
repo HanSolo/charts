@@ -781,7 +781,7 @@ public class Axis extends Region {
 
         if (AxisType.LINEAR == getType()) {
             // ******************** Linear ************************************
-            boolean    fullRange        = (minValue < 0 && minValue > 0);
+            boolean    fullRange        = (minValue < 0 && maxValue > 0);
             double     minorTickSpace   = getMinorTickSpace();
             double     majorTickSpace   = getMajorTickSpace();
             double     tmpStepSize      = minorTickSpace;
@@ -873,21 +873,21 @@ public class Axis extends Region {
                 if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick mark
                     isMinValue = Double.compare(minValue, counter) == 0;
-                    isZero     = Double.compare(0.0, counter) == 0;
                     isMaxValue = Double.compare(maxValue, counter) == 0;
+                    if (Orientation.VERTICAL == orientation) {
+                        isZero = Double.compare(0.0, maxValue - counter + minValue) == 0;
+                    } else {
+                        isZero = Double.compare(0.0, counter) == 0;
+                    }
 
                     if (isZero) { setZeroPosition(fixedPosition); }
 
-                    if (fullRange && isZero) {
-                        axisCtx.setFill(zeroColor);
-                        axisCtx.setStroke(zeroColor);
-                    }
                     if (majorTickMarksVisible) {
-                        axisCtx.setStroke(majorTickMarkColor);
+                        axisCtx.setStroke((fullRange && isZero) ? zeroColor : majorTickMarkColor);
                         axisCtx.setLineWidth(majorLineWidth);
                         axisCtx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
                     } else if (minorTickMarksVisible) {
-                        axisCtx.setStroke(minorTickMarkColor);
+                        axisCtx.setStroke((fullRange && isZero) ? zeroColor : minorTickMarkColor);
                         axisCtx.setLineWidth(minorLineWidth);
                         axisCtx.strokeLine(minorPointX, minorPointY, outerPointX, outerPointY);
                     }
