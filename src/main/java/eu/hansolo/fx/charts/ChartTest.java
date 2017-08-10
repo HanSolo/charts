@@ -34,7 +34,7 @@ import java.util.Random;
  */
 public class ChartTest extends Application {
     private static final Double      AXIS_WIDTH     = 25d;
-    private static final Color[]     COLORS         = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
+    private static final Color[]     COLORS         = { Color.rgb(200, 0, 0, 0.75), Color.rgb(0, 0, 200, 0.75), Color.rgb(0, 200, 200, 0.75), Color.rgb(0, 200, 0, 0.75) };
     private static final Random      RND            = new Random();
     private static final int         NO_OF_X_VALUES = 100;
     private XYSeries<XYDataObject>   xySeries1;
@@ -133,9 +133,9 @@ public class ChartTest extends Application {
         areaChart            = new XYChart<>(new XYPane(xySeries2),
                                              areaChartXAxisBottom, areaChartYAxisLeft);
 
-        xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
-        xySeries2.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 1.0)), new Stop(1.0, Color.TRANSPARENT)));
-        areaChart.getXYPane().setChartBackgroundPaint(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(50, 50, 50, 0.25)), new Stop(1.0, Color.rgb(25, 25, 25, 0.8))));
+        xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 0.75)), new Stop(1.0, Color.rgb(0, 255, 255, 0.25))));
+        xySeries2.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 1.0)), new Stop(1.0, Color.rgb(0, 255, 255, 1.0))));
+        areaChart.getXYPane().setChartBackgroundPaint(Color.rgb(50, 50, 50, 0.5));
 
         // SmoothLineChart
         smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
