@@ -539,19 +539,15 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             }
         }
 
-        // Add last point to all noOfBands
+        // Add last point to all bands
         Point lastPoint = new Point(POINTS.get(noOfPoints - 1).getX(), clamp(0, BAND_WIDTH, POINTS.get(noOfPoints - 1).getY()));
-        for (int band = 0 ; band < getNoOfBands() ; band++) {
-            mapOfBands.get(band).add(lastPoint);
-        }
+        mapOfBands.forEach((band, pointsInBand) -> {
+            Point lastPointInBand = pointsInBand.get(pointsInBand.size() - 1);
+            if(noOfPoints - lastPointInBand.getX() > 2) { pointsInBand.add(new Point(noOfPoints - 1, lastPointInBand.getY())); }
+            pointsInBand.add(lastPoint);
+        });
 
         return mapOfBands;
-    }
-
-    private Point calcIntersectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
-        double m = (RIGHT_POINT.getY() - LEFT_POINT.getY()) / (RIGHT_POINT.getX() - LEFT_POINT.getX());
-        double interSectionX = (INTERSECTION_Y - LEFT_POINT.getY()) / m;
-        return new Point(LEFT_POINT.getX() + interSectionX, INTERSECTION_Y);
     }
 
     private void drawSymbols(final XYSeries<T> SERIES) {
