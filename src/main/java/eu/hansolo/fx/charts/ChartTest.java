@@ -45,6 +45,7 @@ public class ChartTest extends Application {
     private XYChart<XYDataObject>    lineChart;
     private Axis                     lineChartXAxisBottom;
     private Axis                     lineChartYAxisLeft;
+    private Axis                     lineChartYAxisCenter;
     private Axis                     lineChartYAxisRight;
 
     private XYChart<XYDataObject>    areaChart;
@@ -113,15 +114,17 @@ public class ChartTest extends Application {
         double tempFahrenheitMin = tempUnit.convert(-10, Unit.Definition.FAHRENHEIT);
         double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
 
-        lineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
+        lineChartXAxisBottom = createBottomXAxis(-10, NO_OF_X_VALUES, true);
         lineChartYAxisLeft   = createLeftYAxis(-10, 20, true);
+        lineChartYAxisCenter = createCenterYAxis(-10, 20, true);
         lineChartYAxisRight  = createRightYAxis(tempFahrenheitMin, tempFahrenheitMax, false);
 
         lineChartXAxisBottom.setZeroColor(Color.BLACK);
         lineChartYAxisLeft.setZeroColor(Color.BLACK);
+        lineChartYAxisCenter.setAxisColor(Color.MAGENTA);
 
         lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1),
-                                  lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
+                                  lineChartYAxisLeft, lineChartYAxisCenter, lineChartYAxisRight, lineChartXAxisBottom);
 
         Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
         lineChart.setGrid(grid1);
@@ -251,6 +254,19 @@ public class ChartTest extends Application {
 
         return axis;
     }
+    private Axis createCenterYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
+        Axis axis = new Axis(Orientation.VERTICAL, Position.CENTER);
+        axis.setMinValue(MIN);
+        axis.setMaxValue(MAX);
+        axis.setPrefWidth(AXIS_WIDTH);
+        axis.setAutoScale(AUTO_SCALE);
+
+        AnchorPane.setTopAnchor(axis, 0d);
+        AnchorPane.setBottomAnchor(axis, 25d);
+        AnchorPane.setLeftAnchor(axis, axis.getZeroPosition());
+
+        return axis;
+    }
     private Axis createRightYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
         Axis axis = new Axis(Orientation.VERTICAL, Position.RIGHT);
         axis.setMinValue(MIN);
@@ -273,6 +289,19 @@ public class ChartTest extends Application {
         axis.setAutoScale(AUTO_SCALE);
 
         AnchorPane.setBottomAnchor(axis, 0d);
+        AnchorPane.setLeftAnchor(axis, 25d);
+        AnchorPane.setRightAnchor(axis, 25d);
+
+        return axis;
+    }
+    private Axis createCenterXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
+        Axis axis = new Axis(Orientation.HORIZONTAL, Position.CENTER);
+        axis.setMinValue(MIN);
+        axis.setMaxValue(MAX);
+        axis.setPrefHeight(AXIS_WIDTH);
+        axis.setAutoScale(AUTO_SCALE);
+
+        AnchorPane.setBottomAnchor(axis, axis.getZeroPosition());
         AnchorPane.setLeftAnchor(axis, 25d);
         AnchorPane.setRightAnchor(axis, 25d);
 

@@ -121,7 +121,11 @@ public class Axis extends Region {
     }
     public Axis(final double MIN_VALUE, final double MAX_VALUE, final Orientation ORIENTATION, final AxisType TYPE, final Position POSITION) {
         if (Orientation.VERTICAL == ORIENTATION) {
-            if (Position.LEFT != POSITION && Position.RIGHT != POSITION) {
+            if (Position.LEFT != POSITION && Position.RIGHT != POSITION && Position.CENTER != POSITION) {
+                throw new IllegalArgumentException("Wrong combination of orientation and position!");
+            }
+        } else {
+            if (Position.TOP != POSITION && Position.BOTTOM != POSITION && Position.CENTER != POSITION) {
                 throw new IllegalArgumentException("Wrong combination of orientation and position!");
             }
         }
@@ -760,9 +764,9 @@ public class Axis extends Region {
         Locale      locale            = getLocale();
         Orientation orientation       = getOrientation();
         Position    position          = getPosition();
-        double      anchorX           = 0;
+        double      anchorX           = Position.LEFT == position ? 0 : getZeroPosition();
         double      anchorXPlusOffset = anchorX + width;
-        double      anchorY           = 0;
+        double      anchorY           = Position.BOTTOM == position ? 0 : getZeroPosition();
         double      anchorYPlusOffset = anchorY + height;
         boolean     isMinValue;
         boolean     isZero;
@@ -778,6 +782,7 @@ public class Axis extends Region {
         double      textPointX;
         double      textPointY;
         double      maxTextWidth;
+
 
         if (AxisType.LINEAR == getType()) {
             // ******************** Linear ************************************
@@ -797,16 +802,16 @@ public class Axis extends Region {
 
             // Draw axis
             if (Orientation.VERTICAL == orientation) {
-                if (Position.LEFT == position) {
-                    axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition);
-                } else if (Position.RIGHT == position) {
-                    axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition);
+                switch(position) {
+                    case LEFT : axisCtx.strokeLine(anchorXPlusOffset, minPosition, anchorXPlusOffset, maxPosition); break;
+                    case RIGHT: axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition); break;
+                    default   : axisCtx.strokeLine(anchorX, minPosition, anchorX, maxPosition); break;
                 }
             } else {
-                if (Position.BOTTOM == position) {
-                    axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY);
-                } else if (Position.TOP == position) {
-                    axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset);
+                switch(position) {
+                    case BOTTOM: axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY); break;
+                    case TOP   : axisCtx.strokeLine(minPosition, anchorYPlusOffset, maxPosition, anchorYPlusOffset); break;
+                    default    : axisCtx.strokeLine(minPosition, anchorY, maxPosition, anchorY); break;
                 }
             }
 
@@ -829,12 +834,24 @@ public class Axis extends Region {
                         textPointX   = anchorXPlusOffset - 0.6 * width;
                         textPointY   = fixedPosition;
                         maxTextWidth = 0.6 * width;
-                    } else {
+                    } else if (Position.RIGHT == position) {
                         innerPointX  = anchorX + 0.5 * width;
                         innerPointY  = fixedPosition;
                         mediumPointX = anchorX + 0.4 * width;
                         mediumPointY = fixedPosition;
                         minorPointX  = anchorX + 0.3 * width;
+                        minorPointY  = fixedPosition;
+                        outerPointX  = anchorX;
+                        outerPointY  = fixedPosition;
+                        textPointX   = anchorXPlusOffset;
+                        textPointY   = fixedPosition;
+                        maxTextWidth = width;
+                    } else {
+                        innerPointX  = anchorX - 0.25 * width;
+                        innerPointY  = fixedPosition;
+                        mediumPointX = anchorX - 0.2 * width;
+                        mediumPointY = fixedPosition;
+                        minorPointX  = anchorX - 0.15 * width;
                         minorPointY  = fixedPosition;
                         outerPointX  = anchorX;
                         outerPointY  = fixedPosition;
@@ -855,7 +872,7 @@ public class Axis extends Region {
                         textPointX   = fixedPosition;
                         textPointY   = anchorY + 0.8 * height;
                         maxTextWidth = majorTickSpace * stepSize;
-                    } else {
+                    } else if (Position.TOP == position) {
                         innerPointX  = fixedPosition;
                         innerPointY  = anchorYPlusOffset - 0.5 * height;
                         mediumPointX = fixedPosition;
@@ -864,6 +881,18 @@ public class Axis extends Region {
                         minorPointY  = anchorYPlusOffset - 0.3 * height;
                         outerPointX  = fixedPosition;
                         outerPointY  = anchorYPlusOffset;
+                        textPointX   = fixedPosition;
+                        textPointY   = anchorY + 0.2 * height;
+                        maxTextWidth = majorTickSpace * stepSize;
+                    } else {
+                        innerPointX  = fixedPosition;
+                        innerPointY  = anchorY - 0.25 * height;
+                        mediumPointX = fixedPosition;
+                        mediumPointY = anchorY - 0.2 * height;
+                        minorPointX  = fixedPosition;
+                        minorPointY  = anchorY - 0.15 * height;
+                        outerPointX  = fixedPosition;
+                        outerPointY  = anchorY;
                         textPointX   = fixedPosition;
                         textPointY   = anchorY + 0.2 * height;
                         maxTextWidth = majorTickSpace * stepSize;
