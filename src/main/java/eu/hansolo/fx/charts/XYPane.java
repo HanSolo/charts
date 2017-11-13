@@ -12,13 +12,17 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static eu.hansolo.fx.charts.Helper.clamp;
 
@@ -35,6 +39,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private static final double                MAXIMUM_HEIGHT   = 4096;
     private static final double                MIN_SYMBOL_SIZE  = 2;
     private static final double                MAX_SYMBOL_SIZE  = 6;
+    private static final int                   SUB_DIVISIONS    = 24;
     private static       double                aspectRatio;
     private              boolean               keepAspect;
     private              double                size;
@@ -49,6 +54,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              double                scaleX;
     private              double                scaleY;
     private              double                symbolSize;
+    private              int                   noOfBands;
     private              double                _lowerBoundX;
     private              DoubleProperty        lowerBoundX;
     private              double                _upperBoundX;
@@ -57,13 +63,17 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              DoubleProperty        lowerBoundY;
     private              double                _upperBoundY;
     private              DoubleProperty        upperBoundY;
+    private              boolean               referenceZero;
 
 
     // ******************** Constructors **************************************
     public XYPane(final XYSeries<T>... SERIES) {
-        this(Color.WHITE, SERIES);
+        this(Color.WHITE, 1,  SERIES);
     }
-    public XYPane(final Paint BACKGROUND, final XYSeries<T>... SERIES) {
+    public XYPane(final int BANDS, final XYSeries<T>... SERIES) {
+        this(Color.WHITE, BANDS, SERIES);
+    }
+    public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
@@ -72,10 +82,12 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         scaleX                = 1;
         scaleY                = 1;
         symbolSize            = 2;
+        noOfBands = clamp(1, 5, BANDS);
         _lowerBoundX          = 0;
         _upperBoundX          = 100;
         _lowerBoundY          = 0;
         _upperBoundY          = 100;
+        referenceZero         = true;
 
         initGraphics();
         registerListeners();
@@ -140,6 +152,12 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             _chartBackgroundPaint = null;
         }
         return chartBackgroundPaint;
+    }
+
+    public int getNoOfBands() { return noOfBands; }
+    public void setNoOfBands(final int BANDS) {
+        noOfBands = clamp(1, 5, BANDS);
+        redraw();
     }
 
     public double getLowerBoundX() { return null == lowerBoundX ? _lowerBoundX : lowerBoundX.get(); }
@@ -221,7 +239,13 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
         return upperBoundY;
     }
-    
+
+    public boolean isReferenceZero() { return referenceZero; }
+    public void setReferenceZero(final boolean IS_ZERO) {
+        referenceZero = IS_ZERO;
+        redraw();
+    }
+
     public double getRangeX() {  return getUpperBoundX() - getLowerBoundX();  }
     public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
     
@@ -240,11 +264,13 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             final ChartType TYPE        = series.getChartType();
             final boolean   SHOW_POINTS = series.isShowPoints();
             switch(TYPE) {
-                case LINE       : drawLine(series, SHOW_POINTS);break;
-                case SMOOTH_LINE: drawSmoothLine(series, SHOW_POINTS);break;
-                case AREA       : drawArea(series, SHOW_POINTS);break;
-                case SMOOTH_AREA: drawSmoothArea(series, SHOW_POINTS);break;
-                case SCATTER    : drawScatter(series);break;
+                case LINE            : drawLine(series, SHOW_POINTS); break;
+                case SMOOTH_LINE     : drawSmoothLine(series, SHOW_POINTS); break;
+                case AREA            : drawArea(series, SHOW_POINTS); break;
+                case SMOOTH_AREA     : drawSmoothArea(series, SHOW_POINTS); break;
+                case SCATTER         : drawScatter(series) ;break;
+                case HORIZON         : drawHorizon(series, false); break;
+                case SMOOTHED_HORIZON: drawHorizon(series, true); break;
             }
         });
     }
@@ -311,7 +337,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         List<Point> points = new ArrayList<>(SERIES.getItems().size());
         SERIES.getItems().forEach(item -> points.add(new Point(item.getX(), item.getY())));
 
-        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
+        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), SUB_DIVISIONS);
 
         ctx.beginPath();
         for(Point p : interpolatedPoints) {
@@ -332,13 +358,14 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         List<Point> points = new ArrayList<>(SERIES.getItems().size());
         SERIES.getItems().forEach(item -> points.add(new Point(item.getX(), item.getY())));
 
-        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
+        Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), SUB_DIVISIONS);
 
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
         for(Point p : interpolatedPoints) {
-            ctx.lineTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
-            oldX = (p.getX() - LOWER_BOUND_X) * scaleX;
+            double x = (p.getX() - LOWER_BOUND_X) * scaleX;
+            ctx.lineTo(x, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
+            oldX = x;
         }
 
         ctx.lineTo(oldX, height);
@@ -348,6 +375,183 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.stroke();
 
         if (SHOW_POINTS) { drawSymbols(SERIES); }
+    }
+
+    private void drawHorizon(final XYSeries<T> SERIES, final boolean SMOOTHED) {
+        if (null == SERIES || SERIES.getItems().isEmpty()) { return; }
+
+        Color positiveBaseColor;
+        Color negativeBaseColor;
+        if (SERIES.getFill() instanceof Color) {
+            positiveBaseColor = (Color) SERIES.getFill();
+            if (positiveBaseColor.equals(Color.BLACK) ||
+                positiveBaseColor.equals(Color.WHITE) ||
+                positiveBaseColor.equals(Color.TRANSPARENT)) {
+                positiveBaseColor = Color.BLUE;
+                negativeBaseColor = Color.RED;
+            } else {
+                negativeBaseColor = Helper.getComplementaryColor(positiveBaseColor);
+            }
+        } else {
+            positiveBaseColor = Color.BLUE;
+            negativeBaseColor = Color.RED;
+        }
+
+        // Create colors
+        List<Color> aboveColors = Helper.createColorVariations(positiveBaseColor, noOfBands);
+        List<Color> belowColors = Helper.createColorVariations(negativeBaseColor, noOfBands);
+
+        int noOfItems = SERIES.getItems().size();
+
+        // Create list of points
+        List<Point> points = new ArrayList<>(noOfItems);
+        for (int i = 0; i < noOfItems; i++) { points.add(new Point(i, SERIES.getItems().get(i).getY())); }
+
+        double refValue  = isReferenceZero() ? 0 : (points.isEmpty() ? 0 : points.get(0).getY());
+        double minY      = points.stream().mapToDouble(Point::getY).min().getAsDouble();
+        double maxY      = points.stream().mapToDouble(Point::getY).max().getAsDouble();
+        double bandWidth = (maxY - minY) / noOfBands;
+
+        scaleX = width / (noOfItems - 1);
+        scaleY = height / ((maxY - minY) / (getNoOfBands()));
+
+        // Normalize y values to 0
+        points.forEach(point -> point.setY(point.getY() - refValue));
+
+        // Subdivide points
+        Point[] subdividedPoints;
+        if (SMOOTHED) {
+            subdividedPoints = Helper.subdividePoints(points.toArray(new Point[0]), SUB_DIVISIONS);
+        } else {
+            subdividedPoints = Helper.subdividePointsLinear(points.toArray(new Point[0]), SUB_DIVISIONS);
+        }
+
+        // Split in points above and below 0
+        List<Point>[] splittedPoints = splitIntoAboveAndBelow(Arrays.asList(subdividedPoints));
+        List<Point>   aboveRefPoints = splittedPoints[0];
+        List<Point>   belowRefPoints = splittedPoints[1];
+
+        // Split points above and below 0 into noOfBands
+        Map<Integer, List<Point>> aboveRefPointsSplitToBands = splitIntoBands(aboveRefPoints, bandWidth);
+        Map<Integer, List<Point>> belowRefPointsSplitToBands = splitIntoBands(belowRefPoints, bandWidth);
+
+        // Draw values above 0
+        if (!aboveRefPoints.isEmpty()) { drawPath(aboveRefPointsSplitToBands, bandWidth, aboveColors); }
+
+        // Draw values below 0
+        if (!belowRefPoints.isEmpty()) { drawPath(belowRefPointsSplitToBands, bandWidth, belowColors); }
+    }
+
+    private void drawPath(final Map<Integer, List<Point>> MAP_OF_BANDS, final double BAND_WIDTH, final List<Color> COLORS) {
+        double oldX = 0;
+        for (int band = 0 ; band < getNoOfBands() ; band++) {
+            ctx.beginPath();
+            for (Point p : MAP_OF_BANDS.get(band)) {
+                double x = p.getX() * scaleX;
+                double y = height - (p.getY() * scaleY);
+                ctx.lineTo(x, y + (band * BAND_WIDTH) * scaleY);
+                oldX = x;
+            }
+            ctx.lineTo(oldX, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.setFill(COLORS.get(band));
+            ctx.fill();
+        }
+    }
+
+    private List<Point>[] splitIntoAboveAndBelow(final List<Point> POINTS) {
+        ArrayList<Point> aboveReferencePoints = new ArrayList<>();
+        ArrayList<Point> belowReferencePoints = new ArrayList<>();
+        Point   last       = POINTS.get(0);
+        boolean isAbove    = Double.compare(last.getY(), 0.0) >= 0;
+        int     noOfPoints = POINTS.size();
+        for (int i = 0 ; i < noOfPoints ; i++) {
+            Point current = POINTS.get(i);
+            Point next    = i < noOfPoints - 1 ? POINTS.get(i + 1) : POINTS.get(noOfPoints - 1);
+
+            if (Double.compare(current.getY(), 0.0) >= 0) {
+                if (!isAbove) {
+                    Point p = Helper.calcIntersectionPoint(last, current, 0.0);
+                    aboveReferencePoints.add(p);
+                    belowReferencePoints.add(p);
+                }
+                aboveReferencePoints.add(current);
+                isAbove = true;
+            } else {
+                if (isAbove) {
+                    Point p = Helper.calcIntersectionPoint(current, next, 0.0);
+                    aboveReferencePoints.add(p);
+                    belowReferencePoints.add(p);
+                }
+                // Invert y values that are below the reference point
+                belowReferencePoints.add(new Point(current.getX(), -current.getY()));
+                isAbove = false;
+            }
+            last = current;
+        }
+        return new ArrayList[] { aboveReferencePoints, belowReferencePoints };
+    }
+
+    private Map<Integer, List<Point>> splitIntoBands(final List<Point> POINTS, final double BAND_WIDTH) {
+        Map<Integer, List<Point>> mapOfBands = new HashMap<>(getNoOfBands());
+        if (POINTS.isEmpty()) { return mapOfBands; }
+
+        int    noOfPoints = POINTS.size();
+        double currentBandMinY;
+        double currentBandMaxY;
+        double currentBandMinYScaled;
+        double currentBandMaxYScaled;
+
+        // Add first point to all noOfBands
+        Point firstPoint = new Point(POINTS.get(0).getX(), POINTS.get(0).getY());
+        for (int band = 0 ; band < getNoOfBands() ; band++) {
+            List<Point> listOfPointsInBand = new ArrayList<>(noOfPoints);
+            listOfPointsInBand.add(firstPoint);
+            mapOfBands.put(band, listOfPointsInBand);
+        }
+
+        // Iterate over all points and check for each band
+        for (int i = 1 ; i < noOfPoints - 1 ; i++) {
+            Point  last     = POINTS.get(i - 1);
+            double lastY    = height - (last.getY() * scaleY);
+            Point  current  = POINTS.get(i);
+            double currentY = height - (current.getY() * scaleY);
+            Point  next     = POINTS.get(i + 1);
+            double nextY    = height - (next.getY() * scaleY);
+
+            for (int band = 0 ; band < getNoOfBands() ; band++) {
+                currentBandMinY       = band * BAND_WIDTH;
+                currentBandMaxY       = currentBandMinY + BAND_WIDTH;
+                currentBandMinYScaled = height - currentBandMinY * scaleY;
+                currentBandMaxYScaled = height - currentBandMaxY * scaleY;
+
+                if (Double.compare(lastY, currentBandMinYScaled) >= 0) {             // last <= currentBandMinY
+                    // Calculate intersection with currentBandMinY
+                    mapOfBands.get(band).add(Helper.calcIntersectionPoint(last, current, currentBandMinY));
+                } else if (Double.compare(currentY, currentBandMinYScaled) <= 0 &&
+                           Double.compare(currentY, currentBandMaxYScaled) >= 0) {   // currentBandMinY < current < currentBandMaxY
+                    mapOfBands.get(band).add(new Point(current.getX(), current.getY()));
+                } else if (Double.compare(nextY, currentBandMaxYScaled) <= 0) {      // next >= currentBandMaxY
+                    // Calculate intersection with currentBandMaxY
+                    mapOfBands.get(band).add(Helper.calcIntersectionPoint(current, next, currentBandMaxY));
+                }
+            }
+        }
+
+        // Add last point to all noOfBands
+        Point lastPoint = new Point(POINTS.get(noOfPoints - 1).getX(), clamp(0, BAND_WIDTH, POINTS.get(noOfPoints - 1).getY()));
+        for (int band = 0 ; band < getNoOfBands() ; band++) {
+            mapOfBands.get(band).add(lastPoint);
+        }
+
+        return mapOfBands;
+    }
+
+    private Point calcIntersectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
+        double m = (RIGHT_POINT.getY() - LEFT_POINT.getY()) / (RIGHT_POINT.getX() - LEFT_POINT.getX());
+        double interSectionX = (INTERSECTION_Y - LEFT_POINT.getY()) / m;
+        return new Point(LEFT_POINT.getX() + interSectionX, INTERSECTION_Y);
     }
 
     private void drawSymbols(final XYSeries<T> SERIES) {

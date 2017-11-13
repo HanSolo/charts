@@ -33,13 +33,17 @@ public class XYChart<T extends XYData> extends Region {
     private              XYPane<T>      xyPane;
     private              List<Axis>     axis;
     private              Axis           yAxisL;
+    private              Axis           yAxisC;
     private              Axis           yAxisR;
     private              Axis           xAxisT;
+    private              Axis           xAxisC;
     private              Axis           xAxisB;
     private              Grid           grid;
     private              boolean        hasLeftYAxis;
+    private              boolean        hasCenterYAxis;
     private              boolean        hasRightYAxis;
     private              boolean        hasTopXAxis;
+    private              boolean        hasCenterXAxis;
     private              boolean        hasBottomXAxis;
     private              String         _title;
     private              StringProperty title;
@@ -142,6 +146,9 @@ public class XYChart<T extends XYData> extends Region {
         return subTitle;
     }
 
+    public boolean isReferenceZero() { return xyPane.isReferenceZero(); }
+    public void setReferenceZero(final boolean IS_ZERO) { xyPane.setReferenceZero(IS_ZERO); }
+
     public void setGrid(final Grid GRID) {
         if (null == GRID) return;
         if (null != grid) { pane.getChildren().remove(1); }
@@ -164,12 +171,17 @@ public class XYChart<T extends XYData> extends Region {
                             hasTopXAxis    = true;
                             xAxisT         = axis;
                             break;
+                        case CENTER:
+                            hasCenterXAxis = true;
+                            xAxisC         = axis;
+                            break;
                         case BOTTOM:
                             hasBottomXAxis = true;
                             xAxisB         = axis;
                             break;
                         default:
                             hasTopXAxis    = false;
+                            hasCenterXAxis = false;
                             hasBottomXAxis = false;
                             break;
                     }
@@ -177,16 +189,21 @@ public class XYChart<T extends XYData> extends Region {
                 case VERTICAL:
                     switch(position) {
                         case LEFT:
-                            hasLeftYAxis  = true;
-                            yAxisL        = axis;
+                            hasLeftYAxis   = true;
+                            yAxisL         = axis;
+                            break;
+                        case CENTER:
+                            hasCenterYAxis = true;
+                            yAxisC         = axis;
                             break;
                         case RIGHT:
-                            hasRightYAxis = true;
-                            yAxisR        = axis;
+                            hasRightYAxis  = true;
+                            yAxisR         = axis;
                             break;
                         default:
-                            hasLeftYAxis  = false;
-                            hasRightYAxis = false;
+                            hasLeftYAxis   = false;
+                            hasCenterYAxis = false;
+                            hasRightYAxis  = false;
                             break;
                     }
                     break;
@@ -228,6 +245,8 @@ public class XYChart<T extends XYData> extends Region {
                 AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? AXIS_WIDTH : 0d);
             }
         });
+        if (hasCenterYAxis) { yAxisC.zeroPositionProperty().addListener(o -> System.out.println(yAxisC.getZeroPosition())); AnchorPane.setLeftAnchor(yAxisC, yAxisC.getZeroPosition()); }
+        if (hasCenterXAxis) { AnchorPane.setTopAnchor(xAxisC, xAxisC.getZeroPosition()); }
     }
 
     private void adjustGridAnchors() {
