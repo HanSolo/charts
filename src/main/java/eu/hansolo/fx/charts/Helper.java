@@ -1,13 +1,20 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.tools.CatmullRom;
+import eu.hansolo.fx.charts.tools.CtxBounds;
+import eu.hansolo.fx.charts.tools.CtxCornerRadii;
 import eu.hansolo.fx.charts.tools.Point;
+import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Polygon;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -88,7 +95,7 @@ public class Helper {
         }
     }
 
-    public static void saveAsPng(final Node NODE, final String FILE_NAME) {
+    public static final void saveAsPng(final Node NODE, final String FILE_NAME) {
         final WritableImage SNAPSHOT = NODE.snapshot(new SnapshotParameters(), null);
         final String        NAME     = FILE_NAME.replace("\\.[a-zA-Z]{3,4}", "");
         final File          FILE     = new File(NAME + ".png");
@@ -100,12 +107,12 @@ public class Helper {
         }
     }
 
-    public static List<Point> subdividePoints(final List<Point> POINTS, final int SUB_DIVISIONS) {
+    public static final List<Point> subdividePoints(final List<Point> POINTS, final int SUB_DIVISIONS) {
         Point[] points = POINTS.toArray(new Point[0]);
         return Arrays.asList(subdividePoints(points, SUB_DIVISIONS));
     }
 
-    public static Point[] subdividePoints(final Point[] POINTS, final int SUB_DIVISIONS) {
+    public static final Point[] subdividePoints(final Point[] POINTS, final int SUB_DIVISIONS) {
         assert POINTS != null;
         assert POINTS.length >= 3;
         int    noOfPoints = POINTS.length;
@@ -130,7 +137,7 @@ public class Helper {
         return subdividedPoints;
     }
 
-    public static Point[] subdividePointsLinear(final Point[] POINTS, final int SUB_DIVISIONS) {
+    public static final Point[] subdividePointsLinear(final Point[] POINTS, final int SUB_DIVISIONS) {
         assert  POINTS != null;
         assert  POINTS.length >= 3;
 
@@ -145,37 +152,37 @@ public class Helper {
         return subdividedPoints;
     }
 
-    public static Point calcIntermediatePoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERVAL_X) {
+    public static final Point calcIntermediatePoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERVAL_X) {
         double m = (RIGHT_POINT.getY() - LEFT_POINT.getY()) / (RIGHT_POINT.getX() - LEFT_POINT.getX());
         double x = INTERVAL_X;
         double y = m * x;
         return new Point(LEFT_POINT.getX() + x, LEFT_POINT.getY() + y);
     }
 
-    public static Point calcIntersectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
+    public static final Point calcIntersectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
         double[] xy = calculateInterSectionPoint(LEFT_POINT.getX(), LEFT_POINT.getY(), RIGHT_POINT.getX(), RIGHT_POINT.getY(), INTERSECTION_Y);
         return new Point(xy[0], xy[1]);
     }
-    public static double[] calculateInterSectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
+    public static final double[] calculateInterSectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
         return calculateInterSectionPoint(LEFT_POINT.getX(), LEFT_POINT.getY(), RIGHT_POINT.getX(), RIGHT_POINT.getY(), INTERSECTION_Y);
     }
-    public static double[] calculateInterSectionPoint(final double X1, final double Y1, final double X2, final double Y2, final double INTERSECTION_Y) {
+    public static final double[] calculateInterSectionPoint(final double X1, final double Y1, final double X2, final double Y2, final double INTERSECTION_Y) {
         double m = (Y2 - Y1) / (X2 - X1);
         double interSectionX = (INTERSECTION_Y - Y1) / m;
         return new double[] { X1 + interSectionX, INTERSECTION_Y };
     }
 
-    public static double[] rotate(final double PX, double PY, final double RX, final double RY, final double ANGLE) {
+    public static final double[] rotate(final double PX, double PY, final double RX, final double RY, final double ANGLE) {
         double x = RX + (Math.cos(ANGLE) * (PX - RX) - Math.sin(ANGLE) * (PY - RY));
         double y = RY + (Math.sin(ANGLE) * (PX - RX) + Math.cos(ANGLE) * (PY - RY));
         return new double[] {x, y};
     }
-    public static Point rotate(final Point P1, final Point ROTATION_CENTER, final double ANGLE) {
+    public static final Point rotate(final Point P1, final Point ROTATION_CENTER, final double ANGLE) {
         double[] xy = rotate(P1.getX(), P1.getY(), ROTATION_CENTER.getX(), ROTATION_CENTER.getY(), ANGLE);
         return new Point(xy[0], xy[1]);
     }
 
-    public static Color getColorWithOpacity(final Color COLOR, final double OPACITY) {
+    public static final Color getColorWithOpacity(final Color COLOR, final double OPACITY) {
         double red     = COLOR.getRed();
         double green   = COLOR.getGreen();
         double blue    = COLOR.getBlue();
@@ -183,13 +190,13 @@ public class Helper {
         return Color.color(red, green, blue, opacity);
     }
 
-    public static boolean isPowerOf10(final double VALUE) {
+    public static final boolean isPowerOf10(final double VALUE) {
         double value = VALUE;
         while(value > 9 && value % 10 == 0) { value /= 10; }
         return value == 1;
     }
 
-    public static void rotateCtx(final GraphicsContext CTX, final double X, final double Y, final double ANGLE) {
+    public static final void rotateCtx(final GraphicsContext CTX, final double X, final double Y, final double ANGLE) {
         CTX.translate(X, Y);
         CTX.rotate(ANGLE);
         CTX.translate(-X, -Y);
@@ -243,6 +250,16 @@ public class Helper {
         return colors;
     }
 
+    public static final LinearGradient createColorVariationGradient(final Color COLOR, final int NO_OF_COLORS) {
+        List<Color> colorVariations = createColorVariations(COLOR, NO_OF_COLORS);
+        List<Stop>  stops = new ArrayList<>(NO_OF_COLORS);
+        double step = 1.0 / NO_OF_COLORS;
+        for (int i = 0 ; i < NO_OF_COLORS ; i++) {
+            stops.add(new Stop(i * step, colorVariations.get(i)));
+        }
+        return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
+    }
+
     public static double[] colorToYUV(final Color COLOR) {
         final double WEIGHT_FACTOR_RED   = 0.299;
         final double WEIGHT_FACTOR_GREEN = 0.587;
@@ -257,4 +274,123 @@ public class Helper {
 
     public static final boolean isBright(final Color COLOR) { return Double.compare(colorToYUV(COLOR)[0], 0.5) >= 0.0; }
     public static final boolean isDark(final Color COLOR) { return colorToYUV(COLOR)[0] < 0.5; }
+
+    public static final boolean isInRectangle(final double X, final double Y,
+                                              final double MIN_X, final double MIN_Y,
+                                              final double MAX_X, final double MAX_Y) {
+        return (Double.compare(X, MIN_X) >= 0 &&
+                Double.compare(X, MAX_X) <= 0 &&
+                Double.compare(Y, MIN_Y) >= 0 &&
+                Double.compare(Y, MAX_Y) <= 0);
+    }
+
+    public static final boolean isInEllipse(final double X, final double Y,
+                                            final double ELLIPSE_CENTER_X, final double ELLIPSE_CENTER_Y,
+                                            final double ELLIPSE_RADIUS_X, final double ELLIPSE_RADIUS_Y) {
+        return Double.compare(((((X - ELLIPSE_CENTER_X) * (X - ELLIPSE_CENTER_X)) / (ELLIPSE_RADIUS_X * ELLIPSE_RADIUS_X)) +
+                               (((Y - ELLIPSE_CENTER_Y) * (Y - ELLIPSE_CENTER_Y)) / (ELLIPSE_RADIUS_Y * ELLIPSE_RADIUS_Y))), 1) <= 0.0;
+    }
+
+    public static final boolean isInPolygon(final double X, final double Y, final Polygon POLYGON) {
+        List<Double> points              = POLYGON.getPoints();
+        int          noOfPointsInPolygon = POLYGON.getPoints().size() / 2;
+        double[]     pointsX             = new double[noOfPointsInPolygon];
+        double[]     pointsY             = new double[noOfPointsInPolygon];
+        int          pointCounter        = 0;
+        for (int i = 0 ; i < points.size() ; i++) {
+            if (i % 2 == 0) {
+                pointsX[i] = points.get(pointCounter);
+            } else {
+                pointsY[i] = points.get(pointCounter);
+                pointCounter++;
+            }
+        }
+        return isInPolygon(X, Y, noOfPointsInPolygon, pointsX, pointsY);
+    }
+    public static final boolean isInPolygon(final double X, final double Y, final int NO_OF_POINTS_IN_POLYGON, final double[] POINTS_X, final double[] POINTS_Y) {
+        if (NO_OF_POINTS_IN_POLYGON != POINTS_X.length || NO_OF_POINTS_IN_POLYGON != POINTS_Y.length) { return false; }
+        boolean inside = false;
+        for (int i = 0, j = NO_OF_POINTS_IN_POLYGON - 1; i < NO_OF_POINTS_IN_POLYGON ; j = i++) {
+            if (((POINTS_Y[i] > Y) != (POINTS_Y[j] > Y)) && (X < (POINTS_X[j] - POINTS_X[i]) * (Y - POINTS_Y[i]) / (POINTS_Y[j] - POINTS_Y[i]) + POINTS_X[i])) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    public static final boolean isInRingSegment(final double X, final double Y,
+                                                final double CENTER_X, final double CENTER_Y,
+                                                final double OUTER_RADIUS, final double INNER_RADIUS,
+                                                final double START_ANGLE, final double SEGMENT_ANGLE) {
+        double angleOffset = 90.0;
+        double pointRadius = Math.sqrt((X - CENTER_X) * (X - CENTER_X) + (Y - CENTER_Y) * (Y - CENTER_Y));
+        double pointAngle  = getAngleFromXY(X, Y, CENTER_X, CENTER_Y, angleOffset);
+        double startAngle  = angleOffset - START_ANGLE;
+        double endAngle    = startAngle + SEGMENT_ANGLE;
+
+        return (Double.compare(pointRadius, INNER_RADIUS) >= 0 &&
+                Double.compare(pointRadius, OUTER_RADIUS) <= 0 &&
+                Double.compare(pointAngle, startAngle) >= 0 &&
+                Double.compare(pointAngle, endAngle) <= 0);
+    }
+
+    public static final double getAngleFromXY(final double X, final double Y, final double CENTER_X, final double CENTER_Y) {
+        return getAngleFromXY(X, Y, CENTER_X, CENTER_Y, 90.0);
+    }
+    public static final double getAngleFromXY(final double X, final double Y, final double CENTER_X, final double CENTER_Y, final double ANGLE_OFFSET) {
+        // For ANGLE_OFFSET =  0 -> Angle of 0 is at 3 o'clock
+        // For ANGLE_OFFSET = 90  ->Angle of 0 is at 12 o'clock
+        double deltaX      = X - CENTER_X;
+        double deltaY      = Y - CENTER_Y;
+        double radius      = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        double nx          = deltaX / radius;
+        double ny          = deltaY / radius;
+        double theta       = Math.atan2(ny, nx);
+        theta              = Double.compare(theta, 0.0) >= 0 ? Math.toDegrees(theta) : Math.toDegrees((theta)) + 360.0;
+        double angle       = (theta + ANGLE_OFFSET) % 360;
+        return angle;
+    }
+
+    public static final void drawRoundedRect(final GraphicsContext CTX, final CtxBounds BOUNDS, final CtxCornerRadii RADII) {
+        double x           = BOUNDS.getX();
+        double y           = BOUNDS.getY();
+        double width       = BOUNDS.getWidth();
+        double height      = BOUNDS.getHeight();
+        double xPlusWidth  = x + width;
+        double yPlusHeight = y + height;
+
+        CTX.beginPath();
+        CTX.moveTo(x + RADII.getTopLeft(), y);
+        CTX.lineTo(xPlusWidth - RADII.getTopRight(), y);
+        CTX.quadraticCurveTo(xPlusWidth, y, xPlusWidth, y + RADII.getTopRight());
+        CTX.lineTo(xPlusWidth, yPlusHeight - RADII.getBottomRight());
+        CTX.quadraticCurveTo(xPlusWidth, yPlusHeight, xPlusWidth - RADII.getBottomRight(), yPlusHeight);
+        CTX.lineTo(x + RADII.getBottomLeft(), yPlusHeight);
+        CTX.quadraticCurveTo(x, yPlusHeight, x, yPlusHeight - RADII.getBottomLeft());
+        CTX.lineTo(x, y + RADII.getTopLeft());
+        CTX.quadraticCurveTo(x, y, x + RADII.getTopLeft(), y);
+        CTX.closePath();
+    }
+
+    public static final Color getColorAt(final LinearGradient GRADIENT, final double FRACTION) {
+        List<Stop> stops     = GRADIENT.getStops();
+        double     fraction  = FRACTION < 0f ? 0f : (FRACTION > 1 ? 1 : FRACTION);
+        Stop       lowerStop = new Stop(0.0, stops.get(0).getColor());
+        Stop       upperStop = new Stop(1.0, stops.get(stops.size() - 1).getColor());
+
+        for (Stop stop : stops) {
+            double currentFraction = stop.getOffset();
+            if (Double.compare(currentFraction, fraction) == 0) {
+                return stop.getColor();
+            } else if (Double.compare(currentFraction, fraction) < 0) {
+                lowerStop = new Stop(currentFraction, stop.getColor());
+            } else {
+                upperStop = new Stop(currentFraction, stop.getColor());
+                break;
+            }
+        }
+
+        double interpolationFraction = (fraction - lowerStop.getOffset()) / (upperStop.getOffset() - lowerStop.getOffset());
+        return (Color) Interpolator.LINEAR.interpolate(lowerStop.getColor(), upperStop.getColor(), interpolationFraction);
+    }
 }
