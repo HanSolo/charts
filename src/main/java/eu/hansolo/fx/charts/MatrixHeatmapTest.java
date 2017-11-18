@@ -55,7 +55,7 @@ public class MatrixHeatmapTest extends Application {
         matrixSeries1  = new MatrixSeries(matrixData1, ChartType.MATRIX_HEATMAP);
 
         matrixHeatMap1 = new MatrixPane(matrixSeries1);
-        matrixHeatMap1.setColorMapping(ColorMapping.BLUE_TRANSPARENT_RED);
+        matrixHeatMap1.setColorMapping(ColorMapping.INFRARED_1);
         matrixHeatMap1.getMatrix().setUseSpacer(false);
         matrixHeatMap1.getMatrix().setColsAndRows(NO_OF_CELLS, NO_OF_CELLS);
         matrixHeatMap1.setPrefSize(400, 400);

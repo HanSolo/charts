@@ -9,7 +9,7 @@ import eu.hansolo.fx.charts.data.YDataObject;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.series.XYSeries;
-import eu.hansolo.fx.charts.unit.Unit;
+import eu.hansolo.fx.charts.unit.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -110,9 +110,9 @@ public class ChartTest extends Application {
         bubbleChart = new XYZPane(xyzSeries);
 
         // LineChart
-        Unit   tempUnit          = new Unit(Unit.Type.TEMPERATURE, Unit.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
-        double tempFahrenheitMin = tempUnit.convert(-10, Unit.Definition.FAHRENHEIT);
-        double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
+        Converter tempConverter     = new Converter(Converter.Type.TEMPERATURE, Converter.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
+        double    tempFahrenheitMin = tempConverter.convert(-10, Converter.Definition.FAHRENHEIT);
+        double    tempFahrenheitMax = tempConverter.convert(20, Converter.Definition.FAHRENHEIT);
 
         lineChartXAxisBottom = createBottomXAxis(-10, NO_OF_X_VALUES, true);
         lineChartYAxisLeft   = createLeftYAxis(-10, 20, true);

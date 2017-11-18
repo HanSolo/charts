@@ -6,7 +6,7 @@ import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.data.YDataObject;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.YSeries;
-import eu.hansolo.fx.charts.unit.Unit;
+import eu.hansolo.fx.charts.unit.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -74,9 +74,9 @@ public class SingleChartTest extends Application {
         xySeries4.setShowPoints(false);
 
         // XYChart
-        Unit   tempUnit          = new Unit(Unit.Type.TEMPERATURE, Unit.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
-        double tempFahrenheitMin = tempUnit.convert(0, Unit.Definition.FAHRENHEIT);
-        double tempFahrenheitMax = tempUnit.convert(20, Unit.Definition.FAHRENHEIT);
+        Converter tempConverter     = new Converter(Converter.Type.TEMPERATURE, Converter.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
+        double    tempFahrenheitMin = tempConverter.convert(0, Converter.Definition.FAHRENHEIT);
+        double    tempFahrenheitMax = tempConverter.convert(20, Converter.Definition.FAHRENHEIT);
 
         lineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         lineChartYAxisLeft   = createLeftYAxis(0, 20, true);

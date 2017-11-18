@@ -1,13 +1,11 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.Axis.AxisType;
-import eu.hansolo.fx.charts.unit.Unit;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 
