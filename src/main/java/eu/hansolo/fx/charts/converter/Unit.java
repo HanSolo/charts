@@ -1,6 +1,6 @@
-package eu.hansolo.fx.charts.unit;
+package eu.hansolo.fx.charts.converter;
 
-import eu.hansolo.fx.charts.unit.Converter.Category;
+import eu.hansolo.fx.charts.converter.Converter.Category;
 
 import java.math.BigDecimal;
 

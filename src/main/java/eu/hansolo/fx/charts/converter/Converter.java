@@ -1,4 +1,4 @@
-package eu.hansolo.fx.charts.unit;
+package eu.hansolo.fx.charts.converter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -318,25 +318,25 @@ public class Converter {
 
     public String getFormatString() { return formatString; }
 
-    public final boolean isActive() { return bean.isActive(); }
-    public final void setActive(final boolean ACTIVE) { bean.setActive(ACTIVE); }
+    public boolean isActive() { return bean.isActive(); }
+    public void setActive(final boolean ACTIVE) { bean.setActive(ACTIVE); }
 
-    public final double convert(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
+    public double convert(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
         if (UNIT_DEFINITION.UNIT.getCategory() != getUnitType()) { throw new IllegalArgumentException("units have to be of the same type"); }
         return ((((VALUE + baseUnitDefinition.UNIT.getOffset().doubleValue()) * baseUnitDefinition.UNIT.getFactor().doubleValue()) + bean.getOffset().doubleValue()) * bean.getFactor().doubleValue()) / UNIT_DEFINITION.UNIT
             .getFactor().doubleValue() - UNIT_DEFINITION.UNIT.getOffset().doubleValue();
     }
 
-    public final String convertToString(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
+    public String convertToString(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
         return String.join(" ", String.format(locale, formatString, convert(VALUE, UNIT_DEFINITION)), UNIT_DEFINITION.UNIT.getUnitShort());
     }
 
-    public final double convertToBaseUnit(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
+    public double convertToBaseUnit(final double VALUE, final UnitDefinition UNIT_DEFINITION) {
         return ((((VALUE + UNIT_DEFINITION.UNIT.getOffset().doubleValue()) * UNIT_DEFINITION.UNIT.getFactor().doubleValue()) + bean.getOffset().doubleValue()) * bean.getFactor().doubleValue()) / baseUnitDefinition.UNIT
             .getFactor().doubleValue() - baseUnitDefinition.UNIT.getOffset().doubleValue();
     }
 
-    public final Pattern getPattern() {
+    public Pattern getPattern() {
         final StringBuilder PATTERN_BUILDER = new StringBuilder();
         PATTERN_BUILDER.append("^([-+]?\\d*\\.?\\d*)\\s?(");
 
@@ -352,11 +352,11 @@ public class Converter {
         return Pattern.compile(PATTERN_BUILDER.toString());
     }
 
-    public final List<Unit> getAvailableUnits(final Category UNIT_DEFINITION) {
+    public List<Unit> getAvailableUnits(final Category UNIT_DEFINITION) {
         return getAllUnitDefinitions().get(UNIT_DEFINITION).stream().map(unitDefinition -> unitDefinition.UNIT).collect(Collectors.toList());
     }
 
-    public final EnumMap<Category, ArrayList<UnitDefinition>> getAllUnitDefinitions() {
+    public EnumMap<Category, ArrayList<UnitDefinition>> getAllUnitDefinitions() {
         final EnumMap<Category, ArrayList<UnitDefinition>> UNIT_TYPES    = new EnumMap<>(Category.class);
         final ArrayList<Category>                          CATEGORY_LIST = new ArrayList<>(Category.values().length);
         CATEGORY_LIST.addAll(Arrays.asList(Category.values()));
@@ -367,7 +367,7 @@ public class Converter {
         return UNIT_TYPES;
     }
 
-    public final EnumMap<Category, ArrayList<UnitDefinition>> getAllActiveUnitDefinitions() {
+    public EnumMap<Category, ArrayList<UnitDefinition>> getAllActiveUnitDefinitions() {
         final EnumMap<Category, ArrayList<UnitDefinition>> UNIT_DEFINITIONS = new EnumMap<>(Category.class);
         final ArrayList<Category>                          CATEGORY_LIST    = new ArrayList<>(Category.values().length);
         CATEGORY_LIST.addAll(Arrays.asList(Category.values()));
