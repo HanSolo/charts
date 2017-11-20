@@ -1,12 +1,15 @@
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.unit.Converter;
+import eu.hansolo.fx.charts.converter.Converter;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+
+import static eu.hansolo.fx.charts.converter.Converter.Category.*;
+import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.*;
 
 
 /**
@@ -40,9 +43,9 @@ public class AxisTest extends Application {
         AnchorPane.setTopAnchor(yAxisLeft, 20d);
         AnchorPane.setBottomAnchor(yAxisLeft, 20d);
 
-        Converter tempConverter     = new Converter(Converter.Type.TEMPERATURE, Converter.Definition.CELSIUS); // Type Temperature with BaseUnit Celsius
-        double    tempFahrenheitMin = tempConverter.convert(-20, Converter.Definition.FAHRENHEIT);
-        double    tempFahrenheitMax = tempConverter.convert(20, Converter.Definition.FAHRENHEIT);
+        Converter tempConverter     = new Converter(TEMPERATURE, CELSIUS); // Type Temperature with BaseUnit Celsius
+        double    tempFahrenheitMin = tempConverter.convert(-20, FAHRENHEIT);
+        double    tempFahrenheitMax = tempConverter.convert(20, FAHRENHEIT);
 
         yAxisRight = new Axis(tempFahrenheitMin, tempFahrenheitMax, Orientation.VERTICAL, Position.RIGHT);
         yAxisRight.setPrefWidth(20);

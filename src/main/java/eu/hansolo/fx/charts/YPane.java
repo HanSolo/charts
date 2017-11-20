@@ -3,6 +3,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.YData;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
+import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static eu.hansolo.fx.charts.Helper.clamp;
+import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
 public class YPane<T extends YData> extends Region implements ChartArea {

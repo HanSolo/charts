@@ -1,6 +1,5 @@
 package eu.hansolo.fx.charts.tools;
 
-import eu.hansolo.fx.charts.Helper;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
 

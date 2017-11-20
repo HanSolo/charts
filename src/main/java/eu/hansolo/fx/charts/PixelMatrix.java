@@ -4,6 +4,7 @@ import eu.hansolo.fx.charts.event.PixelMatrixEvent;
 import eu.hansolo.fx.charts.event.PixelMatrixEventListener;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.CtxCornerRadii;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.DefaultProperty;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;

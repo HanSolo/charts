@@ -1,6 +1,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -26,8 +27,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 

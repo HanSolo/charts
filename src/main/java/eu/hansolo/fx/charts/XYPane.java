@@ -2,6 +2,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.series.XYSeries;
+import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -12,7 +13,6 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static eu.hansolo.fx.charts.Helper.clamp;
+import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
 /**

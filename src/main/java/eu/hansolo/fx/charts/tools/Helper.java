@@ -1,5 +1,6 @@
-package eu.hansolo.fx.charts;
+package eu.hansolo.fx.charts.tools;
 
+import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.tools.CatmullRom;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.CtxCornerRadii;
@@ -22,11 +23,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 
 public class Helper {
-    public static final double MAX_TICK_MARK_LENGTH = 0.125;
-    public static final double MAX_TICK_MARK_WIDTH  = 0.02;
+    public static final double   MAX_TICK_MARK_LENGTH = 0.125;
+    public static final double   MAX_TICK_MARK_WIDTH  = 0.02;
+    public static final String[] ABBREVIATIONS        = { "k", "M", "G", "T", "P", "E", "Z", "Y" };
 
     public static final int clamp(final int MIN, final int MAX, final int VALUE) {
         if (VALUE < MIN) return MIN;
@@ -42,6 +46,20 @@ public class Helper {
         if (Double.compare(VALUE, MIN) < 0) return MIN;
         if (Double.compare(VALUE, MAX) > 0) return MAX;
         return VALUE;
+    }
+
+    public static final double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
+        double maxNoOfMajorTicks = 10;
+        double maxNoOfMinorTicks = 10;
+        double minorTickSpace    = 1;
+        double majorTickSpace    = 10;
+        double niceRange         = (Helper.calcNiceNumber((MAX_VALUE - MIN_VALUE), false));
+        majorTickSpace           = Helper.calcNiceNumber(niceRange / (maxNoOfMajorTicks - 1), true);
+        minorTickSpace           = Helper.calcNiceNumber(majorTickSpace / (maxNoOfMinorTicks - 1), true);
+        double niceMinValue      = (Math.floor(MIN_VALUE / majorTickSpace) * majorTickSpace);
+        double niceMaxValue      = (Math.ceil(MAX_VALUE / majorTickSpace) * majorTickSpace);
+
+        return new double[] { minorTickSpace, majorTickSpace, niceMinValue, niceMaxValue };
     }
 
     public static final double calcNiceNumber(final double RANGE, final boolean ROUND) {
@@ -260,7 +278,7 @@ public class Helper {
         return new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, stops);
     }
 
-    public static double[] colorToYUV(final Color COLOR) {
+    public static final double[] colorToYUV(final Color COLOR) {
         final double WEIGHT_FACTOR_RED   = 0.299;
         final double WEIGHT_FACTOR_GREEN = 0.587;
         final double WEIGHT_FACTOR_BLUE  = 0.144;
@@ -392,5 +410,20 @@ public class Helper {
 
         double interpolationFraction = (fraction - lowerStop.getOffset()) / (upperStop.getOffset() - lowerStop.getOffset());
         return (Color) Interpolator.LINEAR.interpolate(lowerStop.getColor(), upperStop.getColor(), interpolationFraction);
+    }
+
+    public static final String format(final double NUMBER, final int DECIMALS) {
+        return format(NUMBER, clamp(0, 12, DECIMALS), Locale.US);
+    }
+    public static final String format(final double NUMBER, final int DECIMALS, final Locale LOCALE) {
+        String formatString = new StringBuilder("%.").append(clamp(0, 12, DECIMALS)).append("f").toString();
+        double value;
+        for(int i = ABBREVIATIONS.length - 1 ; i >= 0; i--) {
+            value = Math.pow(1000, i+1);
+            if (Double.compare(NUMBER, -value) <= 0 || Double.compare(NUMBER, value) >= 0) {
+                return String.format(LOCALE, formatString, (NUMBER / value)) + ABBREVIATIONS[i];
+            }
+        }
+        return String.format(LOCALE, formatString, NUMBER);
     }
 }

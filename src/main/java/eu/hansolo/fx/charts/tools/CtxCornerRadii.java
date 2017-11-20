@@ -1,9 +1,6 @@
 package eu.hansolo.fx.charts.tools;
 
 
-import eu.hansolo.fx.charts.Helper;
-
-
 public class CtxCornerRadii {
     private double topLeft;
     private double topRight;

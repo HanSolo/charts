@@ -5,6 +5,7 @@ import eu.hansolo.fx.charts.data.ChartData;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEvent.EventType;
 import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tree.TreeNode;
 import javafx.beans.DefaultProperty;
 import javafx.beans.InvalidationListener;
@@ -47,7 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static eu.hansolo.fx.charts.Helper.clamp;
+import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
 @DefaultProperty("children")

@@ -25,4 +25,3 @@ public class Point {
         return new StringBuilder().append("x: ").append(x).append(", y: ").append(y).toString();
     }
 }
-

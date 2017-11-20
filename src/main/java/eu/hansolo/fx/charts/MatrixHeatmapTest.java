@@ -3,6 +3,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.MatrixDataObject;
 import eu.hansolo.fx.charts.series.MatrixSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;

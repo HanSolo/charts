@@ -2,15 +2,13 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.PixelMatrix.PixelShape;
 import eu.hansolo.fx.charts.data.MatrixData;
-import eu.hansolo.fx.charts.data.XYZData;
 import eu.hansolo.fx.charts.series.MatrixSeries;
-import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
@@ -18,8 +16,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
-
-import java.util.List;
 
 
 public class MatrixPane<T extends MatrixData> extends Region implements ChartArea {

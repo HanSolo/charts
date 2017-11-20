@@ -1,7 +1,5 @@
 package eu.hansolo.fx.charts.tools;
 
-import eu.hansolo.fx.charts.Helper;
-
 
 public class CtxBounds {
     private double x;
