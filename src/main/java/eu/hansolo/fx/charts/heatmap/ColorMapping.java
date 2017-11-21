@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.tools;
+package eu.hansolo.fx.charts.heatmap;
 
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -32,16 +32,21 @@ public enum ColorMapping {
     BLUE_GREEN_RED(new Stop(0.0, Color.rgb(12, 51, 250)), new Stop(0.16667, Color.rgb(13, 104, 151)), new Stop(0.33333, Color.rgb(31, 200, 67)), new Stop(0.5, Color.rgb(33, 214, 46)), new Stop(0.66667, Color.rgb(109, 143, 29)), new Stop(0.83333, Color.rgb(186, 72, 21)), new Stop(1.0, Color.rgb(252, 20, 27))),
     BLUE_BLACK_RED(new Stop(0.0, Color.rgb(2, 20, 125)), new Stop(0.25, Color.rgb(10, 47, 234)), new Stop(0.5, Color.rgb(0, 0, 0)), new Stop(0.75, Color.rgb(252, 20, 27)), new Stop(1.0, Color.rgb(142, 6, 10))),
     BLUE_YELLOW_RED(new Stop(0.0, Color.rgb(2, 20, 125)), new Stop(0.25, Color.rgb(10, 47, 234)), new Stop(0.5, Color.rgb(255, 255, 63)), new Stop(0.75, Color.rgb(252, 20, 27)), new Stop(1.0, Color.rgb(142, 6, 10))),
-    BLUE_TRANSPARENT_RED(new Stop(0.0, Color.rgb(2, 20, 125)), new Stop(0.25, Color.rgb(10, 47, 234)), new Stop(0.5, Color.TRANSPARENT), new Stop(0.75, Color.rgb(252, 20, 27)), new Stop(1.0, Color.rgb(142, 6, 10))),
     GREEN_BLACK_RED(new Stop(0.0, Color.rgb(9, 98, 16)), new Stop(0.25, Color.rgb(41, 251, 56)), new Stop(0.5, Color.rgb(0, 0, 0)), new Stop(0.75, Color.rgb(252, 20, 27)), new Stop(1.0, Color.rgb(142, 6, 10))),
     GREEN_YELLOW_RED(new Stop(0.0, Color.rgb(9, 98, 16)), new Stop(0.25, Color.rgb(41, 251, 56)), new Stop(0.5, Color.rgb(255, 255, 63)), new Stop(0.75, Color.rgb(252, 20, 27)), new Stop(1.0, Color.rgb(142, 6, 10))),
     RAINBOW(new Stop(0.0, Color.rgb(142, 6, 10)), new Stop(0.125, Color.rgb(252, 20, 27)), new Stop(0.25, Color.rgb(253, 163, 43)), new Stop(0.375, Color.rgb(255, 251, 63)), new Stop(0.5, Color.rgb(41, 251, 56)), new Stop(0.625, Color.rgb(12, 51, 250)), new Stop(0.75, Color.rgb(3, 23, 136)), new Stop(0.875, Color.rgb(74, 22, 127)), new Stop(1.0, Color.rgb(240, 136, 235))),
     BLACK_WHITE(new Stop(0.0, Color.BLACK), new Stop(1.0, Color.WHITE)),
     WHITE_BLACK(new Stop(0.0, Color.WHITE), new Stop(1.0, Color.BLACK));
 
-    public LinearGradient gradient;
+    private LinearGradient mapping;
 
+
+    // ******************** Constructors **************************************
     ColorMapping(final Stop... STOPS) {
-        gradient = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, STOPS);
+        mapping = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, STOPS);
     }
+
+
+    // ******************** Methods *******************************************
+    public LinearGradient getMapping() { return mapping; }
 }
