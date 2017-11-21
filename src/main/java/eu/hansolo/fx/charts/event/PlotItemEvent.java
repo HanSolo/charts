@@ -16,6 +16,23 @@
 
 package eu.hansolo.fx.charts.event;
 
-public enum ChartItemEventType {
-    UPDATED
+import eu.hansolo.fx.charts.PlotItem;
+
+
+public class PlotItemEvent {
+    private final PlotItem          ITEM;
+    private final PlotItemEventType TYPE;
+
+
+    // ******************** Constructors **************************************
+    public PlotItemEvent(final PlotItem ITEM, final PlotItemEventType TYPE) {
+        this.ITEM = ITEM;
+        this.TYPE = TYPE;
+    }
+
+
+    // ******************** Methods *******************************************
+    public PlotItem getItem() { return ITEM; }
+
+    public PlotItemEventType getType() { return TYPE; }
 }

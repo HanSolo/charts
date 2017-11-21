@@ -15,7 +15,7 @@
  */
 
 package eu.hansolo.fx.charts.event;
-@FunctionalInterface
-public interface ChartItemEventListener {
-    void onChartItemEvent(final ChartItemEvent EVENT);
+
+public enum PlotItemEventType {
+    UPDATED
 }

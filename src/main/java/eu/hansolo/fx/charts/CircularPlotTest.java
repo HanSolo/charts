@@ -14,12 +14,12 @@ public class CircularPlotTest extends Application {
     @Override public void init() {
         // Setup Data
         // Wahlberechtigte 61_500_000
-        ChartItem australia = new ChartItem("AUSTRALIA", 1_250_000, Color.rgb(255, 51, 51));
-        ChartItem india     = new ChartItem("INDIA", 750_000, Color.rgb(255, 153, 51));
-        ChartItem china     = new ChartItem("CHINA", 920_000, Color.rgb(255, 255, 51));
-        ChartItem japan     = new ChartItem("JAPAN", 1_060_000, Color.rgb(153, 255, 51));
-        ChartItem thailand  = new ChartItem("THAILAND", 720_000, Color.rgb(51, 255, 51));
-        ChartItem singapore = new ChartItem("SINGAPORE", 800_000, Color.rgb(51, 255, 153));
+        PlotItem australia = new PlotItem("AUSTRALIA", 1_250_000, Color.rgb(255, 51, 51));
+        PlotItem india     = new PlotItem("INDIA", 750_000, Color.rgb(255, 153, 51));
+        PlotItem china     = new PlotItem("CHINA", 920_000, Color.rgb(255, 255, 51));
+        PlotItem japan     = new PlotItem("JAPAN", 1_060_000, Color.rgb(153, 255, 51));
+        PlotItem thailand  = new PlotItem("THAILAND", 720_000, Color.rgb(51, 255, 51));
+        PlotItem singapore = new PlotItem("SINGAPORE", 800_000, Color.rgb(51, 255, 153));
 
         // Travel flow
         australia.addToOutgoing(india, 150_000);

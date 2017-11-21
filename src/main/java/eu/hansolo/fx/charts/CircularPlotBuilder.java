@@ -46,12 +46,12 @@ public class CircularPlotBuilder<B extends CircularPlotBuilder<B>> {
         return new CircularPlotBuilder();
     }
 
-    public final B items(final ChartItem... ITEMS) {
+    public final B items(final PlotItem... ITEMS) {
         properties.put("itemsArray", new SimpleObjectProperty<>(ITEMS));
         return (B)this;
     }
 
-    public final B items(final List<ChartItem> ITEMS) {
+    public final B items(final List<PlotItem> ITEMS) {
         properties.put("itemsList", new SimpleObjectProperty<>(ITEMS));
         return (B)this;
     }
@@ -187,10 +187,10 @@ public class CircularPlotBuilder<B extends CircularPlotBuilder<B>> {
         final CircularPlot CONTROL = new CircularPlot();
 
         if (properties.keySet().contains("itemsArray")) {
-            CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
+            CONTROL.setItems(((ObjectProperty<PlotItem[]>) properties.get("itemsArray")).get());
         }
         if(properties.keySet().contains("itemsList")) {
-            CONTROL.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
+            CONTROL.setItems(((ObjectProperty<List<PlotItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {

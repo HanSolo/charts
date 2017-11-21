@@ -15,24 +15,7 @@
  */
 
 package eu.hansolo.fx.charts.event;
-
-import eu.hansolo.fx.charts.ChartItem;
-
-
-public class ChartItemEvent {
-    private final ChartItem          ITEM;
-    private final ChartItemEventType TYPE;
-
-
-    // ******************** Constructors **************************************
-    public ChartItemEvent(final ChartItem ITEM, final ChartItemEventType TYPE) {
-        this.ITEM = ITEM;
-        this.TYPE = TYPE;
-    }
-
-
-    // ******************** Methods *******************************************
-    public ChartItem getItem() { return ITEM; }
-
-    public ChartItemEventType getType() { return TYPE; }
+@FunctionalInterface
+public interface PlotItemEventListener {
+    void onChartItemEvent(final PlotItemEvent EVENT);
 }

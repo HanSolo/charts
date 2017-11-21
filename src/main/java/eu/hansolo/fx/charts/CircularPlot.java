@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.event.ChartItemEventListener;
+import eu.hansolo.fx.charts.event.PlotItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
@@ -45,6 +45,8 @@ import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,54 +59,54 @@ import java.util.Map;
  */
 @DefaultProperty("children")
 public class CircularPlot extends Region {
-    private static final double                        PREFERRED_WIDTH            = 500;
-    private static final double                        PREFERRED_HEIGHT           = 500;
-    private static final double                        MINIMUM_WIDTH              = 50;
-    private static final double                        MINIMUM_HEIGHT             = 50;
-    private static final double                        MAXIMUM_WIDTH              = 4096;
-    private static final double                        MAXIMUM_HEIGHT             = 4096;
-    private static final double                        DEFAULT_SEGMENT_GAP        = 4;
-    private static final double                        DEFAULT_CONNECTION_OPACITY = 0.65;
-    private static final double                        MAJOR_TICK_MARK_LENGTH     = 0.0125;
-    private static final double                        MEDIUM_TICK_MARK_LENGTH    = 0.01;
-    private static final double                        MINOR_TICK_MARK_LENGTH     = 0.0075;
-    private static final double                        TICK_MARK_WIDTH            = 0.001;
-    private static final double                        ANGLE_OFFSET               = 90;
-    private              double                        size;
-    private              double                        width;
-    private              double                        height;
-    private              Canvas                        canvas;
-    private              GraphicsContext               ctx;
-    private              double                        mainLineWidth;
-    private              double                        outgoingLineWidth;
-    private              double                        tickMarkWidth;
-    private              double                        chartSize;
-    private              double                        chartOffset;
-    private              double                        innerChartSize;
-    private              double                        innerChartOffset;
-    private              double                        centerX;
-    private              double                        centerY;
-    private              Color                         _tickMarkColor;
-    private              ObjectProperty<Color>         tickMarkColor;
-    private              Color                         _textColor;
-    private              ObjectProperty<Color>         textColor;
-    private              int                           _decimals;
-    private              IntegerProperty               decimals;
-    private              double                        _segmentGap;
-    private              DoubleProperty                segmentGap;
-    private              boolean                       _showFlowDirection;
-    private              BooleanProperty               showFlowDirection;
-    private              boolean                       _minorTickMarksVisible;
-    private              boolean                       _mediumTickMarksVisible;
-    private              boolean                       _majorTickMarksVisible;
-    private              boolean                       _tickLabelsVisible;
-    private              TickLabelOrientation          _tickLabelOrientation;
-    private              boolean                       _onlyFirstAndLastTickLabelVisible;
-    private              double                        _connectionOpacity;
-    private              DoubleProperty                connectionOpacity;
-    private              ObservableList<ChartItem>     items;
-    private              ChartItemEventListener itemListener;
-    private              ListChangeListener<ChartItem> itemListListener;
+    private static final double                       PREFERRED_WIDTH            = 500;
+    private static final double                       PREFERRED_HEIGHT           = 500;
+    private static final double                       MINIMUM_WIDTH              = 50;
+    private static final double                       MINIMUM_HEIGHT             = 50;
+    private static final double                       MAXIMUM_WIDTH              = 4096;
+    private static final double                       MAXIMUM_HEIGHT             = 4096;
+    private static final double                       DEFAULT_SEGMENT_GAP        = 4;
+    private static final double                       DEFAULT_CONNECTION_OPACITY = 0.65;
+    private static final double                       MAJOR_TICK_MARK_LENGTH     = 0.0125;
+    private static final double                       MEDIUM_TICK_MARK_LENGTH    = 0.01;
+    private static final double                       MINOR_TICK_MARK_LENGTH     = 0.0075;
+    private static final double                       TICK_MARK_WIDTH            = 0.001;
+    private static final double                       ANGLE_OFFSET               = 90;
+    private              double                       size;
+    private              double                       width;
+    private              double                       height;
+    private              Canvas                       canvas;
+    private              GraphicsContext              ctx;
+    private              double                       mainLineWidth;
+    private              double                       outgoingLineWidth;
+    private              double                       tickMarkWidth;
+    private              double                       chartSize;
+    private              double                       chartOffset;
+    private              double                       innerChartSize;
+    private              double                       innerChartOffset;
+    private              double                       centerX;
+    private              double                       centerY;
+    private              Color                        _tickMarkColor;
+    private              ObjectProperty<Color>        tickMarkColor;
+    private              Color                        _textColor;
+    private              ObjectProperty<Color>        textColor;
+    private              int                          _decimals;
+    private              IntegerProperty              decimals;
+    private              double                       _segmentGap;
+    private              DoubleProperty               segmentGap;
+    private              boolean                      _showFlowDirection;
+    private              BooleanProperty              showFlowDirection;
+    private              boolean                      _minorTickMarksVisible;
+    private              boolean                      _mediumTickMarksVisible;
+    private              boolean                      _majorTickMarksVisible;
+    private              boolean                      _tickLabelsVisible;
+    private              TickLabelOrientation         _tickLabelOrientation;
+    private              boolean                      _onlyFirstAndLastTickLabelVisible;
+    private              double                       _connectionOpacity;
+    private              DoubleProperty               connectionOpacity;
+    private              ObservableList<PlotItem>     items;
+    private              PlotItemEventListener        itemListener;
+    private              ListChangeListener<PlotItem> itemListListener;
 
 
     // ******************** Constructors **************************************
@@ -351,21 +353,29 @@ public class CircularPlot extends Region {
         return connectionOpacity;
     }
 
-    public List<ChartItem> getItems() { return items; }
-    public void setItems(final ChartItem... ITEMS) { setItems(Arrays.asList(ITEMS)); }
-    public void setItems(final List<ChartItem> ITEMS) {
+    public List<PlotItem> getItems() { return items; }
+    public void setItems(final PlotItem... ITEMS) { setItems(Arrays.asList(ITEMS)); }
+    public void setItems(final List<PlotItem> ITEMS) {
         items.setAll(ITEMS);
         validateData();
     }
-    public void addItem(final ChartItem ITEM) {
+    public void addItem(final PlotItem ITEM) {
         if (!items.contains(ITEM)) { items.add(ITEM); }
         validateData();
     }
-    public void removeItem(final ChartItem ITEM) { if (items.contains(ITEM)) { items.remove(ITEM); } }
+    public void removeItem(final PlotItem ITEM) { if (items.contains(ITEM)) { items.remove(ITEM); } }
+
+    public void sortAscending() {
+        Collections.sort(getItems(), Comparator.comparingDouble(PlotItem::getValue));
+    }
+    public void sortDescending() {
+        Collections.sort(getItems(), (item1, item2) -> Double.compare(item2.getValue(), item1.getValue()));
+    }
+
 
     private void validateData() {
-        Map<ChartItem, Double> incoming = new HashMap<>(getItems().size());
-        for (ChartItem item : getItems()) {
+        Map<PlotItem, Double> incoming = new HashMap<>(getItems().size());
+        for (PlotItem item : getItems()) {
             item.getOutgoing().forEach((outgoingItem, value) -> {
                 if (incoming.containsKey(outgoingItem)) {
                     incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
@@ -374,7 +384,7 @@ public class CircularPlot extends Region {
                 }
             });
         }
-        for (ChartItem item : getItems()) {
+        for (PlotItem item : getItems()) {
             if (incoming.containsKey(item)) {
                 double sumOfIncoming = incoming.get(item);
                 if (item.getValue() < sumOfIncoming) {
@@ -387,18 +397,18 @@ public class CircularPlot extends Region {
     private void drawChart() {
         ctx.clearRect(0, 0, size, size);
 
-        double sum       = items.stream().mapToDouble(ChartItem::getValue).sum();
+        double sum       = items.stream().mapToDouble(PlotItem::getValue).sum();
         int    noOfItems = items.size();
 
-        Map<ChartItem, ChartItemParameter> parameterMap = new HashMap<>(items.size());
+        Map<PlotItem, ChartItemParameter> parameterMap = new HashMap<>(items.size());
 
         // Draw outer circle segments and tickmarks
         double angleStep = (360.0 - (noOfItems * getSegmentGap())) / sum;
         double angle     = -ANGLE_OFFSET;
         for (int i = 0 ; i < noOfItems ; i++) {
-            ChartItem item          = items.get(i);
-            double    angleRange    = item.getValue() * angleStep;
-            double    sumOfOutgoing = item.getOutgoing().values().stream().mapToDouble(Double::doubleValue).sum();
+            PlotItem item          = items.get(i);
+            double   angleRange    = item.getValue() * angleStep;
+            double   sumOfOutgoing = item.getOutgoing().values().stream().mapToDouble(Double::doubleValue).sum();
 
             // Store item specific angle and angleRange for later use
             parameterMap.put(item, new ChartItemParameter(angle + ANGLE_OFFSET, angleRange));
@@ -431,7 +441,7 @@ public class CircularPlot extends Region {
         double outerPointRadius = chartSize * 0.26;
         double innerPointRadius = chartSize * 0.20;
         for (int i = 0 ; i < noOfItems ; i++) {
-            ChartItem          item           = items.get(i);
+            PlotItem           item           = items.get(i);
             ChartItemParameter itemParameter  = parameterMap.get(item);
             double             itemStartAngle = itemParameter.getStartAngle();
             double             itemAngleRange = itemParameter.getAngleRange();
@@ -453,7 +463,7 @@ public class CircularPlot extends Region {
             ctx.restore();
 
             // Draw connections between items
-            for (ChartItem outgoingItem : item.getOutgoing().keySet()) {
+            for (PlotItem outgoingItem : item.getOutgoing().keySet()) {
                 ChartItemParameter outgoingItemParameter = parameterMap.get(outgoingItem);
                 double             outgoingAngleRange    = item.getOutgoing().get(outgoingItem) * angleStep;
 
@@ -531,7 +541,7 @@ public class CircularPlot extends Region {
         }
     }
 
-    private void drawTickMarks(final ChartItem ITEM, final double START_ANGLE, final double ANGLE_RANGE) {
+    private void drawTickMarks(final PlotItem ITEM, final double START_ANGLE, final double ANGLE_RANGE) {
         double        sinValue;
         double        cosValue;
         double[]      scaleParameters              = Helper.calcAutoScale(0, ITEM.getValue());
