@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.tools;
+package eu.hansolo.fx.charts.data;
 
-public class Point implements Comparable<Point> {
-    private double x, y;
+import eu.hansolo.fx.charts.tools.Point;
+
+
+public class DataPoint extends Point {
+    private double value;
 
 
     // ******************** Constructors **************************************
-    public Point() {
-        this(0.0, 0.0);
+    public DataPoint() {
+        this(0, 0, 0);
     }
-    public Point(final double X, final double Y) {
-        x = X;
-        y = Y;
+    public DataPoint(final double X, final double Y) {
+        this(X, Y, 0);
+    }
+    public DataPoint(final double X, final double Y, final double VALUE) {
+        super(X, Y);
+        value = VALUE;
     }
 
 
     // ******************** Methods *******************************************
-    public double getX() { return x; }
-    public void setX(final double X) { x = X; }
-
-    public double getY() { return y; }
-    public void setY(final double Y) { y = Y; }
-
-    public int compareTo(final Point POINT) {
-        return x != POINT.getX() ? Double.compare(x, POINT.x) : Double.compare(y, POINT.y);
-    }
+    public double getValue() { return value; }
+    public void setValue(final double VALUE) { value = VALUE; }
 
     @Override public String toString() {
-        return new StringBuilder().append("x: ").append(x).append(", y: ").append(y).toString();
+        return new StringBuilder().append("x: ").append(getX()).append(", y: ").append(getY()).append(", value: ").append(value).toString();
     }
 }
-

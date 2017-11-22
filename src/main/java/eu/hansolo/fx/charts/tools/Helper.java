@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.tools;
 
 import eu.hansolo.fx.charts.TickLabelOrientation;
+import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.charts.tools.CatmullRom;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.CtxCornerRadii;
@@ -145,7 +146,6 @@ public class Helper {
         Point[] points = POINTS.toArray(new Point[0]);
         return Arrays.asList(subdividePoints(points, SUB_DIVISIONS));
     }
-
     public static final Point[] subdividePoints(final Point[] POINTS, final int SUB_DIVISIONS) {
         assert POINTS != null;
         assert POINTS.length >= 3;
@@ -161,7 +161,36 @@ public class Helper {
             Point p2 = POINTS[i + 1];
             Point p3 = (i+2 == noOfPoints) ? POINTS[i + 1] : POINTS[i + 2];
 
-            CatmullRom crs = new CatmullRom(p0, p1, p2, p3);
+            CatmullRom<Point> crs = new CatmullRom<>(p0, p1, p2, p3);
+
+            for (int j = 0 ; j <= SUB_DIVISIONS ; j++) {
+                subdividedPoints[(i * SUB_DIVISIONS) + j] = crs.q(j * increments);
+            }
+        }
+
+        return subdividedPoints;
+    }
+
+    public static final List<DataPoint> subdivideDataPoints(final List<DataPoint> POINTS, final int SUB_DIVISIONS) {
+        DataPoint[] points = POINTS.toArray(new DataPoint[0]);
+        return Arrays.asList(subdividePoints(points, SUB_DIVISIONS));
+    }
+    public static final DataPoint[] subdividePoints(final DataPoint[] POINTS, final int SUB_DIVISIONS) {
+        assert POINTS != null;
+        assert POINTS.length >= 3;
+        int    noOfPoints = POINTS.length;
+
+        DataPoint[] subdividedPoints = new DataPoint[((noOfPoints - 1) * SUB_DIVISIONS) + 1];
+
+        double increments = 1.0 / (double) SUB_DIVISIONS;
+
+        for (int i = 0 ; i < noOfPoints - 1 ; i++) {
+            DataPoint p0 = i == 0 ? POINTS[i] : POINTS[i - 1];
+            DataPoint p1 = POINTS[i];
+            DataPoint p2 = POINTS[i + 1];
+            DataPoint p3 = (i+2 == noOfPoints) ? POINTS[i + 1] : POINTS[i + 2];
+
+            CatmullRom<DataPoint> crs = new CatmullRom<>(p0, p1, p2, p3);
 
             for (int j = 0 ; j <= SUB_DIVISIONS ; j++) {
                 subdividedPoints[(i * SUB_DIVISIONS) + j] = crs.q(j * increments);
@@ -442,4 +471,243 @@ public class Helper {
         }
         return String.format(LOCALE, formatString, NUMBER);
     }
+
+    public static final <T extends Point> boolean isInPolygon(final double X, final double Y, final List<T> POLYGON) {
+        int      noOfPointsInPolygon = POLYGON.size();
+        double[] pointsX             = new double[noOfPointsInPolygon];
+        double[] pointsY             = new double[noOfPointsInPolygon];
+        for (int i = 0 ; i < noOfPointsInPolygon ; i++) {
+            pointsX[i] = POLYGON.get(i).getX();
+            pointsY[i] = POLYGON.get(i).getY();
+        }
+        return isInPolygon(X, Y, noOfPointsInPolygon, pointsX, pointsY);
+    }
+
+    public static final double squareDistance(final double X1, final double Y1, final double X2, final double Y2) {
+        double deltaX = (X1 - X2);
+        double deltaY = (Y1 - Y2);
+        return (deltaX * deltaX) + (deltaY * deltaY);
+    }
+
+    public static double[] toHSL(final Color COLOR) {
+        return rgbToHSL(COLOR.getRed(), COLOR.getGreen(), COLOR.getBlue());
+    }
+    public static double[] rgbToHSL(final double RED, final double GREEN, final double BLUE) {
+        //	Minimum and Maximum RGB values are used in the HSL calculations
+        double min = Math.min(RED, Math.min(GREEN, BLUE));
+        double max = Math.max(RED, Math.max(GREEN, BLUE));
+
+        //  Calculate the Hue
+        double hue = 0;
+
+        if (max == min) {
+            hue = 0;
+        } else if (max == RED) {
+            hue = ((60 * (GREEN - BLUE) / (max - min)) + 360) % 360;
+        } else if (max == GREEN) {
+            hue = (60 * (BLUE - RED) / (max - min)) + 120;
+        } else if (max == BLUE) {
+            hue = (60 * (RED - GREEN) / (max - min)) + 240;
+        }
+
+        //  Calculate the Luminance
+        double luminance = (max + min) / 2;
+
+        //  Calculate the Saturation
+        double saturation = 0;
+        if (Double.compare(max, min)  == 0) {
+            saturation = 0;
+        } else if (luminance <= .5) {
+            saturation = (max - min) / (max + min);
+        } else {
+            saturation = (max - min) / (2 - max - min);
+        }
+
+        return new double[] { hue, saturation, luminance};
+    }
+
+    public static Color hslToRGB(double hue, double saturation, double luminance) {
+        double r, g, b;
+        if (Double.compare(saturation, 0) == 0) {
+            r = 1;
+            b = 1;
+            g = 1;
+        } else {
+            double q = luminance < 0.5 ? luminance * (1 + saturation) : luminance + saturation - luminance * saturation;
+            double p = 2 * luminance - q;
+            r = clamp(0, 1, hue2RGB(p, q, hue + 0.33));
+            g = clamp(0, 1, hue2RGB(p, q, hue));
+            b = clamp(0, 1, hue2RGB(p, q, hue - 0.33));
+        }
+        return Color.color(r, g, b);
+    }
+    private static double hue2RGB(double p, double q, double t) {
+        if (t < 0) {
+            t += 1;
+        } else if (t > 1) {
+            t -= 1;
+        }
+
+        if (t >= 0.66) {
+            return p;
+        } else if (t >= 0.5) {
+            return p + (q - p) * (0.66 - t) * 6;
+        } else if (t >= 0.33) {
+            return q;
+        } else {
+            return p + (q - p) * 6 * t;
+        }
+    }
+
+    public static List<DataPoint> createSmoothedHull(final List<DataPoint> POINTS, final int SUB_DIVISIONS) {
+        List<DataPoint> hullPolygon = createHull(POINTS);
+        return subdivideDataPoints(hullPolygon, SUB_DIVISIONS);
+    }
+    public static <T extends Point> List<T> createHull(final List<T> POINTS) {
+        List<T> convexHull = new ArrayList<>();
+        if (POINTS.size() < 3) { return new ArrayList<T>(POINTS); }
+
+        int minDataPoint = -1;
+        int maxDataPoint = -1;
+        int minX         = Integer.MAX_VALUE;
+        int maxX         = Integer.MIN_VALUE;
+
+        for (int i = 0; i < POINTS.size(); i++) {
+            if (POINTS.get(i).getX() < minX) {
+                minX     = (int) POINTS.get(i).getX();
+                minDataPoint = i;
+            }
+            if (POINTS.get(i).getX() > maxX) {
+                maxX     = (int) POINTS.get(i).getX();
+                maxDataPoint = i;
+            }
+        }
+        T minPoint = POINTS.get(minDataPoint);
+        T maxPoint = POINTS.get(maxDataPoint);
+        convexHull.add(minPoint);
+        convexHull.add(maxPoint);
+        POINTS.remove(minPoint);
+        POINTS.remove(maxPoint);
+
+        List<T> leftSet  = new ArrayList<>();
+        List<T> rightSet = new ArrayList<>();
+
+        for (int i = 0; i < POINTS.size(); i++) {
+            T p = POINTS.get(i);
+            if (pointLocation(minPoint, maxPoint, p) == -1) { leftSet.add(p); } else if (pointLocation(minPoint, maxPoint, p) == 1) rightSet.add(p);
+        }
+        hullSet(minPoint, maxPoint, rightSet, convexHull);
+        hullSet(maxPoint, minPoint, leftSet, convexHull);
+
+        return convexHull;
+    }
+    private static <T extends Point> double distance(final T P1, final T P2, final T P3) {
+        double deltaX = P2.getX() - P1.getX();
+        double deltaY = P2.getY() - P1.getY();
+        double num = deltaX * (P1.getY() - P3.getY()) - deltaY * (P1.getX() - P3.getX());
+        return Math.abs(num);
+    }
+    private static <T extends Point> void hullSet(final T P1, final T P2, final List<T> POINTS, final List<T> HULL) {
+        int insertPosition = HULL.indexOf(P2);
+
+        if (POINTS.size() == 0) { return; }
+
+        if (POINTS.size() == 1) {
+            T point = POINTS.get(0);
+            POINTS.remove(point);
+            HULL.add(insertPosition, point);
+            return;
+        }
+
+        int dist              = Integer.MIN_VALUE;
+        int furthestDataPoint = -1;
+        for (int i = 0; i < POINTS.size(); i++) {
+            T point    = POINTS.get(i);
+            double distance = distance(P1, P2, point);
+            if (distance > dist) {
+                dist          = (int) distance;
+                furthestDataPoint = i;
+            }
+        }
+        T point = POINTS.get(furthestDataPoint);
+        POINTS.remove(furthestDataPoint);
+        HULL.add(insertPosition, point);
+
+        // Determine who's to the left of AP
+        ArrayList<T> leftSetAP = new ArrayList<>();
+        for (int i = 0; i < POINTS.size(); i++) {
+            T M = POINTS.get(i);
+            if (pointLocation(P1, point, M) == 1) { leftSetAP.add(M); }
+        }
+
+        // Determine who's to the left of PB
+        ArrayList<T> leftSetPB = new ArrayList<>();
+        for (int i = 0; i < POINTS.size(); i++) {
+            T M = POINTS.get(i);
+            if (pointLocation(point, P2, M) == 1) { leftSetPB.add(M); }
+        }
+        hullSet(P1, point, leftSetAP, HULL);
+        hullSet(point, P2, leftSetPB, HULL);
+    }
+    private static <T extends Point> int pointLocation(final T P1, final T P2, final T P3) {
+        double cp1 = (P2.getX() - P1.getX()) * (P3.getY() - P1.getY()) - (P2.getY() - P1.getY()) * (P3.getX() - P1.getX());
+        return cp1 > 0 ? 1 : Double.compare(cp1, 0) == 0 ? 0 : -1;
+    }
+
+    public static Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION) {
+        return interpolateColor(COLOR1, COLOR2, FRACTION, -1);
+    }
+    public static final Color getColorWithOpacityAt(final LinearGradient GRADIENT, final double FRACTION, final double TARGET_OPACITY) {
+        List<Stop> stops     = GRADIENT.getStops();
+        double     fraction  = FRACTION < 0f ? 0f : (FRACTION > 1 ? 1 : FRACTION);
+        Stop       lowerStop = new Stop(0.0, stops.get(0).getColor());
+        Stop       upperStop = new Stop(1.0, stops.get(stops.size() - 1).getColor());
+
+        for (Stop stop : stops) {
+            double currentFraction = stop.getOffset();
+            if (Double.compare(currentFraction, fraction) == 0) {
+                return stop.getColor();
+            } else if (Double.compare(currentFraction, fraction) < 0) {
+                lowerStop = new Stop(currentFraction, stop.getColor());
+            } else {
+                upperStop = new Stop(currentFraction, stop.getColor());
+                break;
+            }
+        }
+
+        double interpolationFraction = (fraction - lowerStop.getOffset()) / (upperStop.getOffset() - lowerStop.getOffset());
+        return interpolateColor(lowerStop.getColor(), upperStop.getColor(), interpolationFraction, TARGET_OPACITY);
+    }
+    public static Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION, final double TARGET_OPACITY) {
+        double fraction       = clamp(0, 1, FRACTION);
+        double targetOpacity  = TARGET_OPACITY < 0 ? TARGET_OPACITY : clamp(0, 1, FRACTION);
+
+        final double RED1     = COLOR1.getRed();
+        final double GREEN1   = COLOR1.getGreen();
+        final double BLUE1    = COLOR1.getBlue();
+        final double OPACITY1 = COLOR1.getOpacity();
+
+        final double RED2     = COLOR2.getRed();
+        final double GREEN2   = COLOR2.getGreen();
+        final double BLUE2    = COLOR2.getBlue();
+        final double OPACITY2 = COLOR2.getOpacity();
+
+        final double DELTA_RED     = RED2 - RED1;
+        final double DELTA_GREEN   = GREEN2 - GREEN1;
+        final double DELTA_BLUE    = BLUE2 - BLUE1;
+        final double DELTA_OPACITY = OPACITY2 - OPACITY1;
+
+        double red     = RED1 + (DELTA_RED * fraction);
+        double green   = GREEN1 + (DELTA_GREEN * fraction);
+        double blue    = BLUE1 + (DELTA_BLUE * fraction);
+        double opacity = targetOpacity < 0 ? OPACITY1 + (DELTA_OPACITY * fraction) : targetOpacity;
+
+        red     = clamp(0, 1, red);
+        green   = clamp(0, 1, green);
+        blue    = clamp(0, 1, blue);
+        opacity = clamp(0, 1, opacity);
+
+        return Color.color(red, green, blue, opacity);
+    }
+
 }

@@ -14,35 +14,21 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.tools;
+package eu.hansolo.fx.charts.event;
 
-public class Point implements Comparable<Point> {
-    private double x, y;
+import eu.hansolo.fx.charts.tools.Location;
+
+
+public class LocationEvent {
+    private Location LOCATION;
 
 
     // ******************** Constructors **************************************
-    public Point() {
-        this(0.0, 0.0);
-    }
-    public Point(final double X, final double Y) {
-        x = X;
-        y = Y;
+    public LocationEvent(final Location LOCATION) {
+        this.LOCATION = LOCATION;
     }
 
 
     // ******************** Methods *******************************************
-    public double getX() { return x; }
-    public void setX(final double X) { x = X; }
-
-    public double getY() { return y; }
-    public void setY(final double Y) { y = Y; }
-
-    public int compareTo(final Point POINT) {
-        return x != POINT.getX() ? Double.compare(x, POINT.x) : Double.compare(y, POINT.y);
-    }
-
-    @Override public String toString() {
-        return new StringBuilder().append("x: ").append(x).append(", y: ").append(y).toString();
-    }
+    public Location getLocation() { return LOCATION; }
 }
-

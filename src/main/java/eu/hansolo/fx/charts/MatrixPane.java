@@ -82,7 +82,7 @@ public class MatrixPane<T extends MatrixData> extends Region implements ChartAre
         keepAspect            = false;
         _chartBackgroundPaint = BACKGROUND;
         series                = SERIES;
-        matrixGradient        = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.gradient;
+        matrixGradient        = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.getGradient();
         scaleX                = 1;
         scaleY                = 1;
         scaleZ                = 1;
@@ -307,7 +307,7 @@ public class MatrixPane<T extends MatrixData> extends Region implements ChartAre
 
     public PixelMatrix getMatrix() { return matrix; }
 
-    public void setColorMapping(final ColorMapping MAPPING) { setMatrixGradient(MAPPING.gradient); }
+    public void setColorMapping(final ColorMapping MAPPING) { setMatrixGradient(MAPPING.getGradient()); }
 
     public LinearGradient getMatrixGradient() { return matrixGradient; }
     public void setMatrixGradient(final LinearGradient GRADIENT) {

@@ -16,13 +16,13 @@
 
 package eu.hansolo.fx.charts.tools;
 
-public class CatmullRom {
+public class CatmullRom<T extends Point> {
     private CatmullRomSpline splineXValues;
     private CatmullRomSpline splineYValues;
 
 
     // ******************** Constructors **************************************
-    public CatmullRom(final Point P0, final Point P1, final Point P2, final Point P3) {
+    public CatmullRom(final T P0, final T P1, final T P2, final T P3) {
         assert P0 != null : "p0 cannot be null";
         assert P1 != null : "p1 cannot be null";
         assert P2 != null : "p2 cannot be null";
@@ -34,7 +34,7 @@ public class CatmullRom {
 
 
     // ******************** Methods *******************************************
-    public Point q(final double T) { return new Point(splineXValues.q(T), splineYValues.q(T)); }
+    public T q(final double T) { return (T) new Point(splineXValues.q(T), splineYValues.q(T)); }
 
 
     // ******************** Inner Classes *************************************

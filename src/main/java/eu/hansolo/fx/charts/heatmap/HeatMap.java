@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts.heatmap;
 
+import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.animation.Interpolator;
@@ -79,7 +80,7 @@ public class HeatMap extends ImageView {
         spotList            = new ArrayList<>();
         spotImages          = new HashMap<>();
         colorMapping        = COLOR_MAPPING;
-        mappingGradient     = colorMapping.getMapping();
+        mappingGradient     = colorMapping.getGradient();
         fadeColors          = FADE_COLORS;
         radius              = SPOT_RADIUS;
         opacityDistribution = OPACITY_DISTRIBUTION;
@@ -180,7 +181,7 @@ public class HeatMap extends ImageView {
      */
     public void setColorMapping(final ColorMapping COLOR_MAPPING) {
         colorMapping    = COLOR_MAPPING;
-        mappingGradient = COLOR_MAPPING.getMapping();
+        mappingGradient = COLOR_MAPPING.getGradient();
         updateHeatMap();
     }
 
@@ -315,7 +316,7 @@ public class HeatMap extends ImageView {
         spotImages.put(OPACITY_DISTRIBUTION.name() + radius, raster);
         return raster;
     }
-
+    
     /**
      * Updates each spot in the monochrome map to the given opacity gradient
      * which could be useful to reduce oversmoothing

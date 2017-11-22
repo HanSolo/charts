@@ -20,6 +20,8 @@ package eu.hansolo.fx.charts.tools;
 public class CtxBounds {
     private double x;
     private double y;
+    private double maxX;
+    private double maxY;
     private double width;
     private double height;
 
@@ -36,19 +38,51 @@ public class CtxBounds {
         y      = Y;
         width  = WIDTH;
         height = HEIGHT;
+        maxX   = x + width;
+        maxY   = y + height;
     }
 
 
     // ******************** Methods *******************************************
     public double getX() { return x; }
-    public void setX(final double X) { x = X; }
+    public void setX(final double X) {
+        x    = X;
+        maxX = x + width;
+    }
 
     public double getY() { return y; }
-    public void setY(final double Y) { y = Y; }
+    public void setY(final double Y) {
+        y    = Y;
+        maxY = y + height;
+    }
+
+    public double getMinX() { return x; }
+    public void setMinX(final double X) { x = X; }
+
+    public double getMaxX() { return maxX; }
+    public void setMaxX(final double X) {
+        maxX = X;
+        width = maxX - x;
+    }
+
+    public double getMinY() { return y; }
+    public void setMinY(final double Y) { y = Y; }
+
+    public double getMaxY() { return maxY; }
+    public void setMaxY(final double Y) {
+        maxY   = Y;
+        height = maxY - y;
+    }
 
     public double getWidth() { return width; }
-    public void setWidth(final double WIDTH) { width = Helper.clamp(0, Double.MAX_VALUE, WIDTH); }
+    public void setWidth(final double WIDTH) {
+        width = Helper.clamp(0, Double.MAX_VALUE, WIDTH);
+        maxX  = x + width;
+    }
 
     public double getHeight() { return height; }
-    public void setHeight(final double HEIGHT) { height = Helper.clamp(0, Double.MAX_VALUE, HEIGHT); }
+    public void setHeight(final double HEIGHT) {
+        height = Helper.clamp(0, Double.MAX_VALUE, HEIGHT);
+        maxY   = y + height;
+    }
 }
