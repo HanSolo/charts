@@ -316,7 +316,7 @@ public class HeatMap extends ImageView {
         spotImages.put(OPACITY_DISTRIBUTION.name() + radius, raster);
         return raster;
     }
-    
+
     /**
      * Updates each spot in the monochrome map to the given opacity gradient
      * which could be useful to reduce oversmoothing

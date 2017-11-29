@@ -17,7 +17,8 @@
 package eu.hansolo.fx.charts.tools;
 
 public class Point implements Comparable<Point> {
-    private double x, y;
+    private double x;
+    private double y;
 
 
     // ******************** Constructors **************************************
@@ -36,6 +37,21 @@ public class Point implements Comparable<Point> {
 
     public double getY() { return y; }
     public void setY(final double Y) { y = Y; }
+
+    public void set(final double X, final double Y) {
+        x = X;
+        y = Y;
+    }
+
+    public double distanceTo(final Point P) { return distance(P.getX(), P.getY(), x, y); }
+    public double distanceTo(final double X, final double Y) { return distance(X, Y, x, y); }
+
+    public static double distance(final Point P1, final Point P2) { return distance(P1.getX(), P1.getY(), P2.getX(), P2.getY()); }
+    public static double distance(final double X1, final double Y1, final double X2, final double Y2) {
+        double deltaX = (X2 - X1);
+        double deltaY = (Y2 - Y1);
+        return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    }
 
     public int compareTo(final Point POINT) {
         return x != POINT.getX() ? Double.compare(x, POINT.x) : Double.compare(y, POINT.y);

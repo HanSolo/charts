@@ -234,7 +234,7 @@ public class CircularPlot extends Region {
     public int getDecimals() { return null == decimals ? _decimals : decimals.get(); }
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
-            _decimals = DECIMALS;
+            _decimals = Helper.clamp(0, 6, DECIMALS);
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -243,7 +243,10 @@ public class CircularPlot extends Region {
     public IntegerProperty decimalsProperty() {
         if (null == decimals) {
             decimals = new IntegerPropertyBase(_decimals) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() {
+                    set(Helper.clamp(0, 6, get()));
+                    redraw();
+                }
                 @Override public Object getBean() { return CircularPlot.this; }
                 @Override public String getName() { return "decimals"; }
             };

@@ -82,7 +82,7 @@ public class CircularPlotBuilder<B extends CircularPlotBuilder<B>> {
     }
 
     public final B minorTickMarksVisible(final boolean VISIBLE) {
-        properties.put("minorTickMarksVisible", new SimpleBooleanProperty());
+        properties.put("minorTickMarksVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
