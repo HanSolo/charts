@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 
@@ -710,4 +711,5 @@ public class Helper {
         return Color.color(red, green, blue, opacity);
     }
 
+    public static <T> Predicate<T> not(Predicate<T> predicate) { return predicate.negate(); }
 }

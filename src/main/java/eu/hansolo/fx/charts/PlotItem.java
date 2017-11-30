@@ -28,7 +28,10 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -45,7 +48,9 @@ public class PlotItem {
     private       Color                       _color;
     private       ObjectProperty<Color>       color;
     private       Map<PlotItem, Double>       outgoing;
+    private       Map<PlotItem, Double>       incoming;
     private       List<PlotItemEventListener> listeners;
+    private       int                         level;
 
 
     // ******************** Constructors **************************************
@@ -55,6 +60,9 @@ public class PlotItem {
     public PlotItem(final String NAME, final double VALUE) {
         this(NAME, VALUE, "", Color.RED);
     }
+    public PlotItem(final String NAME, final Color COLOR) {
+        this(NAME, 0, COLOR);
+    }
     public PlotItem(final String NAME, final double VALUE, final Color COLOR) {
         this(NAME, VALUE, "", COLOR);
     }
@@ -63,7 +71,9 @@ public class PlotItem {
         _value       = VALUE;
         _description = DESCRIPTION;
         _color       = COLOR;
-        outgoing     = new HashMap<>();
+        level        = -1;
+        outgoing     = new LinkedHashMap<>();
+        incoming     = new LinkedHashMap<>();
         listeners    = new CopyOnWriteArrayList<>();
     }
 
@@ -152,27 +162,113 @@ public class PlotItem {
         return color;
     }
 
+    public double getSumOfIncoming() { return getIncoming().values().stream().mapToDouble(Double::doubleValue).sum(); }
+    public double getSumOfOutgoing() { return getOutgoing().values().stream().mapToDouble(Double::doubleValue).sum(); }
+    public double getMaxSum() { return Math.max(getSumOfIncoming(), getSumOfOutgoing()); }
+
     public Map<PlotItem, Double> getOutgoing() { return outgoing; }
     public void setOutgoing(final Map<PlotItem, Double> OUTGOING) {
+        outgoing.forEach((item, value) -> item.removeFromIncoming(PlotItem.this));
         outgoing.clear();
         outgoing.putAll(OUTGOING);
+        establishConnections();
         fireChartItemEvent(UPDATED_EVENT);
     }
     public void addToOutgoing(final PlotItem ITEM, final double VALUE) {
         if (!outgoing.containsKey(ITEM)) {
             outgoing.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
+            establishConnections();
             fireChartItemEvent(UPDATED_EVENT);
         }
     }
     public void removeFromOutgoing(final PlotItem ITEM) {
         if (outgoing.containsKey(ITEM)) {
+            ITEM.removeFromIncoming(PlotItem.this);
             outgoing.remove(ITEM);
             fireChartItemEvent(UPDATED_EVENT);
         }
     }
     public void clearOutgoing() {
+        outgoing.forEach((item, value) -> item.removeFromIncoming(PlotItem.this));
         outgoing.clear();
         fireChartItemEvent(UPDATED_EVENT);
+    }
+    public boolean hasOutgoing() { return outgoing.size() > 0; }
+
+    public Map<PlotItem, Double> getIncoming() { return incoming; }
+    protected void setIncoming(final Map<PlotItem, Double> INCOMING) {
+        incoming.clear();
+        incoming.putAll(INCOMING);
+        fireChartItemEvent(UPDATED_EVENT);
+    }
+    protected void addToIncoming(final PlotItem ITEM, final double VALUE) {
+        if (!incoming.containsKey(ITEM)) {
+            incoming.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
+            fireChartItemEvent(UPDATED_EVENT);
+        }
+    }
+    protected void removeFromIncoming(final PlotItem ITEM) {
+        if (incoming.containsKey(ITEM)) {
+            incoming.remove(ITEM);
+            fireChartItemEvent(UPDATED_EVENT);
+        }
+    }
+    protected void clearIncoming() {
+        incoming.clear();
+        fireChartItemEvent(UPDATED_EVENT);
+    }
+    public boolean hasIncoming() { return incoming.size() > 0 ; }
+
+    public boolean isRoot() { return hasOutgoing() && !hasIncoming(); }
+
+    public int getLevel() {
+        if (level == -1) {
+            if (isRoot()) {
+                level = 0;
+            } else {
+                for (PlotItem item : getIncoming().keySet()) {
+                    level = getLevel(item, 0);
+                }
+            }
+        }
+        return level;
+    }
+    private int getLevel(final PlotItem ITEM, int level) {
+        level++;
+        if (ITEM.isRoot()) { return level; }
+        level = getLevel(ITEM.getIncoming().keySet().iterator().next(), level);
+        return level;
+    }
+
+    protected void sortOutgoingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
+        List<PlotItem> outgoingKeys = new ArrayList(getOutgoing().keySet());
+
+        sortAndReverse(outgoingKeys, LIST_WITH_SORTED_ITEMS);
+
+        Map<PlotItem, Double> sortedOutgoingItems = new LinkedHashMap<>(outgoingKeys.size());
+        for (PlotItem plotItem : outgoingKeys) { sortedOutgoingItems.put(plotItem, getOutgoing().get(plotItem)); }
+        outgoing.clear();
+        outgoing.putAll(sortedOutgoingItems);
+    }
+    protected void sortIncomingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
+        List<PlotItem> incomingKeys = new ArrayList(getIncoming().keySet());
+        Collections.reverse(incomingKeys);
+
+        sortAndReverse(incomingKeys, LIST_WITH_SORTED_ITEMS);
+
+        Map<PlotItem, Double> sortedIncomingItems = new LinkedHashMap<>(incomingKeys.size());
+        for (PlotItem plotItem : incomingKeys) { sortedIncomingItems.put(plotItem, getIncoming().get(plotItem)); }
+        incoming.clear();
+        incoming.putAll(sortedIncomingItems);
+    }
+
+    private void sortAndReverse(final List<PlotItem> LIST_TO_SORT, final List<PlotItem> SORTED_LIST) {
+        Collections.sort(LIST_TO_SORT, Comparator.comparing(item -> SORTED_LIST.indexOf(item)));
+        Collections.reverse(LIST_TO_SORT);
+    }
+
+    private void establishConnections() {
+        outgoing.forEach((item, value) -> item.addToIncoming(PlotItem.this, value));
     }
 
 
