@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.event.PlotItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.fx.geometry.Path;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -36,6 +37,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
@@ -48,7 +50,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -104,9 +108,14 @@ public class CircularPlot extends Region {
     private              boolean                      _onlyFirstAndLastTickLabelVisible;
     private              double                       _connectionOpacity;
     private              DoubleProperty               connectionOpacity;
+    private              Locale                       _locale;
+    private              ObjectProperty<Locale>       locale;
     private              ObservableList<PlotItem>     items;
     private              PlotItemEventListener        itemListener;
     private              ListChangeListener<PlotItem> itemListListener;
+    private              Map<Path, String>            paths;
+    private              Tooltip                      tooltip;
+    private              String                       formatString;
 
 
     // ******************** Constructors **************************************
@@ -123,6 +132,7 @@ public class CircularPlot extends Region {
         _tickLabelOrientation             = TickLabelOrientation.TANGENT;
         _onlyFirstAndLastTickLabelVisible = true;
         _connectionOpacity                = DEFAULT_CONNECTION_OPACITY;
+        _locale                           = Locale.getDefault();
         items                             = FXCollections.observableArrayList();
         itemListener                      = e -> redraw();
         itemListListener                  = c -> {
@@ -136,6 +146,11 @@ public class CircularPlot extends Region {
             validateData();
             redraw();
         };
+
+        formatString                      = "%." + _decimals + "f";
+
+        paths                             = new LinkedHashMap<>();
+
         initGraphics();
         registerListeners();
     }
@@ -157,6 +172,9 @@ public class CircularPlot extends Region {
 
         ctx.setLineCap(StrokeLineCap.BUTT);
 
+        tooltip = new Tooltip();
+        tooltip.setAutoHide(true);
+
         getChildren().setAll(canvas);
     }
 
@@ -164,6 +182,20 @@ public class CircularPlot extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
+        canvas.setOnMouseClicked(e -> {
+            paths.forEach((path, tooltipText) -> {
+                double eventX = e.getX();
+                double eventY = e.getY();
+                if (path.contains(eventX, eventY)) {
+                    double tooltipX = eventX + canvas.getScene().getX() + canvas.getScene().getWindow().getX();
+                    double tooltipY = eventY + canvas.getScene().getY() + canvas.getScene().getWindow().getY() - 25;
+                    tooltip.setText(tooltipText);
+                    tooltip.setX(tooltipX);
+                    tooltip.setY(tooltipY);
+                    tooltip.show(getScene().getWindow());
+                }
+            });
+        });
     }
 
 
@@ -235,6 +267,7 @@ public class CircularPlot extends Region {
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
             _decimals = Helper.clamp(0, 6, DECIMALS);
+            formatString = new StringBuilder("%.").append(getDecimals()).append("f").toString();
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -245,6 +278,7 @@ public class CircularPlot extends Region {
             decimals = new IntegerPropertyBase(_decimals) {
                 @Override protected void invalidated() {
                     set(Helper.clamp(0, 6, get()));
+                    formatString = new StringBuilder("%.").append(get()).append("f").toString();
                     redraw();
                 }
                 @Override public Object getBean() { return CircularPlot.this; }
@@ -356,6 +390,27 @@ public class CircularPlot extends Region {
         return connectionOpacity;
     }
 
+    public Locale getLocale() { return null == locale ? _locale : locale.get(); }
+    public void setLocale(final Locale LOCALE) {
+        if (null == locale) {
+            _locale = LOCALE;
+            redraw();
+        } else {
+            locale.set(LOCALE);
+        }
+    }
+    public ObjectProperty<Locale> localeProperty() {
+        if (null == locale) {
+            locale = new ObjectPropertyBase<Locale>(_locale) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CircularPlot.this; }
+                @Override public String getName() { return "locale"; }
+            };
+        }
+        _locale = null;
+        return locale;
+    }
+
     public List<PlotItem> getItems() { return items; }
     public void setItems(final PlotItem... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<PlotItem> ITEMS) {
@@ -374,7 +429,6 @@ public class CircularPlot extends Region {
     public void sortDescending() {
         Collections.sort(getItems(), (item1, item2) -> Double.compare(item2.getValue(), item1.getValue()));
     }
-
 
     private void validateData() {
         Map<PlotItem, Double> incoming = new HashMap<>(getItems().size());
@@ -398,6 +452,8 @@ public class CircularPlot extends Region {
     }
 
     private void drawChart() {
+        paths.clear();
+
         ctx.clearRect(0, 0, size, size);
 
         double sum       = items.stream().mapToDouble(PlotItem::getValue).sum();
@@ -468,7 +524,8 @@ public class CircularPlot extends Region {
             // Draw connections between items
             for (PlotItem outgoingItem : item.getOutgoing().keySet()) {
                 ChartItemParameter outgoingItemParameter = parameterMap.get(outgoingItem);
-                double             outgoingAngleRange    = item.getOutgoing().get(outgoingItem) * angleStep;
+                double             outgoingValue         = item.getOutgoing().get(outgoingItem);
+                double             outgoingAngleRange    = outgoingValue * angleStep;
 
                 int indexDelta   = items.indexOf(item) - items.indexOf(outgoingItem);
                 outerPointRadius = outerPointRadius / (Math.abs(indexDelta) + 0.75);
@@ -526,6 +583,31 @@ public class CircularPlot extends Region {
                 itemParameter.setNextOutgoingStartAngle(itemParameter.getNextOutgoingStartAngle() + outgoingAngleRange);
 
                 // Draw flow
+                Path path = new Path();
+                path.setFill(Helper.getColorWithOpacity(item.getColor(), getConnectionOpacity()));
+                path.moveTo(p0.getX(), p0.getY());
+                path.quadraticCurveTo(p4.getX(), p4.getY(), p2.getX(), p2.getY());             // curve from p4 -> p4 -> p2
+                if (getShowFlowDirection()) {
+                    path.lineTo(p23.getX(), p23.getY());                                       // line from p2 -> p23
+                    path.lineTo(p3.getX(), p3.getY());                                         // line from p23 -> p3
+                } else {
+                    path.quadraticCurveTo(p23.getX(), p23.getY(), p3.getX(), p3.getY());       // curve from p2 -> p23 -> p3
+                }
+                path.quadraticCurveTo(p5.getX(), p5.getY(), p1.getX(), p1.getY());             // curve from p3 -> p5 -> p1
+                path.quadraticCurveTo(p01.getX(), p01.getY(), p0.getX(), p0.getY());           // curve from p1 -> p01 -> p0
+                path.closePath();
+
+                path.draw(ctx, true, false);
+
+                String tooltipText = new StringBuilder().append(item.getName())
+                                                        .append(" -> ")
+                                                        .append(outgoingItem.getName())
+                                                        .append(" ")
+                                                        .append(String.format(getLocale(), formatString, outgoingValue))
+                                                        .toString();
+                paths.put(path, tooltipText);
+
+                /*
                 ctx.setFill(Helper.getColorWithOpacity(item.getColor(), getConnectionOpacity()));
                 ctx.beginPath();
                 ctx.moveTo(p0.getX(), p0.getY());
@@ -540,6 +622,7 @@ public class CircularPlot extends Region {
                 ctx.quadraticCurveTo(p01.getX(), p01.getY(), p0.getX(), p0.getY());           // curve from p1 -> p01 -> p0
                 ctx.closePath();
                 ctx.fill();
+                */
             }
         }
     }
@@ -635,7 +718,7 @@ public class CircularPlot extends Region {
                             ctx.setFill(Color.TRANSPARENT);
                         }
                     }
-                    ctx.fillText(Helper.format(counter, getDecimals()), 0, 0);
+                    ctx.fillText(Helper.format(counter, getDecimals(), getLocale()), 0, 0);
                     ctx.restore();
                 }
             } else if (mediumTickMarksVisible &&

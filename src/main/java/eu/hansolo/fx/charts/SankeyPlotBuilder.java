@@ -33,6 +33,7 @@ import javafx.scene.paint.Color;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
 public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
@@ -115,6 +116,11 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
 
     public final B connectionOpacity(final double OPACITY) {
         properties.put("connectionOpacity", new SimpleDoubleProperty(OPACITY));
+        return (B)this;
+    }
+
+    public final B locale(final Locale LOCALE) {
+        properties.put("locale", new SimpleObjectProperty<>(LOCALE));
         return (B)this;
     }
 
@@ -260,6 +266,8 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
                 CONTROL.setItemColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("connectionOpacity".equals(key)) {
                 CONTROL.setConnectionOpacity(((DoubleProperty) properties.get(key)).get());
+            } else if ("locale".equals(key)) {
+                CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
             }
         }
         return CONTROL;

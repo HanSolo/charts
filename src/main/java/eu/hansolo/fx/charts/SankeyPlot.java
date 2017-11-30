@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.event.PlotItemEventListener;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.fx.geometry.Path;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -36,6 +37,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -50,6 +52,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -80,7 +83,7 @@ public class SankeyPlot extends Region {
     private              Canvas                           canvas;
     private              GraphicsContext                  ctx;
     private              ObservableList<PlotItem>         items;
-    private              PlotItemEventListener itemListener;
+    private              PlotItemEventListener            itemListener;
     private              ListChangeListener<PlotItem>     itemListListener;
     private              Map<Integer, List<PlotItemData>> itemsPerLevel;
     private              int                              minLevel;
@@ -110,6 +113,11 @@ public class SankeyPlot extends Region {
     private              ObjectProperty<Color>            itemColor;
     private              double                           _connectionOpacity;
     private              DoubleProperty                   connectionOpacity;
+    private              Locale                           _locale;
+    private              ObjectProperty<Locale>           locale;
+    private              String                           formatString;
+    private              Map<Path, String>                paths;
+    private              Tooltip                          tooltip;
 
 
     // ******************** Constructors **************************************
@@ -143,6 +151,11 @@ public class SankeyPlot extends Region {
         _useItemColor      = true;
         _itemColor         = DEFAULT_ITEM_COLOR;
         _connectionOpacity = DEFAULT_OPACITY;
+        _locale            = Locale.getDefault();
+
+        formatString       = "%." + _decimals + "f";
+
+        paths              = new LinkedHashMap<>();
 
         initGraphics();
         registerListeners();
@@ -163,6 +176,9 @@ public class SankeyPlot extends Region {
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
+        tooltip = new Tooltip();
+        tooltip.setAutoHide(true);
+
         getChildren().setAll(canvas);
     }
 
@@ -170,6 +186,20 @@ public class SankeyPlot extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
+        canvas.setOnMouseClicked(e -> {
+            paths.forEach((path, tooltipText) -> {
+                double eventX = e.getX();
+                double eventY = e.getY();
+                if (path.contains(eventX, eventY)) {
+                    double tooltipX = eventX + canvas.getScene().getX() + canvas.getScene().getWindow().getX();
+                    double tooltipY = eventY + canvas.getScene().getY() + canvas.getScene().getWindow().getY() - 25;
+                    tooltip.setText(tooltipText);
+                    tooltip.setX(tooltipX);
+                    tooltip.setY(tooltipY);
+                    tooltip.show(getScene().getWindow());
+                }
+            });
+        });
     }
 
 
@@ -357,6 +387,7 @@ public class SankeyPlot extends Region {
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
             _decimals = Helper.clamp(0, 6, DECIMALS);
+            formatString = new StringBuilder("%.").append(getDecimals()).append("f").toString();
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -367,6 +398,7 @@ public class SankeyPlot extends Region {
             decimals = new IntegerPropertyBase(_decimals) {
                 @Override protected void invalidated() {
                     set(Helper.clamp(0, 6, get()));
+                    formatString = new StringBuilder("%.").append(get()).append("f").toString();
                     redraw();
                 }
                 @Override public Object getBean() { return SankeyPlot.this; }
@@ -457,6 +489,27 @@ public class SankeyPlot extends Region {
             };
         }
         return connectionOpacity;
+    }
+
+    public Locale getLocale() { return null == locale ? _locale : locale.get(); }
+    public void setLocale(final Locale LOCALE) {
+        if (null == locale) {
+            _locale = LOCALE;
+            prepareData();
+        } else {
+            locale.set(LOCALE);
+        }
+    }
+    public ObjectProperty<Locale> localeProperty() {
+        if (null == locale) {
+            locale = new ObjectPropertyBase<Locale>(_locale) {
+                @Override protected void invalidated() { prepareData(); }
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "locale"; }
+            };
+        }
+        _locale = null;
+        return locale;
     }
 
     public List<PlotItem> getItemsWithOnlyOutgoing() {
@@ -566,6 +619,9 @@ public class SankeyPlot extends Region {
             }
         }
 
+        //redraw();
+
+        createPaths();
         redraw();
     }
 
@@ -588,7 +644,99 @@ public class SankeyPlot extends Region {
         }
     }
 
+    private void createPaths() {
+        paths.clear();
+
+        boolean showFlowDirection    = getShowFlowDirection();
+        double  showDirectionOffsetX = size * 0.01875;
+        double  connectionOpacity    = getConnectionOpacity();
+
+        // Draw bezier curves between items
+        for (int level = minLevel ; level <= maxLevel ; level++) {
+            List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
+            int nextLevel   = level + 1;
+
+            // Go through all item data of the current level
+            for (PlotItemData itemData : itemDataInLevel) {
+                PlotItem  item   = itemData.getPlotItem();
+                CtxBounds bounds = itemData.getBounds();
+
+                // Outgoing
+                if (level < maxLevel) {
+                    List<PlotItemData> nextLevelItemDataList = itemsPerLevel.get(nextLevel);
+                    for (PlotItem outgoingItem : item.getOutgoing().keySet()) {
+                        Optional<PlotItemData> targetItemDataOptional = nextLevelItemDataList.stream().filter(id -> id.getPlotItem().equals(outgoingItem)).findFirst();
+                        if (!targetItemDataOptional.isPresent()) { continue; }
+
+                        PlotItemData targetItemData   = targetItemDataOptional.get();
+                        CtxBounds    targetItemBounds = targetItemData.getBounds();
+                        PlotItem     targetItem       = targetItemData.getPlotItem();
+
+                        // Calculate y start position in target item dependent on item index in target incoming
+                        double targetIncomingOffsetY = 0;
+                        for (PlotItem incomingItem : targetItem.getIncoming().keySet()) {
+                            if (incomingItem.equals(item)) { break; }
+                            targetIncomingOffsetY += targetItem.getIncoming().get(incomingItem) * scaleY;
+                        }
+
+                        // Calculate the offset in x direction for the bezier curve control points
+                        double ctrlPointOffsetX = (targetItemBounds.getMinX() - bounds.getMaxX()) * 0.25;
+
+                        // Calculate the value of the current item in y direction
+                        double outgoingValue = item.getOutgoing().get(outgoingItem);
+                        double scaledValueY  = outgoingValue * scaleY;
+
+                        // Create Path
+                        Path path = new Path();
+
+                        // Set Gradient from current item to outgoing items
+                        if (StreamFillMode.COLOR == getStreamFillMode()) {
+                            path.setFill(getStreamColor());
+                        } else {
+                            path.setFill(new LinearGradient(0, 0, 1, 0,
+                                                            true, CycleMethod.NO_CYCLE,
+                                                            new Stop(0, Helper.getColorWithOpacity(item.getColor(), connectionOpacity)),
+                                                            new Stop(1, Helper.getColorWithOpacity(outgoingItem.getColor(), connectionOpacity))));
+                        }
+
+                        // Draw the bezier curve
+                        path.moveTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
+                        if (showFlowDirection) {
+                            path.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
+                                               targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
+                                               targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY);
+                            path.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY * 0.5);
+                            path.lineTo(targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
+                        } else {
+                            path.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
+                                               targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
+                                               targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY);
+                            path.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
+                        }
+
+                        itemData.addToOutgoingOffset(scaledValueY);
+                        targetItemData.addToIncomingOffset(scaledValueY);
+                        path.bezierCurveTo(targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY,
+                                           bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
+                                           bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
+                        path.lineTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
+                        path.closePath();
+
+                        String tooltipText = new StringBuilder().append(item.getName())
+                                                                .append(" -> ")
+                                                                .append(targetItem.getName())
+                                                                .append(" ")
+                                                                .append(String.format(getLocale(), formatString, outgoingValue))
+                                                                .toString();
+                        paths.put(path, tooltipText);
+                    }
+                }
+            }
+        }
+    }
+
     private void redraw() {
+        /*
         ctx.clearRect(0, 0, width, height);
         boolean useItemColor         = getUseItemColor();
         Color   itemColor            = getItemColor();
@@ -677,6 +825,36 @@ public class SankeyPlot extends Region {
                 ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
             }
         }
+        */
+
+
+        ctx.clearRect(0, 0, width, height);
+        paths.forEach((path, plotItem) -> {
+            path.draw(ctx, true, false);
+        });
+        boolean useItemColor         = getUseItemColor();
+        Color   itemColor            = getItemColor();
+        Color   textColor            = getTextColor();
+
+        // Draw bezier curves between items
+        for (int level = minLevel ; level <= maxLevel ; level++) {
+            List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
+            int nextLevel   = level + 1;
+
+            // Go through all item data of the current level
+            for (PlotItemData itemData : itemDataInLevel) {
+                PlotItem  item   = itemData.getPlotItem();
+                CtxBounds bounds = itemData.getBounds();
+
+                // Draw item boxes with their labels
+                ctx.setFill(useItemColor ? item.getColor() : itemColor);
+                ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+
+                ctx.setFill(textColor);
+                ctx.setTextAlign(level == maxLevel ? TextAlignment.RIGHT : TextAlignment.LEFT);
+                ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
+            }
+        }
     }
 
 
@@ -687,6 +865,7 @@ public class SankeyPlot extends Region {
         private Point     textPoint;        // point where text will be drawn
         private double    incomingOffsetY;  // offset in y direction of already added incoming bezier curves
         private double    outgoingOffsetY;  // offset in y direction of already added outgoing bezier curves
+        private double    value;
 
 
         // ******************** Constructors **********************************
@@ -696,6 +875,7 @@ public class SankeyPlot extends Region {
             textPoint      = new Point();
             incomingOffsetY = 0;
             outgoingOffsetY = 0;
+            value           = 0;
         }
 
 
@@ -719,5 +899,8 @@ public class SankeyPlot extends Region {
         public void setOutgoingOffsetY(final double OFFSET) { outgoingOffsetY = OFFSET; }
         public void addToOutgoingOffset(final double ADD) { outgoingOffsetY += ADD; }
         public void resetOutgoingOffset() { outgoingOffsetY = 0; }
+
+        public double getValue() { return value; }
+        public void setValue(final double VALUE) { value = VALUE; }
     }
 }
