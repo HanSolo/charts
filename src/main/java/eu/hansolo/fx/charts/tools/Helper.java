@@ -223,6 +223,33 @@ public class Helper {
         return new Point(LEFT_POINT.getX() + x, LEFT_POINT.getY() + y);
     }
 
+    public static Point calcIntersectionOfTwoLines(Point A, Point B, Point C, Point D) {
+        return calcIntersectionOfTwoLines(A.getX(), A.getY(), B.getX(), B.getY(), C.getX(), C.getY(), D.getX(), D.getY());
+    }
+    public static Point calcIntersectionOfTwoLines(final double X1, final double Y1, final double X2, final double Y2,
+                                                   final double X3, final double Y3, final double X4, final double Y4) {
+
+        // Line AB represented as a1x + b1y = c1
+        double a1 = Y2 - Y1;
+        double b1 = X1 - X2;
+        double c1 = a1 * X1 + b1 * Y1;
+
+        // Line CD represented as a2x + b2y = c2
+        double a2 = Y4 - Y3;
+        double b2 = X3 - X4;
+        double c2 = a2 * X3 + b2 * Y3;
+
+        double determinant = a1 * b2 - a2 * b1;
+
+        if (determinant == 0) { // Lines are parallel
+            return new Point(Double.MAX_VALUE, Double.MAX_VALUE);
+        } else {
+            double x = (b2 * c1 - b1 * c2) / determinant;
+            double y = (a1 * c2 - a2 * c1) / determinant;
+            return new Point(x, y);
+        }
+    }
+
     public static final Point calcIntersectionPoint(final Point LEFT_POINT, final Point RIGHT_POINT, final double INTERSECTION_Y) {
         double[] xy = calculateInterSectionPoint(LEFT_POINT.getX(), LEFT_POINT.getY(), RIGHT_POINT.getX(), RIGHT_POINT.getY(), INTERSECTION_Y);
         return new Point(xy[0], xy[1]);
