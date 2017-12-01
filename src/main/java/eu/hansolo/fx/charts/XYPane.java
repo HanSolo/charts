@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYData;
+import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
@@ -36,7 +37,9 @@ import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -276,17 +279,35 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.setFill(getChartBackgroundPaint());
         ctx.fillRect(0, 0, width, height);
 
+        if (listOfSeries.size() == 2) {
+            boolean     deltaChart = false;
+            ChartType[] chartTypes = new ChartType[2];
+            int         count      = 0;
+            for(Series series : listOfSeries) {
+                chartTypes[count] = series.getChartType();
+                deltaChart        = ChartType.LINE_DELTA == chartTypes[count] || ChartType.SMOOTH_LINE_DELTA == chartTypes[count];
+                count++;
+            }
+            if (deltaChart && chartTypes[0] == chartTypes[1]) {
+                switch(chartTypes[0]) {
+                    case LINE_DELTA       : drawLineDelta(listOfSeries.get(0), listOfSeries.get(1)); return;
+                    case SMOOTH_LINE_DELTA: drawSmoothLineDelta(listOfSeries.get(0), listOfSeries.get(1)); return;
+                }
+            }
+        }
+
+
         listOfSeries.forEach(series -> {
             final ChartType TYPE        = series.getChartType();
             final boolean   SHOW_POINTS = series.isShowPoints();
             switch(TYPE) {
-                case LINE            : drawLine(series, SHOW_POINTS); break;
-                case SMOOTH_LINE     : drawSmoothLine(series, SHOW_POINTS); break;
-                case AREA            : drawArea(series, SHOW_POINTS); break;
-                case SMOOTH_AREA     : drawSmoothArea(series, SHOW_POINTS); break;
-                case SCATTER         : drawScatter(series) ;break;
-                case HORIZON         : drawHorizon(series, false); break;
-                case SMOOTHED_HORIZON: drawHorizon(series, true); break;
+                case LINE             : drawLine(series, SHOW_POINTS); break;
+                case SMOOTH_LINE      : drawSmoothLine(series, SHOW_POINTS); break;
+                case AREA             : drawArea(series, SHOW_POINTS); break;
+                case SMOOTH_AREA      : drawSmoothArea(series, SHOW_POINTS); break;
+                case SCATTER          : drawScatter(series) ;break;
+                case HORIZON          : drawHorizon(series, false); break;
+                case SMOOTHED_HORIZON : drawHorizon(series, true); break;
             }
         });
     }
@@ -456,6 +477,246 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
 
         // Draw values below 0
         if (!belowRefPoints.isEmpty()) { drawPath(belowRefPointsSplitToBands, bandWidth, belowColors); }
+    }
+
+    private void drawLineDelta(final XYSeries<T> SERIES_1, final XYSeries<T> SERIES_2) {
+        if (SERIES_1.getItems().size() != SERIES_2.getItems().size()) { throw new IllegalArgumentException("Both series must have the same number of items!"); }
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+
+        int          noOfItems         = SERIES_1.getItems().size();
+        List<XYData> cachedItems       = new LinkedList<>();
+        Point        lastPointForClose = new Point();
+
+        XYData series1Item0  = SERIES_1.getItems().get(0);
+        XYData series2Item0  = SERIES_2.getItems().get(0);
+        int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
+
+        Paint series1Stroke = SERIES_1.getStroke();
+        Paint series1Fill   = SERIES_1.getFill();
+
+        Paint series2Stroke = SERIES_2.getStroke();
+        Paint series2Fill   = SERIES_2.getFill();
+
+        // Start path
+        ctx.setLineWidth(size * 0.0025);
+        ctx.beginPath();
+        switch(currentSeries) {
+            case 1 :
+                ctx.moveTo((series1Item0.getX() - LOWER_BOUND_X) * scaleX, height - (series1Item0.getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(series2Item0.getX(), series2Item0.getY());
+                break;
+            case 2 :
+                ctx.moveTo((series2Item0.getX() - LOWER_BOUND_X) * scaleX, height - (series2Item0.getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(series1Item0.getX(), series1Item0.getY());
+                break;
+            default: ctx.moveTo((series1Item0.getX() - LOWER_BOUND_X) * scaleX, height - (series1Item0.getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(series2Item0.getX(), series2Item0.getY());
+                break;
+        }
+        // Draw path
+        List<XYData> items1 = SERIES_1.getItems();
+        List<XYData> items2 = SERIES_2.getItems();
+        for (int i = 1 ; i < noOfItems ; i++) {
+            XYData lastXyData1 = items1.get(i - 1);
+            XYData lastXyData2 = items2.get(i - 1);
+
+            XYData xyData1 = items1.get(i);
+            XYData xyData2 = items2.get(i);
+
+            if (lastXyData1.getY() > lastXyData2.getY() && xyData1.getY() < xyData2.getY()) {
+                // Lines crossed Line1 is now below lower Line2
+                Point intersectionPoint = Helper.calcIntersectionOfTwoLines(lastXyData1.getX(), lastXyData1.getY(), xyData1.getX(), xyData1.getY(),
+                                                                            lastXyData2.getX(), lastXyData2.getY(), xyData2.getX(), xyData2.getY());
+                ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+
+                Collections.reverse(cachedItems);
+                for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.closePath();
+                ctx.setFill(series1Fill);
+                ctx.fill();
+                cachedItems.clear();
+
+                ctx.beginPath();
+                ctx.moveTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.lineTo((xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
+                currentSeries = 2;
+                cachedItems.add(xyData1);
+                lastPointForClose.set(intersectionPoint.getX(), intersectionPoint.getY());
+            } else if (lastXyData1.getY() < lastXyData2.getY() && xyData1.getY() > xyData2.getY()) {
+                // Lines crossed and Line1 is now above Line2
+                Point intersectionPoint = Helper.calcIntersectionOfTwoLines(lastXyData1.getX(), lastXyData1.getY(), xyData1.getX(), xyData1.getY(),
+                                                                            lastXyData2.getX(), lastXyData2.getY(), xyData2.getX(), xyData2.getY());
+                ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+
+                Collections.reverse(cachedItems);
+                for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.closePath();
+                ctx.setFill(series2Fill);
+                ctx.fill();
+                cachedItems.clear();
+
+                ctx.beginPath();
+                ctx.moveTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.lineTo((xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
+                currentSeries = 1;
+                cachedItems.add(xyData2);
+                lastPointForClose.set(intersectionPoint.getX(), intersectionPoint.getY());
+            } else {
+                // Lines did not cross
+                switch(currentSeries) {
+                    case 1: ctx.lineTo((xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY); cachedItems.add(xyData2); break;
+                    case 2: ctx.lineTo((xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY); cachedItems.add(xyData1); break;
+                }
+            }
+
+            ctx.setStroke(series1Stroke);
+            ctx.strokeLine((lastXyData1.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData1.getY() - LOWER_BOUND_Y) * scaleY, (xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
+
+            ctx.setStroke(series2Stroke);
+            ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
+        }
+        Collections.reverse(cachedItems);
+        for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+        ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+        ctx.closePath();
+        switch(currentSeries) {
+            case 1: ctx.setFill(series1Fill); break;
+            case 2: ctx.setFill(series2Fill); break;
+        }
+        ctx.fill();
+        cachedItems.clear();
+
+
+        if (SERIES_1.isShowPoints()) { drawSymbols(SERIES_1); }
+        if (SERIES_2.isShowPoints()) { drawSymbols(SERIES_2); }
+    }
+
+    private void drawSmoothLineDelta(final XYSeries<T> SERIES_1, final XYSeries<T> SERIES_2) {
+        if (SERIES_1.getItems().size() != SERIES_2.getItems().size()) { throw new IllegalArgumentException("Both series must have the same number of items!"); }
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+
+        // Smooth series
+        List<Point> points1 = new ArrayList<>(SERIES_1.getItems().size());
+        SERIES_1.getItems().forEach(item -> points1.add(new Point(item.getX(), item.getY())));
+        Point[] interpolatedPoints1 = Helper.subdividePoints(points1.toArray(new Point[0]), SUB_DIVISIONS);
+
+        List<Point> points2 = new ArrayList<>(SERIES_2.getItems().size());
+        SERIES_2.getItems().forEach(item -> points2.add(new Point(item.getX(), item.getY())));
+        Point[] interpolatedPoints2 = Helper.subdividePoints(points2.toArray(new Point[0]), SUB_DIVISIONS);
+
+
+        int         noOfItems         = interpolatedPoints1.length;
+        List<Point> cachedItems       = new LinkedList<>();
+        Point       lastPointForClose = new Point();
+
+        XYData series1Item0  = SERIES_1.getItems().get(0);
+        XYData series2Item0  = SERIES_2.getItems().get(0);
+        int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
+
+        Paint series1Stroke = SERIES_1.getStroke();
+        Paint series1Fill   = SERIES_1.getFill();
+
+        Paint series2Stroke = SERIES_2.getStroke();
+        Paint series2Fill   = SERIES_2.getFill();
+
+        // Start path
+        ctx.setLineWidth(size * 0.0025);
+        ctx.beginPath();
+        switch(currentSeries) {
+            case 1 :
+                ctx.moveTo((interpolatedPoints1[0].getX() - LOWER_BOUND_X) * scaleX, height - (interpolatedPoints1[0].getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(interpolatedPoints2[0].getX(), interpolatedPoints2[0].getY());
+                break;
+            case 2 :
+                ctx.moveTo((interpolatedPoints2[0].getX() - LOWER_BOUND_X) * scaleX, height - (interpolatedPoints2[0].getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(interpolatedPoints1[0].getX(), interpolatedPoints1[0].getY());
+                break;
+            default: ctx.moveTo((interpolatedPoints1[0].getX() - LOWER_BOUND_X) * scaleX, height - (interpolatedPoints1[0].getY() - LOWER_BOUND_Y) * scaleY);
+                lastPointForClose.set(interpolatedPoints2[0].getX(), interpolatedPoints2[0].getY());
+                break;
+        }
+        // Draw path
+        List<XYData> items1 = SERIES_1.getItems();
+        List<XYData> items2 = SERIES_2.getItems();
+        for (int i = 1 ; i < noOfItems ; i++) {
+            Point lastXyData1 = interpolatedPoints1[i - 1];
+            Point lastXyData2 = interpolatedPoints2[i - 1];
+
+            Point xyData1 = interpolatedPoints1[i];
+            Point xyData2 = interpolatedPoints2[i];
+
+            if (lastXyData1.getY() > lastXyData2.getY() && xyData1.getY() < xyData2.getY()) {
+                // Lines crossed Line1 is now below lower Line2
+                Point intersectionPoint = Helper.calcIntersectionOfTwoLines(lastXyData1.getX(), lastXyData1.getY(), xyData1.getX(), xyData1.getY(),
+                                                                            lastXyData2.getX(), lastXyData2.getY(), xyData2.getX(), xyData2.getY());
+                ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+
+                Collections.reverse(cachedItems);
+                for (Point item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.closePath();
+                ctx.setFill(series1Fill);
+                ctx.fill();
+                cachedItems.clear();
+
+                ctx.beginPath();
+                ctx.moveTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.lineTo((xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
+                currentSeries = 2;
+                cachedItems.add(xyData1);
+                lastPointForClose.set(intersectionPoint.getX(), intersectionPoint.getY());
+            } else if (lastXyData1.getY() < lastXyData2.getY() && xyData1.getY() > xyData2.getY()) {
+                // Lines crossed and Line1 is now above Line2
+                Point intersectionPoint = Helper.calcIntersectionOfTwoLines(lastXyData1.getX(), lastXyData1.getY(), xyData1.getX(), xyData1.getY(),
+                                                                            lastXyData2.getX(), lastXyData2.getY(), xyData2.getX(), xyData2.getY());
+                ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+
+                Collections.reverse(cachedItems);
+                for (Point item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.closePath();
+                ctx.setFill(series2Fill);
+                ctx.fill();
+                cachedItems.clear();
+
+                ctx.beginPath();
+                ctx.moveTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
+                ctx.lineTo((xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
+                currentSeries = 1;
+                cachedItems.add(xyData2);
+                lastPointForClose.set(intersectionPoint.getX(), intersectionPoint.getY());
+            } else {
+                // Lines did not cross
+                switch(currentSeries) {
+                    case 1: ctx.lineTo((xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY); cachedItems.add(xyData2); break;
+                    case 2: ctx.lineTo((xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY); cachedItems.add(xyData1); break;
+                }
+            }
+
+            ctx.setStroke(series1Stroke);
+            ctx.strokeLine((lastXyData1.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData1.getY() - LOWER_BOUND_Y) * scaleY, (xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
+
+            ctx.setStroke(series2Stroke);
+            ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
+        }
+        Collections.reverse(cachedItems);
+        for (Point item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+        ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
+        ctx.closePath();
+        switch(currentSeries) {
+            case 1: ctx.setFill(series1Fill); break;
+            case 2: ctx.setFill(series2Fill); break;
+        }
+        ctx.fill();
+        cachedItems.clear();
+
+
+        if (SERIES_1.isShowPoints()) { drawSymbols(SERIES_1); }
+        if (SERIES_2.isShowPoints()) { drawSymbols(SERIES_2); }
     }
 
     private void drawPath(final Map<Integer, List<Point>> MAP_OF_BANDS, final double BAND_WIDTH, final List<Color> COLORS) {
