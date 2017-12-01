@@ -608,7 +608,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         SERIES_2.getItems().forEach(item -> points2.add(new Point(item.getX(), item.getY())));
         Point[] interpolatedPoints2 = Helper.subdividePoints(points2.toArray(new Point[0]), SUB_DIVISIONS);
 
-
         int         noOfItems         = interpolatedPoints1.length;
         List<Point> cachedItems       = new LinkedList<>();
         Point       lastPointForClose = new Point();
@@ -640,8 +639,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
                 break;
         }
         // Draw path
-        List<XYData> items1 = SERIES_1.getItems();
-        List<XYData> items2 = SERIES_2.getItems();
         for (int i = 1 ; i < noOfItems ; i++) {
             Point lastXyData1 = interpolatedPoints1[i - 1];
             Point lastXyData2 = interpolatedPoints2[i - 1];
