@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.data.XYData;
+import eu.hansolo.fx.charts.data.XYDataObject;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -34,23 +35,26 @@ public class XYSeries<T extends XYData> extends Series {
 
     // ******************** Constructors **************************************
     public XYSeries() {
-        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
+        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT, true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT, true);
+    }
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final boolean SHOW_POINTS) {
+        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT, SHOW_POINTS);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE) {
-        this(ITEMS, TYPE, "", STROKE, Color.TRANSPARENT);
+        this(ITEMS, TYPE, "", STROKE, Color.TRANSPARENT, true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE, final Paint FILL) {
-        this(ITEMS, TYPE, "", STROKE, FILL);
+        this(ITEMS, TYPE, "", STROKE, FILL, true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
-        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT, true);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final boolean SHOW_POINTS) {
         super(ITEMS, TYPE, NAME, STROKE, FILL);
-        _showPoints = true;
+        _showPoints = SHOW_POINTS;
     }
 
 
@@ -68,4 +72,9 @@ public class XYSeries<T extends XYData> extends Series {
 
     public boolean isShowPoints() { return _showPoints; }
     public void setShowPoints(final boolean SHOW) { _showPoints = SHOW; }
+
+    @Override public void setPointColor(final Color COLOR) {
+        if (getItems().isEmpty()) { return; }
+        getItems().forEach(item -> ((XYDataObject) item).setColor(COLOR));
+    }
 }

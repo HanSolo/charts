@@ -151,6 +151,8 @@ public abstract class Series<T> {
         return fill;
     }
 
+    public void setPointColor(final Color COLOR) {}
+
     public ChartType getChartType() { return chartType; }
     public void setChartType(final ChartType TYPE) {
         chartType = TYPE;
