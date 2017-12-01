@@ -155,6 +155,8 @@ public class Converter {
         KILOMETER_PER_HOUR(new Unit(Category.SPEED, "km/h", "Kilometer per hour", new BigDecimal("0.2777777778"))),
         MILES_PER_HOUR(new Unit(Category.SPEED, "mph", "Miles per hour", new BigDecimal("0.4472271914"))),
         KNOT(new Unit(Category.SPEED, "kt", "Knot", new BigDecimal("0.51444444444444"))),
+        MACH(new Unit(Category.SPEED, "M", "Mach", new BigDecimal("0.00293866995797"))),
+
 
         // TemperatureGradient
         KELVIN_PER_SECOND(new Unit(Category.TEMPERATURE_GRADIENT, "K/s", "Kelvin per second", new BigDecimal("1.0"))),
