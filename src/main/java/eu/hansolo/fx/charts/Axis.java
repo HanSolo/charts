@@ -687,7 +687,8 @@ public class Axis extends Region {
     public int getDecimals() { return null == decimals ? _decimals : decimals.get(); }
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
-            _decimals = DECIMALS;
+            _decimals = Helper.clamp(0, 12, DECIMALS);
+            tickLabelFormatString = new StringBuilder("%.").append(Integer.toString(_decimals)).append("f").toString();
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -696,7 +697,11 @@ public class Axis extends Region {
     public IntegerProperty decimals() {
         if (null == decimals) {
             decimals = new IntegerPropertyBase(_decimals) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() {
+                    set(Helper.clamp(0, 12, get()));
+                    tickLabelFormatString = new StringBuilder("%.").append(Integer.toString(get())).append("f").toString();
+                    redraw();
+                }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "decimals"; }
             };
