@@ -16,7 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.Axis.AxisType;
 import eu.hansolo.fx.charts.data.XYData;
 import eu.hansolo.fx.charts.data.XYDataObject;
 import eu.hansolo.fx.charts.data.XYZDataObject;
