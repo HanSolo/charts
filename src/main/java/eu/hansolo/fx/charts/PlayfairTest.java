@@ -134,7 +134,7 @@ public class PlayfairTest extends Application {
 
         Scene scene = new Scene(new StackPane(pane));
 
-        stage.setTitle("Charts");
+        stage.setTitle("Playfair Chart Test");
         stage.setScene(scene);
         stage.show();
 
