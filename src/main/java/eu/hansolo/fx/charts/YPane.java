@@ -62,7 +62,6 @@ public class YPane<T extends YData> extends Region implements ChartArea {
     private              double                size;
     private              double                width;
     private              double                height;
-    private              Pane                  pane;
     private              Paint                 _chartBackgroundPaint;
     private              ObjectProperty<Paint> chartBackgroundPaint;
     private              List<YSeries<T>>      listOfSeries;
@@ -118,9 +117,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
-        pane = new Pane(canvas);
-
-        getChildren().setAll(pane);
+        getChildren().setAll(canvas);
     }
 
     private void registerListeners() {
@@ -540,12 +537,9 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         }
 
         if (width > 0 && height > 0) {
-            pane.setMaxSize(width, height);
-            pane.setPrefSize(width, height);
-            pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
-
             canvas.setWidth(size);
             canvas.setHeight(size);
+            //canvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
             canvas.relocate((width - size) * 0.5, (height - size) * 0.5);
             
             redraw();

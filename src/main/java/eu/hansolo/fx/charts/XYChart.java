@@ -276,7 +276,7 @@ public class XYChart<T extends XYData> extends Region {
 
     // ******************** Resizing ******************************************
     private void resize() {
-        width = getWidth() - getInsets().getLeft() - getInsets().getRight();
+        width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
 
         if (width > 0 && height > 0) {

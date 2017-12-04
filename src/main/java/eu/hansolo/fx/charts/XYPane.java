@@ -30,6 +30,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -64,7 +65,6 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              double                size;
     private              double                width;
     private              double                height;
-    private              Pane                  pane;
     private              Paint                 _chartBackgroundPaint;
     private              ObjectProperty<Paint> chartBackgroundPaint;
     private              List<XYSeries<T>>     listOfSeries;
@@ -83,6 +83,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private              double                _upperBoundY;
     private              DoubleProperty        upperBoundY;
     private              boolean               referenceZero;
+    private              Tooltip               tooltip;
 
 
     // ******************** Constructors **************************************
@@ -129,9 +130,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
-        pane = new Pane(canvas);
-
-        getChildren().setAll(pane);
+        getChildren().setAll(canvas);
     }
 
     private void registerListeners() {
@@ -139,6 +138,13 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         heightProperty().addListener(o -> resize());
 
         listOfSeries.forEach(series -> series.setOnSeriesEvent(seriesEvent -> redraw()));
+        canvas.setOnMouseClicked(e -> {
+            final double LOWER_BOUND_X = getLowerBoundX();
+            final double LOWER_BOUND_Y = getLowerBoundY();
+            double x = (e.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (e.getY() - LOWER_BOUND_Y) * scaleY;
+            System.out.println(x + ", " + y);
+        });
     }
 
 
@@ -892,12 +898,9 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         }
 
         if (width > 0 && height > 0) {
-            pane.setMaxSize(width, height);
-            pane.setPrefSize(width, height);
-            pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
-
             canvas.setWidth(width);
             canvas.setHeight(height);
+            canvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
             symbolSize = clamp(MIN_SYMBOL_SIZE, MAX_SYMBOL_SIZE, size * 0.016);
 

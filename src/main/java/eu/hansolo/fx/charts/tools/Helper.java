@@ -18,10 +18,6 @@ package eu.hansolo.fx.charts.tools;
 
 import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.DataPoint;
-import eu.hansolo.fx.charts.tools.CatmullRom;
-import eu.hansolo.fx.charts.tools.CtxBounds;
-import eu.hansolo.fx.charts.tools.CtxCornerRadii;
-import eu.hansolo.fx.charts.tools.Point;
 import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
@@ -37,18 +33,67 @@ import javafx.scene.shape.Polygon;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 
 public class Helper {
     public static final double   MAX_TICK_MARK_LENGTH = 0.125;
     public static final double   MAX_TICK_MARK_WIDTH  = 0.02;
     public static final String[] ABBREVIATIONS        = { "k", "M", "G", "T", "P", "E", "Z", "Y" };
+
+    public enum Interval {
+        DECADE(ChronoUnit.DECADES, 1, 311_040_000, 155_520_000, 31_104_000), // 10 years
+        YEAR(ChronoUnit.YEARS, 1, 31_104_000, 15_552_000, 2_592_000),        // 360 days
+        MONTH_6(ChronoUnit.MONTHS, 6, 15_552_000, 2_592_000, 2_592_000),     // 180 days
+        MONTH_3(ChronoUnit.MONTHS, 3, 7_776_000, 2_592_000, 864_000),        // 90 days
+        MONTH_1(ChronoUnit.MONTHS, 1, 2_592_000, 864_000, 86_400),           // 30 days
+        DAY(ChronoUnit.DAYS, 1, 86_400, 43_200, 3_600),
+        HOUR_12(ChronoUnit.HOURS, 12, 43_200, 3_600, 1_800),
+        HOUR_6(ChronoUnit.HOURS, 6, 21_600, 3_600, 900),
+        HOUR_3(ChronoUnit.HOURS, 3, 10_800, 3_600, 300),
+        HOUR_1(ChronoUnit.HOURS, 1, 3_600, 900, 300),
+        MINUTE_15(ChronoUnit.MINUTES, 15, 900, 300, 60),
+        MINUTE_5(ChronoUnit.MINUTES, 5, 300, 60, 10),
+        MINUTE_1(ChronoUnit.MINUTES, 1, 60, 5, 1),
+        SECOND_15(ChronoUnit.SECONDS, 15, 15, 5, 1),
+        SECOND_5(ChronoUnit.SECONDS, 5, 5, 1, 1),
+        SECOND_1(ChronoUnit.SECONDS, 1, 1, 1, 1);
+        //MILLISECOND(ChronoUnit.MILLIS, 1);
+
+        private final ChronoUnit INTERVAL;
+        private final int        AMOUNT;
+        private final long       MAJOR_TICK_SPACE;
+        private final long       MEDIUM_TICK_SPACE;
+        private final long       MINOR_TICK_SPACE;
+
+
+        Interval(final ChronoUnit INTERVAL, final int AMOUNT, final long MAJOR_TICK_SPACE, final long MEDIUM_TICK_SPACE, final long MINOR_TICK_SPACE) {
+            this.INTERVAL          = INTERVAL;
+            this.AMOUNT            = AMOUNT;
+            this.MAJOR_TICK_SPACE  = MAJOR_TICK_SPACE;
+            this.MEDIUM_TICK_SPACE = MEDIUM_TICK_SPACE;
+            this.MINOR_TICK_SPACE  = MINOR_TICK_SPACE;
+        }
+
+
+        public ChronoUnit getInterval() { return INTERVAL; }
+
+        public int getAmount() { return AMOUNT; }
+
+        public long getMajorTickSpace() { return MAJOR_TICK_SPACE; }
+        public long getMediumTickSpace() { return MEDIUM_TICK_SPACE; }
+        public long getMinorTickSpace() { return MINOR_TICK_SPACE; }
+    }
 
     public static final int clamp(final int MIN, final int MAX, final int VALUE) {
         if (VALUE < MIN) return MIN;
@@ -63,6 +108,21 @@ public class Helper {
     public static final double clamp(final double MIN, final double MAX, final double VALUE) {
         if (Double.compare(VALUE, MIN) < 0) return MIN;
         if (Double.compare(VALUE, MAX) > 0) return MAX;
+        return VALUE;
+    }
+    public static final Instant clamp(final Instant MIN, final Instant MAX, final Instant VALUE) {
+        if (VALUE.isBefore(MIN)) return MIN;
+        if (VALUE.isAfter(MAX)) return MAX;
+        return VALUE;
+    }
+    public static final LocalDateTime clamp(final LocalDateTime MIN, final LocalDateTime MAX, final LocalDateTime VALUE) {
+        if (VALUE.isBefore(MIN)) return MIN;
+        if (VALUE.isAfter(MAX)) return MAX;
+        return VALUE;
+    }
+    public static final LocalDate clamp(final LocalDate MIN, final LocalDate MAX, final LocalDate VALUE) {
+        if (VALUE.isBefore(MIN)) return MIN;
+        if (VALUE.isAfter(MAX)) return MAX;
         return VALUE;
     }
 
@@ -739,4 +799,30 @@ public class Helper {
     }
 
     public static <T> Predicate<T> not(Predicate<T> predicate) { return predicate.negate(); }
+
+    public static ZoneOffset getZoneOffset() { return getZoneOffset(ZoneId.systemDefault()); }
+    public static ZoneOffset getZoneOffset(final ZoneId ZONE_ID) { return ZONE_ID.getRules().getOffset(Instant.now()); }
+
+    public static long toMillis(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return toSeconds(DATE_TIME, ZONE_OFFSET) * 1000; }
+    public static long toSeconds(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return DATE_TIME.toEpochSecond(ZONE_OFFSET); }
+
+    public static double toNumericValue(final LocalDateTime DATE) { return toNumericValue(DATE, ZoneId.systemDefault()); }
+    public static double toNumericValue(final LocalDateTime DATE, final ZoneId ZONE_ID) { return Helper.toSeconds(DATE, Helper.getZoneOffset(ZONE_ID)); }
+
+    public static LocalDateTime toRealValue(final double VALUE) { return secondsToLocalDateTime((long) VALUE); }
+    public static LocalDateTime toRealValue(final double VALUE, final ZoneId ZONE_ID) { return secondsToLocalDateTime((long) VALUE, ZONE_ID); }
+
+    public static LocalDateTime secondsToLocalDateTime(final long SECONDS) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZoneId.systemDefault()); }
+    public static LocalDateTime secondsToLocalDateTime(final long SECONDS, final ZoneId ZONE_ID) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZONE_ID); }
+
+    public static String secondsToHHMMString(final long SECONDS) {
+        long[] hhmmss = secondsToHHMMSS(SECONDS);
+        return String.format("%02d:%02d:%02d", hhmmss[0], hhmmss[1], hhmmss[2]);
+    }
+    public static long[] secondsToHHMMSS(final long SECONDS) {
+        long seconds = SECONDS % 60;
+        long minutes = (SECONDS / 60) % 60;
+        long hours   = (SECONDS / (60 * 60)) % 24;
+        return new long[] { hours, minutes, seconds };
+    }
 }
