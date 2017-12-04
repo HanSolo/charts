@@ -26,7 +26,9 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -51,6 +53,9 @@ public class MatrixHeatmapTest extends Application {
 
     private MatrixSeries<MatrixDataObject> matrixSeries2;
     private MatrixPane<MatrixDataObject>   matrixHeatMap2;
+
+    private MatrixSeries<MatrixDataObject> matrixSeries3;
+    private MatrixPane<MatrixDataObject>   matrixHeatMap3;
 
     private long                           lastTimerCall;
     private AnimationTimer                 timer;
@@ -95,6 +100,36 @@ public class MatrixHeatmapTest extends Application {
         matrixHeatMap2.getMatrix().setUseSpacer(true);
         matrixHeatMap2.getMatrix().setColsAndRows(8, 6);
         matrixHeatMap2.setPrefSize(400, 300);
+
+
+
+        List<MatrixDataObject> matrixData3 = new ArrayList<>();
+        for (int x = 0 ; x <108 ; x++) {
+            int start = RND.nextInt(5);
+            int stop  = RND.nextInt(35 + 5);
+            for (int y = 0 ; y < 40 ; y++) {
+                MatrixDataObject mdo = new MatrixDataObject(x, y, RND.nextDouble());
+
+            }
+        }
+
+        matrixSeries3 = new MatrixSeries<>(matrixData3, ChartType.MATRIX_HEATMAP);
+
+        matrixHeatMap3 = new MatrixPane<>(matrixSeries3);
+        matrixHeatMap3.setMatrixGradient(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                                                            new Stop(0.0, Color.web("#0085D9")),
+                                                            new Stop(0.125, Color.web("#52B53D")),
+                                                            new Stop(0.25, Color.web("#93CE7D")),
+                                                            new Stop(0.375, Color.web("#BBDFAC")),
+                                                            new Stop(0.5, Color.web("#EADEAC")),
+                                                            new Stop(0.625, Color.web("#FFD01F")),
+                                                            new Stop(0.75, Color.web("#FC9200")),
+                                                            new Stop(0.875, Color.web("#EC3A21")),
+                                                            new Stop(1.0, Color.web("#C4311D"))));
+        matrixHeatMap3.getMatrix().setUseSpacer(false);
+        matrixHeatMap3.getMatrix().setSquarePixels(false);
+        matrixHeatMap3.getMatrix().setColsAndRows(108,40);
+        matrixHeatMap3.setPrefSize(900, 400);
 
 
         lastTimerCall = System.nanoTime();
