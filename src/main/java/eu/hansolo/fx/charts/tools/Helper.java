@@ -126,6 +126,22 @@ public class Helper {
         return VALUE;
     }
 
+    public static double clampMin(final double MIN, final double VALUE) {
+        if (VALUE < MIN) return MIN;
+        return VALUE;
+    }
+
+    public static double clampMax(final double MAX, final double VALUE) {
+        if (VALUE > MAX) return MAX;
+        return VALUE;
+    }
+
+    public static double nearest(final double LESS, final double VALUE, final double MORE) {
+        double lessDiff = VALUE - LESS;
+        double moreDiff = MORE - VALUE;
+        return lessDiff < moreDiff ? LESS : MORE;
+    }
+
     public static final double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;

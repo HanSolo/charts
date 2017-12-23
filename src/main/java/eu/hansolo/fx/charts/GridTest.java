@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.application.Application;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
@@ -69,6 +70,8 @@ public class GridTest extends Application {
         stage.setTitle("GridTest");
         stage.setScene(scene);
         stage.show();
+
+        //Helper.saveAsPng(pane, "/Users/hansolo/Desktop/grid.png");
     }
 
     @Override public void stop() {
