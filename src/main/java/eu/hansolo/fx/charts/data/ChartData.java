@@ -39,18 +39,18 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ChartData implements Comparable<ChartData> {
     private final ChartDataEvent               UPDATE_EVENT   = new ChartDataEvent(EventType.UPDATE, ChartData.this);
     private final ChartDataEvent               FINISHED_EVENT = new ChartDataEvent(EventType.FINISHED, ChartData.this);
-    private String  name;
-    private double  value;
-    private double  oldValue;
-    private Color   fillColor;
-    private Color   strokeColor;
-    private Color   textColor;
-    private Instant timestamp;
-    private boolean animated;
-    private long    animationDuration;
-    private List<ChartDataEventListener> listenerList = new CopyOnWriteArrayList<>();
-    private DoubleProperty currentValue;
-    private Timeline       timeline;
+    private       List<ChartDataEventListener> listenerList   = new CopyOnWriteArrayList<>();
+    private       String                       name;
+    private       double                       value;
+    private       double                       oldValue;
+    private       Color                        fillColor;
+    private       Color                        strokeColor;
+    private       Color                        textColor;
+    private       Instant                      timestamp;
+    private       boolean                      animated;
+    private       long                         animationDuration;
+    private       DoubleProperty               currentValue;
+    private       Timeline                     timeline;
 
 
     // ******************** Constructors **************************************
@@ -65,6 +65,9 @@ public class ChartData implements Comparable<ChartData> {
     }
     public ChartData(final double VALUE, final Instant TIMESTAMP) {
         this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
+    }
+    public ChartData(final double VALUE, final Color FILL_COLOR) {
+        this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
     public ChartData(final String NAME, final Color FILL_COLOR) {
         this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
