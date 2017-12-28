@@ -219,7 +219,10 @@ public class CircularPlot extends Region {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public void dispose() { items.removeListener(itemListListener); }
+    public void dispose() {
+        items.forEach(item -> item.removeChartItemEventListener(itemListener));
+        items.removeListener(itemListListener);
+    }
 
     public Color getTickMarkColor() { return null == tickMarkColor ? _tickMarkColor : tickMarkColor.get(); }
     public void setTickMarkColor(final Color COLOR) {
