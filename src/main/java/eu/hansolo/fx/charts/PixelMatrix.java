@@ -29,6 +29,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -68,6 +69,7 @@ public class PixelMatrix extends Region {
     private double                                         pixelWidthMinusDoubleSpacer;
     private double                                         pixelHeightMinusDoubleSpacer;
     private InvalidationListener                           sizeListener;
+    private Tooltip                                        tooltip;
     private EventHandler<MouseEvent>                       clickHandler;
     private CopyOnWriteArrayList<PixelMatrixEventListener> listeners;
 
@@ -124,7 +126,6 @@ public class PixelMatrix extends Region {
         ctx = canvas.getGraphicsContext2D();
 
         getChildren().setAll(canvas);
-        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
     }
 
     private void registerListeners() {
