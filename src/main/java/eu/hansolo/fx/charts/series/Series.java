@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.data.ChartData;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.event.SeriesEventType;
@@ -30,6 +31,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -37,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by hansolo on 16.07.17.
  */
-public abstract class Series<T> {
+public abstract class Series<T extends ChartData> {
     public    final SeriesEvent REFRESH = new SeriesEvent(Series.this, SeriesEventType.REDRAW);
     protected String                                    _name;
     protected StringProperty                            name;
@@ -56,11 +58,23 @@ public abstract class Series<T> {
     public Series() {
         this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
     }
+    public Series(final T... ITEMS) {
+        this(Arrays.asList(ITEMS), ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
+    }
+    public Series(final ChartType TYPE, final T... ITEMS) {
+        this(Arrays.asList(ITEMS), TYPE, "", Color.BLACK, Color.TRANSPARENT);
+    }
     public Series(final List<T> ITEMS, final ChartType TYPE) {
         this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
     }
+    public Series(final ChartType TYPE, final String NAME, final T... ITEMS) {
+        this(Arrays.asList(ITEMS), TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+    }
     public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
         this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+    }
+    public Series(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
+        this(Arrays.asList(ITEMS), TYPE, NAME, STROKE, FILL);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
         _name     = NAME;
@@ -158,6 +172,10 @@ public abstract class Series<T> {
         chartType = TYPE;
         refresh();
     }
+
+    public int getNoOfItems() { return items.size(); }
+
+    public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
 
     public void dispose() { items.remove(itemListener); }
 
