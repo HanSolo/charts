@@ -126,17 +126,17 @@ public class Helper {
         return VALUE;
     }
 
-    public static double clampMin(final double MIN, final double VALUE) {
+    public static final double clampMin(final double MIN, final double VALUE) {
         if (VALUE < MIN) return MIN;
         return VALUE;
     }
 
-    public static double clampMax(final double MAX, final double VALUE) {
+    public static final double clampMax(final double MAX, final double VALUE) {
         if (VALUE > MAX) return MAX;
         return VALUE;
     }
 
-    public static double nearest(final double LESS, final double VALUE, final double MORE) {
+    public static final double nearest(final double LESS, final double VALUE, final double MORE) {
         double lessDiff = VALUE - LESS;
         double moreDiff = MORE - VALUE;
         return lessDiff < moreDiff ? LESS : MORE;
@@ -299,11 +299,11 @@ public class Helper {
         return new Point(LEFT_POINT.getX() + x, LEFT_POINT.getY() + y);
     }
 
-    public static Point calcIntersectionOfTwoLines(Point A, Point B, Point C, Point D) {
+    public static final Point calcIntersectionOfTwoLines(Point A, Point B, Point C, Point D) {
         return calcIntersectionOfTwoLines(A.getX(), A.getY(), B.getX(), B.getY(), C.getX(), C.getY(), D.getX(), D.getY());
     }
-    public static Point calcIntersectionOfTwoLines(final double X1, final double Y1, final double X2, final double Y2,
-                                                   final double X3, final double Y3, final double X4, final double Y4) {
+    public static final Point calcIntersectionOfTwoLines(final double X1, final double Y1, final double X2, final double Y2,
+                                                         final double X3, final double Y3, final double X4, final double Y4) {
 
         // Line AB represented as a1x + b1y = c1
         double a1 = Y2 - Y1;
@@ -485,6 +485,14 @@ public class Helper {
         return inside;
     }
 
+    public static final boolean isInRingSegment(final double X, final double Y, final double WIDTH, final double HEIGHT, final double START_ANGLE, final double SEGMENT_ANGLE, final double LINE_WIDTH) {
+        double centerX = X + WIDTH * 0.5;
+        double centerY = Y + HEIGHT * 0.5;
+        double size    = WIDTH < HEIGHT ? WIDTH : HEIGHT;
+        double outerRadius = (size + LINE_WIDTH) * 0.5;
+        double innerRadius = (size - LINE_WIDTH) * 0.5;
+        return isInRingSegment(X, Y, centerX, centerY, outerRadius, innerRadius, START_ANGLE, SEGMENT_ANGLE);
+    }
     public static final boolean isInRingSegment(final double X, final double Y,
                                                 final double CENTER_X, final double CENTER_Y,
                                                 final double OUTER_RADIUS, final double INNER_RADIUS,
@@ -593,10 +601,10 @@ public class Helper {
         return (deltaX * deltaX) + (deltaY * deltaY);
     }
 
-    public static double[] toHSL(final Color COLOR) {
+    public static final double[] toHSL(final Color COLOR) {
         return rgbToHSL(COLOR.getRed(), COLOR.getGreen(), COLOR.getBlue());
     }
-    public static double[] rgbToHSL(final double RED, final double GREEN, final double BLUE) {
+    public static final double[] rgbToHSL(final double RED, final double GREEN, final double BLUE) {
         //	Minimum and Maximum RGB values are used in the HSL calculations
         double min = Math.min(RED, Math.min(GREEN, BLUE));
         double max = Math.max(RED, Math.max(GREEN, BLUE));
@@ -630,7 +638,7 @@ public class Helper {
         return new double[] { hue, saturation, luminance};
     }
 
-    public static Color hslToRGB(double hue, double saturation, double luminance) {
+    public static final Color hslToRGB(double hue, double saturation, double luminance) {
         double r, g, b;
         if (Double.compare(saturation, 0) == 0) {
             r = 1;
@@ -645,7 +653,7 @@ public class Helper {
         }
         return Color.color(r, g, b);
     }
-    private static double hue2RGB(double p, double q, double t) {
+    private static final double hue2RGB(double p, double q, double t) {
         if (t < 0) {
             t += 1;
         } else if (t > 1) {
@@ -663,11 +671,41 @@ public class Helper {
         }
     }
 
-    public static List<DataPoint> createSmoothedHull(final List<DataPoint> POINTS, final int SUB_DIVISIONS) {
+    public static final String rgb(final Color COLOR) {
+        String hex      = COLOR.toString().replace("0x", "");
+        String hexRed   = hex.substring(0, 2).toUpperCase();
+        String hexGreen = hex.substring(2, 4).toUpperCase();
+        String hexBlue  = hex.substring(4, 6).toUpperCase();
+
+        String intRed   = Integer.toString(Integer.parseInt(hexRed, 16));
+        String intGreen = Integer.toString(Integer.parseInt(hexGreen, 16));
+        String intBlue  = Integer.toString(Integer.parseInt(hexBlue, 16));
+
+        return String.join("", "rgb(", intRed, ", ", intGreen, ", ", intBlue, ")");
+    }
+
+    public static final String rgba(final Color COLOR) { return rgba(COLOR, COLOR.getOpacity()); }
+    public static final String rgba(final Color COLOR, final double ALPHA) {
+        String hex      = COLOR.toString().replace("0x", "");
+        String hexRed   = hex.substring(0, 2).toUpperCase();
+        String hexGreen = hex.substring(2, 4).toUpperCase();
+        String hexBlue  = hex.substring(4, 6).toUpperCase();
+
+        String intRed   = Integer.toString(Integer.parseInt(hexRed, 16));
+        String intGreen = Integer.toString(Integer.parseInt(hexGreen, 16));
+        String intBlue  = Integer.toString(Integer.parseInt(hexBlue, 16));
+        String alpha    = String.format(Locale.US, "%.3f", clamp(0, 1, ALPHA));
+
+        return String.join("", "rgba(", intRed, ", ", intGreen, ", ", intBlue, ",", alpha, ")");
+    }
+
+    public static final String web(final Color COLOR) { return COLOR.toString().replace("0x", "#").substring(0, 7); }
+
+    public static final List<DataPoint> createSmoothedHull(final List<DataPoint> POINTS, final int SUB_DIVISIONS) {
         List<DataPoint> hullPolygon = createHull(POINTS);
         return subdivideDataPoints(hullPolygon, SUB_DIVISIONS);
     }
-    public static <T extends Point> List<T> createHull(final List<T> POINTS) {
+    public static final <T extends Point> List<T> createHull(final List<T> POINTS) {
         List<T> convexHull = new ArrayList<>();
         if (POINTS.size() < 3) { return new ArrayList<T>(POINTS); }
 
@@ -705,13 +743,13 @@ public class Helper {
 
         return convexHull;
     }
-    private static <T extends Point> double distance(final T P1, final T P2, final T P3) {
+    private static final <T extends Point> double distance(final T P1, final T P2, final T P3) {
         double deltaX = P2.getX() - P1.getX();
         double deltaY = P2.getY() - P1.getY();
         double num = deltaX * (P1.getY() - P3.getY()) - deltaY * (P1.getX() - P3.getX());
         return Math.abs(num);
     }
-    private static <T extends Point> void hullSet(final T P1, final T P2, final List<T> POINTS, final List<T> HULL) {
+    private static final <T extends Point> void hullSet(final T P1, final T P2, final List<T> POINTS, final List<T> HULL) {
         int insertPosition = HULL.indexOf(P2);
 
         if (POINTS.size() == 0) { return; }
@@ -753,12 +791,12 @@ public class Helper {
         hullSet(P1, point, leftSetAP, HULL);
         hullSet(point, P2, leftSetPB, HULL);
     }
-    private static <T extends Point> int pointLocation(final T P1, final T P2, final T P3) {
+    private static final <T extends Point> int pointLocation(final T P1, final T P2, final T P3) {
         double cp1 = (P2.getX() - P1.getX()) * (P3.getY() - P1.getY()) - (P2.getY() - P1.getY()) * (P3.getX() - P1.getX());
         return cp1 > 0 ? 1 : Double.compare(cp1, 0) == 0 ? 0 : -1;
     }
 
-    public static Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION) {
+    public static final Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION) {
         return interpolateColor(COLOR1, COLOR2, FRACTION, -1);
     }
     public static final Color getColorWithOpacityAt(final LinearGradient GRADIENT, final double FRACTION, final double TARGET_OPACITY) {
@@ -782,7 +820,7 @@ public class Helper {
         double interpolationFraction = (fraction - lowerStop.getOffset()) / (upperStop.getOffset() - lowerStop.getOffset());
         return interpolateColor(lowerStop.getColor(), upperStop.getColor(), interpolationFraction, TARGET_OPACITY);
     }
-    public static Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION, final double TARGET_OPACITY) {
+    public static final Color interpolateColor(final Color COLOR1, final Color COLOR2, final double FRACTION, final double TARGET_OPACITY) {
         double fraction       = clamp(0, 1, FRACTION);
         double targetOpacity  = TARGET_OPACITY < 0 ? TARGET_OPACITY : clamp(0, 1, FRACTION);
 
@@ -814,31 +852,36 @@ public class Helper {
         return Color.color(red, green, blue, opacity);
     }
 
-    public static <T> Predicate<T> not(Predicate<T> predicate) { return predicate.negate(); }
+    public static final <T> Predicate<T> not(Predicate<T> predicate) { return predicate.negate(); }
 
-    public static ZoneOffset getZoneOffset() { return getZoneOffset(ZoneId.systemDefault()); }
-    public static ZoneOffset getZoneOffset(final ZoneId ZONE_ID) { return ZONE_ID.getRules().getOffset(Instant.now()); }
+    public static final ZoneOffset getZoneOffset() { return getZoneOffset(ZoneId.systemDefault()); }
+    public static final ZoneOffset getZoneOffset(final ZoneId ZONE_ID) { return ZONE_ID.getRules().getOffset(Instant.now()); }
 
-    public static long toMillis(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return toSeconds(DATE_TIME, ZONE_OFFSET) * 1000; }
-    public static long toSeconds(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return DATE_TIME.toEpochSecond(ZONE_OFFSET); }
+    public static final long toMillis(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return toSeconds(DATE_TIME, ZONE_OFFSET) * 1000; }
+    public static final long toSeconds(final LocalDateTime DATE_TIME, final ZoneOffset ZONE_OFFSET) { return DATE_TIME.toEpochSecond(ZONE_OFFSET); }
 
-    public static double toNumericValue(final LocalDateTime DATE) { return toNumericValue(DATE, ZoneId.systemDefault()); }
-    public static double toNumericValue(final LocalDateTime DATE, final ZoneId ZONE_ID) { return Helper.toSeconds(DATE, Helper.getZoneOffset(ZONE_ID)); }
+    public static final double toNumericValue(final LocalDateTime DATE) { return toNumericValue(DATE, ZoneId.systemDefault()); }
+    public static final double toNumericValue(final LocalDateTime DATE, final ZoneId ZONE_ID) { return Helper.toSeconds(DATE, Helper.getZoneOffset(ZONE_ID)); }
 
-    public static LocalDateTime toRealValue(final double VALUE) { return secondsToLocalDateTime((long) VALUE); }
-    public static LocalDateTime toRealValue(final double VALUE, final ZoneId ZONE_ID) { return secondsToLocalDateTime((long) VALUE, ZONE_ID); }
+    public static final LocalDateTime toRealValue(final double VALUE) { return secondsToLocalDateTime((long) VALUE); }
+    public static final LocalDateTime toRealValue(final double VALUE, final ZoneId ZONE_ID) { return secondsToLocalDateTime((long) VALUE, ZONE_ID); }
 
-    public static LocalDateTime secondsToLocalDateTime(final long SECONDS) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZoneId.systemDefault()); }
-    public static LocalDateTime secondsToLocalDateTime(final long SECONDS, final ZoneId ZONE_ID) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZONE_ID); }
+    public static final LocalDateTime secondsToLocalDateTime(final long SECONDS) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZoneId.systemDefault()); }
+    public static final LocalDateTime secondsToLocalDateTime(final long SECONDS, final ZoneId ZONE_ID) { return LocalDateTime.ofInstant(Instant.ofEpochSecond(SECONDS), ZONE_ID); }
 
-    public static String secondsToHHMMString(final long SECONDS) {
+    public static final String secondsToHHMMString(final long SECONDS) {
         long[] hhmmss = secondsToHHMMSS(SECONDS);
         return String.format("%02d:%02d:%02d", hhmmss[0], hhmmss[1], hhmmss[2]);
     }
-    public static long[] secondsToHHMMSS(final long SECONDS) {
+    public static final long[] secondsToHHMMSS(final long SECONDS) {
         long seconds = SECONDS % 60;
         long minutes = (SECONDS / 60) % 60;
         long hours   = (SECONDS / (60 * 60)) % 24;
         return new long[] { hours, minutes, seconds };
+    }
+
+    public static final void enableNode(final Node NODE, final boolean ENABLE) {
+        NODE.setVisible(ENABLE);
+        NODE.setManaged(ENABLE);
     }
 }
