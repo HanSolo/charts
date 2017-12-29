@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts;
+package eu.hansolo.fx.charts.event;
 
-public enum ChartType {
-    SCATTER, LINE, SMOOTH_LINE, AREA, SMOOTH_AREA, BAR, BUBBLE, DONUT, RADAR_POLYGON, SMOOTH_RADAR_POLYGON, RADAR_SECTOR,
-    HORIZON, SMOOTHED_HORIZON, MATRIX_HEATMAP, LINE_DELTA, SMOOTH_LINE_DELTA, NESTED_BAR
+@FunctionalInterface
+public interface SelectionEventListener {
+    void onSelectionEvent(final SelectionEvent EVENT);
 }
