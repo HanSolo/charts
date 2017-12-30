@@ -35,12 +35,12 @@ public class CoxcombChartTest extends Application {
 
     @Override public void init() {
         ChartData[] items = {
-            new ChartData(27, Color.web("#96AA3B")),
-            new ChartData(24, Color.web("#29A783")),
-            new ChartData(16, Color.web("#098AA9")),
-            new ChartData(15, Color.web("#62386F")),
-            new ChartData(13, Color.web("#89447B")),
-            new ChartData(5, Color.web("#EF5780"))
+            new ChartData("Item 1", 27, Color.web("#96AA3B")),
+            new ChartData("Item 2", 24, Color.web("#29A783")),
+            new ChartData("Item 3", 16, Color.web("#098AA9")),
+            new ChartData("Item 4", 15, Color.web("#62386F")),
+            new ChartData("Item 5", 13, Color.web("#89447B")),
+            new ChartData("Item 6", 5, Color.web("#EF5780"))
         };
         chart = new CoxcombChart(items);
         chart.setTextColor(Color.WHITE);
@@ -57,7 +57,7 @@ public class CoxcombChartTest extends Application {
         stage.setScene(scene);
         stage.show();
 
-        chart.addItem(new ChartData(3, Color.RED));
+        chart.addItem(new ChartData("New Item", 3, Color.RED));
     }
 
     @Override public void stop() {

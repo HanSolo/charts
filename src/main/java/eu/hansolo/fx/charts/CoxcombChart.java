@@ -18,7 +18,11 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartData;
 import eu.hansolo.fx.charts.event.ChartDataEventListener;
+import eu.hansolo.fx.charts.event.SelectionEvent;
+import eu.hansolo.fx.charts.event.SelectionEventListener;
+import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -28,12 +32,14 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -48,6 +54,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -57,27 +64,30 @@ import java.util.Locale;
  */
 @DefaultProperty("children")
 public class CoxcombChart extends Region {
-    private static final double                        PREFERRED_WIDTH  = 250;
-    private static final double                        PREFERRED_HEIGHT = 250;
-    private static final double                        MINIMUM_WIDTH    = 50;
-    private static final double                        MINIMUM_HEIGHT   = 50;
-    private static final double                        MAXIMUM_WIDTH    = 1024;
-    private static final double                        MAXIMUM_HEIGHT   = 1024;
-    private              double                        size;
-    private              double                        width;
-    private              double                        height;
-    private              Canvas                        canvas;
-    private              GraphicsContext               ctx;
-    private              Pane                          pane;
-    private              ObservableList<ChartData>     items;
-    private              Color                         _textColor;
-    private              ObjectProperty<Color>         textColor;
-    private              boolean                       _autoTextColor;
-    private              BooleanProperty               autoTextColor;
-    private              Order                         _order;
-    private              ObjectProperty<Order>         order;
-    private              ChartDataEventListener        itemListener;
-    private              ListChangeListener<ChartData> itemListListener;
+    private static final double                                       PREFERRED_WIDTH  = 250;
+    private static final double                                       PREFERRED_HEIGHT = 250;
+    private static final double                                       MINIMUM_WIDTH    = 50;
+    private static final double                                       MINIMUM_HEIGHT   = 50;
+    private static final double                                       MAXIMUM_WIDTH    = 1024;
+    private static final double                                       MAXIMUM_HEIGHT   = 1024;
+    private              double                                       size;
+    private              double                                       width;
+    private              double                                       height;
+    private              Canvas                                       canvas;
+    private              GraphicsContext                              ctx;
+    private              Pane                                         pane;
+    private              ObservableList<ChartData>                    items;
+    private              Color                                        _textColor;
+    private              ObjectProperty<Color>                        textColor;
+    private              boolean                                      _autoTextColor;
+    private              BooleanProperty                              autoTextColor;
+    private              Order                                        _order;
+    private              ObjectProperty<Order>                        order;
+    private              ChartDataEventListener                       itemListener;
+    private              ListChangeListener<ChartData>                itemListListener;
+    private              EventHandler<MouseEvent>                     clickHandler;
+    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private              InfoPopup                                    popup;
 
 
     // ******************** Constructors **************************************
@@ -108,6 +118,8 @@ public class CoxcombChart extends Region {
             }
             redraw();
         };
+        clickHandler     = e -> checkForClick(e);
+        listeners        = new CopyOnWriteArrayList<>();
         initGraphics();
         registerListeners();
     }
@@ -126,6 +138,8 @@ public class CoxcombChart extends Region {
 
         getStyleClass().add("coxcomb-chart");
 
+        popup = new InfoPopup();
+
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
@@ -143,6 +157,11 @@ public class CoxcombChart extends Region {
         heightProperty().addListener(o -> resize());
         items.forEach(item -> item.setOnChartDataEvent(itemListener));
         items.addListener(itemListListener);
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
+        setOnSelectionEvent(e -> {
+            popup.update(e);
+            popup.animatedShow(getScene().getWindow());
+        });
     }
 
 
@@ -264,6 +283,42 @@ public class CoxcombChart extends Region {
         return autoTextColor;
     }
 
+    public void checkForClick(final MouseEvent EVT) {
+        final double X = EVT.getX();
+        final double Y = EVT.getY();
+
+        popup.setX(EVT.getScreenX());
+        popup.setY(EVT.getScreenY() - popup.getHeight());
+
+        int    noOfChartData = items.size();
+        double barWidth      = size * 0.04;
+        double sum           = sumOfAllItems();
+        double stepSize      = 360.0 / sum;
+        double angle         = 0;
+        double startAngle    = 0;
+        double xy            = size * 0.32;
+        double minWH         = size * 0.36;
+        double maxWH         = size * 0.64;
+        double wh            = minWH;
+        double whStep        = (maxWH - minWH) / noOfChartData;
+
+        for (int i = 0 ; i < noOfChartData ; i++) {
+            ChartData item  = items.get(i);
+
+            angle      = item.getValue() * stepSize;
+            startAngle += angle;
+            xy         -= (whStep / 2.0);
+            wh         += whStep;
+            barWidth   += whStep;
+
+            // Check if x,y are in segment
+            if (Helper.isInRingSegment(X, Y, xy, xy, wh, wh, Math.abs(360 - startAngle), angle, barWidth)) {
+                fireSelectionEvent(new SelectionEvent(item));
+                break;
+            };
+        }
+    }
+
     private void reorder(final Order ORDER) {
         if (ORDER == Order.ASCENDING) {
             sortItemsAscending();
@@ -272,6 +327,19 @@ public class CoxcombChart extends Region {
         }
     }
 
+
+    // ******************** Event Handling ************************************
+    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
+    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void removeAllSelectionEventListeners() { listeners.clear(); }
+
+    public void fireSelectionEvent(final SelectionEvent EVENT) {
+        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    }
+
+
+    // ******************** Drawing *******************************************
     private void drawChart() {
         int          noOfChartDatas   = items.size();
         double       center      = size * 0.5;
