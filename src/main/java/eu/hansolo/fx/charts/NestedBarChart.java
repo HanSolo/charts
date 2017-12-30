@@ -105,14 +105,14 @@ public class NestedBarChart extends Region {
 
         getStyleClass().add("nested-bar-chart");
 
+        popup = new InfoPopup();
+
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
         pane = new Pane(canvas);
 
         getChildren().setAll(pane);
-
-        popup = new InfoPopup();
     }
 
     private void registerListeners() {
@@ -120,12 +120,6 @@ public class NestedBarChart extends Region {
         heightProperty().addListener(o -> resize());
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
         setOnSelectionEvent(e -> {
-            Series<ChartData> series = e.getSeries();
-            ChartData         item   = e.getItem();
-            StringBuilder sb = new StringBuilder().append(series.getName()).append("\n");
-            if (null != item) {
-                sb.append(item.getName()).append(": ").append(String.format(Locale.US, "%.2f", item.getValue()));
-            }
             popup.update(e);
             popup.animatedShow(getScene().getWindow());
         });
@@ -209,8 +203,6 @@ public class NestedBarChart extends Region {
 
         popup.setX(EVT.getScreenX());
         popup.setY(EVT.getScreenY() - popup.getHeight());
-
-        System.out.println("click");
 
         long noOfBars       = series.size();
         double spacer       = width * 0.05;
