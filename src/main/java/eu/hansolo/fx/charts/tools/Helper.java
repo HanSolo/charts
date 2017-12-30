@@ -485,13 +485,13 @@ public class Helper {
         return inside;
     }
 
-    public static final boolean isInRingSegment(final double X, final double Y, final double WIDTH, final double HEIGHT, final double START_ANGLE, final double SEGMENT_ANGLE, final double LINE_WIDTH) {
-        double centerX = X + WIDTH * 0.5;
-        double centerY = Y + HEIGHT * 0.5;
-        double size    = WIDTH < HEIGHT ? WIDTH : HEIGHT;
+    public static final boolean isInRingSegment(final double MOUSE_X, final double MOUSE_Y, final double X, final double Y, final double WIDTH, final double HEIGHT, final double START_ANGLE, final double SEGMENT_ANGLE, final double LINE_WIDTH) {
+        double centerX     = X + WIDTH * 0.5;
+        double centerY     = Y + HEIGHT * 0.5;
+        double size        = WIDTH < HEIGHT ? WIDTH : HEIGHT;
         double outerRadius = (size + LINE_WIDTH) * 0.5;
         double innerRadius = (size - LINE_WIDTH) * 0.5;
-        return isInRingSegment(X, Y, centerX, centerY, outerRadius, innerRadius, START_ANGLE, SEGMENT_ANGLE);
+        return isInRingSegment(MOUSE_X, MOUSE_Y, centerX, centerY, outerRadius, innerRadius, START_ANGLE, SEGMENT_ANGLE);
     }
     public static final boolean isInRingSegment(final double X, final double Y,
                                                 final double CENTER_X, final double CENTER_Y,
@@ -500,13 +500,10 @@ public class Helper {
         double angleOffset = 90.0;
         double pointRadius = Math.sqrt((X - CENTER_X) * (X - CENTER_X) + (Y - CENTER_Y) * (Y - CENTER_Y));
         double pointAngle  = getAngleFromXY(X, Y, CENTER_X, CENTER_Y, angleOffset);
-        double startAngle  = angleOffset - START_ANGLE;
-        double endAngle    = startAngle + SEGMENT_ANGLE;
-
         return (Double.compare(pointRadius, INNER_RADIUS) >= 0 &&
                 Double.compare(pointRadius, OUTER_RADIUS) <= 0 &&
-                Double.compare(pointAngle, startAngle) >= 0 &&
-                Double.compare(pointAngle, endAngle) <= 0);
+                Double.compare(pointAngle, START_ANGLE) >= 0 &&
+                Double.compare(pointAngle, (START_ANGLE + SEGMENT_ANGLE)) <= 0);
     }
 
     public static final double getAngleFromXY(final double X, final double Y, final double CENTER_X, final double CENTER_Y) {
