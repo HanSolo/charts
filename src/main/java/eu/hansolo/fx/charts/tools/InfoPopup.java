@@ -331,7 +331,14 @@ public class InfoPopup extends Popup {
             Helper.enableNode(itemNameText, true);
             Helper.enableNode(itemValueText, true);
             VBox.setMargin(itemNameText, new Insets(3, 0, 0, 0));
-            setTo4Rows();
+            if (null == series) {
+                VBox.setMargin(itemText, new Insets(0, 0, 0, 0));
+                VBox.setMargin(itemNameText, new Insets(0, 0, 0, 0));
+            } else {
+                VBox.setMargin(itemText, new Insets(3, 0, 0, 0));
+                VBox.setMargin(itemNameText, new Insets(3, 0, 0, 0));
+                setTo4Rows();
+            }
         }
     }
 
