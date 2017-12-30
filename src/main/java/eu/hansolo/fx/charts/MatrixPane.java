@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.PixelMatrix.PixelShape;
 import eu.hansolo.fx.charts.data.MatrixItem;
-import eu.hansolo.fx.charts.series.MatrixSeries;
+import eu.hansolo.fx.charts.series.MatrixItemSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
@@ -41,42 +41,42 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
     private static final double                MINIMUM_HEIGHT   = 0;
     private static final double                MAXIMUM_WIDTH    = 4096;
     private static final double                MAXIMUM_HEIGHT   = 4096;
-    private static       double                aspectRatio;
-    private              boolean               keepAspect;
-    private              double                size;
-    private              double                width;
-    private              double                height;
-    private              Pane                  pane;
-    private              Paint                 _chartBackgroundPaint;
-    private              ObjectProperty<Paint> chartBackgroundPaint;
-    private              MatrixSeries<T>       series;
-    private              PixelMatrix           matrix;
-    private              LinearGradient        matrixGradient;
-    private              double                minZ;
-    private              double                maxZ;
-    private              double                rangeZ;
-    private              double                scaleX;
-    private              double                scaleY;
-    private              double                scaleZ;
-    private              double                _lowerBoundX;
+    private static double                aspectRatio;
+    private        boolean               keepAspect;
+    private        double                size;
+    private        double                width;
+    private        double                height;
+    private        Pane                  pane;
+    private        Paint                 _chartBackgroundPaint;
+    private        ObjectProperty<Paint> chartBackgroundPaint;
+    private        MatrixItemSeries<T>   series;
+    private        PixelMatrix           matrix;
+    private        LinearGradient        matrixGradient;
+    private        double                minZ;
+    private        double                maxZ;
+    private        double                rangeZ;
+    private        double                scaleX;
+    private        double                scaleY;
+    private        double                scaleZ;
+    private        double                _lowerBoundX;
     private              DoubleProperty        lowerBoundX;
     private              double                _upperBoundX;
     private              DoubleProperty        upperBoundX;
     private              double                _lowerBoundY;
-    private              DoubleProperty        lowerBoundY;
-    private              double                _upperBoundY;
-    private              DoubleProperty        upperBoundY;
-    private              double                _lowerBoundZ;
-    private              DoubleProperty        lowerBoundZ;
-    private              double                _upperBoundZ;
-    private              DoubleProperty        upperBoundZ;
+    private        DoubleProperty        lowerBoundY;
+    private        double                _upperBoundY;
+    private        DoubleProperty        upperBoundY;
+    private        double                _lowerBoundZ;
+    private        DoubleProperty        lowerBoundZ;
+    private        double                _upperBoundZ;
+    private        DoubleProperty        upperBoundZ;
 
 
     // ******************** Constructors **************************************
-    public MatrixPane(final MatrixSeries<T> SERIES) {
+    public MatrixPane(final MatrixItemSeries<T> SERIES) {
         this(Color.WHITE, SERIES);
     }
-    public MatrixPane(final Paint BACKGROUND, final MatrixSeries<T> SERIES) {
+    public MatrixPane(final Paint BACKGROUND, final MatrixItemSeries<T> SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect            = false;
@@ -303,7 +303,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
         }
     }
 
-    public MatrixSeries<T> getSeries() { return series; }
+    public MatrixItemSeries<T> getSeries() { return series; }
 
     public PixelMatrix getMatrix() { return matrix; }
 
@@ -327,7 +327,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
         }
     }
 
-    private void drawMatrixHeatMap(final MatrixSeries<T> SERIES) {
+    private void drawMatrixHeatMap(final MatrixItemSeries<T> SERIES) {
         minZ   = SERIES.getItems().stream().mapToDouble(MatrixItem::getZ).min().getAsDouble();
         maxZ   = SERIES.getItems().stream().mapToDouble(MatrixItem::getZ).max().getAsDouble();
         rangeZ = maxZ - minZ;

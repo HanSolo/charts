@@ -25,17 +25,17 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class MatrixSeries<T extends MatrixItem> extends Series {
+public class MatrixItemSeries<T extends MatrixItem> extends Series {
 
 
     // ******************** Constructors **************************************
-    public MatrixSeries() {
+    public MatrixItemSeries() {
         this(null, ChartType.MATRIX_HEATMAP, "");
     }
-    public MatrixSeries(final List<T> ITEMS, final ChartType TYPE) {
+    public MatrixItemSeries(final List<T> ITEMS, final ChartType TYPE) {
         this(ITEMS, TYPE, "");
     }
-    public MatrixSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
+    public MatrixItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
         super(ITEMS, TYPE, NAME);
     }
 

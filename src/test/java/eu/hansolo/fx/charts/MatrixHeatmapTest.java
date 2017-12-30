@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.MatrixChartItem;
-import eu.hansolo.fx.charts.series.MatrixSeries;
+import eu.hansolo.fx.charts.series.MatrixItemSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.animation.AnimationTimer;
@@ -47,15 +47,15 @@ public class MatrixHeatmapTest extends Application {
     private static final int    NO_OF_CELLS = 100;
     private static final double STEP        = TWO_PI / NO_OF_CELLS;
 
-    private MatrixSeries<MatrixChartItem> matrixSeries1;
-    private MatrixPane<MatrixChartItem>   matrixHeatMap1;
-    private double                        factor;
+    private MatrixItemSeries<MatrixChartItem> matrixItemSeries1;
+    private MatrixPane<MatrixChartItem>       matrixHeatMap1;
+    private double                            factor;
 
-    private MatrixSeries<MatrixChartItem> matrixSeries2;
-    private MatrixPane<MatrixChartItem>   matrixHeatMap2;
+    private MatrixItemSeries<MatrixChartItem> matrixItemSeries2;
+    private MatrixPane<MatrixChartItem>       matrixHeatMap2;
 
-    private MatrixSeries<MatrixChartItem> matrixSeries3;
-    private MatrixPane<MatrixChartItem>   matrixHeatMap3;
+    private MatrixItemSeries<MatrixChartItem> matrixItemSeries3;
+    private MatrixPane<MatrixChartItem>       matrixHeatMap3;
 
     private long                           lastTimerCall;
     private AnimationTimer                 timer;
@@ -74,9 +74,9 @@ public class MatrixHeatmapTest extends Application {
             cellY++;
         }
 
-        matrixSeries1  = new MatrixSeries(matrixData1, ChartType.MATRIX_HEATMAP);
+        matrixItemSeries1 = new MatrixItemSeries(matrixData1, ChartType.MATRIX_HEATMAP);
 
-        matrixHeatMap1 = new MatrixPane(matrixSeries1);
+        matrixHeatMap1 = new MatrixPane(matrixItemSeries1);
         matrixHeatMap1.setColorMapping(ColorMapping.INFRARED_1);
         matrixHeatMap1.getMatrix().setUseSpacer(false);
         matrixHeatMap1.getMatrix().setColsAndRows(NO_OF_CELLS, NO_OF_CELLS);
@@ -92,9 +92,9 @@ public class MatrixHeatmapTest extends Application {
             }
         }
 
-        matrixSeries2  = new MatrixSeries(matrixData2, ChartType.MATRIX_HEATMAP);
+        matrixItemSeries2 = new MatrixItemSeries(matrixData2, ChartType.MATRIX_HEATMAP);
 
-        matrixHeatMap2 = new MatrixPane(matrixSeries2);
+        matrixHeatMap2 = new MatrixPane(matrixItemSeries2);
         //matrixHeatMap2.setColorMapping(ColorMapping.BLUE_TRANSPARENT_RED);
         matrixHeatMap2.setMatrixGradient(matrixGradient);
         matrixHeatMap2.getMatrix().setUseSpacer(true);
@@ -113,9 +113,9 @@ public class MatrixHeatmapTest extends Application {
             }
         }
 
-        matrixSeries3 = new MatrixSeries<>(matrixData3, ChartType.MATRIX_HEATMAP);
+        matrixItemSeries3 = new MatrixItemSeries<>(matrixData3, ChartType.MATRIX_HEATMAP);
 
-        matrixHeatMap3 = new MatrixPane<>(matrixSeries3);
+        matrixHeatMap3 = new MatrixPane<>(matrixItemSeries3);
         matrixHeatMap3.setMatrixGradient(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
                                                             new Stop(0.0, Color.web("#0085D9")),
                                                             new Stop(0.125, Color.web("#52B53D")),
