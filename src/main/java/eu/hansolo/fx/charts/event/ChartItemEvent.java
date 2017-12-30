@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.data;
-
-import javafx.beans.property.DoubleProperty;
+package eu.hansolo.fx.charts.event;
 
 
-public interface YData extends Data {
+import eu.hansolo.fx.charts.data.ChartItem;
 
-    double         getY();
-    void           setY(double y);
-    DoubleProperty yProperty();
+
+public class ChartItemEvent {
+    public enum EventType { UPDATE, FINISHED }
+
+    private ChartItem item;
+    private EventType type;
+
+
+    // ******************** Constructors **************************************
+    public ChartItemEvent(final EventType TYPE, final ChartItem ITEM) {
+        type = TYPE;
+        item = ITEM;
+    }
+
+
+    // ******************** Methods *******************************************
+    public EventType getType() { return type; }
+
+    public ChartItem getItem() { return item; }
 }

@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.SankeyPlot.StreamFillMode;
+import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -53,10 +54,10 @@ public class SankeyPlotTest extends Application {
 
     @Override public void init() {
         // Setup chart items
-        PlotItem brazil      = new PlotItem("Brazil", Colors.LIGHT_BLUE.get());
-        PlotItem mexico      = new PlotItem("Mexico", Colors.ORANGE.get());
-        PlotItem usa         = new PlotItem("USA", Colors.ORANGE.get());
-        PlotItem canada      = new PlotItem("Canada", Colors.LIGHT_RED.get());
+        PlotItem brazil = new PlotItem("Brazil", Colors.LIGHT_BLUE.get());
+        PlotItem mexico = new PlotItem("Mexico", Colors.ORANGE.get());
+        PlotItem usa    = new PlotItem("USA", Colors.ORANGE.get());
+        PlotItem canada = new PlotItem("Canada", Colors.LIGHT_RED.get());
 
         PlotItem germany     = new PlotItem("Germany", Color.web("#FF48C6"));
 

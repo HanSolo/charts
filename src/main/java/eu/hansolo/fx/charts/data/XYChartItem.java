@@ -17,12 +17,10 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.DataEvent;
-import eu.hansolo.fx.charts.event.DataEventListener;
+import eu.hansolo.fx.charts.event.ItemEvent;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -32,15 +30,16 @@ import javafx.scene.paint.Color;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class MatrixDataObject implements MatrixData {
-    private final DataEvent                         DATA_EVENT = new DataEvent(MatrixDataObject.this);
-    private CopyOnWriteArrayList<DataEventListener> listeners;
-    private int                                     _x;
-    private IntegerProperty                         x;
-    private int                                     _y;
-    private IntegerProperty                         y;
-    private double                                  _z;
-    private DoubleProperty                          z;
+/**
+ * Created by hansolo on 16.07.17.
+ */
+public class XYChartItem implements XYItem {
+    private final ItemEvent DATA_EVENT = new ItemEvent(XYChartItem.this);
+    private CopyOnWriteArrayList<ItemEventListener> listeners;
+    private double                                  _x;
+    private DoubleProperty                          x;
+    private double                                  _y;
+    private DoubleProperty                          y;
     private String                                  _name;
     private StringProperty                          name;
     private Color                                   _color;
@@ -50,29 +49,28 @@ public class MatrixDataObject implements MatrixData {
 
 
     // ******************** Constructors **********************************
-    public MatrixDataObject() {
-        this(0, 0, 0, "", Color.RED);
+    public XYChartItem() {
+        this(0, 0, "", Color.RED, Symbol.CIRCLE);
     }
-    public MatrixDataObject(final int X, final int Y, final double Z) {
-        this(X, Y, Z, "", Color.RED);
+    public XYChartItem(final double X, final double Y, final String NAME) {
+        this(X, Y, NAME, Color.RED, Symbol.CIRCLE);
     }
-    public MatrixDataObject(final int X, final int Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED);
+    public XYChartItem(final double X, final double Y, final String NAME, final Color COLOR) {
+        this(X, Y, NAME, COLOR, Symbol.CIRCLE);
     }
-    public MatrixDataObject(final int X, final int Y, final double Z, final String NAME, final Color COLOR) {
+    public XYChartItem(final double X, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
         _x        = X;
         _y        = Y;
-        _z        = Z;
         _name     = NAME;
         _color    = COLOR;
-        _symbol   = Symbol.NONE;
+        _symbol   = SYMBOL;
         listeners = new CopyOnWriteArrayList<>();
     }
 
 
     // ******************** Methods ***************************************
-    @Override public int getX() { return null == x ? _x : x.get(); }
-    @Override public void setX(final int X) {
+    @Override public double getX() { return null == x ? _x : x.get(); }
+    @Override public void setX(final double X) {
         if (null == x) {
             _x = X;
             fireDataEvent(DATA_EVENT);
@@ -80,19 +78,19 @@ public class MatrixDataObject implements MatrixData {
             x.set(X);
         }
     }
-    public IntegerProperty xProperty() {
+    @Override public DoubleProperty xProperty() {
         if (null == x) {
-            x = new IntegerPropertyBase(_x) {
+            x = new DoublePropertyBase(_x) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return MatrixDataObject.this; }
+                @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
         }
         return x;
     }
 
-    @Override public int getY() { return null == y ? _y : y.get(); }
-    @Override public void setY(final int Y) {
+    @Override public double getY() { return null == y ? _y : y.get(); }
+    @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
             fireDataEvent(DATA_EVENT);
@@ -100,35 +98,15 @@ public class MatrixDataObject implements MatrixData {
             y.set(Y);
         }
     }
-    @Override public IntegerProperty yProperty() {
+    @Override public DoubleProperty yProperty() {
         if (null == y) {
-            y = new IntegerPropertyBase(_y) {
+            y = new DoublePropertyBase(_y) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return MatrixDataObject.this; }
+                @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
         }
         return y;
-    }
-
-    @Override public double getZ() { return null == z ? _z : z.get(); }
-    @Override public void setZ(final double Z) {
-        if (null == z) {
-            _z = Z;
-            fireDataEvent(DATA_EVENT);
-        } else {
-            z.set(Z);
-        }
-    }
-    @Override public DoubleProperty zProperty() {
-        if (null == z) {
-            z = new DoublePropertyBase(_z) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return MatrixDataObject.this; }
-                @Override public String getName() { return "z"; }
-            };
-        }
-        return z;
     }
 
     @Override public String getName() { return null == name ? _name : name.get(); }
@@ -144,7 +122,7 @@ public class MatrixDataObject implements MatrixData {
         if (null == name) {
             name = new StringPropertyBase(_name) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return MatrixDataObject.this; }
+                @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
@@ -165,7 +143,7 @@ public class MatrixDataObject implements MatrixData {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return MatrixDataObject.this; }
+                @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
             _color = null;
@@ -173,13 +151,20 @@ public class MatrixDataObject implements MatrixData {
         return color;
     }
 
-    @Override public Symbol getSymbol() { return Symbol.NONE; }
-    public void setSymbol(final Symbol SYMBOL) {}
+    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
+    public void setSymbol(final Symbol SYMBOL) {
+        if (null == symbol) {
+            _symbol = SYMBOL;
+            fireDataEvent(DATA_EVENT);
+        } else {
+            symbol.set(SYMBOL);
+        }
+    }
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
                 @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() {  return MatrixDataObject.this;  }
+                @Override public Object getBean() {  return XYChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
             _symbol = null;
@@ -187,23 +172,21 @@ public class MatrixDataObject implements MatrixData {
         return symbol;
     }
 
-
+    
     // ******************** Event handling ************************************
-    public void setOnDataEvent(final DataEventListener LISTENER) { addDataEventListener(LISTENER); }
-    public void addDataEventListener(final DataEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeDataEventListener(final DataEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
+    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
 
-    public void fireDataEvent(final DataEvent EVENT) {
-        for (DataEventListener listener : listeners) { listener.onDataEvent(EVENT); }
+    public void fireDataEvent(final ItemEvent EVENT) {
+        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
     }
-
-
+    
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
-                                  .append("  \"z\":").append(getZ()).append(",\n")
                                   .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")

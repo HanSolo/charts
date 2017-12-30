@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
+import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -31,7 +31,6 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -50,7 +49,7 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
 /**
  * Created by hansolo on 16.07.17.
  */
-public class XYPane<T extends XYData> extends Region implements ChartArea {
+public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -325,7 +324,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         double oldY = height;
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
-        for (XYData item : SERIES.getItems()) {
+        for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.strokeLine(oldX, oldY, x, y);
@@ -344,7 +343,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         ctx.setFill(SERIES.getFill());
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
-        for (XYData item : SERIES.getItems()) {
+        for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.lineTo(x, y);
@@ -364,7 +363,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
         ctx.setFill(Color.TRANSPARENT);
-        for (XYData item : SERIES.getItems()) {
+        for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             drawSymbol(x, y, item.getColor(), item.getSymbol());
@@ -491,11 +490,11 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
 
         int          noOfItems         = SERIES_1.getItems().size();
-        List<XYData> cachedItems       = new LinkedList<>();
+        List<XYItem> cachedItems       = new LinkedList<>();
         Point        lastPointForClose = new Point();
 
-        XYData series1Item0  = SERIES_1.getItems().get(0);
-        XYData series2Item0  = SERIES_2.getItems().get(0);
+        XYItem series1Item0  = SERIES_1.getItems().get(0);
+        XYItem series2Item0  = SERIES_2.getItems().get(0);
         int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
 
         Paint series1Stroke = SERIES_1.getStroke();
@@ -521,14 +520,14 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
                 break;
         }
         // Draw path
-        List<XYData> items1 = SERIES_1.getItems();
-        List<XYData> items2 = SERIES_2.getItems();
+        List<XYItem> items1 = SERIES_1.getItems();
+        List<XYItem> items2 = SERIES_2.getItems();
         for (int i = 1 ; i < noOfItems ; i++) {
-            XYData lastXyData1 = items1.get(i - 1);
-            XYData lastXyData2 = items2.get(i - 1);
+            XYItem lastXyData1 = items1.get(i - 1);
+            XYItem lastXyData2 = items2.get(i - 1);
 
-            XYData xyData1 = items1.get(i);
-            XYData xyData2 = items2.get(i);
+            XYItem xyData1 = items1.get(i);
+            XYItem xyData2 = items2.get(i);
 
             if (lastXyData1.getY() > lastXyData2.getY() && xyData1.getY() < xyData2.getY()) {
                 // Lines crossed Line1 is now below lower Line2
@@ -537,7 +536,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
                 ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
 
                 Collections.reverse(cachedItems);
-                for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
                 ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
                 ctx.closePath();
                 ctx.setFill(series1Fill);
@@ -557,7 +556,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
                 ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
 
                 Collections.reverse(cachedItems);
-                for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
                 ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
                 ctx.closePath();
                 ctx.setFill(series2Fill);
@@ -585,7 +584,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
             ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
         }
         Collections.reverse(cachedItems);
-        for (XYData item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+        for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
         ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
         ctx.closePath();
         switch(currentSeries) {
@@ -618,8 +617,8 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
         List<Point> cachedItems       = new LinkedList<>();
         Point       lastPointForClose = new Point();
 
-        XYData series1Item0  = SERIES_1.getItems().get(0);
-        XYData series2Item0  = SERIES_2.getItems().get(0);
+        XYItem series1Item0  = SERIES_1.getItems().get(0);
+        XYItem series2Item0  = SERIES_2.getItems().get(0);
         int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
 
         Paint series1Stroke = SERIES_1.getStroke();
@@ -833,7 +832,7 @@ public class XYPane<T extends XYData> extends Region implements ChartArea {
     private void drawSymbols(final XYSeries<T> SERIES) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        for (XYData item : SERIES.getItems()) {
+        for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             drawSymbol(x, y, item.getColor(), item.getSymbol());

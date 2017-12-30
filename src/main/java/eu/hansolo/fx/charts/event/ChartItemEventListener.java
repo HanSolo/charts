@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.data;
+package eu.hansolo.fx.charts.event;
 
 
-import javafx.beans.property.DoubleProperty;
-
-
-/**
- * Created by hansolo on 17.07.17.
- */
-public interface XYData extends Data {
-
-    double         getX();
-    void           setX(double x);
-    DoubleProperty xProperty();
-
-    double         getY();
-    void           setY(double y);
-    DoubleProperty yProperty();
+@FunctionalInterface
+public interface ChartItemEventListener {
+    void onChartItemEvent(final ChartItemEvent EVENT);
 }

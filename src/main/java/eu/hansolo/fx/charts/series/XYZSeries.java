@@ -17,14 +17,14 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.XYZData;
+import eu.hansolo.fx.charts.data.XYZItem;
 import javafx.collections.ObservableList;
 
 import java.util.Comparator;
 import java.util.List;
 
 
-public class XYZSeries<T extends XYZData> extends Series {
+public class XYZSeries<T extends XYZItem> extends Series {
 
 
     // ******************** Constructors **************************************
@@ -40,16 +40,16 @@ public class XYZSeries<T extends XYZData> extends Series {
 
 
     // ******************** Methods *******************************************
-    @Override public ObservableList<XYZData> getItems() { return items; }
+    @Override public ObservableList<XYZItem> getItems() { return items; }
 
-    public double getMinX() { return ((XYZData) items.stream().min(Comparator.comparingDouble(XYZData::getX)).get()).getX(); }
-    public double getMaxX() { return ((XYZData) items.stream().max(Comparator.comparingDouble(XYZData::getX)).get()).getX(); }
+    public double getMinX() { return ((XYZItem) items.stream().min(Comparator.comparingDouble(XYZItem::getX)).get()).getX(); }
+    public double getMaxX() { return ((XYZItem) items.stream().max(Comparator.comparingDouble(XYZItem::getX)).get()).getX(); }
 
-    public double getMinY() { return ((XYZData) items.stream().min(Comparator.comparingDouble(XYZData::getY)).get()).getY(); }
-    public double getMaxY() { return ((XYZData) items.stream().max(Comparator.comparingDouble(XYZData::getY)).get()).getY(); }
+    public double getMinY() { return ((XYZItem) items.stream().min(Comparator.comparingDouble(XYZItem::getY)).get()).getY(); }
+    public double getMaxY() { return ((XYZItem) items.stream().max(Comparator.comparingDouble(XYZItem::getY)).get()).getY(); }
 
-    public double getMinZ() { return ((XYZData) items.stream().min(Comparator.comparingDouble(XYZData::getZ)).get()).getZ(); }
-    public double getMaxZ() { return ((XYZData) items.stream().max(Comparator.comparingDouble(XYZData::getZ)).get()).getZ(); }
+    public double getMinZ() { return ((XYZItem) items.stream().min(Comparator.comparingDouble(XYZItem::getZ)).get()).getZ(); }
+    public double getMaxZ() { return ((XYZItem) items.stream().max(Comparator.comparingDouble(XYZItem::getZ)).get()).getZ(); }
 
     public double getRangeX() { return getMaxX() - getMinX(); }
     public double getRangeY() { return getMaxY() - getMinY(); }

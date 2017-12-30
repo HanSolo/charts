@@ -16,11 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.ChartData;
-import eu.hansolo.fx.charts.event.ChartDataEventListener;
+import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.event.ChartItemEventListener;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
-import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
@@ -76,28 +75,28 @@ public class CoxcombChart extends Region {
     private              Canvas                                       canvas;
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
-    private              ObservableList<ChartData>                    items;
-    private              Color                                        _textColor;
-    private              ObjectProperty<Color>                        textColor;
-    private              boolean                                      _autoTextColor;
-    private              BooleanProperty                              autoTextColor;
-    private              Order                                        _order;
-    private              ObjectProperty<Order>                        order;
-    private              ChartDataEventListener                       itemListener;
-    private              ListChangeListener<ChartData>                itemListListener;
-    private              EventHandler<MouseEvent>                     clickHandler;
-    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
-    private              InfoPopup                                    popup;
+    private              ObservableList<ChartItem>                    items;
+    private Color                                        _textColor;
+    private ObjectProperty<Color>                        textColor;
+    private boolean                                      _autoTextColor;
+    private BooleanProperty                              autoTextColor;
+    private Order                                        _order;
+    private ObjectProperty<Order>                        order;
+    private ChartItemEventListener                       itemListener;
+    private ListChangeListener<ChartItem>                itemListListener;
+    private EventHandler<MouseEvent>                     clickHandler;
+    private CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private InfoPopup                                    popup;
 
 
     // ******************** Constructors **************************************
     public CoxcombChart() {
         this(new ArrayList<>());
     }
-    public CoxcombChart(final ChartData... ITEMS) {
+    public CoxcombChart(final ChartItem... ITEMS) {
         this(Arrays.asList(ITEMS));
     }
-    public CoxcombChart(final List<ChartData> ITEMS) {
+    public CoxcombChart(final List<ChartItem> ITEMS) {
         width            = PREFERRED_WIDTH;
         height           = PREFERRED_HEIGHT;
         size             = PREFERRED_WIDTH;
@@ -109,10 +108,10 @@ public class CoxcombChart extends Region {
         itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartDataEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartItemEvent(itemListener));
                     reorder(getOrder());
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeChartDataEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartItemEventListener(itemListener));
                     reorder(getOrder());
                 }
             }
@@ -155,7 +154,7 @@ public class CoxcombChart extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        items.forEach(item -> item.setOnChartDataEvent(itemListener));
+        items.forEach(item -> item.setOnChartItemEvent(itemListener));
         items.addListener(itemListListener);
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
         setOnSelectionEvent(e -> {
@@ -180,46 +179,46 @@ public class CoxcombChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeChartDataEventListener(itemListener));
+        items.forEach(item -> item.removeChartItemEventListener(itemListener));
         items.removeListener(itemListListener);
     }
 
-    public List<ChartData> getItems() { return items; }
-    public void setItems(final ChartData... ITEMS) {
+    public List<ChartItem> getItems() { return items; }
+    public void setItems(final ChartItem... ITEMS) {
         setItems(Arrays.asList(ITEMS));
     }
-    public void setItems(final List<ChartData> ITEMS) { items.setAll(ITEMS); }
-    public void addItem(final ChartData ITEM) {
+    public void setItems(final List<ChartItem> ITEMS) { items.setAll(ITEMS); }
+    public void addItem(final ChartItem ITEM) {
         if (!items.contains(ITEM)) {
             items.add(ITEM);
         }
     }
-    public void addItems(final ChartData... ITEMS) {
+    public void addItems(final ChartItem... ITEMS) {
         addItems(Arrays.asList(ITEMS));
     }
-    public void addItems(final List<ChartData> ITEMS) {
+    public void addItems(final List<ChartItem> ITEMS) {
         ITEMS.forEach(item -> addItem(item));
     }
-    public void removeItem(final ChartData ITEM) {
+    public void removeItem(final ChartItem ITEM) {
         if (items.contains(ITEM)) {
             items.remove(ITEM);
         }
     }
-    public void removeItems(final ChartData... ITEMS) {
+    public void removeItems(final ChartItem... ITEMS) {
         removeItems(Arrays.asList(ITEMS));
     }
-    public void removeItems(final List<ChartData> ITEMS) {
+    public void removeItems(final List<ChartItem> ITEMS) {
         ITEMS.forEach(item -> removeItem(item));
     }
 
     public void sortItemsAscending() {
-        Collections.sort(items, Comparator.comparingDouble(ChartData::getValue));
+        Collections.sort(items, Comparator.comparingDouble(ChartItem::getValue));
     }
     public void sortItemsDescending() {
-        Collections.sort(items, Comparator.comparingDouble(ChartData::getValue).reversed());
+        Collections.sort(items, Comparator.comparingDouble(ChartItem::getValue).reversed());
     }
 
-    public double sumOfAllItems() { return items.stream().mapToDouble(ChartData::getValue).sum(); }
+    public double sumOfAllItems() { return items.stream().mapToDouble(ChartItem::getValue).sum(); }
 
     public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
     public void setTextColor(final Color COLOR) {
@@ -290,7 +289,7 @@ public class CoxcombChart extends Region {
         popup.setX(EVT.getScreenX());
         popup.setY(EVT.getScreenY() - popup.getHeight());
 
-        int    noOfChartData = items.size();
+        int    noOfChartItem = items.size();
         double barWidth      = size * 0.04;
         double sum           = sumOfAllItems();
         double stepSize      = 360.0 / sum;
@@ -300,10 +299,10 @@ public class CoxcombChart extends Region {
         double minWH         = size * 0.36;
         double maxWH         = size * 0.64;
         double wh            = minWH;
-        double whStep        = (maxWH - minWH) / noOfChartData;
+        double whStep        = (maxWH - minWH) / noOfChartItem;
 
-        for (int i = 0 ; i < noOfChartData ; i++) {
-            ChartData item  = items.get(i);
+        for (int i = 0 ; i < noOfChartItem ; i++) {
+            ChartItem item = items.get(i);
 
             angle      = item.getValue() * stepSize;
             startAngle += angle;
@@ -341,7 +340,7 @@ public class CoxcombChart extends Region {
 
     // ******************** Drawing *******************************************
     private void drawChart() {
-        int          noOfChartDatas   = items.size();
+        int          noOfChartItems   = items.size();
         double       center      = size * 0.5;
         double       barWidth    = size * 0.04;
         double       sum         = sumOfAllItems();
@@ -352,7 +351,7 @@ public class CoxcombChart extends Region {
         double       minWH       = size * 0.36;
         double       maxWH       = size * 0.64;
         double       wh          = minWH;
-        double       whStep      = (maxWH - minWH) / noOfChartDatas;
+        double       whStep      = (maxWH - minWH) / noOfChartItems;
         Color        textColor   = getTextColor();
         boolean      isAutoColor = isAutoTextColor();
         DropShadow   shadow      = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
@@ -365,9 +364,9 @@ public class CoxcombChart extends Region {
 
         ctx.clearRect(0, 0, size, size);
         ctx.setFont(Font.font(size * 0.03));
-        for (int i = 0 ; i < noOfChartDatas ; i++) {
-            ChartData   item  = items.get(i);
-            double value = item.getValue();
+        for (int i = 0 ; i < noOfChartItems ; i++) {
+            ChartItem item  = items.get(i);
+            double    value = item.getValue();
 
             startAngle += angle;
             xy         -= (whStep / 2.0);
@@ -392,7 +391,7 @@ public class CoxcombChart extends Region {
             ctx.setStroke(item.getFillColor());
             ctx.strokeArc(xy, xy, wh, wh, startAngle, angle, ArcType.OPEN);
             // Add shadow effect to segment
-            if (i != (noOfChartDatas-1) && angle > 2) {
+            if (i != (noOfChartItems-1) && angle > 2) {
                 x = Math.cos(Math.toRadians(endAngle - 5));
                 y = -Math.sin(Math.toRadians(endAngle - 5));
                 shadow.setOffsetX(x * spread);

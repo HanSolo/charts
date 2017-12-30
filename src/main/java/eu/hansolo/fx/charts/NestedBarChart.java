@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
 import eu.hansolo.fx.charts.series.Series;
@@ -41,7 +41,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -64,22 +63,22 @@ public class NestedBarChart extends Region {
     private              Canvas                                       canvas;
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
-    private              ObservableList<Series<ChartData>>            series;
+    private              ObservableList<Series<ChartItem>>            series;
     private              Order                                        _order;
     private              ObjectProperty<Order>                        order;
     private              EventHandler<MouseEvent>                     clickHandler;
     private              CopyOnWriteArrayList<SelectionEventListener> listeners;
-    private              InfoPopup popup;
+    private              InfoPopup                                    popup;
 
 
     // ******************** Constructors **************************************
     public NestedBarChart() {
         this(new ArrayList<>());
     }
-    public NestedBarChart(final Series<ChartData>... SERIES) {
+    public NestedBarChart(final Series<ChartItem>... SERIES) {
         this(Arrays.asList(SERIES));
     }
-    public NestedBarChart(final List<Series<ChartData>> SERIES) {
+    public NestedBarChart(final List<Series<ChartItem>> SERIES) {
         width        = PREFERRED_WIDTH;
         height       = PREFERRED_HEIGHT;
         size         = PREFERRED_HEIGHT;
@@ -142,37 +141,37 @@ public class NestedBarChart extends Region {
 
     public void dispose() { canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);}
 
-    public List<Series<ChartData>> getSeries() { return series; }
-    public void setSeries(final Series<ChartData>... SERIES) {
+    public List<Series<ChartItem>> getSeries() { return series; }
+    public void setSeries(final Series<ChartItem>... SERIES) {
         setSeries(Arrays.asList(SERIES));
     }
-    public void setSeries(final List<Series<ChartData>> SERIES) {
+    public void setSeries(final List<Series<ChartItem>> SERIES) {
         series.clear();
         SERIES.forEach(item -> series.add(item));
         redraw();
     }
-    public void addSeries(final Series<ChartData> SERIES) {
+    public void addSeries(final Series<ChartItem> SERIES) {
         if (!series.contains(SERIES)) {
             series.add(SERIES);
             redraw();
         }
     }
-    public void addSeries(final Series<ChartData>... SERIES) {
+    public void addSeries(final Series<ChartItem>... SERIES) {
         addSeries(Arrays.asList(SERIES));
     }
-    public void addSeries(final List<Series<ChartData>> SERIES) {
+    public void addSeries(final List<Series<ChartItem>> SERIES) {
         SERIES.forEach(item -> addSeries(item));
     }
-    public void removeSeries(final Series<ChartData> SERIES) {
+    public void removeSeries(final Series<ChartItem> SERIES) {
         if (series.contains(SERIES)) {
             series.remove(SERIES);
             redraw();
         }
     }
-    public void removeSeries(final Series<ChartData>... SERIES) {
+    public void removeSeries(final Series<ChartItem>... SERIES) {
         removeSeries(Arrays.asList(SERIES));
     }
-    public void removeSeries(final List<Series<ChartData>> SERIES) {
+    public void removeSeries(final List<Series<ChartItem>> SERIES) {
         SERIES.forEach(item -> removeSeries(item));
     }
 
@@ -211,21 +210,21 @@ public class NestedBarChart extends Region {
         // Find series with sum of values
         double maxSum = -Double.MAX_VALUE;
         for (int i = 0 ; i < noOfBars  ;i++) {
-            maxSum = Math.max(maxSum, series.get(i).getItems().stream().mapToDouble(ChartData::getValue).sum());
+            maxSum = Math.max(maxSum, series.get(i).getItems().stream().mapToDouble(ChartItem::getValue).sum());
         }
-        double stepY = height / maxSum;
-        Series<ChartData> selectedSeries = null;
+        double            stepY          = height / maxSum;
+        Series<ChartItem> selectedSeries = null;
         for (int i = 0 ; i < noOfBars ; i++) {
-            Series<ChartData> s = series.get(i);
-            int noOfItems        = s.getNoOfItems();
-            double sumOfItems    = s.getItems().stream().mapToDouble(ChartData::getValue).sum();
-            double innerBarWidth = mainBarWidth / noOfItems;
-            double mainBarHeight = sumOfItems * stepY;
-            double minX          = i * mainBarWidth + i * spacer;
+            Series<ChartItem> s             = series.get(i);
+            int               noOfItems     = s.getNoOfItems();
+            double            sumOfItems    = s.getItems().stream().mapToDouble(ChartItem::getValue).sum();
+            double            innerBarWidth = mainBarWidth / noOfItems;
+            double            mainBarHeight = sumOfItems * stepY;
+            double            minX          = i * mainBarWidth + i * spacer;
             if (Helper.isInRectangle(X, Y, minX, height - mainBarHeight, minX + mainBarWidth, height)) {
                 selectedSeries = s;
             }
-            for (ChartData item : s.getItems()) {
+            for (ChartItem item : s.getItems()) {
                 double innerBarHeight = item.getValue() * stepY;
                 if (Helper.isInRectangle(X, Y, minX, height - innerBarHeight, minX + innerBarWidth, height)) {
                     fireSelectionEvent(new SelectionEvent(selectedSeries, item));
@@ -237,11 +236,11 @@ public class NestedBarChart extends Region {
         if (null != selectedSeries) { fireSelectionEvent(new SelectionEvent(selectedSeries)); }
     }
 
-    private void sortItems(final List<ChartData> ITEMS, final Order ORDER) {
+    private void sortItems(final List<ChartItem> ITEMS, final Order ORDER) {
         if (Order.ASCENDING == ORDER) {
-            Collections.sort(ITEMS, Comparator.comparingDouble(ChartData::getValue));
+            Collections.sort(ITEMS, Comparator.comparingDouble(ChartItem::getValue));
         } else {
-            Collections.sort(ITEMS, Comparator.comparingDouble(ChartData::getValue).reversed());
+            Collections.sort(ITEMS, Comparator.comparingDouble(ChartItem::getValue).reversed());
         }
     }
 
@@ -271,17 +270,17 @@ public class NestedBarChart extends Region {
         // Find series with sum of values
         double maxSum = -Double.MAX_VALUE;
         for (int i = 0 ; i < noOfBars  ;i++) {
-            maxSum = Math.max(maxSum, series.get(i).getItems().stream().mapToDouble(ChartData::getValue).sum());
+            maxSum = Math.max(maxSum, series.get(i).getItems().stream().mapToDouble(ChartItem::getValue).sum());
         }
         double stepY = height / maxSum;
 
         for (int i = 0 ; i < noOfBars ; i++) {
-            Series<ChartData> s = series.get(i);
-            int noOfItems        = s.getNoOfItems();
-            double sumOfItems    = s.getItems().stream().mapToDouble(ChartData::getValue).sum();
-            double innerBarWidth = mainBarWidth / noOfItems;
-            double mainBarHeight = sumOfItems * stepY;
-            double minX          = i * mainBarWidth + i * spacer;
+            Series<ChartItem> s             = series.get(i);
+            int               noOfItems     = s.getNoOfItems();
+            double            sumOfItems    = s.getItems().stream().mapToDouble(ChartItem::getValue).sum();
+            double            innerBarWidth = mainBarWidth / noOfItems;
+            double            mainBarHeight = sumOfItems * stepY;
+            double            minX          = i * mainBarWidth + i * spacer;
             // Draw main bar
             ctx.setFill(s.getFill());
             ctx.fillRect(minX, height - mainBarHeight, mainBarWidth, mainBarHeight);
@@ -290,7 +289,7 @@ public class NestedBarChart extends Region {
             sortItems(s.getItems(), getOrder());
 
             // Draw sub bars within main bar
-            for (ChartData item : s.getItems()) {
+            for (ChartItem item : s.getItems()) {
                 double innerBarHeight = item.getValue() * stepY;
                 ctx.setFill(item.getFillColor());
                 ctx.fillRect(minX, height - innerBarHeight, innerBarWidth, innerBarHeight);

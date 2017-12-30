@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.YData;
+import eu.hansolo.fx.charts.data.YItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -26,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class YSeries<T extends YData> extends Series {
+public class YSeries<T extends YItem> extends Series {
 
     // ******************** Constructors **************************************
     public YSeries() {
@@ -47,8 +47,8 @@ public class YSeries<T extends YData> extends Series {
 
 
     // ******************** Methods *******************************************
-    @Override public ObservableList<YData> getItems() { return items; }
+    @Override public ObservableList<YItem> getItems() { return items; }
 
-    public double getMinY() { return ((YData) items.stream().min(Comparator.comparingDouble(YData::getY)).get()).getY(); }
-    public double getMaxY() { return ((YData) items.stream().max(Comparator.comparingDouble(YData::getY)).get()).getY(); }
+    public double getMinY() { return ((YItem) items.stream().min(Comparator.comparingDouble(YItem::getY)).get()).getY(); }
+    public double getMaxY() { return ((YItem) items.stream().max(Comparator.comparingDouble(YItem::getY)).get()).getY(); }
 }

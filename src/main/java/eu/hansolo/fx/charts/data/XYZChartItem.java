@@ -17,9 +17,8 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.DataEvent;
-import eu.hansolo.fx.charts.event.DataEventListener;
-import eu.hansolo.fx.charts.event.SeriesEventListener;
+import eu.hansolo.fx.charts.event.ItemEvent;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -31,16 +30,15 @@ import javafx.scene.paint.Color;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-/**
- * Created by hansolo on 16.07.17.
- */
-public class XYDataObject implements XYData {
-    private final DataEvent                         DATA_EVENT = new DataEvent(XYDataObject.this);
-    private CopyOnWriteArrayList<DataEventListener> listeners;
+public class XYZChartItem implements XYZItem {
+    private final ItemEvent DATA_EVENT = new ItemEvent(XYZChartItem.this);
+    private CopyOnWriteArrayList<ItemEventListener> listeners;
     private double                                  _x;
     private DoubleProperty                          x;
     private double                                  _y;
     private DoubleProperty                          y;
+    private double                                  _z;
+    private DoubleProperty                          z;
     private String                                  _name;
     private StringProperty                          name;
     private Color                                   _color;
@@ -50,18 +48,22 @@ public class XYDataObject implements XYData {
 
 
     // ******************** Constructors **********************************
-    public XYDataObject() {
-        this(0, 0, "", Color.RED, Symbol.CIRCLE);
+    public XYZChartItem() {
+        this(0, 0, 0, "", Color.RED, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME) {
-        this(X, Y, NAME, Color.RED, Symbol.CIRCLE);
+    public XYZChartItem(final double X, final double Y, final double Z) {
+        this(X, Y, Z, "", Color.RED, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME, final Color COLOR) {
-        this(X, Y, NAME, COLOR, Symbol.CIRCLE);
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME) {
+        this(X, Y, Z, NAME, Color.RED, Symbol.CIRCLE);
     }
-    public XYDataObject(final double X, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color COLOR) {
+        this(X, Y, Z, NAME, COLOR, Symbol.CIRCLE);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color COLOR, final Symbol SYMBOL) {
         _x        = X;
         _y        = Y;
+        _z        = Z;
         _name     = NAME;
         _color    = COLOR;
         _symbol   = SYMBOL;
@@ -74,7 +76,7 @@ public class XYDataObject implements XYData {
     @Override public void setX(final double X) {
         if (null == x) {
             _x = X;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             x.set(X);
         }
@@ -82,8 +84,8 @@ public class XYDataObject implements XYData {
     @Override public DoubleProperty xProperty() {
         if (null == x) {
             x = new DoublePropertyBase(_x) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
         }
@@ -94,7 +96,7 @@ public class XYDataObject implements XYData {
     @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             y.set(Y);
         }
@@ -102,19 +104,39 @@ public class XYDataObject implements XYData {
     @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
         }
         return y;
     }
 
+    @Override public double getZ() { return null == z ? _z : z.get(); }
+    @Override public void setZ(final double Z) {
+        if (null == z) {
+            _z = Z;
+            fireItemEvent(DATA_EVENT);
+        } else {
+            z.set(Z);
+        }
+    }
+    @Override public DoubleProperty zProperty() {
+        if (null == z) {
+            z = new DoublePropertyBase(_z) {
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
+                @Override public String getName() { return "z"; }
+            };
+        }
+        return z;
+    }
+
     @Override public String getName() { return null == name ? _name : name.get(); }
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             name.set(NAME);
         }
@@ -122,8 +144,8 @@ public class XYDataObject implements XYData {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
@@ -135,7 +157,7 @@ public class XYDataObject implements XYData {
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             color.set(COLOR);
         }
@@ -143,8 +165,8 @@ public class XYDataObject implements XYData {
     public ObjectProperty<Color> colorProperty() {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
             _color = null;
@@ -156,7 +178,7 @@ public class XYDataObject implements XYData {
     public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -164,8 +186,8 @@ public class XYDataObject implements XYData {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() {  return XYDataObject.this;  }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() {  return XYZChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
             _symbol = null;
@@ -173,21 +195,23 @@ public class XYDataObject implements XYData {
         return symbol;
     }
 
-    
-    // ******************** Event handling ************************************
-    public void setOnDataEvent(final DataEventListener LISTENER) { addDataEventListener(LISTENER); }
-    public void addDataEventListener(final DataEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeDataEventListener(final DataEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
 
-    public void fireDataEvent(final DataEvent EVENT) {
-        for (DataEventListener listener : listeners) { listener.onDataEvent(EVENT); }
+    // ******************** Event handling ************************************
+    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
+    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+
+    public void fireItemEvent(final ItemEvent EVENT) {
+        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
     }
-    
+
+
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
+                                  .append("  \"z\":").append(getZ()).append(",\n")
                                   .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")

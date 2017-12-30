@@ -16,9 +16,9 @@
 
 package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.event.ChartDataEvent;
-import eu.hansolo.fx.charts.event.ChartDataEvent.EventType;
-import eu.hansolo.fx.charts.event.ChartDataEventListener;
+import eu.hansolo.fx.charts.event.ChartItemEvent;
+import eu.hansolo.fx.charts.event.ChartItemEvent.EventType;
+import eu.hansolo.fx.charts.event.ChartItemEventListener;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -36,10 +36,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class ChartData implements Comparable<ChartData> {
-    private final ChartDataEvent               UPDATE_EVENT   = new ChartDataEvent(EventType.UPDATE, ChartData.this);
-    private final ChartDataEvent               FINISHED_EVENT = new ChartDataEvent(EventType.FINISHED, ChartData.this);
-    private       List<ChartDataEventListener> listenerList   = new CopyOnWriteArrayList<>();
+public class ChartItem implements Comparable<ChartItem> {
+    private final ChartItemEvent               UPDATE_EVENT   = new ChartItemEvent(EventType.UPDATE, ChartItem.this);
+    private final ChartItemEvent               FINISHED_EVENT = new ChartItemEvent(EventType.FINISHED, ChartItem.this);
+    private       List<ChartItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
     private       String                       name;
     private       double                       value;
     private       double                       oldValue;
@@ -54,49 +54,49 @@ public class ChartData implements Comparable<ChartData> {
 
 
     // ******************** Constructors **************************************
-    public ChartData() {
+    public ChartItem() {
         this("", 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME) {
+    public ChartItem(final String NAME) {
         this(NAME, 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(double VALUE) {
+    public ChartItem(double VALUE) {
         this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final double VALUE, final Instant TIMESTAMP) {
+    public ChartItem(final double VALUE, final Instant TIMESTAMP) {
         this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
-    public ChartData(final double VALUE, final Color FILL_COLOR) {
+    public ChartItem(final double VALUE, final Color FILL_COLOR) {
         this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME, final Color FILL_COLOR) {
+    public ChartItem(final String NAME, final Color FILL_COLOR) {
         this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME, final double VALUE) {
+    public ChartItem(final String NAME, final double VALUE) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Instant TIMESTAMP) {
+    public ChartItem(final String NAME, final double VALUE, final Instant TIMESTAMP) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, true, 800);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartData(final String NAME, final double VALUE, final Color FILL_COLOR, final Color STROKE_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color STROKE_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         name              = NAME;
         value             = VALUE;
         oldValue          = 0;
@@ -108,16 +108,16 @@ public class ChartData implements Comparable<ChartData> {
             @Override protected void invalidated() {
                 oldValue = value;
                 value = get();
-                fireChartDataEvent(UPDATE_EVENT);
+                fireChartItemEvent(UPDATE_EVENT);
             }
-            @Override public Object getBean() { return ChartData.this; }
+            @Override public Object getBean() { return ChartItem.this; }
             @Override public String getName() { return "currentValue"; }
         };
         timeline          = new Timeline();
         animated          = ANIMATED;
         animationDuration = ANIMATION_DURATION;
 
-        timeline.setOnFinished(e -> fireChartDataEvent(FINISHED_EVENT));
+        timeline.setOnFinished(e -> fireChartItemEvent(FINISHED_EVENT));
     }
 
 
@@ -125,7 +125,7 @@ public class ChartData implements Comparable<ChartData> {
     public String getName() { return name; }
     public void setName(final String NAME) {
         name = NAME;
-        fireChartDataEvent(UPDATE_EVENT);
+        fireChartItemEvent(UPDATE_EVENT);
     }
 
     public double getValue() { return value; }
@@ -141,7 +141,7 @@ public class ChartData implements Comparable<ChartData> {
         } else {
             oldValue = value;
             value = VALUE;
-            fireChartDataEvent(FINISHED_EVENT);
+            fireChartItemEvent(FINISHED_EVENT);
         }
     }
 
@@ -150,25 +150,25 @@ public class ChartData implements Comparable<ChartData> {
     public Color getFillColor() { return fillColor; }
     public void setFillColor(final Color COLOR) {
         fillColor = COLOR;
-        fireChartDataEvent(UPDATE_EVENT);
+        fireChartItemEvent(UPDATE_EVENT);
     }
 
     public Color getStrokeColor() { return strokeColor; }
     public void setStrokeColor(final Color COLOR) {
         strokeColor = COLOR;
-        fireChartDataEvent(UPDATE_EVENT);
+        fireChartItemEvent(UPDATE_EVENT);
     }
 
     public Color getTextColor() { return textColor; }
     public void setTextColor(final Color COLOR) {
         textColor = COLOR;
-        fireChartDataEvent(UPDATE_EVENT);
+        fireChartItemEvent(UPDATE_EVENT);
     }
 
     public Instant getTimestamp() { return timestamp; }
     public void setTimestamp(final Instant TIMESTAMP) {
         timestamp = TIMESTAMP;
-        fireChartDataEvent(UPDATE_EVENT);
+        fireChartItemEvent(UPDATE_EVENT);
     }
 
     public ZonedDateTime getTimestampAdDateTime() { return getTimestampAsDateTime(ZoneId.systemDefault()); }
@@ -194,7 +194,7 @@ public class ChartData implements Comparable<ChartData> {
                                   .toString();
     }
 
-    @Override public int compareTo(final ChartData DATA) { return Double.compare(getValue(), DATA.getValue()); }
+    @Override public int compareTo(final ChartItem DATA) { return Double.compare(getValue(), DATA.getValue()); }
 
     private long clamp(final long MIN, final long MAX, final long VALUE) {
         if (VALUE < MIN) return MIN;
@@ -204,11 +204,11 @@ public class ChartData implements Comparable<ChartData> {
 
 
     // ******************** Event Handling ************************************
-    public void setOnChartDataEvent(final ChartDataEventListener LISTENER) { addChartDataEventListener(LISTENER); }
-    public void addChartDataEventListener(final ChartDataEventListener LISTENER) { if (!listenerList.contains(LISTENER)) listenerList.add(LISTENER); }
-    public void removeChartDataEventListener(final ChartDataEventListener LISTENER) { if (listenerList.contains(LISTENER)) listenerList.remove(LISTENER); }
+    public void setOnChartItemEvent(final ChartItemEventListener LISTENER) { addChartItemEventListener(LISTENER); }
+    public void addChartItemEventListener(final ChartItemEventListener LISTENER) { if (!listenerList.contains(LISTENER)) listenerList.add(LISTENER); }
+    public void removeChartItemEventListener(final ChartItemEventListener LISTENER) { if (listenerList.contains(LISTENER)) listenerList.remove(LISTENER); }
 
-    public void fireChartDataEvent(final ChartDataEvent EVENT) {
-        for (ChartDataEventListener listener : listenerList) { listener.onChartDataEvent(EVENT); }
+    public void fireChartItemEvent(final ChartItemEvent EVENT) {
+        for (ChartItemEventListener listener : listenerList) { listener.onChartItemEvent(EVENT); }
     }
 }

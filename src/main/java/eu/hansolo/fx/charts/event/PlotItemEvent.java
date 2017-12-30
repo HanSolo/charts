@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.PlotItem;
+import eu.hansolo.fx.charts.data.PlotItem;
 
 
 public class PlotItemEvent {

@@ -104,8 +104,8 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B useChartDataTextColor(final boolean USE) {
-        properties.put("useChartDataTextColor", new SimpleBooleanProperty(USE));
+    public final B useChartItemTextColor(final boolean USE) {
+        properties.put("useChartItemTextColor", new SimpleBooleanProperty(USE));
         return (B)this;
     }
 
@@ -244,8 +244,8 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
                 CONTROL.setBrightTextColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("darkTextColor".equals(key)) {
                 CONTROL.setDarkTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("useChartDataTextColor".equals(key)) {
-                CONTROL.setUseChartDataTextColor(((BooleanProperty) properties.get(key)).get());
+            } else if ("useChartItemTextColor".equals(key)) {
+                CONTROL.setUseChartItemTextColor(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

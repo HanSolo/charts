@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEvent.EventType;
 import eu.hansolo.fx.charts.font.Fonts;
@@ -93,53 +93,53 @@ public class SunburstChart extends Region {
     private static final double MAXIMUM_HEIGHT    = 2048;
     private static final Color  BRIGHT_TEXT_COLOR = Color.WHITE;
     private static final Color  DARK_TEXT_COLOR   = Color.BLACK;
-    private double                          size;
-    private double                          width;
-    private double                          height;
-    private double                          centerX;
-    private double                          centerY;
-    private Pane                            segmentPane;
-    private Canvas                          chartCanvas;
-    private GraphicsContext                 chartCtx;
-    private Pane                            pane;
-    private Paint                           backgroundPaint;
-    private Paint                           borderPaint;
-    private double                          borderWidth;
-    private List<Path>                      segments;
-    private VisibleData                     _visibleData;
-    private ObjectProperty<VisibleData>     visibleData;
-    private TextOrientation                 _textOrientation;
-    private ObjectProperty<TextOrientation> textOrientation;
-    private Color                           _backgroundColor;
-    private ObjectProperty<Color>           backgroundColor;
-    private Color                           _textColor;
-    private ObjectProperty<Color>           textColor;
-    private boolean                         _useColorFromParent;
-    private BooleanProperty                 useColorFromParent;
-    private int                             _decimals;
-    private IntegerProperty                 decimals;
-    private boolean                         _interactive;
-    private BooleanProperty                 interactive;
-    private boolean                         _autoTextColor;
-    private BooleanProperty                 autoTextColor;
-    private Color                           _brightTextColor;
-    private ObjectProperty<Color>           brightTextColor;
-    private Color                           _darkTextColor;
-    private ObjectProperty<Color>           darkTextColor;
-    private boolean                         _useChartDataTextColor;
-    private BooleanProperty                 useChartDataTextColor;
-    private String                          formatString;
-    private TreeNode                        tree;
-    private TreeNode                        root;
-    private int                             maxLevel;
-    private Map<Integer, List<TreeNode>>    levelMap;
-    private InvalidationListener            sizeListener;
+    private              double                          size;
+    private              double                          width;
+    private              double                          height;
+    private              double                          centerX;
+    private              double                          centerY;
+    private              Pane                            segmentPane;
+    private              Canvas                          chartCanvas;
+    private              GraphicsContext                 chartCtx;
+    private              Pane                            pane;
+    private              Paint                           backgroundPaint;
+    private              Paint                           borderPaint;
+    private              double                          borderWidth;
+    private              List<Path>                      segments;
+    private              VisibleData                     _visibleData;
+    private              ObjectProperty<VisibleData>     visibleData;
+    private              TextOrientation                 _textOrientation;
+    private              ObjectProperty<TextOrientation> textOrientation;
+    private              Color                           _backgroundColor;
+    private              ObjectProperty<Color>           backgroundColor;
+    private              Color                           _textColor;
+    private              ObjectProperty<Color>           textColor;
+    private              boolean                         _useColorFromParent;
+    private              BooleanProperty                 useColorFromParent;
+    private              int                             _decimals;
+    private              IntegerProperty                 decimals;
+    private              boolean                         _interactive;
+    private              BooleanProperty                 interactive;
+    private              boolean                         _autoTextColor;
+    private              BooleanProperty                 autoTextColor;
+    private              Color                           _brightTextColor;
+    private              ObjectProperty<Color>           brightTextColor;
+    private              Color                           _darkTextColor;
+    private              ObjectProperty<Color>           darkTextColor;
+    private              boolean                         _useChartItemTextColor;
+    private              BooleanProperty                 useChartItemTextColor;
+    private              String                          formatString;
+    private              TreeNode                        tree;
+    private              TreeNode                        root;
+    private              int                             maxLevel;
+    private              Map<Integer, List<TreeNode>>    levelMap;
+    private              InvalidationListener            sizeListener;
 
 
 
     // ******************** Constructors **************************************
     public SunburstChart() {
-        this(new TreeNode(new ChartData()));
+        this(new TreeNode(new ChartItem()));
     }
     public SunburstChart(final TreeNode TREE) {
         backgroundPaint        = Color.TRANSPARENT;
@@ -156,7 +156,7 @@ public class SunburstChart extends Region {
         _autoTextColor         = true;
         _brightTextColor       = BRIGHT_TEXT_COLOR;
         _darkTextColor         = DARK_TEXT_COLOR;
-        _useChartDataTextColor = false;
+        _useChartItemTextColor = false;
         formatString           = "%.0f";
         tree                   = TREE;
         levelMap               = new HashMap<>(8);
@@ -308,12 +308,12 @@ public class SunburstChart extends Region {
     }
 
     /**
-     * Returns the color that will be used to draw text in segments if useChartDataTextColor == false
-     * @return the color that will be used to draw text in segments if useChartDataTextColor == false
+     * Returns the color that will be used to draw text in segments if useChartItemTextColor == false
+     * @return the color that will be used to draw text in segments if useChartItemTextColor == false
      */
     public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
     /**
-     * Defines the color that will be used to draw text in segments if useChartDataTextColor == false
+     * Defines the color that will be used to draw text in segments if useChartItemTextColor == false
      * @param COLOR
      */
     public void setTextColor(final Color COLOR) {
@@ -400,12 +400,12 @@ public class SunburstChart extends Region {
     }
 
     /**
-     * Returns true if the chart is drawn using Path elements, fire ChartDataEvents and show tooltips on segments.
+     * Returns true if the chart is drawn using Path elements, fire ChartItemEvents and show tooltips on segments.
      * @return
      */
     public boolean isInteractive() { return null == interactive ? _interactive : interactive.get(); }
     /**
-     * Defines if the chart should be drawn using Path elements, fire ChartDataEvents and shows tooltips on segments or
+     * Defines if the chart should be drawn using Path elements, fire ChartItemEvents and shows tooltips on segments or
      * if the the chart should be drawn using one Canvas node.
      * @param INTERACTIVE
      */
@@ -537,32 +537,32 @@ public class SunburstChart extends Region {
     }
 
     /**
-     * Returns true if the text color of the ChartData elements should be used to
+     * Returns true if the text color of the ChartItem elements should be used to
      * fill the text in the segments
-     * @return true if the text color of the segments will be taken from the ChartData elements
+     * @return true if the text color of the segments will be taken from the ChartItem elements
      */
-    public boolean getUseChartDataTextColor() { return null == useChartDataTextColor ? _useChartDataTextColor : useChartDataTextColor.get(); }
+    public boolean getUseChartItemTextColor() { return null == useChartItemTextColor ? _useChartItemTextColor : useChartItemTextColor.get(); }
     /**
-     * Defines if the text color of the segments should be taken from the ChartData elements
+     * Defines if the text color of the segments should be taken from the ChartItem elements
      * @param USE
      */
-    public void setUseChartDataTextColor(final boolean USE) {
-        if (null == useChartDataTextColor) {
-            _useChartDataTextColor = USE;
+    public void setUseChartItemTextColor(final boolean USE) {
+        if (null == useChartItemTextColor) {
+            _useChartItemTextColor = USE;
             redraw();
         } else {
-            useChartDataTextColor.set(USE);
+            useChartItemTextColor.set(USE);
         }
     }
-    public BooleanProperty useChartDataTextColor() {
-        if (null == useChartDataTextColor) {
-            useChartDataTextColor = new BooleanPropertyBase(_useChartDataTextColor) {
+    public BooleanProperty useChartItemTextColor() {
+        if (null == useChartItemTextColor) {
+            useChartItemTextColor = new BooleanPropertyBase(_useChartItemTextColor) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return SunburstChart.this; }
-                @Override public String getName() { return "useChartDataTextColor"; }
+                @Override public String getName() { return "useChartItemTextColor"; }
             };
         }
-        return useChartDataTextColor;
+        return useChartItemTextColor;
     }
 
     /**
@@ -582,9 +582,9 @@ public class SunburstChart extends Region {
         Color brightColor = getBrightTextColor();
         Color darkColor   = getDarkTextColor();
         root.stream().forEach(node -> {
-            ChartData data = node.getData();
-            boolean darkFillColor = Helper.isDark(data.getFillColor());
-            boolean darkTextColor = Helper.isDark(data.getTextColor());
+            ChartItem data          = node.getData();
+            boolean   darkFillColor = Helper.isDark(data.getFillColor());
+            boolean   darkTextColor = Helper.isDark(data.getTextColor());
             if (darkFillColor && darkTextColor) { data.setTextColor(brightColor); }
             if (!darkFillColor && !darkTextColor) { data.setTextColor(darkColor); }
         });
@@ -603,7 +603,7 @@ public class SunburstChart extends Region {
             List<TreeNode> treeNodeList = levelMap.get(level);
             treeNodeList.stream()
                         .filter(node -> node.getChildren().isEmpty())
-                        .forEach(node ->node.addNode(new TreeNode(new ChartData("", 0, Color.TRANSPARENT, Color.TRANSPARENT), node)));
+                        .forEach(node ->node.addNode(new TreeNode(new ChartItem("", 0, Color.TRANSPARENT, Color.TRANSPARENT), node)));
         }
     }
 
@@ -643,7 +643,7 @@ public class SunburstChart extends Region {
             double segmentStartAngle;
             double segmentEndAngle = 0;
             for (TreeNode node : nodesAtLevel) {
-                ChartData segmentData  = node.getData();
+                ChartItem segmentData  = node.getData();
                 double    segmentAngle = node.getParentAngle() * node.getPercentage();
                 Color     segmentColor = getUseColorFromParent() ? node.getMyRoot().getData().getFillColor() : segmentData.getFillColor();
 
@@ -685,7 +685,7 @@ public class SunburstChart extends Region {
                         double textX      = centerX + textRadius * cosText;
                         double textY      = centerY - textRadius * sinText;
 
-                        chartCtx.setFill(getUseChartDataTextColor() ? segmentData.getTextColor() : textColor);
+                        chartCtx.setFill(getUseChartItemTextColor() ? segmentData.getTextColor() : textColor);
 
                         chartCtx.save();
                         chartCtx.translate(textX, textY);

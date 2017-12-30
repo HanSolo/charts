@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.event;
+package eu.hansolo.fx.charts.data;
 
-@FunctionalInterface
-public interface DataEventListener {
-    void onDataEvent(final DataEvent EVENT);
+import eu.hansolo.fx.charts.Symbol;
+import javafx.scene.paint.Color;
+
+
+public interface Item {
+
+    String getName();
+
+    Color getColor();
+
+    Symbol getSymbol();
+    void setSymbol(Symbol symbol);
 }

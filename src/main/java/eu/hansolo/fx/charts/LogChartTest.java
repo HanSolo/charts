@@ -16,10 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
-import eu.hansolo.fx.charts.data.XYZDataObject;
-import eu.hansolo.fx.charts.data.YDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.fx.charts.data.XYZChartItem;
+import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -46,26 +46,26 @@ public class LogChartTest extends Application {
     private static final Color[] COLORS         = {Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
     private static final Random  RND            = new Random();
     private static final int     NO_OF_X_VALUES = 100;
-    private XYSeries<XYDataObject> xySeries1;
+    private XYSeries<XYChartItem> xySeries1;
 
-    private XYChart<XYDataObject>  smoothLineChart;
-    private Axis                   smoothLineChartXAxisBottom;
-    private Axis                   smoothLineChartYAxisLeft;
+    private XYChart<XYChartItem> smoothLineChart;
+    private Axis                 smoothLineChartXAxisBottom;
+    private Axis                 smoothLineChartYAxisLeft;
 
     private long                   lastTimerCall;
     private AnimationTimer         timer;
 
 
     @Override public void init() {
-        List<XYDataObject>  xyData1 = new ArrayList<>(20);
-        List<YDataObject>   yData   = new ArrayList<>(20);
-        List<XYZDataObject> xyzData = new ArrayList<>(20);
+        List<XYChartItem>  xyData1 = new ArrayList<>(20);
+        List<YChartItem>   yData   = new ArrayList<>(20);
+        List<XYZChartItem> xyzData = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyData1.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
-            yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
-            xyzData.add(new XYZDataObject(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25,"P" + i, COLORS[RND.nextInt(3)]));
+            yData.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
+            xyzData.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         xySeries1 = new XYSeries<>(xyData1, ChartType.LINE, Color.rgb(255, 0, 255, 0.5));
@@ -84,7 +84,7 @@ public class LogChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYData> xyItems = xySeries1.getItems();
+                    List<XYItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 1000));
 
                     xySeries1.refresh();

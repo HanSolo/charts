@@ -17,18 +17,18 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import javafx.scene.paint.Paint;
 
 import java.util.Arrays;
 import java.util.List;
 
 
-public class ChartDataSeries<T extends ChartData> extends Series {
-    public ChartDataSeries(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
+public class ChartItemSeries<T extends ChartItem> extends Series {
+    public ChartItemSeries(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
         super(Arrays.asList(ITEMS), TYPE, NAME, STROKE, FILL);
     }
-    public ChartDataSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
+    public ChartItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
        super(ITEMS, TYPE, NAME, STROKE, FILL);
     }
 

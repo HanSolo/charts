@@ -17,12 +17,8 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.converter.Converter;
-import eu.hansolo.fx.charts.data.TYDataObject;
-import eu.hansolo.fx.charts.data.XYData;
+import eu.hansolo.fx.charts.data.TYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
-import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Helper.Interval;
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -35,7 +31,6 @@ import javafx.scene.Scene;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 import static eu.hansolo.fx.charts.converter.Converter.Category.TEMPERATURE;
@@ -52,21 +47,21 @@ public class TimeAxisTest extends Application {
     private static final Double    AXIS_WIDTH      = 25d;
     private static final Color[]   COLORS          = { Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
     private static final Random    RND             = new Random();
-    private XYSeries<TYDataObject> tySeries1;
-    private XYChart<TYDataObject>  tyChart;
-    private Axis                   xAxisBottom;
-    private Axis                   yAxisLeft;
-    private Axis                   yAxisRight;
+    private XYSeries<TYChartItem> tySeries1;
+    private XYChart<TYChartItem>  tyChart;
+    private Axis                  xAxisBottom;
+    private Axis                  yAxisLeft;
+    private Axis                  yAxisRight;
 
 
     @Override public void init() {
-        int noOfValues             = 24 * 60;
-        LocalDateTime      start   = LocalDateTime.now();
-        LocalDateTime      end     = start.plusHours(24);
-        List<TYDataObject> tyData1 = new ArrayList<>();
+        int               noOfValues = 24 * 60;
+        LocalDateTime     start      = LocalDateTime.now();
+        LocalDateTime     end        = start.plusHours(24);
+        List<TYChartItem> tyData1    = new ArrayList<>();
 
         for (int i = 0 ; i < noOfValues ; i++) {
-            tyData1.add(new TYDataObject(start.plusMinutes(i),RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
+            tyData1.add(new TYChartItem(start.plusMinutes(i), RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         tySeries1 = new XYSeries(tyData1, ChartType.LINE, Color.RED, Color.rgb(255, 0, 0, 0.5));

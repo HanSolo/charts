@@ -25,22 +25,22 @@ import javafx.scene.paint.Color;
 import java.time.LocalDateTime;
 
 
-public class TYDataObject extends XYDataObject {
+public class TYChartItem extends XYChartItem {
     private LocalDateTime                 _t;
     private ObjectProperty<LocalDateTime> t;
 
 
     // ******************** Constructors **********************************
-    public TYDataObject() {
+    public TYChartItem() {
         this(LocalDateTime.now(), 0, "", Color.RED, Symbol.CIRCLE);
     }
-    public TYDataObject(final LocalDateTime T, final double Y, final String NAME) {
+    public TYChartItem(final LocalDateTime T, final double Y, final String NAME) {
         this(T, Y, NAME, Color.RED, Symbol.CIRCLE);
     }
-    public TYDataObject(final LocalDateTime T, final double Y, final String NAME, final Color COLOR) {
+    public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color COLOR) {
         this(T, Y, NAME, COLOR, Symbol.CIRCLE);
     }
-    public TYDataObject(final LocalDateTime T, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
         super(T.toEpochSecond(Helper.getZoneOffset()), Y, NAME, COLOR, SYMBOL);
         _t = T;
     }
@@ -59,8 +59,8 @@ public class TYDataObject extends XYDataObject {
     public ObjectProperty<LocalDateTime> tProperty() {
         if (null == t) {
             t = new ObjectPropertyBase<LocalDateTime>(_t) {
-                @Override protected void invalidated() { TYDataObject.super.setX(get().toEpochSecond(Helper.getZoneOffset())); }
-                @Override public Object getBean() { return TYDataObject.this; }
+                @Override protected void invalidated() { TYChartItem.super.setX(get().toEpochSecond(Helper.getZoneOffset())); }
+                @Override public Object getBean() { return TYChartItem.this; }
                 @Override public String getName() { return "t"; }
             };
             _t = null;

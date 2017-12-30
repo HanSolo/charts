@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.event.SeriesEventType;
@@ -39,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by hansolo on 16.07.17.
  */
-public abstract class Series<T extends ChartData> {
+public abstract class Series<T extends ChartItem> {
     public    final SeriesEvent REFRESH = new SeriesEvent(Series.this, SeriesEventType.REDRAW);
     protected String                                    _name;
     protected StringProperty                            name;

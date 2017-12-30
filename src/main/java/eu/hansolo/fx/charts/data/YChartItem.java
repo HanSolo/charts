@@ -17,8 +17,8 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.DataEvent;
-import eu.hansolo.fx.charts.event.DataEventListener;
+import eu.hansolo.fx.charts.event.ItemEvent;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -30,9 +30,9 @@ import javafx.scene.paint.Color;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class YDataObject implements YData {
-    private final DataEvent                         DATA_EVENT = new DataEvent(YDataObject.this);
-    private CopyOnWriteArrayList<DataEventListener> listeners;
+public class YChartItem implements YItem {
+    private final ItemEvent DATA_EVENT = new ItemEvent(YChartItem.this);
+    private CopyOnWriteArrayList<ItemEventListener> listeners;
     private double                                  _y;
     private DoubleProperty                          y;
     private String                                  _name;
@@ -44,16 +44,16 @@ public class YDataObject implements YData {
 
 
     // ******************** Constructors **********************************
-    public YDataObject() {
+    public YChartItem() {
         this(0, "", Color.RED, Symbol.CIRCLE);
     }
-    public YDataObject(final double Y, final String NAME) {
+    public YChartItem(final double Y, final String NAME) {
         this(Y, NAME, Color.RED, Symbol.CIRCLE);
     }
-    public YDataObject(final double Y, final String NAME, final Color COLOR) {
+    public YChartItem(final double Y, final String NAME, final Color COLOR) {
         this(Y, NAME, COLOR, Symbol.CIRCLE);
     }
-    public YDataObject(final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public YChartItem(final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
         _y        = Y;
         _name     = NAME;
         _color    = COLOR;
@@ -67,7 +67,7 @@ public class YDataObject implements YData {
     @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             y.set(Y);
         }
@@ -75,8 +75,8 @@ public class YDataObject implements YData {
     @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return YDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
         }
@@ -87,7 +87,7 @@ public class YDataObject implements YData {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             name.set(NAME);
         }
@@ -95,8 +95,8 @@ public class YDataObject implements YData {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return YDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
@@ -108,7 +108,7 @@ public class YDataObject implements YData {
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             color.set(COLOR);
         }
@@ -116,8 +116,8 @@ public class YDataObject implements YData {
     public ObjectProperty<Color> colorProperty() {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return YDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
             _color = null;
@@ -129,7 +129,7 @@ public class YDataObject implements YData {
     public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -137,8 +137,8 @@ public class YDataObject implements YData {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() {  return YDataObject.this;  }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() {  return YChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
             _symbol = null;
@@ -148,12 +148,12 @@ public class YDataObject implements YData {
 
 
     // ******************** Event handling ************************************
-    public void setOnDataEvent(final DataEventListener LISTENER) { addDataEventListener(LISTENER); }
-    public void addDataEventListener(final DataEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeDataEventListener(final DataEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
+    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
 
-    public void fireDataEvent(final DataEvent EVENT) {
-        for (DataEventListener listener : listeners) { listener.onDataEvent(EVENT); }
+    public void fireItemEvent(final ItemEvent EVENT) {
+        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
     }
 
 

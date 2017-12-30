@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.event;
+package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.data.Data;
-
-
-public class DataEvent<T extends Data> {
-    private T data;
+import javafx.beans.property.DoubleProperty;
 
 
-    // ******************** Constructors **************************************
-    public DataEvent(final T DATA) {
-        data = DATA;
-    }
+public interface XYZItem extends Item {
 
+    double         getX();
+    void           setX(double x);
+    DoubleProperty xProperty();
 
-    // ******************** Methods *******************************************
-    public T getData() { return data; }
+    double         getY();
+    void           setY(double y);
+    DoubleProperty yProperty();
+
+    double         getZ();
+    void           setZ(double value);
+    DoubleProperty zProperty();
 }

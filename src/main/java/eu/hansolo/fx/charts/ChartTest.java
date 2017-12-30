@@ -16,12 +16,12 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
-import eu.hansolo.fx.charts.data.XYZData;
-import eu.hansolo.fx.charts.data.XYZDataObject;
-import eu.hansolo.fx.charts.data.YData;
-import eu.hansolo.fx.charts.data.YDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.fx.charts.data.XYZItem;
+import eu.hansolo.fx.charts.data.XYZChartItem;
+import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.series.XYSeries;
@@ -56,38 +56,38 @@ public class ChartTest extends Application {
     private static final Color[]     COLORS         = { Color.rgb(200, 0, 0, 0.75), Color.rgb(0, 0, 200, 0.75), Color.rgb(0, 200, 200, 0.75), Color.rgb(0, 200, 0, 0.75) };
     private static final Random      RND            = new Random();
     private static final int         NO_OF_X_VALUES = 100;
-    private XYSeries<XYDataObject>   xySeries1;
-    private XYSeries<XYDataObject>   xySeries2;
-    private XYSeries<XYDataObject>   xySeries3;
-    private XYSeries<XYDataObject>   xySeries4;
+    private XYSeries<XYChartItem> xySeries1;
+    private XYSeries<XYChartItem> xySeries2;
+    private XYSeries<XYChartItem> xySeries3;
+    private XYSeries<XYChartItem> xySeries4;
 
-    private XYChart<XYDataObject>    lineChart;
-    private Axis                     lineChartXAxisBottom;
-    private Axis                     lineChartYAxisLeft;
-    private Axis                     lineChartYAxisCenter;
-    private Axis                     lineChartYAxisRight;
+    private XYChart<XYChartItem> lineChart;
+    private Axis                 lineChartXAxisBottom;
+    private Axis                 lineChartYAxisLeft;
+    private Axis                 lineChartYAxisCenter;
+    private Axis                 lineChartYAxisRight;
 
-    private XYChart<XYDataObject>    areaChart;
-    private Axis                     areaChartXAxisBottom;
-    private Axis                     areaChartYAxisLeft;
+    private XYChart<XYChartItem> areaChart;
+    private Axis                 areaChartXAxisBottom;
+    private Axis                 areaChartYAxisLeft;
 
-    private XYChart<XYDataObject>    smoothLineChart;
-    private Axis                     smoothLineChartXAxisBottom;
-    private Axis                     smoothLineChartYAxisLeft;
+    private XYChart<XYChartItem> smoothLineChart;
+    private Axis                 smoothLineChartXAxisBottom;
+    private Axis                 smoothLineChartYAxisLeft;
 
-    private XYChart<XYDataObject>    smoothAreaChart;
-    private Axis                     smoothAreaChartXAxisBottom;
-    private Axis                     smoothAreaChartYAxisLeft;
+    private XYChart<XYChartItem> smoothAreaChart;
+    private Axis                 smoothAreaChartXAxisBottom;
+    private Axis                 smoothAreaChartYAxisLeft;
 
-    private XYChart<XYDataObject>    scatterChart;
-    private Axis                     scatterChartXAxisBottom;
-    private Axis                     scatterChartYAxisLeft;
+    private XYChart<XYChartItem> scatterChart;
+    private Axis                 scatterChartXAxisBottom;
+    private Axis                 scatterChartYAxisLeft;
 
-    private YSeries<YDataObject>     ySeries;
-    private YPane<YDataObject>       donutChart;
+    private YSeries<YChartItem> ySeries;
+    private YPane<YChartItem>   donutChart;
 
-    private XYZSeries<XYZDataObject> xyzSeries;
-    private XYZPane<XYZDataObject>   bubbleChart;
+    private XYZSeries<XYZChartItem> xyzSeries;
+    private XYZPane<XYZChartItem>   bubbleChart;
 
     private Thread                   modificationThread;
 
@@ -96,19 +96,19 @@ public class ChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYDataObject>  xyData1 = new ArrayList<>(20);
-        List<XYDataObject>  xyData2 = new ArrayList<>(20);
-        List<XYDataObject>  xyData3 = new ArrayList<>(20);
-        List<YDataObject>   yData   = new ArrayList<>(20);
-        List<XYZDataObject> xyzData = new ArrayList<>(20);
+        List<XYChartItem>  xyData1 = new ArrayList<>(20);
+        List<XYChartItem>  xyData2 = new ArrayList<>(20);
+        List<XYChartItem>  xyData3 = new ArrayList<>(20);
+        List<YChartItem>   yData   = new ArrayList<>(20);
+        List<XYZChartItem> xyzData = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyData1.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData2.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData3.add(new XYDataObject(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData2.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
-            yData.add(new YDataObject(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
-            xyzData.add(new XYZDataObject(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25,"P" + i, COLORS[RND.nextInt(3)]));
+            yData.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
+            xyzData.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         xySeries1 = new XYSeries<>(xyData1, ChartType.LINE);
@@ -187,7 +187,7 @@ public class ChartTest extends Application {
 
         modificationThread = new Thread(() -> {
             while(true) {
-                List<XYData> xyItems = xySeries3.getItems();
+                List<XYItem> xyItems = xySeries3.getItems();
                 xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
                 xySeries3.refresh();
                 try {
@@ -202,7 +202,7 @@ public class ChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYData> xyItems = xySeries1.getItems();
+                    List<XYItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyItems = xySeries2.getItems();
@@ -214,10 +214,10 @@ public class ChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
 
-                    List<YData> yItems = ySeries.getItems();
+                    List<YItem> yItems = ySeries.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
-                    List<XYZData> xyzItems = xyzSeries.getItems();
+                    List<XYZItem> xyzItems = xyzSeries.getItems();
                     xyzItems.forEach(item -> item.setZ(RND.nextDouble() * 25));
 
                     xySeries1.refresh();

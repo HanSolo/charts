@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.YData;
+import eu.hansolo.fx.charts.data.YItem;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -33,7 +33,6 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -50,7 +49,7 @@ import java.util.Locale;
 import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
-public class YPane<T extends YData> extends Region implements ChartArea {
+public class YPane<T extends YItem> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -302,13 +301,13 @@ public class YPane<T extends YData> extends Region implements ChartArea {
 
     private void drawDonut(final YSeries<T> SERIES) {
         if (null == SERIES) return;
-        List<YData> items       = SERIES.getItems();
+        List<YItem> items       = SERIES.getItems();
         int         noOfItems   = items.size();
         double      center      = size * 0.5;
         double      innerRadius = size * 0.275;
         double      outerRadius = size * 0.4;
         double      barWidth    = size * 0.1;
-        double      sum         = items.stream().mapToDouble(YData::getY).sum();
+        double      sum         = items.stream().mapToDouble(YItem::getY).sum();
         double      stepSize    = 360.0 / sum;
         double      angle       = 0;
         double      startAngle  = 90;
@@ -321,7 +320,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
 
-        for (YData item : items) {
+        for (YItem item : items) {
             double value = item.getY();
             startAngle -= angle;
             angle = value * stepSize;
@@ -391,7 +390,7 @@ public class YPane<T extends YData> extends Region implements ChartArea {
                 double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.36239 * size)));
                 points.add(new Point(x, y));
 
-                for (YData item : SERIES.getItems()) {
+                for (YItem item : SERIES.getItems()) {
                     double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
                     x = CENTER_X + (-Math.sin(radAngle) * r1);
                     y = CENTER_Y + (+Math.cos(radAngle) * r1);

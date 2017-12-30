@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts.tree;
 
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEvent.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEventListener;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 public class TreeNode {
     private final TreeNodeEvent               PARENT_CHANGED   = new TreeNodeEvent(TreeNode.this, EventType.PARENT_CHANGED);
     private final TreeNodeEvent               CHILDREN_CHANGED = new TreeNodeEvent(TreeNode.this, EventType.CHILDREN_CHANGED);
-    private ChartData                   data;
+    private ChartItem                   data;
     private TreeNode                    parent;
     private TreeNode                    myRoot;
     private TreeNode                    treeRoot;
@@ -49,10 +49,10 @@ public class TreeNode {
 
 
     // ******************** Constructors **************************************
-    public TreeNode(final ChartData DATA) {
+    public TreeNode(final ChartItem DATA) {
         this(DATA, null);
     }
-    public TreeNode(final ChartData DATA, final TreeNode PARENT) {
+    public TreeNode(final ChartItem DATA, final TreeNode PARENT) {
         data      = DATA;
         parent    = PARENT;
         depth     = -1;
@@ -96,14 +96,14 @@ public class TreeNode {
         getTreeRoot().fireTreeNodeEvent(PARENT_CHANGED);
     }
 
-    public ChartData getData() { return data; }
-    public void setData(final ChartData DATA) { data = DATA; }
+    public ChartItem getData() { return data; }
+    public void setData(final ChartItem DATA) { data = DATA; }
 
     public List<TreeNode> getChildrenUnmodifiable() { return Collections.unmodifiableList(children); }
     public List<TreeNode> getChildren() { return children; }
     public void setChildren(final List<TreeNode> CHILDREN) { children.setAll(new LinkedHashSet<>(CHILDREN)); }
 
-    public void addNode(final ChartData DATA) {
+    public void addNode(final ChartItem DATA) {
         TreeNode child = new TreeNode(DATA);
         child.setParent(this);
         children.add(child);
@@ -142,13 +142,13 @@ public class TreeNode {
 
     public Stream<TreeNode> flattened() { return Stream.concat(Stream.of(this), children.stream().flatMap(TreeNode::flattened)); }
     public List<TreeNode> getAll() { return flattened().collect(Collectors.toList()); }
-    public List<ChartData> getAllData() { return flattened().map(TreeNode::getData).collect(Collectors.toList()); }
+    public List<ChartItem> getAllData() { return flattened().map(TreeNode::getData).collect(Collectors.toList()); }
 
     public int getNoOfNodes() { return flattened().map(TreeNode::getData).collect(Collectors.toList()).size(); }
     public int getNoOfLeafNodes() { return flattened().filter(node -> node.isLeaf()).map(TreeNode::getData).collect(Collectors.toList()).size(); }
 
     public boolean contains(final TreeNode NODE) { return flattened().anyMatch(n -> n.equals(NODE)); }
-    public boolean containsData(final ChartData DATA) { return flattened().anyMatch(n -> n.data.equals(DATA)); }
+    public boolean containsData(final ChartItem DATA) { return flattened().anyMatch(n -> n.data.equals(DATA)); }
 
     public TreeNode getMyRoot() {
         if (null == myRoot) {
@@ -200,7 +200,7 @@ public class TreeNode {
 
     public double getPercentage() {
         List<TreeNode> siblings   = getSiblings();
-        double         sum        = siblings.stream().map(node -> node.getData()).mapToDouble(ChartData::getValue).sum();
+        double         sum        = siblings.stream().map(node -> node.getData()).mapToDouble(ChartItem::getValue).sum();
         return Double.compare(sum, 0) == 0 ? 1.0 : getData().getValue() / sum;
     }
 

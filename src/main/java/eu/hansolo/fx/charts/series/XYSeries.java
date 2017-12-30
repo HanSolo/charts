@@ -17,8 +17,8 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Created by hansolo on 16.07.17.
  */
-public class XYSeries<T extends XYData> extends Series {
+public class XYSeries<T extends XYItem> extends Series {
     private boolean _showPoints;
 
     // ******************** Constructors **************************************
@@ -59,13 +59,13 @@ public class XYSeries<T extends XYData> extends Series {
 
 
     // ******************** Methods *******************************************
-    @Override public ObservableList<XYData> getItems() { return items; }
+    @Override public ObservableList<XYItem> getItems() { return items; }
 
-    public double getMinX() { return ((XYData) items.stream().min(Comparator.comparingDouble(XYData::getX)).get()).getX(); }
-    public double getMaxX() { return ((XYData) items.stream().max(Comparator.comparingDouble(XYData::getX)).get()).getX(); }
+    public double getMinX() { return ((XYItem) items.stream().min(Comparator.comparingDouble(XYItem::getX)).get()).getX(); }
+    public double getMaxX() { return ((XYItem) items.stream().max(Comparator.comparingDouble(XYItem::getX)).get()).getX(); }
 
-    public double getMinY() { return ((XYData) items.stream().min(Comparator.comparingDouble(XYData::getY)).get()).getY(); }
-    public double getMaxY() { return ((XYData) items.stream().max(Comparator.comparingDouble(XYData::getY)).get()).getY(); }
+    public double getMinY() { return ((XYItem) items.stream().min(Comparator.comparingDouble(XYItem::getY)).get()).getY(); }
+    public double getMaxY() { return ((XYItem) items.stream().max(Comparator.comparingDouble(XYItem::getY)).get()).getY(); }
 
     public double getRangeX() { return getMaxX() - getMinX(); }
     public double getRangeY() { return getMaxY() - getMinY(); }
@@ -75,6 +75,6 @@ public class XYSeries<T extends XYData> extends Series {
 
     @Override public void setPointColor(final Color COLOR) {
         if (getItems().isEmpty()) { return; }
-        getItems().forEach(item -> ((XYDataObject) item).setColor(COLOR));
+        getItems().forEach(item -> ((XYChartItem) item).setColor(COLOR));
     }
 }

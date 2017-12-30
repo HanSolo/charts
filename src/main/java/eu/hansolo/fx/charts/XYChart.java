@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
+import eu.hansolo.fx.charts.data.XYItem;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
@@ -36,7 +36,7 @@ import java.util.List;
  * Time: 16:52
  */
 @DefaultProperty("children")
-public class XYChart<T extends XYData> extends Region {
+public class XYChart<T extends XYItem> extends Region {
     private static final double         PREFERRED_WIDTH  = 400;
     private static final double         PREFERRED_HEIGHT = 250;
     private static final double         MINIMUM_WIDTH    = 50;

@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts.tools;
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
@@ -295,7 +295,7 @@ public class InfoPopup extends Popup {
 
     public void update(final SelectionEvent EVENT) {
         Series    series = EVENT.getSeries();
-        ChartData item   = EVENT.getItem();
+        ChartItem item   = EVENT.getItem();
         if (null == series && null == item) {
             this.setOpacity(0);
         } else {

@@ -16,8 +16,8 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -37,21 +37,21 @@ import java.util.Random;
 public class HorizonChartTest extends Application {
     private static final Random                 RND            = new Random();
     private static final int                    NO_OF_X_VALUES = 1500;
-    private              XYSeries<XYDataObject> xySeries;
-    private              XYPane                 xyPane;
+    private              XYSeries<XYChartItem> xySeries;
+    private              XYPane                xyPane;
 
 
     @Override public void init() {
-        int                bands      = 4;
-        int                noOfValues = 1500;
-        List<XYDataObject> xyData     = new ArrayList<>(noOfValues);
+        int               bands      = 4;
+        int               noOfValues = 1500;
+        List<XYChartItem> xyData     = new ArrayList<>(noOfValues);
         for (int i = 0 ; i < noOfValues; i++) {
             double value = Math.abs(Math.cos(i/100.0) + (RND.nextDouble() - 0.5) / 10.0); // Only positive data
-            xyData.add(new XYDataObject(i, value, "P" + i));
+            xyData.add(new XYChartItem(i, value, "P" + i));
         }
 
-        double minY = xyData.stream().mapToDouble(XYData::getY).min().getAsDouble();
-        double maxY = xyData.stream().mapToDouble(XYData::getY).max().getAsDouble();
+        double minY = xyData.stream().mapToDouble(XYItem::getY).min().getAsDouble();
+        double maxY = xyData.stream().mapToDouble(XYItem::getY).max().getAsDouble();
 
         xySeries = new XYSeries<>(xyData, ChartType.HORIZON);
 

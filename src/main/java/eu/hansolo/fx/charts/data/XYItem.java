@@ -16,21 +16,20 @@
 
 package eu.hansolo.fx.charts.data;
 
+
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
 
 
-public interface MatrixData extends Data {
+/**
+ * Created by hansolo on 17.07.17.
+ */
+public interface XYItem extends Item {
 
-    int            getX();
-    void           setX(int x);
-    IntegerProperty xProperty();
+    double         getX();
+    void           setX(double x);
+    DoubleProperty xProperty();
 
-    int            getY();
-    void           setY(int y);
-    IntegerProperty yProperty();
-
-    double         getZ();
-    void           setZ(double value);
-    DoubleProperty zProperty();
+    double         getY();
+    void           setY(double y);
+    DoubleProperty yProperty();
 }

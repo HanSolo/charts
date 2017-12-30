@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.data;
+package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.Symbol;
-import javafx.scene.paint.Color;
+import eu.hansolo.fx.charts.data.Item;
 
 
-public interface Data {
+public class ItemEvent<T extends Item> {
+    private T item;
 
-    String getName();
 
-    Color getColor();
+    // ******************** Constructors **************************************
+    public ItemEvent(final T ITEM) {
+        item = ITEM;
+    }
 
-    Symbol getSymbol();
-    void setSymbol(Symbol symbol);
+
+    // ******************** Methods *******************************************
+    public T getItem() { return item; }
 }

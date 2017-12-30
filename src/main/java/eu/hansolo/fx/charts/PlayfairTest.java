@@ -16,8 +16,8 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -47,12 +47,12 @@ public class PlayfairTest extends Application {
     private static final Color[] COLORS         = {Color.rgb(200, 0, 0, 0.75), Color.rgb(0, 0, 200, 0.75), Color.rgb(0, 200, 200, 0.75), Color.rgb(0, 200, 0, 0.75) };
     private static final Random  RND            = new Random();
     private static final int     NO_OF_X_VALUES = 5;
-    private XYSeries<XYDataObject> xySeries1;
-    private XYSeries<XYDataObject> xySeries2;
+    private XYSeries<XYChartItem> xySeries1;
+    private XYSeries<XYChartItem> xySeries2;
 
-    private XYChart<XYDataObject> playfairChart;
-    private Axis                  xAxisBottom;
-    private Axis                  yAxisLeft;
+    private XYChart<XYChartItem> playfairChart;
+    private Axis                 xAxisBottom;
+    private Axis                 yAxisLeft;
 
     private Thread                   modificationThread;
 
@@ -61,25 +61,25 @@ public class PlayfairTest extends Application {
 
 
     @Override public void init() {
-        List<XYDataObject>  xyData1 = new ArrayList<>(5);
-        List<XYDataObject>  xyData2 = new ArrayList<>(5);
+        List<XYChartItem> xyData1 = new ArrayList<>(5);
+        List<XYChartItem> xyData2 = new ArrayList<>(5);
 
         Color item1Color = Color.rgb(0, 200, 0);
         Color item2Color = Color.rgb(200, 0, 0);
 
-        xyData1.add(new XYDataObject(0, 12, "P0"));
-        xyData1.add(new XYDataObject(1, 7, "P1"));
-        xyData1.add(new XYDataObject(2, 9, "P2"));
-        xyData1.add(new XYDataObject(3, 3, "P3"));
-        xyData1.add(new XYDataObject(4, 5, "P4"));
-        xyData1.add(new XYDataObject(5, 4, "P5"));
+        xyData1.add(new XYChartItem(0, 12, "P0"));
+        xyData1.add(new XYChartItem(1, 7, "P1"));
+        xyData1.add(new XYChartItem(2, 9, "P2"));
+        xyData1.add(new XYChartItem(3, 3, "P3"));
+        xyData1.add(new XYChartItem(4, 5, "P4"));
+        xyData1.add(new XYChartItem(5, 4, "P5"));
 
-        xyData2.add(new XYDataObject(0, 5, "P0"));
-        xyData2.add(new XYDataObject(1, 9, "P1"));
-        xyData2.add(new XYDataObject(2, 5, "P2"));
-        xyData2.add(new XYDataObject(3, 4, "P3"));
-        xyData2.add(new XYDataObject(4, 7, "P4"));
-        xyData2.add(new XYDataObject(5, 9, "P5"));
+        xyData2.add(new XYChartItem(0, 5, "P0"));
+        xyData2.add(new XYChartItem(1, 9, "P1"));
+        xyData2.add(new XYChartItem(2, 5, "P2"));
+        xyData2.add(new XYChartItem(3, 4, "P3"));
+        xyData2.add(new XYChartItem(4, 7, "P4"));
+        xyData2.add(new XYChartItem(5, 9, "P5"));
 
         xySeries1 = new XYSeries<>(xyData1, ChartType.SMOOTH_LINE_DELTA, true);
         xySeries2 = new XYSeries<>(xyData2, ChartType.SMOOTH_LINE_DELTA, true);
@@ -113,7 +113,7 @@ public class PlayfairTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYData> xyItems = xySeries1.getItems();
+                    List<XYItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyItems = xySeries2.getItems();

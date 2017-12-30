@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.YDataObject;
+import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -48,28 +48,28 @@ public class RadarChartTest extends Application {
     private static final double               ANIM_TIME  = INTERVAL / 1_000_000;
     private static final int                  ELEMENTS   = 30;
     private static final ChartType            CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
-    private              YSeries<YDataObject> series1;
-    private              YSeries<YDataObject> series2;
-    private              YSeries<YDataObject> series3;
-    private              YChart<YDataObject>  chart;
-    private              Timeline             timeline;
-    private              long                 lastTimerCall;
-    private              AnimationTimer       timer;
+    private              YSeries<YChartItem> series1;
+    private              YSeries<YChartItem> series2;
+    private              YSeries<YChartItem> series3;
+    private              YChart<YChartItem>  chart;
+    private              Timeline            timeline;
+    private              long                lastTimerCall;
+    private              AnimationTimer      timer;
 
     @Override public void init() {
-        List<YDataObject> data1 = new ArrayList<>(ELEMENTS);
-        List<YDataObject> data2 = new ArrayList<>(ELEMENTS);
-        List<YDataObject> data3 = new ArrayList<>(ELEMENTS);
+        List<YChartItem> data1 = new ArrayList<>(ELEMENTS);
+        List<YChartItem> data2 = new ArrayList<>(ELEMENTS);
+        List<YChartItem> data3 = new ArrayList<>(ELEMENTS);
         for (int i = 0 ; i < ELEMENTS ; i++) {
-            YDataObject dataPoint;
+            YChartItem dataPoint;
 
-            dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
             data1.add(dataPoint);
 
-            dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
             data2.add(dataPoint);
 
-            dataPoint = new YDataObject(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
             data3.add(dataPoint);
         }
 
@@ -123,7 +123,7 @@ public class RadarChartTest extends Application {
         timeline.getKeyFrames().setAll(keyFrames);
     }
 
-    private void animateSeries(final YSeries<YDataObject> SERIES, final List<KeyFrame> KEY_FRAMES) {
+    private void animateSeries(final YSeries<YChartItem> SERIES, final List<KeyFrame> KEY_FRAMES) {
         SERIES.getItems().forEach(item -> {
             KeyValue kv0 = new KeyValue(item.yProperty(), item.getY());
             KeyValue kv1 = new KeyValue(item.yProperty(), RND.nextDouble() * 100);

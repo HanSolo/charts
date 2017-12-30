@@ -16,11 +16,11 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.Series;
 
 
-public class SelectionEvent<T extends ChartData> {
+public class SelectionEvent<T extends ChartItem> {
     private Series<T> series;
     private T         item;
 

@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.MatrixDataObject;
+import eu.hansolo.fx.charts.data.MatrixChartItem;
 import eu.hansolo.fx.charts.series.MatrixSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -47,28 +47,28 @@ public class MatrixHeatmapTest extends Application {
     private static final int    NO_OF_CELLS = 100;
     private static final double STEP        = TWO_PI / NO_OF_CELLS;
 
-    private MatrixSeries<MatrixDataObject> matrixSeries1;
-    private MatrixPane<MatrixDataObject>   matrixHeatMap1;
-    private double                         factor;
+    private MatrixSeries<MatrixChartItem> matrixSeries1;
+    private MatrixPane<MatrixChartItem>   matrixHeatMap1;
+    private double                        factor;
 
-    private MatrixSeries<MatrixDataObject> matrixSeries2;
-    private MatrixPane<MatrixDataObject>   matrixHeatMap2;
+    private MatrixSeries<MatrixChartItem> matrixSeries2;
+    private MatrixPane<MatrixChartItem>   matrixHeatMap2;
 
-    private MatrixSeries<MatrixDataObject> matrixSeries3;
-    private MatrixPane<MatrixDataObject>   matrixHeatMap3;
+    private MatrixSeries<MatrixChartItem> matrixSeries3;
+    private MatrixPane<MatrixChartItem>   matrixHeatMap3;
 
     private long                           lastTimerCall;
     private AnimationTimer                 timer;
 
 
     @Override public void init() {
-        int cellX = 0;
-        int cellY = 0;
-        List<MatrixDataObject> matrixData1 = new ArrayList<>();
+        int                   cellX       = 0;
+        int                   cellY       = 0;
+        List<MatrixChartItem> matrixData1 = new ArrayList<>();
         for (double y = 0 ; y < TWO_PI ; y += STEP) {
             cellX = 0;
             for (double x = 0 ; x < TWO_PI ; x += STEP) {
-                matrixData1.add(new MatrixDataObject(cellX, cellY, (Math.cos(y * TWO_PI * 0.125) * Math.sin(x * TWO_PI * 0.125) + 1) * 0.5));
+                matrixData1.add(new MatrixChartItem(cellX, cellY, (Math.cos(y * TWO_PI * 0.125) * Math.sin(x * TWO_PI * 0.125) + 1) * 0.5));
                 cellX++;
             }
             cellY++;
@@ -85,10 +85,10 @@ public class MatrixHeatmapTest extends Application {
 
         LinearGradient matrixGradient = Helper.createColorVariationGradient(Color.BLUE, 5);
 
-        List<MatrixDataObject> matrixData2 = new ArrayList<>();
+        List<MatrixChartItem> matrixData2 = new ArrayList<>();
         for (int y = 0 ; y < 6 ; y++) {
             for (int x = 0 ; x < 8 ; x++) {
-                matrixData2.add(new MatrixDataObject(x, y, RND.nextDouble()));
+                matrixData2.add(new MatrixChartItem(x, y, RND.nextDouble()));
             }
         }
 
@@ -103,12 +103,12 @@ public class MatrixHeatmapTest extends Application {
 
 
 
-        List<MatrixDataObject> matrixData3 = new ArrayList<>();
+        List<MatrixChartItem> matrixData3 = new ArrayList<>();
         for (int x = 0 ; x <108 ; x++) {
             int start = RND.nextInt(5);
             int stop  = RND.nextInt(35 + 5);
             for (int y = 0 ; y < 40 ; y++) {
-                MatrixDataObject mdo = new MatrixDataObject(x, y, RND.nextDouble());
+                MatrixChartItem mdo = new MatrixChartItem(x, y, RND.nextDouble());
 
             }
         }

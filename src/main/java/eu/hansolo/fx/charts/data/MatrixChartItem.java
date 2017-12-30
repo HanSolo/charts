@@ -17,10 +17,12 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.DataEvent;
-import eu.hansolo.fx.charts.event.DataEventListener;
+import eu.hansolo.fx.charts.event.ItemEvent;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -30,13 +32,13 @@ import javafx.scene.paint.Color;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class XYZDataObject implements XYZData {
-    private final DataEvent                         DATA_EVENT = new DataEvent(XYZDataObject.this);
-    private CopyOnWriteArrayList<DataEventListener> listeners;
-    private double                                  _x;
-    private DoubleProperty                          x;
-    private double                                  _y;
-    private DoubleProperty                          y;
+public class MatrixChartItem implements MatrixItem {
+    private final ItemEvent DATA_EVENT = new ItemEvent(MatrixChartItem.this);
+    private CopyOnWriteArrayList<ItemEventListener> listeners;
+    private int                                     _x;
+    private IntegerProperty                         x;
+    private int                                     _y;
+    private IntegerProperty                         y;
     private double                                  _z;
     private DoubleProperty                          z;
     private String                                  _name;
@@ -48,64 +50,61 @@ public class XYZDataObject implements XYZData {
 
 
     // ******************** Constructors **********************************
-    public XYZDataObject() {
-        this(0, 0, 0, "", Color.RED, Symbol.CIRCLE);
+    public MatrixChartItem() {
+        this(0, 0, 0, "", Color.RED);
     }
-    public XYZDataObject(final double X, final double Y, final double Z) {
-        this(X, Y, Z, "", Color.RED, Symbol.CIRCLE);
+    public MatrixChartItem(final int X, final int Y, final double Z) {
+        this(X, Y, Z, "", Color.RED);
     }
-    public XYZDataObject(final double X, final double Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED, Symbol.CIRCLE);
+    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME) {
+        this(X, Y, Z, NAME, Color.RED);
     }
-    public XYZDataObject(final double X, final double Y, final double Z, final String NAME, final Color COLOR) {
-        this(X, Y, Z, NAME, COLOR, Symbol.CIRCLE);
-    }
-    public XYZDataObject(final double X, final double Y, final double Z, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final Color COLOR) {
         _x        = X;
         _y        = Y;
         _z        = Z;
         _name     = NAME;
         _color    = COLOR;
-        _symbol   = SYMBOL;
+        _symbol   = Symbol.NONE;
         listeners = new CopyOnWriteArrayList<>();
     }
 
 
     // ******************** Methods ***************************************
-    @Override public double getX() { return null == x ? _x : x.get(); }
-    @Override public void setX(final double X) {
+    @Override public int getX() { return null == x ? _x : x.get(); }
+    @Override public void setX(final int X) {
         if (null == x) {
             _x = X;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             x.set(X);
         }
     }
-    @Override public DoubleProperty xProperty() {
+    public IntegerProperty xProperty() {
         if (null == x) {
-            x = new DoublePropertyBase(_x) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYZDataObject.this; }
+            x = new IntegerPropertyBase(_x) {
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
         }
         return x;
     }
 
-    @Override public double getY() { return null == y ? _y : y.get(); }
-    @Override public void setY(final double Y) {
+    @Override public int getY() { return null == y ? _y : y.get(); }
+    @Override public void setY(final int Y) {
         if (null == y) {
             _y = Y;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             y.set(Y);
         }
     }
-    @Override public DoubleProperty yProperty() {
+    @Override public IntegerProperty yProperty() {
         if (null == y) {
-            y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYZDataObject.this; }
+            y = new IntegerPropertyBase(_y) {
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
         }
@@ -116,7 +115,7 @@ public class XYZDataObject implements XYZData {
     @Override public void setZ(final double Z) {
         if (null == z) {
             _z = Z;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             z.set(Z);
         }
@@ -124,8 +123,8 @@ public class XYZDataObject implements XYZData {
     @Override public DoubleProperty zProperty() {
         if (null == z) {
             z = new DoublePropertyBase(_z) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "z"; }
             };
         }
@@ -136,7 +135,7 @@ public class XYZDataObject implements XYZData {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             name.set(NAME);
         }
@@ -144,8 +143,8 @@ public class XYZDataObject implements XYZData {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
@@ -157,7 +156,7 @@ public class XYZDataObject implements XYZData {
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
-            fireDataEvent(DATA_EVENT);
+            fireItemEvent(DATA_EVENT);
         } else {
             color.set(COLOR);
         }
@@ -165,8 +164,8 @@ public class XYZDataObject implements XYZData {
     public ObjectProperty<Color> colorProperty() {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() { return XYZDataObject.this; }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
             _color = null;
@@ -174,20 +173,13 @@ public class XYZDataObject implements XYZData {
         return color;
     }
 
-    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
-    public void setSymbol(final Symbol SYMBOL) {
-        if (null == symbol) {
-            _symbol = SYMBOL;
-            fireDataEvent(DATA_EVENT);
-        } else {
-            symbol.set(SYMBOL);
-        }
-    }
+    @Override public Symbol getSymbol() { return Symbol.NONE; }
+    public void setSymbol(final Symbol SYMBOL) {}
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
-                @Override public Object getBean() {  return XYZDataObject.this;  }
+                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override public Object getBean() {  return MatrixChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
             _symbol = null;
@@ -197,12 +189,12 @@ public class XYZDataObject implements XYZData {
 
 
     // ******************** Event handling ************************************
-    public void setOnDataEvent(final DataEventListener LISTENER) { addDataEventListener(LISTENER); }
-    public void addDataEventListener(final DataEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeDataEventListener(final DataEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
+    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
 
-    public void fireDataEvent(final DataEvent EVENT) {
-        for (DataEventListener listener : listeners) { listener.onDataEvent(EVENT); }
+    public void fireItemEvent(final ItemEvent EVENT) {
+        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
     }
 
 

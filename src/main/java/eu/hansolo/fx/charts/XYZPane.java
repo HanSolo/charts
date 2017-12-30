@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYZData;
+import eu.hansolo.fx.charts.data.XYZItem;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -35,7 +35,7 @@ import javafx.scene.paint.Paint;
 import java.util.List;
 
 
-public class XYZPane<T extends XYZData> extends Region implements ChartArea {
+public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -303,7 +303,7 @@ public class XYZPane<T extends XYZData> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
         final double LOWER_BOUND_Z = getLowerBoundZ();
 
-        for (XYZData item : SERIES.getItems()) {
+        for (XYZItem item : SERIES.getItems()) {
             double x     = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y     = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             double z     = (item.getZ() - LOWER_BOUND_Z) * scaleZ;

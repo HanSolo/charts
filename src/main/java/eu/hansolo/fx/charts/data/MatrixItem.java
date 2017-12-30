@@ -14,28 +14,23 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.event;
+package eu.hansolo.fx.charts.data;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 
 
-import eu.hansolo.fx.charts.data.ChartData;
+public interface MatrixItem extends Item {
 
+    int            getX();
+    void           setX(int x);
+    IntegerProperty xProperty();
 
-public class ChartDataEvent {
-    public enum EventType { UPDATE, FINISHED }
+    int            getY();
+    void           setY(int y);
+    IntegerProperty yProperty();
 
-    private ChartData data;
-    private EventType type;
-
-
-    // ******************** Constructors **************************************
-    public ChartDataEvent(final EventType TYPE, final ChartData DATA) {
-        type = TYPE;
-        data = DATA;
-    }
-
-
-    // ******************** Methods *******************************************
-    public EventType getType() { return type; }
-
-    public ChartData getData() { return data; }
+    double         getZ();
+    void           setZ(double value);
+    DoubleProperty zProperty();
 }

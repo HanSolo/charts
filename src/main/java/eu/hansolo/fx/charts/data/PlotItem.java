@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts;
+package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.event.PlotItemEvent;
 import eu.hansolo.fx.charts.event.PlotItemEventListener;
@@ -240,7 +240,7 @@ public class PlotItem {
         return level;
     }
 
-    protected void sortOutgoingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
+    public void sortOutgoingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
         List<PlotItem> outgoingKeys = new ArrayList(getOutgoing().keySet());
 
         sortAndReverse(outgoingKeys, LIST_WITH_SORTED_ITEMS);
@@ -250,7 +250,7 @@ public class PlotItem {
         outgoing.clear();
         outgoing.putAll(sortedOutgoingItems);
     }
-    protected void sortIncomingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
+    public void sortIncomingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
         List<PlotItem> incomingKeys = new ArrayList(getIncoming().keySet());
         Collections.reverse(incomingKeys);
 

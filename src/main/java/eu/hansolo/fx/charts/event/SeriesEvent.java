@@ -16,14 +16,14 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.data.ChartData;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.Series;
 
 
 /**
  * Created by hansolo on 16.07.17.
  */
-public class SeriesEvent<T extends ChartData> {
+public class SeriesEvent<T extends ChartItem> {
     private Series<T>       model;
     private SeriesEventType type;
 

@@ -16,10 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYData;
-import eu.hansolo.fx.charts.data.XYDataObject;
-import eu.hansolo.fx.charts.data.YData;
-import eu.hansolo.fx.charts.data.YDataObject;
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.converter.Converter;
@@ -50,36 +50,36 @@ public class SingleChartTest extends Application {
     private static final Random    RND             = new Random();
     private static final int       NO_OF_X_VALUES  = 1000;
     private static final long      UPDATE_INTERVAL = 1_000_000_000l;
-    private XYSeries<XYDataObject> xySeries1;
-    private XYSeries<XYDataObject> xySeries2;
-    private XYSeries<XYDataObject> xySeries3;
-    private XYSeries<XYDataObject> xySeries4;
+    private XYSeries<XYChartItem> xySeries1;
+    private XYSeries<XYChartItem> xySeries2;
+    private XYSeries<XYChartItem> xySeries3;
+    private XYSeries<XYChartItem> xySeries4;
 
-    private XYChart<XYDataObject>  xyChart;
-    private Axis                   lineChartXAxisBottom;
-    private Axis                   lineChartYAxisLeft;
-    private Axis                   lineChartYAxisRight;
+    private XYChart<XYChartItem> xyChart;
+    private Axis                 lineChartXAxisBottom;
+    private Axis                 lineChartYAxisLeft;
+    private Axis                 lineChartYAxisRight;
 
-    private YSeries<YDataObject>   ySeries1;
-    private YSeries<YDataObject>   ySeries2;
-    private YSeries<YDataObject>   ySeries3;
-    private YChart<YDataObject>    yChart;
+    private YSeries<YChartItem> ySeries1;
+    private YSeries<YChartItem> ySeries2;
+    private YSeries<YChartItem> ySeries3;
+    private YChart<YChartItem>  yChart;
 
     private long                   lastTimerCall;
     private AnimationTimer         timer;
 
 
     @Override public void init() {
-        List<XYDataObject> xyData1 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYDataObject> xyData2 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYDataObject> xyData3 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYDataObject> xyData4 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyData1 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyData2 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyData3 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyData4 = new ArrayList<>(NO_OF_X_VALUES);
 
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyData1.add(new XYDataObject(i, RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData2.add(new XYDataObject(i, RND.nextDouble() * 7 + RND.nextDouble() * 3, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData3.add(new XYDataObject(i, RND.nextDouble() * 3 + RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData4.add(new XYDataObject(i, RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData1.add(new XYChartItem(i, RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData2.add(new XYChartItem(i, RND.nextDouble() * 7 + RND.nextDouble() * 3, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData3.add(new XYChartItem(i, RND.nextDouble() * 3 + RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
+            xyData4.add(new XYChartItem(i, RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         xySeries1 = new XYSeries(xyData1, ChartType.LINE, Color.RED, Color.rgb(255, 0, 0, 0.5));
@@ -104,13 +104,13 @@ public class SingleChartTest extends Application {
                                 lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
 
         // YChart
-        List<YDataObject> yData1 = new ArrayList<>(20);
-        List<YDataObject> yData2 = new ArrayList<>(20);
-        List<YDataObject> yData3 = new ArrayList<>(20);
+        List<YChartItem> yData1 = new ArrayList<>(20);
+        List<YChartItem> yData2 = new ArrayList<>(20);
+        List<YChartItem> yData3 = new ArrayList<>(20);
         for (int i = 0 ; i < 20 ; i++) {
-            yData1.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yData2.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yData3.add(new YDataObject(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yData1.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yData2.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yData3.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         ySeries1 = new YSeries(yData1, ChartType.RADAR_SECTOR, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))));
@@ -122,7 +122,7 @@ public class SingleChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + UPDATE_INTERVAL) {
-                    List<XYData> xyItems = xySeries1.getItems();
+                    List<XYItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 8 + RND.nextDouble() * 10));
 
                     xyItems = xySeries2.getItems();
@@ -134,7 +134,7 @@ public class SingleChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 4));
 
-                    List<YData> yItems = ySeries1.getItems();
+                    List<YItem> yItems = ySeries1.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
 
                     yItems = ySeries2.getItems();

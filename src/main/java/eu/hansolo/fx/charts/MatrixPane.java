@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.PixelMatrix.PixelShape;
-import eu.hansolo.fx.charts.data.MatrixData;
+import eu.hansolo.fx.charts.data.MatrixItem;
 import eu.hansolo.fx.charts.series.MatrixSeries;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -34,7 +34,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
 
 
-public class MatrixPane<T extends MatrixData> extends Region implements ChartArea {
+public class MatrixPane<T extends MatrixItem> extends Region implements ChartArea {
     private static final double                PREFERRED_WIDTH  = 250;
     private static final double                PREFERRED_HEIGHT = 250;
     private static final double                MINIMUM_WIDTH    = 0;
@@ -328,8 +328,8 @@ public class MatrixPane<T extends MatrixData> extends Region implements ChartAre
     }
 
     private void drawMatrixHeatMap(final MatrixSeries<T> SERIES) {
-        minZ   = SERIES.getItems().stream().mapToDouble(MatrixData::getZ).min().getAsDouble();
-        maxZ   = SERIES.getItems().stream().mapToDouble(MatrixData::getZ).max().getAsDouble();
+        minZ   = SERIES.getItems().stream().mapToDouble(MatrixItem::getZ).min().getAsDouble();
+        maxZ   = SERIES.getItems().stream().mapToDouble(MatrixItem::getZ).max().getAsDouble();
         rangeZ = maxZ - minZ;
 
         SERIES.getItems().forEach(data -> {
