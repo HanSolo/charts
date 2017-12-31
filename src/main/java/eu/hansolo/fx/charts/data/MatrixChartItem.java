@@ -152,7 +152,7 @@ public class MatrixChartItem implements MatrixItem {
         return name;
     }
 
-    @Override public Color getColor() { return null == color ? _color : color.get(); }
+    @Override public Color getFillColor() { return null == color ? _color : color.get(); }
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
@@ -204,7 +204,7 @@ public class MatrixChartItem implements MatrixItem {
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
                                   .append("  \"z\":").append(getZ()).append(",\n")
-                                  .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
+                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();

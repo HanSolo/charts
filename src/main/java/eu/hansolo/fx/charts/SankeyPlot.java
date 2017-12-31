@@ -786,8 +786,8 @@ public class SankeyPlot extends Region {
                         } else {
                             ctx.setFill(new LinearGradient(0, 0, 1, 0,
                                                            true, CycleMethod.NO_CYCLE,
-                                                           new Stop(0, Helper.getColorWithOpacity(item.getColor(), connectionOpacity)),
-                                                           new Stop(1, Helper.getColorWithOpacity(outgoingItem.getColor(), connectionOpacity))));
+                                                           new Stop(0, Helper.getColorWithOpacity(item.getFillColor(), connectionOpacity)),
+                                                           new Stop(1, Helper.getColorWithOpacity(outgoingItem.getFillColor(), connectionOpacity))));
                         }
 
                         // Draw the bezier curve
@@ -818,7 +818,7 @@ public class SankeyPlot extends Region {
                 }
 
                 // Draw item boxes with their labels
-                ctx.setFill(useItemColor ? item.getColor() : itemColor);
+                ctx.setFill(useItemColor ? item.getFillColor() : itemColor);
                 ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
                 ctx.setFill(textColor);

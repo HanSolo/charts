@@ -24,7 +24,7 @@ public interface Item {
 
     String getName();
 
-    Color getColor();
+    Color getFillColor();
 
     Symbol getSymbol();
     void setSymbol(Symbol symbol);

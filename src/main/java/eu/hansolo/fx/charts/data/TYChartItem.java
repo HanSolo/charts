@@ -74,7 +74,7 @@ public class TYChartItem extends XYChartItem {
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"t\":").append(getT()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
-                                  .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
+                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();

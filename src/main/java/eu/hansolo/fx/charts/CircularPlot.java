@@ -612,7 +612,7 @@ public class CircularPlot extends Region {
                 paths.put(path, tooltipText);
 
                 /*
-                ctx.setFill(Helper.getColorWithOpacity(item.getColor(), getConnectionOpacity()));
+                ctx.setFill(Helper.getColorWithOpacity(item.getFillColor(), getConnectionOpacity()));
                 ctx.beginPath();
                 ctx.moveTo(p0.getX(), p0.getY());
                 ctx.quadraticCurveTo(p4.getX(), p4.getY(), p2.getX(), p2.getY());             // curve from p4 -> p4 -> p2

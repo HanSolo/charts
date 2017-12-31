@@ -309,7 +309,7 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
             double z     = (item.getZ() - LOWER_BOUND_Z) * scaleZ;
             double halfZ = z * 0.5;
             ctx.setStroke(Color.TRANSPARENT);
-            ctx.setFill(item.getColor());
+            ctx.setFill(item.getFillColor());
             ctx.fillOval(x - halfZ, height - y - halfZ, z, z);
 
         }

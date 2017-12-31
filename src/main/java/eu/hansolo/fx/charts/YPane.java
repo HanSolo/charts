@@ -327,7 +327,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
             // Segment
             ctx.setLineWidth(barWidth);
-            ctx.setStroke(item.getColor());
+            ctx.setStroke(item.getFillColor());
             ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
 
             // Percentage

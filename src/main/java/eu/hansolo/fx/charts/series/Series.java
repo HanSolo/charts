@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.event.SeriesEventType;
@@ -39,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Created by hansolo on 16.07.17.
  */
-public abstract class Series<T extends ChartItem> {
+public abstract class Series<T extends Item> {
     public    final SeriesEvent REFRESH = new SeriesEvent(Series.this, SeriesEventType.REDRAW);
     protected String                                    _name;
     protected StringProperty                            name;
@@ -174,8 +174,6 @@ public abstract class Series<T extends ChartItem> {
     }
 
     public int getNoOfItems() { return items.size(); }
-
-    public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
 
     public void dispose() { items.remove(itemListener); }
 

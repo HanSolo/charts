@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class YChartItem implements YItem {
-    private final ItemEvent DATA_EVENT = new ItemEvent(YChartItem.this);
+    private final ItemEvent                         ITEM_EVENT = new ItemEvent(YChartItem.this);
     private CopyOnWriteArrayList<ItemEventListener> listeners;
     private double                                  _y;
     private DoubleProperty                          y;
@@ -67,7 +67,7 @@ public class YChartItem implements YItem {
     @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             y.set(Y);
         }
@@ -75,7 +75,7 @@ public class YChartItem implements YItem {
     @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
@@ -87,7 +87,7 @@ public class YChartItem implements YItem {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -95,7 +95,7 @@ public class YChartItem implements YItem {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -104,11 +104,11 @@ public class YChartItem implements YItem {
         return name;
     }
 
-    @Override public Color getColor() { return null == color ? _color : color.get(); }
+    @Override public Color getFillColor() { return null == color ? _color : color.get(); }
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             color.set(COLOR);
         }
@@ -116,7 +116,7 @@ public class YChartItem implements YItem {
     public ObjectProperty<Color> colorProperty() {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return YChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
@@ -129,7 +129,7 @@ public class YChartItem implements YItem {
     public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -137,7 +137,7 @@ public class YChartItem implements YItem {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() {  return YChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -161,7 +161,7 @@ public class YChartItem implements YItem {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
-                                  .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
+                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();

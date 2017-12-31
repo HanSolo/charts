@@ -17,29 +17,30 @@
 package eu.hansolo.fx.charts.event;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.Series;
 
 
 public class SelectionEvent<T extends ChartItem> {
-    private Series<T> series;
-    private T         item;
+    private ChartItemSeries<T> series;
+    private T                  item;
 
 
     // ******************** Constructors **************************************
     public SelectionEvent(final T ITEM) {
         this(null, ITEM);
     }
-    public SelectionEvent(final Series<T> SERIES) {
+    public SelectionEvent(final ChartItemSeries<T> SERIES) {
         this(SERIES, null);
     }
-    public SelectionEvent(final Series<T> SERIES, final T ITEM) {
+    public SelectionEvent(final ChartItemSeries<T> SERIES, final T ITEM) {
         series = SERIES;
         item   = ITEM;
     }
 
 
     // ******************** Methods *******************************************
-    public Series<T> getSeries() { return series; }
+    public ChartItemSeries<T> getSeries() { return series; }
 
     public T getItem() { return item; }
 

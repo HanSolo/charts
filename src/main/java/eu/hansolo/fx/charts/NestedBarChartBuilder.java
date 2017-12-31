@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.DoubleProperty;
@@ -44,12 +45,12 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
         return new NestedBarChartBuilder();
     }
 
-    public final B series(final Series<ChartItem>... SERIES) {
+    public final B series(final ChartItemSeries<ChartItem>... SERIES) {
         properties.put("seriesArray", new SimpleObjectProperty<>(SERIES));
         return (B)this;
     }
 
-    public final B series(final List<Series<ChartItem>> SERIES) {
+    public final B series(final List<ChartItemSeries<ChartItem>> SERIES) {
         properties.put("seriesList", new SimpleObjectProperty<>(SERIES));
         return (B)this;
     }
@@ -135,10 +136,10 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
         final NestedBarChart CONTROL = new NestedBarChart();
 
         if (properties.keySet().contains("seriesArray")) {
-            CONTROL.setSeries(((ObjectProperty<Series<ChartItem>[]>) properties.get("seriesArray")).get());
+            CONTROL.setSeries(((ObjectProperty<ChartItemSeries<ChartItem>[]>) properties.get("seriesArray")).get());
         }
         if(properties.keySet().contains("seriesList")) {
-            CONTROL.setSeries(((ObjectProperty<List<Series<ChartItem>>>) properties.get("seriesList")).get());
+            CONTROL.setSeries(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("seriesList")).get());
         }
 
         for (String key : properties.keySet()) {

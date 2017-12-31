@@ -366,7 +366,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getColor(), item.getSymbol());
+            drawSymbol(x, y, item.getFillColor(), item.getSymbol());
         }
     }
 
@@ -835,7 +835,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (XYItem item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getColor(), item.getSymbol());
+            drawSymbol(x, y, item.getFillColor(), item.getSymbol());
         }
     }
 
