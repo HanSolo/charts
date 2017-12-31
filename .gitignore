@@ -24,4 +24,5 @@ hs_err_pid*
 /.gradle
 /.idea
 /out
+/build
 .DS_Store
