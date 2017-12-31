@@ -34,7 +34,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public class XYChartItem implements XYItem {
-    private final ItemEvent DATA_EVENT = new ItemEvent(XYChartItem.this);
+    private final ItemEvent                         ITEM_EVENT = new ItemEvent(XYChartItem.this);
     private CopyOnWriteArrayList<ItemEventListener> listeners;
     private double                                  _x;
     private DoubleProperty                          x;
@@ -73,7 +73,7 @@ public class XYChartItem implements XYItem {
     @Override public void setX(final double X) {
         if (null == x) {
             _x = X;
-            fireDataEvent(DATA_EVENT);
+            fireDataEvent(ITEM_EVENT);
         } else {
             x.set(X);
         }
@@ -81,7 +81,7 @@ public class XYChartItem implements XYItem {
     @Override public DoubleProperty xProperty() {
         if (null == x) {
             x = new DoublePropertyBase(_x) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireDataEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
@@ -93,7 +93,7 @@ public class XYChartItem implements XYItem {
     @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
-            fireDataEvent(DATA_EVENT);
+            fireDataEvent(ITEM_EVENT);
         } else {
             y.set(Y);
         }
@@ -101,7 +101,7 @@ public class XYChartItem implements XYItem {
     @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireDataEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
@@ -113,7 +113,7 @@ public class XYChartItem implements XYItem {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireDataEvent(DATA_EVENT);
+            fireDataEvent(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -121,7 +121,7 @@ public class XYChartItem implements XYItem {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireDataEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -130,11 +130,11 @@ public class XYChartItem implements XYItem {
         return name;
     }
 
-    @Override public Color getColor() { return null == color ? _color : color.get(); }
+    @Override public Color getFillColor() { return null == color ? _color : color.get(); }
     public void setColor(final Color COLOR) {
         if (null == color) {
             _color = COLOR;
-            fireDataEvent(DATA_EVENT);
+            fireDataEvent(ITEM_EVENT);
         } else {
             color.set(COLOR);
         }
@@ -142,7 +142,7 @@ public class XYChartItem implements XYItem {
     public ObjectProperty<Color> colorProperty() {
         if (null == color) {
             color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireDataEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "color"; }
             };
@@ -155,7 +155,7 @@ public class XYChartItem implements XYItem {
     public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireDataEvent(DATA_EVENT);
+            fireDataEvent(ITEM_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -163,7 +163,7 @@ public class XYChartItem implements XYItem {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireDataEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireDataEvent(ITEM_EVENT); }
                 @Override public Object getBean() {  return XYChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -187,7 +187,7 @@ public class XYChartItem implements XYItem {
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
-                                  .append("  \"color\":\"").append(getColor().toString().replace("0x", "#")).append("\",\n")
+                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();
