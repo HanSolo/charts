@@ -503,7 +503,7 @@ public class CoxcombChart extends Region {
             ctx.restore();
 
             ctx.restore();
-            
+
             // Percentage
             if (angle > 12 && barWidth > 10) {
                 tx = center + radius * Math.cos(Math.toRadians(endAngle - angle * 0.5));
