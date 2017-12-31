@@ -66,13 +66,13 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B equalSegmentAngles(final boolean EQUAL) {
-        properties.put("equalSegmentAngles", new SimpleBooleanProperty(EQUAL));
+    public final B autoTextColor(final boolean AUTO) {
+        properties.put("autoTextColor", new SimpleBooleanProperty(AUTO));
         return (B)this;
     }
 
-    public final B autoTextColor(final boolean AUTO) {
-        properties.put("autoTextColor", new SimpleBooleanProperty(AUTO));
+    public final B equalSegmentAngles(final boolean EQUAL) {
+        properties.put("equalSegmentAngles", new SimpleBooleanProperty(EQUAL));
         return (B)this;
     }
 

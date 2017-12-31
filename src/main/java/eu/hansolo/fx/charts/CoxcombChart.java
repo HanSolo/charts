@@ -84,9 +84,11 @@ public class CoxcombChart extends Region {
     private              ObjectProperty<Order>                        order;
     private              boolean                                      _equalSegmentAngles;
     private              BooleanProperty                              equalSegmentAngles;
+    private              boolean                                      _hoverMode;
+    private              BooleanProperty                              hoverMode;
     private              ChartItemEventListener                       itemListener;
     private              ListChangeListener<ChartItem>                itemListListener;
-    private              EventHandler<MouseEvent>                     clickHandler;
+    private              EventHandler<MouseEvent>                     mouseHandler;
     private              CopyOnWriteArrayList<SelectionEventListener> listeners;
     private              InfoPopup                                    popup;
 
@@ -107,6 +109,7 @@ public class CoxcombChart extends Region {
         _autoTextColor      = true;
         _order              = Order.DESCENDING;
         _equalSegmentAngles = false;
+        _hoverMode          = false;
         itemListener        = e -> reorder(getOrder());
         itemListListener    = c -> {
             while (c.next()) {
@@ -120,7 +123,7 @@ public class CoxcombChart extends Region {
             }
             redraw();
         };
-        clickHandler        = e -> checkForClick(e);
+        mouseHandler        = e -> handleMouseEvent(e);
         listeners           = new CopyOnWriteArrayList<>();
         initGraphics();
         registerListeners();
@@ -159,7 +162,7 @@ public class CoxcombChart extends Region {
         heightProperty().addListener(o -> resize());
         items.forEach(item -> item.setOnChartItemEvent(itemListener));
         items.addListener(itemListListener);
-        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         setOnSelectionEvent(e -> {
             popup.update(e);
             popup.animatedShow(getScene().getWindow());
@@ -184,6 +187,7 @@ public class CoxcombChart extends Region {
     public void dispose() {
         items.forEach(item -> item.removeChartItemEventListener(itemListener));
         items.removeListener(itemListListener);
+        canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
 
     public List<ChartItem> getItems() { return items; }
@@ -268,26 +272,6 @@ public class CoxcombChart extends Region {
         return order;
     }
 
-    public boolean getEqualSegmentAngles() { return null == equalSegmentAngles ? _equalSegmentAngles : equalSegmentAngles.get(); }
-    public void setEqualSegmentAngles(final boolean SET) {
-        if (null == equalSegmentAngles) {
-            _equalSegmentAngles = SET;
-            redraw();
-        } else {
-            equalSegmentAngles.set(SET);
-        }
-    }
-    public BooleanProperty equalSegmentAnglesProperty() {
-        if (null == equalSegmentAngles) {
-            equalSegmentAngles = new BooleanPropertyBase(_equalSegmentAngles) {
-                @Override protected void invalidated() { redraw(); }
-                @Override public Object getBean() { return CoxcombChart.this; }
-                @Override public String getName() { return "equalSegmentAngles"; }
-            };
-        }
-        return equalSegmentAngles;
-    }
-
     public boolean isAutoTextColor() { return null == autoTextColor ? _autoTextColor : autoTextColor.get(); }
     public void setAutoTextColor(final boolean AUTO) {
         if (null == autoTextColor) {
@@ -308,7 +292,27 @@ public class CoxcombChart extends Region {
         return autoTextColor;
     }
 
-    public void checkForClick(final MouseEvent EVT) {
+    public boolean getEqualSegmentAngles() { return null == equalSegmentAngles ? _equalSegmentAngles : equalSegmentAngles.get(); }
+    public void setEqualSegmentAngles(final boolean SET) {
+        if (null == equalSegmentAngles) {
+            _equalSegmentAngles = SET;
+            redraw();
+        } else {
+            equalSegmentAngles.set(SET);
+        }
+    }
+    public BooleanProperty equalSegmentAnglesProperty() {
+        if (null == equalSegmentAngles) {
+            equalSegmentAngles = new BooleanPropertyBase(_equalSegmentAngles) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CoxcombChart.this; }
+                @Override public String getName() { return "equalSegmentAngles"; }
+            };
+        }
+        return equalSegmentAngles;
+    }
+
+    public void handleMouseEvent(final MouseEvent EVT) {
         final double X = EVT.getX();
         final double Y = EVT.getY();
 
@@ -380,30 +384,30 @@ public class CoxcombChart extends Region {
 
     // ******************** Drawing *******************************************
     private void drawChart() {
-        Order        order          = getOrder();
-        int          noOfChartItems = items.size();
-        boolean      equalAngles    = getEqualSegmentAngles();
-        double       center         = size * 0.5;
-        double       barWidth       = size * 0.04;
-        double       minValue       = getMinValue();
-        double       maxValue       = getMaxValue();
-        double       valueRange     = maxValue - minValue;
-        double       sum            = sumOfAllItems();
-        double       stepSize       = equalAngles ? (360.0 / noOfChartItems) : (360.0 / sum);
-        double       angle          = 0;
-        double       startAngle     = 90;
-        double       baseXY         = size * 0.345;
-        double       baseWH         = size * 0.31;
-        double       xy             = size * 0.32;
-        double       minWH          = size * 0.36;
-        double       maxWH          = size * 0.64;
-        double       whRange        = maxWH - minWH;
-        double       wh             = minWH;
-        double       whStep         = equalAngles ? (whRange / valueRange) : (whRange / noOfChartItems);
-        Color        textColor      = getTextColor();
-        boolean      isAutoColor    = isAutoTextColor();
-        DropShadow   shadow         = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
-        double       spread         = size * 0.005;
+        Order        order           = getOrder();
+        int          noOfChartItems  = items.size();
+        boolean      equalAngles     = getEqualSegmentAngles();
+        double       center          = size * 0.5;
+        double       barWidth        = size * 0.04;
+        double       minValue        = getMinValue();
+        double       maxValue        = getMaxValue();
+        double       valueRange      = maxValue - minValue;
+        double       sum             = sumOfAllItems();
+        double       stepSize        = equalAngles ? (360.0 / noOfChartItems) : (360.0 / sum);
+        double       angle           = 0;
+        double       startAngle      = 90;
+        double       baseXY          = size * 0.345;
+        double       baseWH          = size * 0.31;
+        double       xy              = size * 0.32;
+        double       minWH           = size * 0.36;
+        double       maxWH           = size * 0.64;
+        double       whRange         = maxWH - minWH;
+        double       wh              = minWH;
+        double       whStep          = equalAngles ? (whRange / valueRange) : (whRange / noOfChartItems);
+        Color        textColor       = getTextColor();
+        boolean      isAutoColor     = isAutoTextColor();
+        DropShadow   shadow          = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
+        double       spread          = size * 0.005;
         double       x, y;
         double       tx, ty;
         double       endAngle;
@@ -413,8 +417,8 @@ public class CoxcombChart extends Region {
         ctx.clearRect(0, 0, size, size);
         ctx.setFont(Font.font(size * 0.03));
         for (int i = 0 ; i < noOfChartItems ; i++) {
-            ChartItem item  = items.get(i);
-            double    value = item.getValue();
+            ChartItem item       = items.get(i);
+            double    value      = item.getValue();
 
             startAngle += angle;
             if (equalAngles) {
@@ -499,9 +503,9 @@ public class CoxcombChart extends Region {
             ctx.restore();
 
             ctx.restore();
-
+            
             // Percentage
-            if (angle > 8) {
+            if (angle > 12 && barWidth > 10) {
                 tx = center + radius * Math.cos(Math.toRadians(endAngle - angle * 0.5));
                 ty = center - radius * Math.sin(Math.toRadians(endAngle - angle * 0.5));
                 if (isAutoColor) {
