@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
@@ -42,9 +43,13 @@ public class CoxcombChartTest extends Application {
             new ChartItem("Item 5", 13, Color.web("#89447B")),
             new ChartItem("Item 6", 5, Color.web("#EF5780"))
         };
-        chart = new CoxcombChart(items);
-        chart.setTextColor(Color.WHITE);
-        chart.setAutoTextColor(false);
+        chart = CoxcombChartBuilder.create()
+                                   .items(items)
+                                   .textColor(Color.WHITE)
+                                   .autoTextColor(false)
+                                   .equalSegmentAngles(true)
+                                   .order(Order.ASCENDING)
+                                   .build();
     }
 
     @Override public void start(Stage stage) {

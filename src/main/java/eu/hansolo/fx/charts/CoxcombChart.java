@@ -76,17 +76,19 @@ public class CoxcombChart extends Region {
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
     private              ObservableList<ChartItem>                    items;
-    private Color                                        _textColor;
-    private ObjectProperty<Color>                        textColor;
-    private boolean                                      _autoTextColor;
-    private BooleanProperty                              autoTextColor;
-    private Order                                        _order;
-    private ObjectProperty<Order>                        order;
-    private ChartItemEventListener                       itemListener;
-    private ListChangeListener<ChartItem>                itemListListener;
-    private EventHandler<MouseEvent>                     clickHandler;
-    private CopyOnWriteArrayList<SelectionEventListener> listeners;
-    private InfoPopup                                    popup;
+    private              Color                                        _textColor;
+    private              ObjectProperty<Color>                        textColor;
+    private              boolean                                      _autoTextColor;
+    private              BooleanProperty                              autoTextColor;
+    private              Order                                        _order;
+    private              ObjectProperty<Order>                        order;
+    private              boolean                                      _equalSegmentAngles;
+    private              BooleanProperty                              equalSegmentAngles;
+    private              ChartItemEventListener                       itemListener;
+    private              ListChangeListener<ChartItem>                itemListListener;
+    private              EventHandler<MouseEvent>                     clickHandler;
+    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private              InfoPopup                                    popup;
 
 
     // ******************** Constructors **************************************
@@ -97,15 +99,16 @@ public class CoxcombChart extends Region {
         this(Arrays.asList(ITEMS));
     }
     public CoxcombChart(final List<ChartItem> ITEMS) {
-        width            = PREFERRED_WIDTH;
-        height           = PREFERRED_HEIGHT;
-        size             = PREFERRED_WIDTH;
-        items            = FXCollections.observableArrayList(ITEMS);
-        _textColor       = Color.WHITE;
-        _autoTextColor   = true;
-        _order           = Order.DESCENDING;
-        itemListener     = e -> reorder(getOrder());
-        itemListListener = c -> {
+        width               = PREFERRED_WIDTH;
+        height              = PREFERRED_HEIGHT;
+        size                = PREFERRED_WIDTH;
+        items               = FXCollections.observableArrayList(ITEMS);
+        _textColor          = Color.WHITE;
+        _autoTextColor      = true;
+        _order              = Order.DESCENDING;
+        _equalSegmentAngles = false;
+        itemListener        = e -> reorder(getOrder());
+        itemListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartItemEvent(itemListener));
@@ -117,8 +120,8 @@ public class CoxcombChart extends Region {
             }
             redraw();
         };
-        clickHandler     = e -> checkForClick(e);
-        listeners        = new CopyOnWriteArrayList<>();
+        clickHandler        = e -> checkForClick(e);
+        listeners           = new CopyOnWriteArrayList<>();
         initGraphics();
         registerListeners();
     }
@@ -220,6 +223,9 @@ public class CoxcombChart extends Region {
 
     public double sumOfAllItems() { return items.stream().mapToDouble(ChartItem::getValue).sum(); }
 
+    public double getMinValue() { return items.stream().mapToDouble(ChartItem::getValue).min().getAsDouble(); }
+    public double getMaxValue() { return items.stream().mapToDouble(ChartItem::getValue).max().getAsDouble(); }
+
     public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
     public void setTextColor(final Color COLOR) {
         if (null == textColor) {
@@ -262,6 +268,26 @@ public class CoxcombChart extends Region {
         return order;
     }
 
+    public boolean getEqualSegmentAngles() { return null == equalSegmentAngles ? _equalSegmentAngles : equalSegmentAngles.get(); }
+    public void setEqualSegmentAngles(final boolean SET) {
+        if (null == equalSegmentAngles) {
+            _equalSegmentAngles = SET;
+            redraw();
+        } else {
+            equalSegmentAngles.set(SET);
+        }
+    }
+    public BooleanProperty equalSegmentAnglesProperty() {
+        if (null == equalSegmentAngles) {
+            equalSegmentAngles = new BooleanPropertyBase(_equalSegmentAngles) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CoxcombChart.this; }
+                @Override public String getName() { return "equalSegmentAngles"; }
+            };
+        }
+        return equalSegmentAngles;
+    }
+
     public boolean isAutoTextColor() { return null == autoTextColor ? _autoTextColor : autoTextColor.get(); }
     public void setAutoTextColor(final boolean AUTO) {
         if (null == autoTextColor) {
@@ -289,26 +315,40 @@ public class CoxcombChart extends Region {
         popup.setX(EVT.getScreenX());
         popup.setY(EVT.getScreenY() - popup.getHeight());
 
-        int    noOfChartItem = items.size();
-        double barWidth      = size * 0.04;
-        double sum           = sumOfAllItems();
-        double stepSize      = 360.0 / sum;
-        double angle         = 0;
-        double startAngle    = 0;
-        double xy            = size * 0.32;
-        double minWH         = size * 0.36;
-        double maxWH         = size * 0.64;
-        double wh            = minWH;
-        double whStep        = (maxWH - minWH) / noOfChartItem;
+        int     noOfChartItems = items.size();
+        boolean equalsAngles   = getEqualSegmentAngles();
+        double  barWidth       = size * 0.04;
+        double  minValue       = getMinValue();
+        double  maxValue       = getMaxValue();
+        double  valueRange     = maxValue - minValue;
+        double  sum            = sumOfAllItems();
+        double  stepSize       = equalsAngles ? (360.0 / noOfChartItems) : (360.0 / sum);
+        double  angle          = equalsAngles ? stepSize : 0;
+        double  startAngle     = 0;
+        double  baseXY         = size * 0.345;
+        double  baseWH         = size * 0.31;
+        double  xy             = size * 0.32;
+        double  minWH          = size * 0.36;
+        double  maxWH          = size * 0.64;
+        double  whRange        = maxWH - minWH;
+        double  wh             = minWH;
+        double  whStep         = equalsAngles ? (whRange / valueRange) : (whRange / noOfChartItems);
 
-        for (int i = 0 ; i < noOfChartItem ; i++) {
+        for (int i = 0 ; i < noOfChartItems ; i++) {
             ChartItem item = items.get(i);
 
-            angle      = item.getValue() * stepSize;
-            startAngle += angle;
-            xy         -= (whStep / 2.0);
-            wh         += whStep;
-            barWidth   += whStep;
+            if (equalsAngles) {
+                barWidth    = item.getValue() * whStep;
+                xy          = baseXY - barWidth * 0.5;
+                wh          = baseWH + barWidth;
+                startAngle += angle;
+            } else {
+                angle       = item.getValue() * stepSize;
+                startAngle += angle;
+                xy         -= (whStep / 2.0);
+                wh         += whStep;
+                barWidth   += whStep;
+            }
 
             // Check if x,y are in segment
             if (Helper.isInRingSegment(X, Y, xy, xy, wh, wh, Math.abs(360 - startAngle), angle, barWidth)) {
@@ -340,22 +380,30 @@ public class CoxcombChart extends Region {
 
     // ******************** Drawing *******************************************
     private void drawChart() {
-        int          noOfChartItems   = items.size();
-        double       center      = size * 0.5;
-        double       barWidth    = size * 0.04;
-        double       sum         = sumOfAllItems();
-        double       stepSize    = 360.0 / sum;
-        double       angle       = 0;
-        double       startAngle  = 90;
-        double       xy          = size * 0.32;
-        double       minWH       = size * 0.36;
-        double       maxWH       = size * 0.64;
-        double       wh          = minWH;
-        double       whStep      = (maxWH - minWH) / noOfChartItems;
-        Color        textColor   = getTextColor();
-        boolean      isAutoColor = isAutoTextColor();
-        DropShadow   shadow      = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
-        double       spread      = size * 0.005;
+        Order        order          = getOrder();
+        int          noOfChartItems = items.size();
+        boolean      equalAngles    = getEqualSegmentAngles();
+        double       center         = size * 0.5;
+        double       barWidth       = size * 0.04;
+        double       minValue       = getMinValue();
+        double       maxValue       = getMaxValue();
+        double       valueRange     = maxValue - minValue;
+        double       sum            = sumOfAllItems();
+        double       stepSize       = equalAngles ? (360.0 / noOfChartItems) : (360.0 / sum);
+        double       angle          = 0;
+        double       startAngle     = 90;
+        double       baseXY         = size * 0.345;
+        double       baseWH         = size * 0.31;
+        double       xy             = size * 0.32;
+        double       minWH          = size * 0.36;
+        double       maxWH          = size * 0.64;
+        double       whRange        = maxWH - minWH;
+        double       wh             = minWH;
+        double       whStep         = equalAngles ? (whRange / valueRange) : (whRange / noOfChartItems);
+        Color        textColor      = getTextColor();
+        boolean      isAutoColor    = isAutoTextColor();
+        DropShadow   shadow         = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
+        double       spread         = size * 0.005;
         double       x, y;
         double       tx, ty;
         double       endAngle;
@@ -369,20 +417,20 @@ public class CoxcombChart extends Region {
             double    value = item.getValue();
 
             startAngle += angle;
-            xy         -= (whStep / 2.0);
-            wh         += whStep;
-            barWidth   += whStep;
-
-            angle          = value * stepSize;
+            if (equalAngles) {
+                barWidth = value * whStep;
+                xy       = baseXY - barWidth * 0.5;
+                wh       = baseWH + barWidth;
+                angle    = stepSize;
+            } else {
+                xy         -= (whStep / 2.0);
+                wh         += whStep;
+                barWidth   += whStep;
+                angle       = value * stepSize;
+            }
             endAngle       = startAngle + angle;
             radius         = wh * 0.5;
             clippingRadius = radius + barWidth * 0.5;
-
-            // Set Segment Clipping
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(center, center, clippingRadius, clippingRadius, 0, 360);
-            ctx.clip();
 
             // Segment
             ctx.save();
@@ -390,28 +438,66 @@ public class CoxcombChart extends Region {
             ctx.setLineWidth(barWidth);
             ctx.setStroke(item.getFillColor());
             ctx.strokeArc(xy, xy, wh, wh, startAngle, angle, ArcType.OPEN);
+
+            // Set Segment Clipping
+            ctx.save();
+            ctx.beginPath();
+            if (equalAngles && Order.DESCENDING == order && i < noOfChartItems - 1) {
+                ChartItem nextItem     = items.get(i + 1);
+                double    nextBarWidth = nextItem.getValue() * whStep;
+                double    nextWH       = baseWH + nextBarWidth;
+                double    nextRadius   = nextWH * 0.5;
+                clippingRadius = nextRadius + nextBarWidth * 0.5;
+            }
+            ctx.arc(center, center, clippingRadius, clippingRadius, 0, 360);
+            ctx.clip();
+
             // Add shadow effect to segment
-            if (i != (noOfChartItems-1) && angle > 2) {
+            if (i != (noOfChartItems - 1) && angle > 2) {
                 x = Math.cos(Math.toRadians(endAngle - 5));
                 y = -Math.sin(Math.toRadians(endAngle - 5));
                 shadow.setOffsetX(x * spread);
                 shadow.setOffsetY(y * spread);
-                ctx.save();
-                ctx.setEffect(shadow);
-                ctx.strokeArc(xy, xy, wh, wh, endAngle, 2, ArcType.OPEN);
-                ctx.restore();
-                if (i == 0) {
-                    x = Math.cos(Math.toRadians(startAngle + 5));
-                    y = -Math.sin(Math.toRadians(startAngle + 5));
-                    shadow.setOffsetX(x * spread);
-                    shadow.setOffsetY(y * spread);
+                if (equalAngles && Order.DESCENDING == order && i < noOfChartItems - 1) {
+                    ChartItem nextItem     = items.get(i + 1);
+                    double    nextBarWidth = nextItem.getValue() * whStep;
+                    double    nextXY       = baseXY - nextBarWidth * 0.5;
+                    double    nextWH       = baseWH + nextBarWidth;
+                    ctx.save();
+                    ctx.setLineWidth(nextBarWidth);
                     ctx.setEffect(shadow);
-                    ctx.strokeArc(xy, xy, wh, wh, startAngle, -2, ArcType.OPEN);
+                    ctx.strokeArc(nextXY, nextXY, nextWH, nextWH, endAngle, 2, ArcType.OPEN);
+                    ctx.restore();
+                    if (i == 0) {
+                        x = Math.cos(Math.toRadians(startAngle + 5));
+                        y = -Math.sin(Math.toRadians(startAngle + 5));
+                        shadow.setOffsetX(x * spread);
+                        shadow.setOffsetY(y * spread);
+                        ctx.setEffect(shadow);
+                        nextBarWidth = minValue * whStep;
+                        nextXY       = baseXY - nextBarWidth * 0.5;
+                        nextWH       = baseWH + nextBarWidth;
+                        ctx.setLineWidth(nextBarWidth);
+                        ctx.strokeArc(nextXY, nextXY, nextWH, nextWH, startAngle, -2, ArcType.OPEN);
+                    }
+                } else {
+                    ctx.save();
+                    ctx.setEffect(shadow);
+                    ctx.strokeArc(xy, xy, wh, wh, endAngle, 2, ArcType.OPEN);
+                    ctx.restore();
+                    if (i == 0) {
+                        x = Math.cos(Math.toRadians(startAngle + 5));
+                        y = -Math.sin(Math.toRadians(startAngle + 5));
+                        shadow.setOffsetX(x * spread);
+                        shadow.setOffsetY(y * spread);
+                        ctx.setEffect(shadow);
+                        ctx.strokeArc(xy, xy, wh, wh, startAngle, -2, ArcType.OPEN);
+                    }
                 }
             }
+            // Remove Segment Clipping
             ctx.restore();
 
-            // Remove Segment Clipping
             ctx.restore();
 
             // Percentage

@@ -66,6 +66,11 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B equalSegmentAngles(final boolean EQUAL) {
+        properties.put("equalSegmentAngles", new SimpleBooleanProperty(EQUAL));
+        return (B)this;
+    }
+
     public final B autoTextColor(final boolean AUTO) {
         properties.put("autoTextColor", new SimpleBooleanProperty(AUTO));
         return (B)this;
@@ -195,6 +200,8 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("autoTextColor".equals(key)) {
                 CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+            } else if ("equalSegmentAngles".equals(key)) {
+                CONTROL.setEqualSegmentAngles(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
