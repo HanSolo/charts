@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.PlotItemEventListener;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
@@ -112,7 +112,7 @@ public class CircularPlot extends Region {
     private              Locale                       _locale;
     private              ObjectProperty<Locale>       locale;
     private              ObservableList<PlotItem>     items;
-    private              PlotItemEventListener        itemListener;
+    private              ItemEventListener            itemListener;
     private              ListChangeListener<PlotItem> itemListListener;
     private              Map<Path, String>            paths;
     private              Tooltip                      tooltip;
@@ -139,9 +139,9 @@ public class CircularPlot extends Region {
         itemListListener                  = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeChartItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
                 }
             }
             validateData();
@@ -221,7 +221,7 @@ public class CircularPlot extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeChartItemEventListener(itemListener));
+        items.forEach(item -> item.removeItemEventListener(itemListener));
         items.removeListener(itemListListener);
     }
 
@@ -478,7 +478,7 @@ public class CircularPlot extends Region {
 
             // Draw outer circle segments
             ctx.setLineWidth(mainLineWidth);
-            ctx.setStroke(item.getColor());
+            ctx.setStroke(item.getFillColor());
             ctx.strokeArc(chartOffset, chartOffset, chartSize, chartSize, -angle, -angleRange, ArcType.OPEN);
 
             // Draw sum of outgoing at the end of the segment
@@ -588,7 +588,7 @@ public class CircularPlot extends Region {
 
                 // Draw flow
                 Path path = new Path();
-                path.setFill(Helper.getColorWithOpacity(item.getColor(), getConnectionOpacity()));
+                path.setFill(Helper.getColorWithOpacity(item.getFillColor(), getConnectionOpacity()));
                 path.moveTo(p0.getX(), p0.getY());
                 path.quadraticCurveTo(p4.getX(), p4.getY(), p2.getX(), p2.getY());             // curve from p4 -> p4 -> p2
                 if (getShowFlowDirection()) {

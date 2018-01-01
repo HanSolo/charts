@@ -40,18 +40,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public abstract class Series<T extends Item> {
-    public    final SeriesEvent REFRESH = new SeriesEvent(Series.this, SeriesEventType.REDRAW);
-    protected String                                    _name;
-    protected StringProperty                            name;
-    protected Paint                                     _stroke;
-    protected ObjectProperty<Paint>                     stroke;
-    protected Paint                                     _fill;
-    protected ObjectProperty<Paint>                     fill;
-    protected ChartType                                 chartType;
-    protected ObservableList<T>                         items;
-    private   CopyOnWriteArrayList<SeriesEventListener> listeners;
-    private   ListChangeListener<T>                     itemListener;
-
+    public    final SeriesEvent                               REFRESH = new SeriesEvent(SeriesEventType.REDRAW, Series.this);
+    protected       String                                    _name;
+    protected       StringProperty                            name;
+    protected       Paint                                     _stroke;
+    protected       ObjectProperty<Paint>                     stroke;
+    protected       Paint                                     _fill;
+    protected       ObjectProperty<Paint>                     fill;
+    protected       ChartType                                 chartType;
+    protected       ObservableList<T>                         items;
+    private         CopyOnWriteArrayList<SeriesEventListener> listeners;
+    private         ListChangeListener<T>                     itemListener;
 
 
     // ******************** Constructors **************************************

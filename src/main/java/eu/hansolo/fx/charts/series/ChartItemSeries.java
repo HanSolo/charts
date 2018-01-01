@@ -25,6 +25,8 @@ import java.util.List;
 
 
 public class ChartItemSeries<T extends ChartItem> extends Series<T> {
+
+    // ******************** Constructors **************************************
     public ChartItemSeries(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
         super(Arrays.asList(ITEMS), TYPE, NAME, STROKE, FILL);
     }
@@ -33,6 +35,7 @@ public class ChartItemSeries<T extends ChartItem> extends Series<T> {
     }
 
 
+    // ******************** Methods *******************************************
     public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
 
     public double getMinValue() { return items.stream().mapToDouble(T::getValue).min().getAsDouble(); }

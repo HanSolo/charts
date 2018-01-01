@@ -16,9 +16,10 @@
 
 package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.event.PlotItemEvent;
-import eu.hansolo.fx.charts.event.PlotItemEventListener;
-import eu.hansolo.fx.charts.event.PlotItemEventType;
+import eu.hansolo.fx.charts.Symbol;
+import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.ItemEvent;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -37,20 +38,22 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class PlotItem {
-    private final PlotItemEvent UPDATED_EVENT = new PlotItemEvent(PlotItem.this, PlotItemEventType.UPDATED);
-    private       String                      _name;
-    private       StringProperty              name;
-    private       double                      _value;
-    private       DoubleProperty              value;
-    private       String                      _description;
-    private       StringProperty              description;
-    private       Color                       _color;
-    private       ObjectProperty<Color>       color;
-    private       Map<PlotItem, Double>       outgoing;
-    private       Map<PlotItem, Double>       incoming;
-    private       List<PlotItemEventListener> listeners;
-    private       int                         level;
+public class PlotItem implements Item, Comparable<PlotItem>{
+    private final ItemEvent               UPDATE_EVENT = new ItemEvent(EventType.UPDATE, PlotItem.this);
+    private       String                  _name;
+    private       StringProperty          name;
+    private       double                  _value;
+    private       DoubleProperty          value;
+    private       String                  _description;
+    private       StringProperty          description;
+    private       Color                   _fillColor;
+    private       ObjectProperty<Color>   fillColor;
+    private       Symbol                  _symbol;
+    private       ObjectProperty<Symbol>  symbol;
+    private       Map<PlotItem, Double>   outgoing;
+    private       Map<PlotItem, Double>   incoming;
+    private       List<ItemEventListener> listeners;
+    private       int                     level;
 
 
     // ******************** Constructors **************************************
@@ -70,7 +73,8 @@ public class PlotItem {
         _name        = NAME;
         _value       = VALUE;
         _description = DESCRIPTION;
-        _color       = COLOR;
+        _fillColor   = COLOR;
+        _symbol      = Symbol.NONE;
         level        = -1;
         outgoing     = new LinkedHashMap<>();
         incoming     = new LinkedHashMap<>();
@@ -83,7 +87,7 @@ public class PlotItem {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         } else {
             name.set(NAME);
         }
@@ -91,7 +95,7 @@ public class PlotItem {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireChartItemEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -104,7 +108,7 @@ public class PlotItem {
     public void setValue(final double VALUE) {
         if (null == value) {
             _value = VALUE;
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         } else {
             value.set(VALUE);
         }
@@ -112,7 +116,7 @@ public class PlotItem {
     public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireChartItemEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -124,7 +128,7 @@ public class PlotItem {
     public void setDescription(final String DESCRIPTION) {
         if (null == description) {
             _description = DESCRIPTION;
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         } else {
             description.set(DESCRIPTION);
         }
@@ -132,7 +136,7 @@ public class PlotItem {
     public StringProperty descriptionProperty() {
         if (null == description) {
             description = new StringPropertyBase(_description) {
-                @Override protected void invalidated() { fireChartItemEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "description"; }
             };
@@ -141,25 +145,46 @@ public class PlotItem {
         return description;
     }
 
-    public Color getColor() { return null == color ? _color : color.get(); }
-    public void setColor(final Color COLOR) {
-        if (null == color) {
-            _color = COLOR;
-            fireChartItemEvent(UPDATED_EVENT);
+    public Color getFillColor() { return null == fillColor ? _fillColor : fillColor.get(); }
+    public void setFillColor(final Color COLOR) {
+        if (null == fillColor) {
+            _fillColor = COLOR;
+            fireItemEvent(UPDATE_EVENT);
         } else {
-            color.set(COLOR);
+            fillColor.set(COLOR);
         }
     }
-    public ObjectProperty<Color> colorProperty() {
-        if (null == color) {
-            color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireChartItemEvent(UPDATED_EVENT); }
+    public ObjectProperty<Color> fillColorProperty() {
+        if (null == fillColor) {
+            fillColor = new ObjectPropertyBase<Color>(_fillColor) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
-                @Override public String getName() { return "color"; }
+                @Override public String getName() { return "fillColor"; }
             };
-            _color = null;
+            _fillColor = null;
         }
-        return color;
+        return fillColor;
+    }
+
+    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
+    @Override public void setSymbol(final Symbol SYMBOL) {
+        if (null == symbol) {
+            _symbol = SYMBOL;
+            fireItemEvent(UPDATE_EVENT);
+        } else {
+            symbol.set(SYMBOL);
+        }
+    }
+    public ObjectProperty<Symbol> symbolProperty() {
+        if (null == symbol) {
+            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() {  return PlotItem.this;  }
+                @Override public String getName() {  return "symbol";  }
+            };
+            _symbol = null;
+        }
+        return symbol;
     }
 
     public double getSumOfIncoming() { return getIncoming().values().stream().mapToDouble(Double::doubleValue).sum(); }
@@ -172,26 +197,26 @@ public class PlotItem {
         outgoing.clear();
         outgoing.putAll(OUTGOING);
         establishConnections();
-        fireChartItemEvent(UPDATED_EVENT);
+        fireItemEvent(UPDATE_EVENT);
     }
     public void addToOutgoing(final PlotItem ITEM, final double VALUE) {
         if (!outgoing.containsKey(ITEM)) {
             outgoing.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
             establishConnections();
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         }
     }
     public void removeFromOutgoing(final PlotItem ITEM) {
         if (outgoing.containsKey(ITEM)) {
             ITEM.removeFromIncoming(PlotItem.this);
             outgoing.remove(ITEM);
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         }
     }
     public void clearOutgoing() {
         outgoing.forEach((item, value) -> item.removeFromIncoming(PlotItem.this));
         outgoing.clear();
-        fireChartItemEvent(UPDATED_EVENT);
+        fireItemEvent(UPDATE_EVENT);
     }
     public boolean hasOutgoing() { return outgoing.size() > 0; }
 
@@ -199,23 +224,23 @@ public class PlotItem {
     protected void setIncoming(final Map<PlotItem, Double> INCOMING) {
         incoming.clear();
         incoming.putAll(INCOMING);
-        fireChartItemEvent(UPDATED_EVENT);
+        fireItemEvent(UPDATE_EVENT);
     }
     protected void addToIncoming(final PlotItem ITEM, final double VALUE) {
         if (!incoming.containsKey(ITEM)) {
             incoming.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         }
     }
     protected void removeFromIncoming(final PlotItem ITEM) {
         if (incoming.containsKey(ITEM)) {
             incoming.remove(ITEM);
-            fireChartItemEvent(UPDATED_EVENT);
+            fireItemEvent(UPDATE_EVENT);
         }
     }
     protected void clearIncoming() {
         incoming.clear();
-        fireChartItemEvent(UPDATED_EVENT);
+        fireItemEvent(UPDATE_EVENT);
     }
     public boolean hasIncoming() { return incoming.size() > 0 ; }
 
@@ -271,11 +296,13 @@ public class PlotItem {
         outgoing.forEach((item, value) -> item.addToIncoming(PlotItem.this, value));
     }
 
+    @Override public int compareTo(final PlotItem ITEM) { return Double.compare(getValue(), ITEM.getValue()); }
+
 
     // ******************** Event Handling ************************************
-    public void setOnChartItemEvent(final PlotItemEventListener LISTENER) { addChartItemEventListener(LISTENER); }
-    public void addChartItemEventListener(final PlotItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) { listeners.add(LISTENER); } }
-    public void removeChartItemEventListener(final PlotItemEventListener LISTENER) { if (listeners.contains(LISTENER)) { listeners.remove(LISTENER); } }
+    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
+    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) { listeners.add(LISTENER); } }
+    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) { listeners.remove(LISTENER); } }
 
-    public void fireChartItemEvent(final PlotItemEvent EVENT) { listeners.forEach(listener -> listener.onChartItemEvent(EVENT)); }
+    public void fireItemEvent(final ItemEvent EVENT) { listeners.forEach(listener -> listener.onItemEvent(EVENT)); }
 }

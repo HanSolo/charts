@@ -20,15 +20,22 @@ import eu.hansolo.fx.charts.data.Item;
 
 
 public class ItemEvent<T extends Item> {
-    private T item;
+    private final EventType TYPE;
+    private final T         ITEM;
 
 
     // ******************** Constructors **************************************
     public ItemEvent(final T ITEM) {
-        item = ITEM;
+        this(EventType.UPDATE, ITEM);
+    }
+    public ItemEvent(final EventType TYPE, final T ITEM) {
+        this.TYPE = TYPE;
+        this.ITEM = ITEM;
     }
 
 
     // ******************** Methods *******************************************
-    public T getItem() { return item; }
+    public EventType getEventType() { return TYPE; }
+
+    public T getITEM() { return ITEM; }
 }

@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.PlotItemEventListener;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
@@ -84,7 +84,7 @@ public class SankeyPlot extends Region {
     private              Canvas                           canvas;
     private              GraphicsContext                  ctx;
     private              ObservableList<PlotItem>         items;
-    private              PlotItemEventListener            itemListener;
+    private              ItemEventListener                itemListener;
     private              ListChangeListener<PlotItem>     itemListListener;
     private              Map<Integer, List<PlotItemData>> itemsPerLevel;
     private              int                              minLevel;
@@ -129,9 +129,9 @@ public class SankeyPlot extends Region {
             /*
             while (c.next()) {
                 if (c.wasAdded()) {
-                    //c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartItemEvent(itemListener));
+                    //c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
                 } else if (c.wasRemoved()) {
-                    //c.getRemoved().forEach(removedItem -> removedItem.removeChartItemEventListener(itemListener));
+                    //c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
                 }
             }
             */
@@ -696,8 +696,8 @@ public class SankeyPlot extends Region {
                         } else {
                             path.setFill(new LinearGradient(0, 0, 1, 0,
                                                             true, CycleMethod.NO_CYCLE,
-                                                            new Stop(0, Helper.getColorWithOpacity(item.getColor(), connectionOpacity)),
-                                                            new Stop(1, Helper.getColorWithOpacity(outgoingItem.getColor(), connectionOpacity))));
+                                                            new Stop(0, Helper.getColorWithOpacity(item.getFillColor(), connectionOpacity)),
+                                                            new Stop(1, Helper.getColorWithOpacity(outgoingItem.getFillColor(), connectionOpacity))));
                         }
 
                         // Draw the bezier curve
@@ -848,7 +848,7 @@ public class SankeyPlot extends Region {
                 CtxBounds bounds = itemData.getBounds();
 
                 // Draw item boxes with their labels
-                ctx.setFill(useItemColor ? item.getColor() : itemColor);
+                ctx.setFill(useItemColor ? item.getFillColor() : itemColor);
                 ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
                 ctx.setFill(textColor);

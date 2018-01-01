@@ -26,7 +26,6 @@ import java.util.List;
 
 public class XYZSeries<T extends XYZItem> extends Series {
 
-
     // ******************** Constructors **************************************
     public XYZSeries() {
         this(null, ChartType.BUBBLE, "");

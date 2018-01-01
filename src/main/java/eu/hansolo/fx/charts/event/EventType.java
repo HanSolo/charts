@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * Copyright (c) 2018 by Gerrit Grunwald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,6 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.data.PlotItem;
-
-
-public class PlotItemEvent {
-    private final PlotItem          ITEM;
-    private final PlotItemEventType TYPE;
-
-
-    // ******************** Constructors **************************************
-    public PlotItemEvent(final PlotItem ITEM, final PlotItemEventType TYPE) {
-        this.ITEM = ITEM;
-        this.TYPE = TYPE;
-    }
-
-
-    // ******************** Methods *******************************************
-    public PlotItem getItem() { return ITEM; }
-
-    public PlotItemEventType getType() { return TYPE; }
+public enum EventType {
+    UPDATE, FINISHED
 }

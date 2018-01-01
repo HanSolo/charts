@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.ChartItemEventListener;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -84,9 +84,7 @@ public class CoxcombChart extends Region {
     private              ObjectProperty<Order>                        order;
     private              boolean                                      _equalSegmentAngles;
     private              BooleanProperty                              equalSegmentAngles;
-    private              boolean                                      _hoverMode;
-    private              BooleanProperty                              hoverMode;
-    private              ChartItemEventListener                       itemListener;
+    private              ItemEventListener                            itemListener;
     private              ListChangeListener<ChartItem>                itemListListener;
     private              EventHandler<MouseEvent>                     mouseHandler;
     private              CopyOnWriteArrayList<SelectionEventListener> listeners;
@@ -109,15 +107,14 @@ public class CoxcombChart extends Region {
         _autoTextColor      = true;
         _order              = Order.DESCENDING;
         _equalSegmentAngles = false;
-        _hoverMode          = false;
         itemListener        = e -> reorder(getOrder());
         itemListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnChartItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
                     reorder(getOrder());
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeChartItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
                     reorder(getOrder());
                 }
             }
@@ -160,7 +157,7 @@ public class CoxcombChart extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        items.forEach(item -> item.setOnChartItemEvent(itemListener));
+        items.forEach(item -> item.setOnItemEvent(itemListener));
         items.addListener(itemListListener);
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         setOnSelectionEvent(e -> {
@@ -185,7 +182,7 @@ public class CoxcombChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeChartItemEventListener(itemListener));
+        items.forEach(item -> item.removeItemEventListener(itemListener));
         items.removeListener(itemListListener);
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }

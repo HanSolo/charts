@@ -27,7 +27,6 @@ import java.util.Optional;
 
 public class MatrixItemSeries<T extends MatrixItem> extends Series {
 
-
     // ******************** Constructors **************************************
     public MatrixItemSeries() {
         this(null, ChartType.MATRIX_HEATMAP, "");
