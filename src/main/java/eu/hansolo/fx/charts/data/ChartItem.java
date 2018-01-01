@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ChartItemEvent;
 import eu.hansolo.fx.charts.event.ChartItemEvent.EventType;
 import eu.hansolo.fx.charts.event.ChartItemEventListener;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -230,27 +231,6 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         return fillColor;
     }
 
-    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
-    @Override public void setSymbol(final Symbol SYMBOL) {
-        if (null == symbol) {
-            _symbol = SYMBOL;
-            fireChartItemEvent(UPDATE_EVENT);
-        } else {
-            symbol.set(SYMBOL);
-        }
-    }
-    public ObjectProperty<Symbol> symbolProperty() {
-        if (null == symbol) {
-            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireChartItemEvent(UPDATE_EVENT); }
-                @Override public Object getBean() {  return ChartItem.this;  }
-                @Override public String getName() {  return "symbol";  }
-            };
-            _symbol = null;
-        }
-        return symbol;
-    }
-
     public Color getStrokeColor() { return null == strokeColor ? _strokeColor : strokeColor.get(); }
     public void setStrokeColor(final Color COLOR) {
         if (null == strokeColor) {
@@ -291,6 +271,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             _textColor = null;
         }
         return textColor;
+    }
+
+    @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
+    @Override public void setSymbol(final Symbol SYMBOL) {
+        if (null == symbol) {
+            _symbol = SYMBOL;
+            fireChartItemEvent(UPDATE_EVENT);
+        } else {
+            symbol.set(SYMBOL);
+        }
+    }
+    public ObjectProperty<Symbol> symbolProperty() {
+        if (null == symbol) {
+            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
+                @Override protected void invalidated() { fireChartItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() {  return ChartItem.this;  }
+                @Override public String getName() {  return "symbol";  }
+            };
+            _symbol = null;
+        }
+        return symbol;
     }
 
     public Instant getTimestamp() { return null == timestamp ? _timestamp : timestamp.get(); }
@@ -339,7 +340,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     }
 
     public long getAnimationDuration() { return animationDuration; }
-    public void setAnimationDuration(final long DURATION) { animationDuration = clamp(10, 10000, DURATION); }
+    public void setAnimationDuration(final long DURATION) { animationDuration = Helper.clamp(10, 10000, DURATION); }
 
     @Override public String toString() {
         return new StringBuilder().append("{\n")
@@ -353,12 +354,6 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     }
 
     @Override public int compareTo(final ChartItem DATA) { return Double.compare(getValue(), DATA.getValue()); }
-
-    private long clamp(final long MIN, final long MAX, final long VALUE) {
-        if (VALUE < MIN) return MIN;
-        if (VALUE > MAX) return MAX;
-        return VALUE;
-    }
 
 
     // ******************** Event Handling ************************************
