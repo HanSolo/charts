@@ -40,7 +40,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public abstract class Series<T extends Item> {
-    public    final SeriesEvent                               REFRESH = new SeriesEvent(EventType.UPDATE, Series.this);
+    public    final SeriesEvent                               REDRAW = new SeriesEvent(Series.this, EventType.UPDATE);
     protected       String                                    _name;
     protected       StringProperty                            name;
     protected       Paint                                     _stroke;
@@ -89,7 +89,7 @@ public abstract class Series<T extends Item> {
 
     // ******************** Initialization ************************************
     private void init() {
-        itemListener = change -> fireSeriesEvent(REFRESH);
+        itemListener = change -> fireSeriesEvent(REDRAW);
     }
 
     private void registerListeners() {
@@ -105,7 +105,7 @@ public abstract class Series<T extends Item> {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireSeriesEvent(REFRESH);
+            fireSeriesEvent(REDRAW);
         } else {
             name.set(NAME);
         }
@@ -113,7 +113,7 @@ public abstract class Series<T extends Item> {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireSeriesEvent(REFRESH); }
+                @Override protected void invalidated() { fireSeriesEvent(REDRAW); }
                 @Override public Object getBean() { return Series.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -176,7 +176,7 @@ public abstract class Series<T extends Item> {
 
     public void dispose() { items.remove(itemListener); }
 
-    public void refresh() { fireSeriesEvent(REFRESH); }
+    public void refresh() { fireSeriesEvent(REDRAW); }
 
 
     // ******************** Event handling ************************************

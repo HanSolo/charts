@@ -39,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class PlotItem implements Item, Comparable<PlotItem>{
-    private final ItemEvent               UPDATE_EVENT = new ItemEvent(EventType.UPDATE, PlotItem.this);
+    private final ItemEvent               UPDATE_EVENT = new ItemEvent(PlotItem.this, EventType.UPDATE);
     private       String                  _name;
     private       StringProperty          name;
     private       double                  _value;

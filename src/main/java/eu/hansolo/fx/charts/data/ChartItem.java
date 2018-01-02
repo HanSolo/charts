@@ -45,8 +45,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ChartItem implements Item, Comparable<ChartItem> {
-    private final ItemEvent               UPDATE_EVENT   = new ItemEvent(EventType.UPDATE, ChartItem.this);
-    private final ItemEvent               FINISHED_EVENT = new ItemEvent(EventType.FINISHED, ChartItem.this);
+    private final ItemEvent               UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
+    private final ItemEvent               FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
     private       List<ItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
     private       String                  _name;
     private       StringProperty          name;

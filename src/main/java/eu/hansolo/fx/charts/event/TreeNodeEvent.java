@@ -17,12 +17,10 @@
 package eu.hansolo.fx.charts.event;
 
 
-import eu.hansolo.fx.charts.tree.TreeNode;
+import eu.hansolo.fx.charts.data.TreeNode;
 
 
 public class TreeNodeEvent {
-    public enum EventType { PARENT_CHANGED, CHILDREN_CHANGED, NODE_SELECTED }
-
     private final TreeNode  SRC;
     private final EventType TYPE;
 

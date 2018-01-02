@@ -19,8 +19,8 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.SunburstChart.TextOrientation;
 import eu.hansolo.fx.charts.SunburstChart.VisibleData;
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.TreeNodeEvent.EventType;
-import eu.hansolo.fx.charts.tree.TreeNode;
+import eu.hansolo.fx.charts.data.TreeNode;
+import eu.hansolo.fx.charts.event.EventType;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -98,7 +98,7 @@ public class SunburstChartTest extends Application {
             EventType type = e.getType();
             if (EventType.NODE_SELECTED == type) {
                 TreeNode segment = e.getSource();
-                System.out.println(segment.getData().getName() + ": " + segment.getData().getValue());
+                System.out.println(segment.getItem().getName() + ": " + segment.getItem().getValue());
             }
         });
 

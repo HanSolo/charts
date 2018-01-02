@@ -26,16 +26,16 @@ public class ItemEvent<T extends Item> {
 
     // ******************** Constructors **************************************
     public ItemEvent(final T ITEM) {
-        this(EventType.UPDATE, ITEM);
+        this(ITEM, EventType.UPDATE);
     }
-    public ItemEvent(final EventType TYPE, final T ITEM) {
-        this.TYPE = TYPE;
+    public ItemEvent(final T ITEM, final EventType TYPE) {
         this.ITEM = ITEM;
+        this.TYPE = TYPE;
     }
 
 
     // ******************** Methods *******************************************
-    public EventType getEventType() { return TYPE; }
+    public T getItem() { return ITEM; }
 
-    public T getITEM() { return ITEM; }
+    public EventType getEventType() { return TYPE; }
 }

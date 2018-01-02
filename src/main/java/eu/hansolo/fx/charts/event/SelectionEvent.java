@@ -18,55 +18,61 @@ package eu.hansolo.fx.charts.event;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
-import eu.hansolo.fx.charts.series.Series;
 
 
 public class SelectionEvent<T extends ChartItem> {
-    private ChartItemSeries<T> series;
-    private T                  item;
+    private final ChartItemSeries<T> SERIES;
+    private final T                  ITEM;
+    private final EventType          TYPE;
 
 
     // ******************** Constructors **************************************
     public SelectionEvent(final T ITEM) {
-        this(null, ITEM);
+        this(null, ITEM, EventType.SELECTED);
     }
     public SelectionEvent(final ChartItemSeries<T> SERIES) {
-        this(SERIES, null);
+        this(SERIES, null, EventType.SELECTED);
     }
     public SelectionEvent(final ChartItemSeries<T> SERIES, final T ITEM) {
-        series = SERIES;
-        item   = ITEM;
+        this(SERIES, ITEM, EventType.SELECTED);
+    }
+    public SelectionEvent(final ChartItemSeries<T> SERIES, final T ITEM, final EventType TYPE) {
+        this.SERIES = SERIES;
+        this.ITEM   = ITEM;
+        this.TYPE   = TYPE;
     }
 
 
     // ******************** Methods *******************************************
-    public ChartItemSeries<T> getSeries() { return series; }
+    public ChartItemSeries<T> getSeries() { return SERIES; }
 
-    public T getItem() { return item; }
+    public T getItem() { return ITEM; }
+
+    public EventType getEventType() { return TYPE; }
 
     @Override public String toString() {
         String ret;
-        if (null == series) {
-            if (null == item) { ret = "{}"; }
+        if (null == SERIES) {
+            if (null == ITEM) { ret = "{}"; }
             // Only Item
             ret = new StringBuilder().append("{\n")
-                                     .append("  \"item\"  :\"").append(item.getName()).append("\",\n")
-                                     .append("  \"value\" :").append(item.getValue()).append("\n")
+                                     .append("  \"item\"  :\"").append(ITEM.getName()).append("\",\n")
+                                     .append("  \"value\" :").append(ITEM.getValue()).append("\n")
                                      .append("}").toString();
         } else {
-            if (null == item) {
+            if (null == ITEM) {
                 // Only Series
                 ret = new StringBuilder().append("{\n")
-                                         .append("  \"series\":\"").append(series.getName()).append("\",\n")
-                                         .append("  \"sum\"   :").append(series.getSumOfAllItems()).append("\n")
+                                         .append("  \"series\":\"").append(SERIES.getName()).append("\",\n")
+                                         .append("  \"sum\"   :").append(SERIES.getSumOfAllItems()).append("\n")
                                          .append("}").toString();
             } else {
                 // Series and Item
                 ret = new StringBuilder().append("{\n")
-                                         .append("  \"series\":\"").append(series.getName()).append("\",\n")
-                                         .append("  \"sum\"   :").append(series.getSumOfAllItems()).append(",\n")
-                                         .append("  \"item\"  :\"").append(item.getName()).append("\",\n")
-                                         .append("  \"value\" :").append(item.getValue()).append("\n")
+                                         .append("  \"series\":\"").append(SERIES.getName()).append("\",\n")
+                                         .append("  \"sum\"   :").append(SERIES.getSumOfAllItems()).append(",\n")
+                                         .append("  \"item\"  :\"").append(ITEM.getName()).append("\",\n")
+                                         .append("  \"value\" :").append(ITEM.getValue()).append("\n")
                                          .append("}").toString();
             }
         }

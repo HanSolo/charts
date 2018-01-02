@@ -19,7 +19,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.SunburstChart.TextOrientation;
 import eu.hansolo.fx.charts.SunburstChart.VisibleData;
-import eu.hansolo.fx.charts.tree.TreeNode;
+import eu.hansolo.fx.charts.data.TreeNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;

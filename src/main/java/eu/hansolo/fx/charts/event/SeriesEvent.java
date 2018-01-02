@@ -29,14 +29,17 @@ public class SeriesEvent<T extends ChartItem> {
 
 
     // ******************** Constructors **************************************
-    public SeriesEvent(final EventType TYPE, final Series<T> SERIES) {
+    public SeriesEvent(final Series<T> SERIES) {
+        this(SERIES, EventType.UPDATE);
+    }
+    public SeriesEvent(final Series<T> SERIES, final EventType TYPE) {
         this.SERIES = SERIES;
         this.TYPE   = TYPE;
     }
 
 
     // ******************** Methods *******************************************
-    public Series<T> getSERIES() { return SERIES; }
+    public Series<T> getSeries() { return SERIES; }
 
-    public EventType getTYPE() { return TYPE; }
+    public EventType getEventType() { return TYPE; }
 }

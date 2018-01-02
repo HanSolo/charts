@@ -20,15 +20,22 @@ import eu.hansolo.fx.charts.tools.Location;
 
 
 public class LocationEvent {
-    private Location LOCATION;
+    private final Location  LOCATION;
+    private final EventType TYPE;
 
 
     // ******************** Constructors **************************************
     public LocationEvent(final Location LOCATION) {
+        this(LOCATION, EventType.CHANGED);
+    }
+    public LocationEvent(final Location LOCATION, final EventType TYPE) {
         this.LOCATION = LOCATION;
+        this.TYPE     = TYPE;
     }
 
 
     // ******************** Methods *******************************************
     public Location getLocation() { return LOCATION; }
+
+    public EventType getEventType() { return TYPE; }
 }

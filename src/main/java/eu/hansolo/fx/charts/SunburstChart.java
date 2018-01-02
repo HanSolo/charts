@@ -18,11 +18,11 @@ package eu.hansolo.fx.charts;
 
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
-import eu.hansolo.fx.charts.event.TreeNodeEvent.EventType;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tree.TreeNode;
+import eu.hansolo.fx.charts.data.TreeNode;
 import javafx.beans.DefaultProperty;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -68,7 +68,7 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
 @DefaultProperty("children")
-public class SunburstChart extends Region {
+public class SunburstChart<T extends ChartItem> extends Region {
     public enum TextOrientation {
         HORIZONTAL(12),
         TANGENT(8),
@@ -129,10 +129,10 @@ public class SunburstChart extends Region {
     private              boolean                         _useChartItemTextColor;
     private              BooleanProperty                 useChartItemTextColor;
     private              String                          formatString;
-    private              TreeNode                        tree;
-    private              TreeNode                        root;
+    private              TreeNode<T>                     tree;
+    private              TreeNode<T>                     root;
     private              int                             maxLevel;
-    private              Map<Integer, List<TreeNode>>    levelMap;
+    private              Map<Integer, List<TreeNode<T>>> levelMap;
     private              InvalidationListener            sizeListener;
 
 
@@ -141,7 +141,7 @@ public class SunburstChart extends Region {
     public SunburstChart() {
         this(new TreeNode(new ChartItem()));
     }
-    public SunburstChart(final TreeNode TREE) {
+    public SunburstChart(final TreeNode<T> TREE) {
         backgroundPaint        = Color.TRANSPARENT;
         borderPaint            = Color.TRANSPARENT;
         borderWidth            = 0d;
@@ -569,7 +569,7 @@ public class SunburstChart extends Region {
      * Defines the root element of the tree
      * @param TREE
      */
-    public void setTree(final TreeNode TREE) {
+    public void setTree(final TreeNode<T> TREE) {
         if (null != tree) { tree.flattened().forEach(node -> node.removeAllTreeNodeEventListeners()); }
         tree = TREE;
         tree.flattened().forEach(node -> node.setOnTreeNodeEvent(e -> redraw()));
@@ -582,11 +582,11 @@ public class SunburstChart extends Region {
         Color brightColor = getBrightTextColor();
         Color darkColor   = getDarkTextColor();
         root.stream().forEach(node -> {
-            ChartItem data          = node.getData();
-            boolean   darkFillColor = Helper.isDark(data.getFillColor());
-            boolean   darkTextColor = Helper.isDark(data.getTextColor());
-            if (darkFillColor && darkTextColor) { data.setTextColor(brightColor); }
-            if (!darkFillColor && !darkTextColor) { data.setTextColor(darkColor); }
+            T       item          = node.getItem();
+            boolean darkFillColor = Helper.isDark(item.getFillColor());
+            boolean darkTextColor = Helper.isDark(item.getTextColor());
+            if (darkFillColor && darkTextColor) { item.setTextColor(brightColor); }
+            if (!darkFillColor && !darkTextColor) { item.setTextColor(darkColor); }
         });
     }
 
@@ -600,7 +600,7 @@ public class SunburstChart extends Region {
         root.stream().forEach(node -> levelMap.get(node.getDepth()).add(node));
 
         for (int level = 1 ; level < maxLevel ; level++) {
-            List<TreeNode> treeNodeList = levelMap.get(level);
+            List<TreeNode<T>> treeNodeList = levelMap.get(level);
             treeNodeList.stream()
                         .filter(node -> node.getChildren().isEmpty())
                         .forEach(node ->node.addNode(new TreeNode(new ChartItem("", 0, Color.TRANSPARENT, Color.TRANSPARENT), node)));
@@ -634,18 +634,18 @@ public class SunburstChart extends Region {
         segments.clear();
 
         for (int level = 1 ; level <= maxLevel ; level++) {
-            List<TreeNode> nodesAtLevel = levelMap.get(level);
-            double         xy           = centerX - ringStepSize * level * 0.5;
-            double         wh           = ringStepSize * level;
-            double         outerRadius  = ringRadiusStep * level + barWidth * 0.5;
-            double         innerRadius  = outerRadius - barWidth;
+            List<TreeNode<T>> nodesAtLevel = levelMap.get(level);
+            double            xy           = centerX - ringStepSize * level * 0.5;
+            double            wh           = ringStepSize * level;
+            double            outerRadius  = ringRadiusStep * level + barWidth * 0.5;
+            double            innerRadius  = outerRadius - barWidth;
 
             double segmentStartAngle;
             double segmentEndAngle = 0;
             for (TreeNode node : nodesAtLevel) {
-                ChartItem segmentData  = node.getData();
+                ChartItem segmentData  = node.getItem();
                 double    segmentAngle = node.getParentAngle() * node.getPercentage();
-                Color     segmentColor = getUseColorFromParent() ? node.getMyRoot().getData().getFillColor() : segmentData.getFillColor();
+                Color     segmentColor = getUseColorFromParent() ? node.getMyRoot().getItem().getFillColor() : segmentData.getFillColor();
 
                 segmentStartAngle = 90 + segmentEndAngle;
                 segmentEndAngle  -= segmentAngle;
@@ -740,7 +740,7 @@ public class SunburstChart extends Region {
         path.setFill(FILL);
         path.setStroke(STROKE);
 
-        String tooltipText = new StringBuilder(NODE.getData().getName()).append("\n").append(String.format(Locale.US, formatString, NODE.getData().getValue())).toString();
+        String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, NODE.getItem().getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
         path.setOnMousePressed(new WeakEventHandler<>(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED))));
