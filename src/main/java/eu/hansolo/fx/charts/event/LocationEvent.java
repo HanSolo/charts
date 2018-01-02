@@ -26,7 +26,7 @@ public class LocationEvent {
 
     // ******************** Constructors **************************************
     public LocationEvent(final Location LOCATION) {
-        this(LOCATION, EventType.CHANGED);
+        this(LOCATION, EventType.UPDATE);
     }
     public LocationEvent(final Location LOCATION, final EventType TYPE) {
         this.LOCATION = LOCATION;
