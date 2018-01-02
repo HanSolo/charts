@@ -34,9 +34,7 @@ ext {
     buildTime = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
 }
 
-dependencies {
-    compile 'com.googlecode.json-simple:json-simple:1.1.1'
-}
+dependencies {}
 
 jar {
     manifest {
