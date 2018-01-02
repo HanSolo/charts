@@ -29,14 +29,14 @@ public interface Colors {
     public Color get();
 
     /**
-     * Returns a String expression from the color with the format: rgb(12, 121, 15)
+     * Returns a String expression from the color with the format: colorToRGB(12, 121, 15)
      *
      * @return the String expression.
      */
     public String rgb();
 
     /**
-     * Returns a String expression from the color and opacity with the format: rgba(12, 121, 15, 0.5)
+     * Returns a String expression from the color and opacity with the format: colorToRGBA(12, 121, 15, 0.5)
      *
      * @return the String expression.
      */

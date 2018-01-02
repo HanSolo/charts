@@ -83,9 +83,9 @@ public enum FlatColors implements Colors {
 
     @Override public Color get() { return COLOR; }
 
-    @Override public String rgb() { return Helper.rgb(COLOR); }
+    @Override public String rgb() { return Helper.colorToRGB(COLOR); }
 
-    @Override public String rgba(final double OPACITY) { return Helper.rgba(COLOR, OPACITY); }
+    @Override public String rgba(final double OPACITY) { return Helper.colorToRGBA(COLOR, OPACITY); }
 
-    @Override public String web() { return Helper.web(COLOR); }
+    @Override public String web() { return Helper.colorToWeb(COLOR); }
 }

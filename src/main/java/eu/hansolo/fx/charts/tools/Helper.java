@@ -668,7 +668,7 @@ public class Helper {
         }
     }
 
-    public static final String rgb(final Color COLOR) {
+    public static final String colorToRGB(final Color COLOR) {
         String hex      = COLOR.toString().replace("0x", "");
         String hexRed   = hex.substring(0, 2).toUpperCase();
         String hexGreen = hex.substring(2, 4).toUpperCase();
@@ -678,11 +678,11 @@ public class Helper {
         String intGreen = Integer.toString(Integer.parseInt(hexGreen, 16));
         String intBlue  = Integer.toString(Integer.parseInt(hexBlue, 16));
 
-        return String.join("", "rgb(", intRed, ", ", intGreen, ", ", intBlue, ")");
+        return String.join("", "colorToRGB(", intRed, ", ", intGreen, ", ", intBlue, ")");
     }
 
-    public static final String rgba(final Color COLOR) { return rgba(COLOR, COLOR.getOpacity()); }
-    public static final String rgba(final Color COLOR, final double ALPHA) {
+    public static final String colorToRGBA(final Color COLOR) { return colorToRGBA(COLOR, COLOR.getOpacity()); }
+    public static final String colorToRGBA(final Color COLOR, final double ALPHA) {
         String hex      = COLOR.toString().replace("0x", "");
         String hexRed   = hex.substring(0, 2).toUpperCase();
         String hexGreen = hex.substring(2, 4).toUpperCase();
@@ -693,10 +693,10 @@ public class Helper {
         String intBlue  = Integer.toString(Integer.parseInt(hexBlue, 16));
         String alpha    = String.format(Locale.US, "%.3f", clamp(0, 1, ALPHA));
 
-        return String.join("", "rgba(", intRed, ", ", intGreen, ", ", intBlue, ",", alpha, ")");
+        return String.join("", "colorToRGBA(", intRed, ", ", intGreen, ", ", intBlue, ",", alpha, ")");
     }
 
-    public static final String web(final Color COLOR) { return COLOR.toString().replace("0x", "#").substring(0, 7); }
+    public static final String colorToWeb(final Color COLOR) { return COLOR.toString().replace("0x", "#").substring(0, 7); }
 
     public static final List<DataPoint> createSmoothedHull(final List<DataPoint> POINTS, final int SUB_DIVISIONS) {
         List<DataPoint> hullPolygon = createHull(POINTS);
