@@ -17,5 +17,5 @@
 package eu.hansolo.fx.charts;
 
 public enum AxisType {
-    LINEAR, LOGARITHMIC, DATE
+    LINEAR, LOGARITHMIC, DATE, TEXT
 }

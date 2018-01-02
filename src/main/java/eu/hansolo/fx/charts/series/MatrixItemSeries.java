@@ -42,14 +42,14 @@ public class MatrixItemSeries<T extends MatrixItem> extends Series {
     // ******************** Methods *******************************************
     @Override public ObservableList<T> getItems() { return (ObservableList<T>) items; }
 
-    public int getMinX() { return ((MatrixItem) items.stream().min(Comparator.comparingInt(MatrixItem::getX)).get()).getX(); }
-    public int getMaxX() { return ((MatrixItem) items.stream().max(Comparator.comparingInt(MatrixItem::getX)).get()).getX(); }
+    public int getMinX() { return getItems().stream().min(Comparator.comparingInt(T::getX)).get().getX(); }
+    public int getMaxX() { return getItems().stream().max(Comparator.comparingInt(T::getX)).get().getX(); }
 
-    public int getMinY() { return ((MatrixItem) items.stream().min(Comparator.comparingInt(MatrixItem::getY)).get()).getY(); }
-    public int getMaxY() { return ((MatrixItem) items.stream().max(Comparator.comparingInt(MatrixItem::getY)).get()).getY(); }
+    public int getMinY() { return getItems().stream().min(Comparator.comparingInt(T::getY)).get().getY(); }
+    public int getMaxY() { return getItems().stream().max(Comparator.comparingInt(T::getY)).get().getY(); }
 
-    public double getMinZ() { return ((MatrixItem) items.stream().min(Comparator.comparingDouble(MatrixItem::getZ)).get()).getZ(); }
-    public double getMaxZ() { return ((MatrixItem) items.stream().max(Comparator.comparingDouble(MatrixItem::getZ)).get()).getZ(); }
+    public double getMinZ() { return getItems().stream().min(Comparator.comparingDouble(T::getZ)).get().getZ(); }
+    public double getMaxZ() { return getItems().stream().max(Comparator.comparingDouble(T::getZ)).get().getZ(); }
 
     public int getRangeX() { return getMaxX() - getMinX(); }
     public int getRangeY() { return getMaxY() - getMinY(); }

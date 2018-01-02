@@ -64,8 +64,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              double                size;
     private              double                width;
     private              double                height;
-    private              Paint                 _chartBackgroundPaint;
-    private              ObjectProperty<Paint> chartBackgroundPaint;
+    private              Paint                 _chartBackground;
+    private              ObjectProperty<Paint> chartBackground;
     private              List<XYSeries<T>>     listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
@@ -94,19 +94,19 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
     public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect            = false;
-        _chartBackgroundPaint = BACKGROUND;
-        listOfSeries          = FXCollections.observableArrayList(SERIES);
-        scaleX                = 1;
-        scaleY                = 1;
-        symbolSize            = 2;
-        noOfBands = clamp(1, 5, BANDS);
-        _lowerBoundX          = 0;
-        _upperBoundX          = 100;
-        _lowerBoundY          = 0;
-        _upperBoundY          = 100;
-        referenceZero         = true;
+        aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect      = false;
+        _chartBackground = BACKGROUND;
+        listOfSeries    = FXCollections.observableArrayList(SERIES);
+        scaleX          = 1;
+        scaleY          = 1;
+        symbolSize      = 2;
+        noOfBands       = clamp(1, 5, BANDS);
+        _lowerBoundX    = 0;
+        _upperBoundX    = 100;
+        _lowerBoundY    = 0;
+        _upperBoundY    = 100;
+        referenceZero   = true;
 
         initGraphics();
         registerListeners();
@@ -157,25 +157,25 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
-    public void setChartBackgroundPaint(final Paint PAINT) {
-        if (null == chartBackgroundPaint) {
-            _chartBackgroundPaint = PAINT;
+    public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
+    public void setChartBackground(final Paint PAINT) {
+        if (null == chartBackground) {
+            _chartBackground = PAINT;
             redraw();
         } else {
-            chartBackgroundPaint.set(PAINT);
+            chartBackground.set(PAINT);
         }
     }
-    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
-        if (null == chartBackgroundPaint) {
-            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
+    public ObjectProperty<Paint> chartBackgroundProperty() {
+        if (null == chartBackground) {
+            chartBackground = new ObjectPropertyBase<Paint>(_chartBackground) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return XYPane.this; }
-                @Override public String getName() { return "chartBackgroundPaint"; }
+                @Override public String getName() { return "chartBackground"; }
             };
-            _chartBackgroundPaint = null;
+            _chartBackground = null;
         }
-        return chartBackgroundPaint;
+        return chartBackground;
     }
 
     public int getNoOfBands() { return noOfBands; }
@@ -277,11 +277,15 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
 
     // ******************** Draw Chart ****************************************
+    protected void redraw() {
+        drawChart();
+    }
+
     private void drawChart() {
         if (null == listOfSeries || listOfSeries.isEmpty()) return;
 
         ctx.clearRect(0, 0, width, height);
-        ctx.setFill(getChartBackgroundPaint());
+        ctx.setFill(getChartBackground());
         ctx.fillRect(0, 0, width, height);
 
         if (listOfSeries.size() == 2) {
@@ -324,7 +328,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         double oldY = height;
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
-        for (XYItem item : SERIES.getItems()) {
+        for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.strokeLine(oldX, oldY, x, y);
@@ -343,7 +347,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.setFill(SERIES.getFill());
         ctx.beginPath();
         ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
-        for (XYItem item : SERIES.getItems()) {
+        for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.lineTo(x, y);
@@ -363,7 +367,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
         ctx.setFill(Color.TRANSPARENT);
-        for (XYItem item : SERIES.getItems()) {
+        for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             drawSymbol(x, y, item.getFillColor(), item.getSymbol());
@@ -489,13 +493,13 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
 
-        int          noOfItems         = SERIES_1.getItems().size();
-        List<XYItem> cachedItems       = new LinkedList<>();
-        Point        lastPointForClose = new Point();
+        int     noOfItems         = SERIES_1.getItems().size();
+        List<T> cachedItems       = new LinkedList<>();
+        Point   lastPointForClose = new Point();
 
-        XYItem series1Item0  = SERIES_1.getItems().get(0);
-        XYItem series2Item0  = SERIES_2.getItems().get(0);
-        int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
+        T   series1Item0  = SERIES_1.getItems().get(0);
+        T   series2Item0  = SERIES_2.getItems().get(0);
+        int currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
 
         Paint series1Stroke = SERIES_1.getStroke();
         Paint series1Fill   = SERIES_1.getFill();
@@ -520,14 +524,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 break;
         }
         // Draw path
-        List<XYItem> items1 = SERIES_1.getItems();
-        List<XYItem> items2 = SERIES_2.getItems();
+        List<T> items1 = SERIES_1.getItems();
+        List<T> items2 = SERIES_2.getItems();
         for (int i = 1 ; i < noOfItems ; i++) {
-            XYItem lastXyData1 = items1.get(i - 1);
-            XYItem lastXyData2 = items2.get(i - 1);
+            T lastXyData1 = items1.get(i - 1);
+            T lastXyData2 = items2.get(i - 1);
 
-            XYItem xyData1 = items1.get(i);
-            XYItem xyData2 = items2.get(i);
+            T xyData1     = items1.get(i);
+            T xyData2     = items2.get(i);
 
             if (lastXyData1.getY() > lastXyData2.getY() && xyData1.getY() < xyData2.getY()) {
                 // Lines crossed Line1 is now below lower Line2
@@ -536,7 +540,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
 
                 Collections.reverse(cachedItems);
-                for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                for (T item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
                 ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
                 ctx.closePath();
                 ctx.setFill(series1Fill);
@@ -556,7 +560,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 ctx.lineTo((intersectionPoint.getX() - LOWER_BOUND_X) * scaleX, height - (intersectionPoint.getY() - LOWER_BOUND_Y) * scaleY);
 
                 Collections.reverse(cachedItems);
-                for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+                for (T item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
                 ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
                 ctx.closePath();
                 ctx.setFill(series2Fill);
@@ -584,7 +588,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
         }
         Collections.reverse(cachedItems);
-        for (XYItem item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
+        for (T item : cachedItems) { ctx.lineTo((item.getX() - LOWER_BOUND_X) * scaleX, height - (item.getY() - LOWER_BOUND_Y) * scaleY); }
         ctx.lineTo((lastPointForClose.getX() - LOWER_BOUND_X) * scaleX, height - (lastPointForClose.getY() - LOWER_BOUND_Y) * scaleY);
         ctx.closePath();
         switch(currentSeries) {
@@ -617,9 +621,9 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         List<Point> cachedItems       = new LinkedList<>();
         Point       lastPointForClose = new Point();
 
-        XYItem series1Item0  = SERIES_1.getItems().get(0);
-        XYItem series2Item0  = SERIES_2.getItems().get(0);
-        int    currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
+        T   series1Item0  = SERIES_1.getItems().get(0);
+        T   series2Item0  = SERIES_2.getItems().get(0);
+        int currentSeries = series1Item0.getY() > series2Item0.getY() ? 1 : 2;
 
         Paint series1Stroke = SERIES_1.getStroke();
         Paint series1Fill   = SERIES_1.getFill();
@@ -832,7 +836,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void drawSymbols(final XYSeries<T> SERIES) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        for (XYItem item : SERIES.getItems()) {
+        for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             drawSymbol(x, y, item.getFillColor(), item.getSymbol());
@@ -908,9 +912,5 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
             redraw();
         }
-    }
-
-    protected void redraw() {
-        drawChart();
     }
 }

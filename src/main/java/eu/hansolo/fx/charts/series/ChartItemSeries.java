@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.data.ChartItem;
+import javafx.collections.ObservableList;
 import javafx.scene.paint.Paint;
 
 import java.util.Arrays;
@@ -36,9 +37,10 @@ public class ChartItemSeries<T extends ChartItem> extends Series<T> {
 
 
     // ******************** Methods *******************************************
-    public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
+    @Override public ObservableList<T> getItems() { return items; }
 
     public double getMinValue() { return items.stream().mapToDouble(T::getValue).min().getAsDouble(); }
-
     public double getMaxValue() { return items.stream().mapToDouble(T::getValue).max().getAsDouble(); }
+
+    public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
 }

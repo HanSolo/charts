@@ -70,10 +70,15 @@ public class XYChart<T extends XYItem> extends Region {
 
     // ******************** Constructors **************************************
     public XYChart(final XYPane<T> XY_PANE, final Axis... AXIS) {
+        this(XY_PANE, null, AXIS);
+    }
+    public XYChart(final XYPane<T> XY_PANE, final Grid GRID, final Axis... AXIS) {
         if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
         xyPane = XY_PANE;
         axis   = Arrays.asList(AXIS);
-        grid   = null;
+        grid   = GRID;
+        width  = PREFERRED_WIDTH;
+        height = PREFERRED_HEIGHT;
         initGraphics();
         registerListeners();
     }

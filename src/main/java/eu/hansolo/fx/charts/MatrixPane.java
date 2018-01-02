@@ -41,35 +41,35 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
     private static final double                MINIMUM_HEIGHT   = 0;
     private static final double                MAXIMUM_WIDTH    = 4096;
     private static final double                MAXIMUM_HEIGHT   = 4096;
-    private static double                aspectRatio;
-    private        boolean               keepAspect;
-    private        double                size;
-    private        double                width;
-    private        double                height;
-    private        Pane                  pane;
-    private        Paint                 _chartBackgroundPaint;
-    private        ObjectProperty<Paint> chartBackgroundPaint;
-    private        MatrixItemSeries<T>   series;
-    private        PixelMatrix           matrix;
-    private        LinearGradient        matrixGradient;
-    private        double                minZ;
-    private        double                maxZ;
-    private        double                rangeZ;
-    private        double                scaleX;
-    private        double                scaleY;
-    private        double                scaleZ;
-    private        double                _lowerBoundX;
+    private static       double                aspectRatio;
+    private              boolean               keepAspect;
+    private              double                size;
+    private              double                width;
+    private              double                height;
+    private              Pane                  pane;
+    private              Paint                 _chartBackground;
+    private              ObjectProperty<Paint> chartBackground;
+    private              MatrixItemSeries<T>   series;
+    private              PixelMatrix           matrix;
+    private              LinearGradient        matrixGradient;
+    private              double                minZ;
+    private              double                maxZ;
+    private              double                rangeZ;
+    private              double                scaleX;
+    private              double                scaleY;
+    private              double                scaleZ;
+    private              double                _lowerBoundX;
     private              DoubleProperty        lowerBoundX;
     private              double                _upperBoundX;
     private              DoubleProperty        upperBoundX;
     private              double                _lowerBoundY;
-    private        DoubleProperty        lowerBoundY;
-    private        double                _upperBoundY;
-    private        DoubleProperty        upperBoundY;
-    private        double                _lowerBoundZ;
-    private        DoubleProperty        lowerBoundZ;
-    private        double                _upperBoundZ;
-    private        DoubleProperty        upperBoundZ;
+    private              DoubleProperty        lowerBoundY;
+    private              double                _upperBoundY;
+    private              DoubleProperty        upperBoundY;
+    private              double                _lowerBoundZ;
+    private              DoubleProperty        lowerBoundZ;
+    private              double                _upperBoundZ;
+    private              DoubleProperty        upperBoundZ;
 
 
     // ******************** Constructors **************************************
@@ -78,20 +78,20 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
     }
     public MatrixPane(final Paint BACKGROUND, final MatrixItemSeries<T> SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect            = false;
-        _chartBackgroundPaint = BACKGROUND;
-        series                = SERIES;
-        matrixGradient        = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.getGradient();
-        scaleX                = 1;
-        scaleY                = 1;
-        scaleZ                = 1;
-        _lowerBoundX          = 0;
-        _upperBoundX          = 100;
-        _lowerBoundY          = 0;
-        _upperBoundY          = 100;
-        _lowerBoundZ          = 0;
-        _upperBoundZ          = 100;
+        aspectRatio      = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect       = false;
+        _chartBackground = BACKGROUND;
+        series           = SERIES;
+        matrixGradient   = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.getGradient();
+        scaleX           = 1;
+        scaleY           = 1;
+        scaleZ           = 1;
+        _lowerBoundX     = 0;
+        _upperBoundX     = 100;
+        _lowerBoundY     = 0;
+        _upperBoundY     = 100;
+        _lowerBoundZ     = 0;
+        _upperBoundZ     = 100;
 
         initGraphics();
         registerListeners();
@@ -142,25 +142,25 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
-    public void setChartBackgroundPaint(final Paint PAINT) {
-        if (null == chartBackgroundPaint) {
-            _chartBackgroundPaint = PAINT;
+    public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
+    public void setChartBackground(final Paint PAINT) {
+        if (null == chartBackground) {
+            _chartBackground = PAINT;
             redraw();
         } else {
-            chartBackgroundPaint.set(PAINT);
+            chartBackground.set(PAINT);
         }
     }
-    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
-        if (null == chartBackgroundPaint) {
-            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
+    public ObjectProperty<Paint> chartBackgroundProperty() {
+        if (null == chartBackground) {
+            chartBackground = new ObjectPropertyBase<Paint>(_chartBackground) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return MatrixPane.this; }
-                @Override public String getName() { return "chartBackgroundPaint"; }
+                @Override public String getName() { return "chartBackground"; }
             };
-            _chartBackgroundPaint = null;
+            _chartBackground = null;
         }
-        return chartBackgroundPaint;
+        return chartBackground;
     }
 
     public double getLowerBoundX() { return null == lowerBoundX ? _lowerBoundX : lowerBoundX.get(); }

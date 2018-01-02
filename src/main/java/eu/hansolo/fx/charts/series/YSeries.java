@@ -47,8 +47,10 @@ public class YSeries<T extends YItem> extends Series {
 
 
     // ******************** Methods *******************************************
-    @Override public ObservableList<YItem> getItems() { return items; }
+    @Override public ObservableList<T> getItems() { return items; }
 
-    public double getMinY() { return ((YItem) items.stream().min(Comparator.comparingDouble(YItem::getY)).get()).getY(); }
-    public double getMaxY() { return ((YItem) items.stream().max(Comparator.comparingDouble(YItem::getY)).get()).getY(); }
+    public double getMinY() { return getItems().stream().min(Comparator.comparingDouble(T::getY)).get().getY(); }
+    public double getMaxY() { return getItems().stream().max(Comparator.comparingDouble(T::getY)).get().getY(); }
+
+    public double getSumOfYValues() { return getItems().stream().mapToDouble(T::getY).sum(); }
 }

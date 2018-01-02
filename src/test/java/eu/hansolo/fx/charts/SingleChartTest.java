@@ -16,15 +16,14 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.YItem;
 import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.YSeries;
-import eu.hansolo.fx.charts.converter.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -40,8 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static eu.hansolo.fx.charts.converter.Converter.Category.*;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.*;
+import static eu.hansolo.fx.charts.converter.Converter.Category.TEMPERATURE;
+import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.CELSIUS;
+import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.FAHRENHEIT;
 
 
 public class SingleChartTest extends Application {
@@ -122,7 +122,7 @@ public class SingleChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + UPDATE_INTERVAL) {
-                    List<XYItem> xyItems = xySeries1.getItems();
+                    ObservableList<XYChartItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 8 + RND.nextDouble() * 10));
 
                     xyItems = xySeries2.getItems();
@@ -134,7 +134,7 @@ public class SingleChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 4));
 
-                    List<YItem> yItems = ySeries1.getItems();
+                    ObservableList<YChartItem> yItems = ySeries1.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
 
                     yItems = ySeries2.getItems();

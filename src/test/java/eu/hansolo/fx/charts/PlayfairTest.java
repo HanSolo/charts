@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.AnchorPane;
@@ -113,7 +114,7 @@ public class PlayfairTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYItem> xyItems = xySeries1.getItems();
+                    ObservableList<XYChartItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyItems = xySeries2.getItems();

@@ -23,6 +23,7 @@ import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -42,18 +43,18 @@ import java.util.Random;
  * Time: 13:30
  */
 public class LogChartTest extends Application {
-    private static final Double  AXIS_WIDTH     = 25d;
-    private static final Color[] COLORS         = {Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
-    private static final Random  RND            = new Random();
-    private static final int     NO_OF_X_VALUES = 100;
+    private static final Double   AXIS_WIDTH     = 25d;
+    private static final Color[]  COLORS         = {Color.RED, Color.BLUE, Color.CYAN, Color.LIME };
+    private static final Random   RND            = new Random();
+    private static final int      NO_OF_X_VALUES = 100;
     private XYSeries<XYChartItem> xySeries1;
 
     private XYChart<XYChartItem> smoothLineChart;
     private Axis                 smoothLineChartXAxisBottom;
     private Axis                 smoothLineChartYAxisLeft;
 
-    private long                   lastTimerCall;
-    private AnimationTimer         timer;
+    private long                 lastTimerCall;
+    private AnimationTimer       timer;
 
 
     @Override public void init() {
@@ -84,7 +85,7 @@ public class LogChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYItem> xyItems = xySeries1.getItems();
+                    ObservableList<XYChartItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 1000));
 
                     xySeries1.refresh();

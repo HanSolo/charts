@@ -59,16 +59,19 @@ public class XYSeries<T extends XYItem> extends Series {
 
 
     // ******************** Methods *******************************************
-    @Override public ObservableList<XYItem> getItems() { return items; }
+    @Override public ObservableList<T> getItems() { return items; }
 
-    public double getMinX() { return ((XYItem) items.stream().min(Comparator.comparingDouble(XYItem::getX)).get()).getX(); }
-    public double getMaxX() { return ((XYItem) items.stream().max(Comparator.comparingDouble(XYItem::getX)).get()).getX(); }
+    public double getMinX() { return getItems().stream().min(Comparator.comparingDouble(T::getX)).get().getX(); }
+    public double getMaxX() { return getItems().stream().max(Comparator.comparingDouble(T::getX)).get().getX(); }
 
-    public double getMinY() { return ((XYItem) items.stream().min(Comparator.comparingDouble(XYItem::getY)).get()).getY(); }
-    public double getMaxY() { return ((XYItem) items.stream().max(Comparator.comparingDouble(XYItem::getY)).get()).getY(); }
+    public double getMinY() { return getItems().stream().min(Comparator.comparingDouble(T::getY)).get().getY(); }
+    public double getMaxY() { return getItems().stream().max(Comparator.comparingDouble(T::getY)).get().getY(); }
 
     public double getRangeX() { return getMaxX() - getMinX(); }
     public double getRangeY() { return getMaxY() - getMinY(); }
+
+    public double getSumOfXValues() { return getItems().stream().mapToDouble(T::getX).sum(); }
+    public double getSumOfYValues() { return getItems().stream().mapToDouble(T::getY).sum(); }
 
     public boolean isShowPoints() { return _showPoints; }
     public void setShowPoints(final boolean SHOW) { _showPoints = SHOW; }

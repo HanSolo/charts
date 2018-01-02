@@ -28,6 +28,7 @@ import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.converter.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
@@ -157,7 +158,7 @@ public class ChartTest extends Application {
 
         xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 0.75)), new Stop(1.0, Color.rgb(0, 255, 255, 0.25))));
         xySeries2.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 1.0)), new Stop(1.0, Color.rgb(0, 255, 255, 1.0))));
-        areaChart.getXYPane().setChartBackgroundPaint(Color.rgb(50, 50, 50, 0.5));
+        areaChart.getXYPane().setChartBackground(Color.rgb(50, 50, 50, 0.5));
 
         // SmoothLineChart
         smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
@@ -176,7 +177,7 @@ public class ChartTest extends Application {
 
         xySeries4.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
         xySeries4.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 1.0)), new Stop(1.0, Color.TRANSPARENT)));
-        smoothAreaChart.getXYPane().setChartBackgroundPaint(Color.rgb(25, 25, 25, 0.8));
+        smoothAreaChart.getXYPane().setChartBackground(Color.rgb(25, 25, 25, 0.8));
 
 
         // ScatterChart
@@ -187,7 +188,7 @@ public class ChartTest extends Application {
 
         modificationThread = new Thread(() -> {
             while(true) {
-                List<XYItem> xyItems = xySeries3.getItems();
+                ObservableList<XYChartItem> xyItems = xySeries3.getItems();
                 xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
                 xySeries3.refresh();
                 try {
@@ -202,7 +203,7 @@ public class ChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 1_000_000_000l) {
-                    List<XYItem> xyItems = xySeries1.getItems();
+                    ObservableList<XYChartItem> xyItems = xySeries1.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
                     xyItems = xySeries2.getItems();
@@ -214,10 +215,10 @@ public class ChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
 
-                    List<YItem> yItems = ySeries.getItems();
+                    ObservableList<YChartItem> yItems = ySeries.getItems();
                     yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
 
-                    List<XYZItem> xyzItems = xyzSeries.getItems();
+                    ObservableList<XYZChartItem> xyzItems = xyzSeries.getItems();
                     xyzItems.forEach(item -> item.setZ(RND.nextDouble() * 25));
 
                     xySeries1.refresh();

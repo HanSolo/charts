@@ -61,8 +61,8 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
     private              double                size;
     private              double                width;
     private              double                height;
-    private              Paint                 _chartBackgroundPaint;
-    private              ObjectProperty<Paint> chartBackgroundPaint;
+    private              Paint                 _chartBackground;
+    private              ObjectProperty<Paint> chartBackground;
     private              List<YSeries<T>>      listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
@@ -85,16 +85,16 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
     }
     public YPane(final Paint BACKGROUND, final YSeries<T>... SERIES) {
         getStylesheets().add(YPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect            = false;
-        _chartBackgroundPaint = BACKGROUND;
-        listOfSeries          = FXCollections.observableArrayList(SERIES);
-        _thresholdY           = 100;
-        _thresholdYVisible    = false;
-        _thresholdYColor      = Color.RED;
-        _lowerBoundY          = 0;
-        _upperBoundY          = 100;
-        valid                 = isChartTypeValid();
+        aspectRatio        = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect         = false;
+        _chartBackground   = BACKGROUND;
+        listOfSeries       = FXCollections.observableArrayList(SERIES);
+        _thresholdY        = 100;
+        _thresholdYVisible = false;
+        _thresholdYColor   = Color.RED;
+        _lowerBoundY       = 0;
+        _upperBoundY       = 100;
+        valid              = isChartTypeValid();
         initGraphics();
         registerListeners();
     }
@@ -137,25 +137,25 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
-    public void setChartBackgroundPaint(final Paint PAINT) {
-        if (null == chartBackgroundPaint) {
-            _chartBackgroundPaint = PAINT;
+    public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
+    public void setChartBackground(final Paint PAINT) {
+        if (null == chartBackground) {
+            _chartBackground = PAINT;
             redraw();
         } else {
-            chartBackgroundPaint.set(PAINT);
+            chartBackground.set(PAINT);
         }
     }
-    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
-        if (null == chartBackgroundPaint) {
-            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
+    public ObjectProperty<Paint> chartBackgroundProperty() {
+        if (null == chartBackground) {
+            chartBackground = new ObjectPropertyBase<Paint>(_chartBackground) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return YPane.this; }
-                @Override public String getName() { return "chartBackgroundPaint"; }
+                @Override public String getName() { return "chartBackground"; }
             };
-            _chartBackgroundPaint = null;
+            _chartBackground = null;
         }
-        return chartBackgroundPaint;
+        return chartBackground;
     }
 
     public double getThresholdY() { return null == thresholdY ? _thresholdY : thresholdY.get(); }
@@ -269,7 +269,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         if (null == listOfSeries || listOfSeries.isEmpty()) return;
 
         ctx.clearRect(0, 0, width, height);
-        ctx.setFill(getChartBackgroundPaint());
+        ctx.setFill(getChartBackground());
         ctx.fillRect(0, 0, width, height);
 
         //double    minValue = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
@@ -301,26 +301,26 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
     private void drawDonut(final YSeries<T> SERIES) {
         if (null == SERIES) return;
-        List<YItem> items       = SERIES.getItems();
-        int         noOfItems   = items.size();
-        double      center      = size * 0.5;
-        double      innerRadius = size * 0.275;
-        double      outerRadius = size * 0.4;
-        double      barWidth    = size * 0.1;
-        double      sum         = items.stream().mapToDouble(YItem::getY).sum();
-        double      stepSize    = 360.0 / sum;
-        double      angle       = 0;
-        double      startAngle  = 90;
-        double      xy          = size * 0.1;
-        double      wh          = size * 0.8;
-        double      x;
-        double      y;
+        List<T> items       = SERIES.getItems();
+        int     noOfItems   = items.size();
+        double  center      = size * 0.5;
+        double  innerRadius = size * 0.275;
+        double  outerRadius = size * 0.4;
+        double  barWidth    = size * 0.1;
+        double  sum         = items.stream().mapToDouble(T::getY).sum();
+        double  stepSize    = 360.0 / sum;
+        double  angle       = 0;
+        double  startAngle  = 90;
+        double  xy          = size * 0.1;
+        double  wh          = size * 0.8;
+        double  x;
+        double  y;
         
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
 
-        for (YItem item : items) {
+        for (T item : items) {
             double value = item.getY();
             startAngle -= angle;
             angle = value * stepSize;
@@ -331,16 +331,20 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
             ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
 
             // Percentage
-            //x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            //y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
-            //ctx.setFill(Color.BLACK);
-            //ctx.fillText(String.format(Locale.US, "%.0f%%", (value / sum * 100.0)), center + x, center + y, barWidth);
+            //if (angle > 8) {
+            //    x = innerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+            //    y = -innerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+            //    ctx.setFill(Color.BLACK);
+            //    ctx.fillText(String.format(Locale.US, "%.0f%%", (value / sum * 100.0)), center + x, center + y, barWidth);
+            //}
 
             // Value
-            x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
-            y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
-            ctx.setFill(Color.WHITE);
-            ctx.fillText(String.format(Locale.US, "%.0f", value), center + x, center + y, barWidth);
+            if (angle > 8) {
+                x = outerRadius * Math.cos(Math.toRadians(startAngle - (angle * 0.5)));
+                y = -outerRadius * Math.sin(Math.toRadians(startAngle - (angle * 0.5)));
+                ctx.setFill(Color.WHITE);
+                ctx.fillText(String.format(Locale.US, "%.0f", value), center + x, center + y, barWidth);
+            }
         }
     }
 
@@ -390,7 +394,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.36239 * size)));
                 points.add(new Point(x, y));
 
-                for (YItem item : SERIES.getItems()) {
+                for (T item : SERIES.getItems()) {
                     double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
                     x = CENTER_X + (-Math.sin(radAngle) * r1);
                     y = CENTER_Y + (+Math.cos(radAngle) * r1);

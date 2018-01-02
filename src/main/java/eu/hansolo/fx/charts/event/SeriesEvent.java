@@ -24,12 +24,12 @@ import eu.hansolo.fx.charts.series.Series;
  * Created by hansolo on 16.07.17.
  */
 public class SeriesEvent<T extends ChartItem> {
-    private final Series<T>       SERIES;
-    private final SeriesEventType TYPE;
+    private final Series<T> SERIES;
+    private final EventType TYPE;
 
 
     // ******************** Constructors **************************************
-    public SeriesEvent(final SeriesEventType TYPE, final Series<T> SERIES) {
+    public SeriesEvent(final EventType TYPE, final Series<T> SERIES) {
         this.SERIES = SERIES;
         this.TYPE   = TYPE;
     }
@@ -38,5 +38,5 @@ public class SeriesEvent<T extends ChartItem> {
     // ******************** Methods *******************************************
     public Series<T> getSERIES() { return SERIES; }
 
-    public SeriesEventType getTYPE() { return TYPE; }
+    public EventType getTYPE() { return TYPE; }
 }

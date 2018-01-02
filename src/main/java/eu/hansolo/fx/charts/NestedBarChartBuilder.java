@@ -18,7 +18,6 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
-import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -27,6 +26,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
+import javafx.scene.paint.Paint;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +57,11 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
 
     public final B order(final Order ORDER) {
         properties.put("order", new SimpleObjectProperty<>(ORDER));
+        return (B)this;
+    }
+
+    public final B chartBackground(final Paint BACKGROUND) {
+        properties.put("chartBackground", new SimpleObjectProperty<>(BACKGROUND));
         return (B)this;
     }
 
@@ -180,6 +185,8 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
                 CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
             } else if ("order".equals(key)) {
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
+            } else if ("chartBackground".equals(key)) {
+                CONTROL.setChartBackground(((ObjectProperty<Paint>) properties.get(key)).get());
             }
         }
         return CONTROL;

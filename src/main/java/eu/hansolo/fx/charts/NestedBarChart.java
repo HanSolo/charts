@@ -35,6 +35,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +52,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Time: 13:35
  */
 @DefaultProperty("children")
-public class NestedBarChart extends Region {
+public class NestedBarChart extends Region implements ChartArea {
     private static final double                                       PREFERRED_WIDTH  = 250;
     private static final double                                       PREFERRED_HEIGHT = 150;
     private static final double                                       MINIMUM_WIDTH    = 50;
@@ -60,6 +62,8 @@ public class NestedBarChart extends Region {
     private              double                                       size;
     private              double                                       width;
     private              double                                       height;
+    private              Paint                                        _chartBackground;
+    private              ObjectProperty<Paint>                        chartBackground;
     private              Canvas                                       canvas;
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
@@ -73,19 +77,23 @@ public class NestedBarChart extends Region {
 
     // ******************** Constructors **************************************
     public NestedBarChart() {
-        this(new ArrayList<>());
+        this(new ArrayList<>(), Color.TRANSPARENT);
     }
     public NestedBarChart(final ChartItemSeries<ChartItem>... SERIES) {
-        this(Arrays.asList(SERIES));
+        this(Arrays.asList(SERIES), Color.TRANSPARENT);
     }
     public NestedBarChart(final List<ChartItemSeries<ChartItem>> SERIES) {
-        width        = PREFERRED_WIDTH;
-        height       = PREFERRED_HEIGHT;
-        size         = PREFERRED_HEIGHT;
-        series       = FXCollections.observableArrayList(SERIES);
-        _order       = Order.DESCENDING;
-        clickHandler = e -> checkForClick(e);
-        listeners    = new CopyOnWriteArrayList<>();
+        this(SERIES, Color.TRANSPARENT);
+    }
+    public NestedBarChart(final List<ChartItemSeries<ChartItem>> SERIES, final Paint BACKGROUND) {
+        width            = PREFERRED_WIDTH;
+        height           = PREFERRED_HEIGHT;
+        size             = PREFERRED_HEIGHT;
+        series           = FXCollections.observableArrayList(SERIES);
+        _order           = Order.DESCENDING;
+        _chartBackground = BACKGROUND;
+        clickHandler     = e -> checkForClick(e);
+        listeners        = new CopyOnWriteArrayList<>();
         initGraphics();
         registerListeners();
     }
@@ -196,6 +204,27 @@ public class NestedBarChart extends Region {
         return order;
     }
 
+    public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
+    public void setChartBackground(final Paint PAINT) {
+        if (null == chartBackground) {
+            _chartBackground = PAINT;
+            redraw();
+        } else {
+            chartBackground.set(PAINT);
+        }
+    }
+    public ObjectProperty<Paint> chartBackgroundProperty() {
+        if (null == chartBackground) {
+            chartBackground = new ObjectPropertyBase<Paint>(_chartBackground) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return NestedBarChart.this; }
+                @Override public String getName() { return "chartBackground"; }
+            };
+            _chartBackground = null;
+        }
+        return chartBackground;
+    }
+
     public void checkForClick(final MouseEvent EVT) {
         final double X = EVT.getX();
         final double Y = EVT.getY();
@@ -263,6 +292,9 @@ public class NestedBarChart extends Region {
 
     private void drawChart() {
         ctx.clearRect(0, 0, width, height);
+        ctx.setFill(getChartBackground());
+        ctx.fillRect(0, 0, width, height);
+
         long noOfBars       = series.size();
         double spacer       = width * 0.05;
         double mainBarWidth = (width - (spacer * (noOfBars - 1))) / noOfBars;

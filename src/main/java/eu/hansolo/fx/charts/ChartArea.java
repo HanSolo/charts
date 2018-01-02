@@ -24,6 +24,6 @@ import javafx.scene.paint.Paint;
  */
 public interface ChartArea {
 
-    Paint getChartBackgroundPaint();
-    void  setChartBackgroundPaint(Paint paint);
+    Paint getChartBackground();
+    void setChartBackground(Paint paint);
 }

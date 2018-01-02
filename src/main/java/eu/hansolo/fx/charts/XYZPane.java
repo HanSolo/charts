@@ -48,8 +48,8 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
     private              double                width;
     private              double                height;
     private              Pane                  pane;
-    private              Paint                 _chartBackgroundPaint;
-    private              ObjectProperty<Paint> chartBackgroundPaint;
+    private              Paint                 _chartBackground;
+    private              ObjectProperty<Paint> chartBackground;
     private              List<XYZSeries<T>>    listOfSeries;
     private              Canvas                canvas;
     private              GraphicsContext       ctx;
@@ -76,19 +76,19 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
     }
     public XYZPane(final Paint BACKGROUND, final XYZSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio           = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect            = false;
-        _chartBackgroundPaint = BACKGROUND;
-        listOfSeries          = FXCollections.observableArrayList(SERIES);
-        scaleX                = 1;
-        scaleY                = 1;
-        scaleZ                = 1;
-        _lowerBoundX          = 0;
-        _upperBoundX          = 100;
-        _lowerBoundY          = 0;
-        _upperBoundY          = 100;
-        _lowerBoundZ          = 0;
-        _upperBoundZ          = 100;
+        aspectRatio      = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect       = false;
+        _chartBackground = BACKGROUND;
+        listOfSeries     = FXCollections.observableArrayList(SERIES);
+        scaleX           = 1;
+        scaleY           = 1;
+        scaleZ           = 1;
+        _lowerBoundX     = 0;
+        _upperBoundX     = 100;
+        _lowerBoundY     = 0;
+        _upperBoundY     = 100;
+        _lowerBoundZ     = 0;
+        _upperBoundZ     = 100;
 
         initGraphics();
         registerListeners();
@@ -134,25 +134,25 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public Paint getChartBackgroundPaint() { return null == chartBackgroundPaint ? _chartBackgroundPaint : chartBackgroundPaint.get(); }
-    public void setChartBackgroundPaint(final Paint PAINT) {
-        if (null == chartBackgroundPaint) {
-            _chartBackgroundPaint = PAINT;
+    public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
+    public void setChartBackground(final Paint PAINT) {
+        if (null == chartBackground) {
+            _chartBackground = PAINT;
             redraw();
         } else {
-            chartBackgroundPaint.set(PAINT);
+            chartBackground.set(PAINT);
         }
     }
-    public ObjectProperty<Paint> chartBackgroundPaintProperty() {
-        if (null == chartBackgroundPaint) {
-            chartBackgroundPaint = new ObjectPropertyBase<Paint>(_chartBackgroundPaint) {
+    public ObjectProperty<Paint> chartBackgroundProperty() {
+        if (null == chartBackground) {
+            chartBackground = new ObjectPropertyBase<Paint>(_chartBackground) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return XYZPane.this; }
-                @Override public String getName() { return "chartBackgroundPaint"; }
+                @Override public String getName() { return "chartBackground"; }
             };
-            _chartBackgroundPaint = null;
+            _chartBackground = null;
         }
-        return chartBackgroundPaint;
+        return chartBackground;
     }
 
     public double getLowerBoundX() { return null == lowerBoundX ? _lowerBoundX : lowerBoundX.get(); }
@@ -287,7 +287,7 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
         if (null == listOfSeries || listOfSeries.isEmpty()) return;
 
         ctx.clearRect(0, 0, width, height);
-        ctx.setFill(getChartBackgroundPaint());
+        ctx.setFill(getChartBackground());
         ctx.fillRect(0, 0, width, height);
 
         listOfSeries.forEach(series -> {
