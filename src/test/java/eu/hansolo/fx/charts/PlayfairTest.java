@@ -89,13 +89,13 @@ public class PlayfairTest extends Application {
         xySeries2.setPointColor(item2Color);
 
         xySeries1.setStroke(item1Color);
-        //xySeries1.setFill(Color.rgb(0, 200, 0, 0.35));
+        //xySeries1.setFill(Color.colorToRGB(0, 200, 0, 0.35));
         xySeries1.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
                                              new Stop(0, Color.rgb(0, 200, 0, 0.75)),
                                              new Stop(1, Color.rgb(0, 200, 0, 0.25))));
 
         xySeries2.setStroke(item2Color);
-        //xySeries2.setFill(Color.rgb(200, 0, 0, 0.35));
+        //xySeries2.setFill(Color.colorToRGB(200, 0, 0, 0.35));
         xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
                                              new Stop(0, Color.rgb(200, 0, 0, 0.75)),
                                              new Stop(1, Color.rgb(200, 0, 0, 0.25))));
