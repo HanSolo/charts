@@ -29,7 +29,7 @@ public class PixelMatrixEvent {
 
     // ******************** Constructors **************************************
     public PixelMatrixEvent(final int X, final int Y, final double MOUSE_X, final double MOUSE_Y) {
-        this(X, Y, MOUSE_X, MOUSE_Y, EventType.CHANGED);
+        this(X, Y, MOUSE_X, MOUSE_Y, EventType.UPDATE);
     }
     public PixelMatrixEvent(final int X, final int Y, final double MOUSE_X, final double MOUSE_Y, final EventType TYPE) {
         this.X              = X;
