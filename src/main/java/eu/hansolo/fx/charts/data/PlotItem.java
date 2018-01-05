@@ -28,6 +28,7 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,15 +40,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class PlotItem implements Item, Comparable<PlotItem>{
-    private final ItemEvent               UPDATE_EVENT = new ItemEvent(PlotItem.this, EventType.UPDATE);
+    private final ItemEvent               ITEM_EVENT = new ItemEvent(PlotItem.this, EventType.UPDATE);
     private       String                  _name;
     private       StringProperty          name;
     private       double                  _value;
     private       DoubleProperty          value;
     private       String                  _description;
     private       StringProperty          description;
-    private       Color                   _fillColor;
-    private       ObjectProperty<Color>   fillColor;
+    private       Color                   _fill;
+    private       ObjectProperty<Color>   fill;
+    private       Color                   _stroke;
+    private       ObjectProperty<Color>   stroke;
     private       Symbol                  _symbol;
     private       ObjectProperty<Symbol>  symbol;
     private       Map<PlotItem, Double>   outgoing;
@@ -69,11 +72,12 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public PlotItem(final String NAME, final double VALUE, final Color COLOR) {
         this(NAME, VALUE, "", COLOR);
     }
-    public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color COLOR) {
+    public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL) {
         _name        = NAME;
         _value       = VALUE;
         _description = DESCRIPTION;
-        _fillColor   = COLOR;
+        _fill        = FILL;
+        _stroke      = Color.TRANSPARENT;
         _symbol      = Symbol.NONE;
         level        = -1;
         outgoing     = new LinkedHashMap<>();
@@ -87,7 +91,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -95,7 +99,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -108,7 +112,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public void setValue(final double VALUE) {
         if (null == value) {
             _value = VALUE;
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             value.set(VALUE);
         }
@@ -116,7 +120,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -128,7 +132,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public void setDescription(final String DESCRIPTION) {
         if (null == description) {
             _description = DESCRIPTION;
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             description.set(DESCRIPTION);
         }
@@ -136,7 +140,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public StringProperty descriptionProperty() {
         if (null == description) {
             description = new StringPropertyBase(_description) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "description"; }
             };
@@ -145,32 +149,53 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         return description;
     }
 
-    public Color getFillColor() { return null == fillColor ? _fillColor : fillColor.get(); }
-    public void setFillColor(final Color COLOR) {
-        if (null == fillColor) {
-            _fillColor = COLOR;
-            fireItemEvent(UPDATE_EVENT);
+    @Override public Color getFill() { return null == fill ? _fill : fill.get(); }
+    public void setFill(final Color FILL) {
+        if (null == fill) {
+            _fill = FILL;
+            fireItemEvent(ITEM_EVENT);
         } else {
-            fillColor.set(COLOR);
+            fill.set(FILL);
         }
     }
-    public ObjectProperty<Color> fillColorProperty() {
-        if (null == fillColor) {
-            fillColor = new ObjectPropertyBase<Color>(_fillColor) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+    public ObjectProperty<Color> fillProperty() {
+        if (null == fill) {
+            fill = new ObjectPropertyBase<Color>(_fill) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
-                @Override public String getName() { return "fillColor"; }
+                @Override public String getName() { return "fill"; }
             };
-            _fillColor = null;
+            _fill = null;
         }
-        return fillColor;
+        return fill;
+    }
+
+    @Override public Color getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Color STROKE) {
+        if (null == stroke) {
+            _stroke = STROKE;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            stroke.set(STROKE);
+        }
+    }
+    public ObjectProperty<Color> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<Color>(_stroke) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "stroke"; }
+            };
+            _stroke = null;
+        }
+        return stroke;
     }
 
     @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
     @Override public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -178,7 +203,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() {  return PlotItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -197,26 +222,26 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         outgoing.clear();
         outgoing.putAll(OUTGOING);
         establishConnections();
-        fireItemEvent(UPDATE_EVENT);
+        fireItemEvent(ITEM_EVENT);
     }
     public void addToOutgoing(final PlotItem ITEM, final double VALUE) {
         if (!outgoing.containsKey(ITEM)) {
             outgoing.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
             establishConnections();
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         }
     }
     public void removeFromOutgoing(final PlotItem ITEM) {
         if (outgoing.containsKey(ITEM)) {
             ITEM.removeFromIncoming(PlotItem.this);
             outgoing.remove(ITEM);
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         }
     }
     public void clearOutgoing() {
         outgoing.forEach((item, value) -> item.removeFromIncoming(PlotItem.this));
         outgoing.clear();
-        fireItemEvent(UPDATE_EVENT);
+        fireItemEvent(ITEM_EVENT);
     }
     public boolean hasOutgoing() { return outgoing.size() > 0; }
 
@@ -224,23 +249,23 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     protected void setIncoming(final Map<PlotItem, Double> INCOMING) {
         incoming.clear();
         incoming.putAll(INCOMING);
-        fireItemEvent(UPDATE_EVENT);
+        fireItemEvent(ITEM_EVENT);
     }
     protected void addToIncoming(final PlotItem ITEM, final double VALUE) {
         if (!incoming.containsKey(ITEM)) {
             incoming.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         }
     }
     protected void removeFromIncoming(final PlotItem ITEM) {
         if (incoming.containsKey(ITEM)) {
             incoming.remove(ITEM);
-            fireItemEvent(UPDATE_EVENT);
+            fireItemEvent(ITEM_EVENT);
         }
     }
     protected void clearIncoming() {
         incoming.clear();
-        fireItemEvent(UPDATE_EVENT);
+        fireItemEvent(ITEM_EVENT);
     }
     public boolean hasIncoming() { return incoming.size() > 0 ; }
 

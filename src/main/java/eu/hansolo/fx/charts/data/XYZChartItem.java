@@ -26,6 +26,7 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Color;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -41,31 +42,34 @@ public class XYZChartItem implements XYZItem {
     private DoubleProperty                          z;
     private String                                  _name;
     private StringProperty                          name;
-    private Color                                   _color;
-    private ObjectProperty<Color>                   color;
+    private Color                                   _fill;
+    private ObjectProperty<Color>                   fill;
+    private Color                                   _stroke;
+    private ObjectProperty<Color>                   stroke;
     private Symbol                                  _symbol;
     private ObjectProperty<Symbol>                  symbol;
 
 
     // ******************** Constructors **********************************
     public XYZChartItem() {
-        this(0, 0, 0, "", Color.RED, Symbol.CIRCLE);
+        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
     }
     public XYZChartItem(final double X, final double Y, final double Z) {
-        this(X, Y, Z, "", Color.RED, Symbol.CIRCLE);
+        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED, Symbol.CIRCLE);
+        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
     }
-    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color COLOR) {
-        this(X, Y, Z, NAME, COLOR, Symbol.CIRCLE);
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL) {
+        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.CIRCLE);
     }
-    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color COLOR, final Symbol SYMBOL) {
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
         _x        = X;
         _y        = Y;
         _z        = Z;
         _name     = NAME;
-        _color    = COLOR;
+        _fill     = FILL;
+        _stroke   = STROKE;
         _symbol   = SYMBOL;
         listeners = new CopyOnWriteArrayList<>();
     }
@@ -153,25 +157,46 @@ public class XYZChartItem implements XYZItem {
         return name;
     }
 
-    @Override public Color getFillColor() { return null == color ? _color : color.get(); }
-    public void setColor(final Color COLOR) {
-        if (null == color) {
-            _color = COLOR;
+    @Override public Color getFill() { return null == fill ? _fill : fill.get(); }
+    public void setFill(final Color FILL) {
+        if (null == fill) {
+            _fill = FILL;
             fireItemEvent(ITEM_EVENT);
         } else {
-            color.set(COLOR);
+            fill.set(FILL);
         }
     }
-    public ObjectProperty<Color> colorProperty() {
-        if (null == color) {
-            color = new ObjectPropertyBase<Color>(_color) {
+    public ObjectProperty<Color> fillProperty() {
+        if (null == fill) {
+            fill = new ObjectPropertyBase<Color>(_fill) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return XYZChartItem.this; }
-                @Override public String getName() { return "color"; }
+                @Override public String getName() { return "fill"; }
             };
-            _color = null;
+            _fill = null;
         }
-        return color;
+        return fill;
+    }
+
+    @Override public Color getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Color STROKE) {
+        if (null == stroke) {
+            _stroke = STROKE;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            stroke.set(STROKE);
+        }
+    }
+    public ObjectProperty<Color> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<Color>(_stroke) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
+                @Override public String getName() { return "stroke"; }
+            };
+            _stroke = null;
+        }
+        return stroke;
     }
 
     @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
@@ -212,7 +237,6 @@ public class XYZChartItem implements XYZItem {
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
                                   .append("  \"z\":").append(getZ()).append(",\n")
-                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();

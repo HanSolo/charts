@@ -57,12 +57,12 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
         return (B)this;
     }
 
-    public final B fillColor(final Color COLOR) {
+    public final B fill(final Color COLOR) {
         properties.put("fillColor", new SimpleObjectProperty(COLOR));
         return (B)this;
     }
 
-    public final B strokeColor(final Color COLOR) {
+    public final B stroke(final Color COLOR) {
         properties.put("strokeColor", new SimpleObjectProperty(COLOR));
         return (B)this;
     }
@@ -100,10 +100,10 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setName(((StringProperty) properties.get(key)).get());
             } else if ("value".equals(key)) {
                 ITEM.setValue(((DoubleProperty) properties.get(key)).get());
-            } else if("fillColor".equals(key)) {
-                ITEM.setFillColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("strokeColor".equals(key)) {
-                ITEM.setStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if("fill".equals(key)) {
+                ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if("stroke".equals(key)) {
+                ITEM.setStroke(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("textColor".equals(key)) {
                 ITEM.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("timestamp".equals(key)) {

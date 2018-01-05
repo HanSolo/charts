@@ -34,6 +34,7 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.time.Instant;
@@ -53,10 +54,10 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       double                  _value;
     private       DoubleProperty          value;
     private       double                  oldValue;
-    private       Color                   _fillColor;
-    private       ObjectProperty<Color>   fillColor;
-    private       Color                   _strokeColor;
-    private       ObjectProperty<Color>   strokeColor;
+    private       Color                   _fill;
+    private       ObjectProperty<Color>   fill;
+    private       Color                   _stroke;
+    private       ObjectProperty<Color>   stroke;
     private       Color                   _textColor;
     private       ObjectProperty<Color>   textColor;
     private       Instant                 _timestamp;
@@ -95,30 +96,30 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ChartItem(final String NAME, final double VALUE, final Instant TIMESTAMP) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), true, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), true, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, true, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR, final Instant TIMESTAMP) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, true, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
-        this(NAME, VALUE, FILL_COLOR, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL_COLOR, final Color STROKE_COLOR, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         _name             = NAME;
         _value            = VALUE;
         oldValue          = 0;
-        _fillColor        = FILL_COLOR;
-        _strokeColor      = STROKE_COLOR;
+        _fill             = FILL;
+        _stroke           = STROKE;
         _textColor        = TEXT_COLOR;
         _timestamp        = TIMESTAMP;
         _symbol           = Symbol.NONE;
@@ -210,46 +211,46 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
     public double getOldValue() { return oldValue; }
 
-    @Override public Color getFillColor() { return null == fillColor ? _fillColor : fillColor.get(); }
-    public void setFillColor(final Color COLOR) {
-        if (null == fillColor) {
-            _fillColor = COLOR;
+    @Override public Color getFill() { return null == fill ? _fill : fill.get(); }
+    public void setFill(final Color FILL) {
+        if (null == fill) {
+            _fill = FILL;
             fireItemEvent(UPDATE_EVENT);
         } else {
-            fillColor.set(COLOR);
+            fill.set(FILL);
         }
     }
-    public ObjectProperty<Color> fillColorProperty() {
-        if (null == fillColor) {
-            fillColor = new ObjectPropertyBase<Color>(_fillColor) {
+    public ObjectProperty<Color> fillProperty() {
+        if (null == fill) {
+            fill = new ObjectPropertyBase<Color>(_fill) {
                 @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
-                @Override public String getName() { return "fillColor"; }
+                @Override public String getName() { return "fill"; }
             };
-            _fillColor = null;
+            _fill = null;
         }
-        return fillColor;
+        return fill;
     }
 
-    public Color getStrokeColor() { return null == strokeColor ? _strokeColor : strokeColor.get(); }
-    public void setStrokeColor(final Color COLOR) {
-        if (null == strokeColor) {
-            _strokeColor = COLOR;
+    public Color getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Color STROKE) {
+        if (null == stroke) {
+            _stroke = STROKE;
             fireItemEvent(UPDATE_EVENT);
         } else {
-            strokeColor.set(COLOR);
+            stroke.set(STROKE);
         }
     }
-    public ObjectProperty<Color> strokeColorProperty() {
-        if (null == strokeColor) {
-            strokeColor = new ObjectPropertyBase<Color>(_strokeColor) {
+    public ObjectProperty<Color> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<Color>(_stroke) {
                 @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
-                @Override public String getName() { return "strokeColor"; }
+                @Override public String getName() { return "stroke"; }
             };
-            _strokeColor = null;
+            _stroke = null;
         }
-        return strokeColor;
+        return stroke;
     }
 
     public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
@@ -346,8 +347,6 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":").append(name).append(",\n")
                                   .append("  \"value\":").append(value).append(",\n")
-                                  .append("  \"fillColor\":").append(fillColor.toString().replace("0x", "#")).append(",\n")
-                                  .append("  \"strokeColor\":").append(strokeColor.toString().replace("0x", "#")).append(",\n")
                                   .append("  \"timestamp\":").append(getTimestamp().toEpochMilli()).append(",\n")
                                   .append("}")
                                   .toString();

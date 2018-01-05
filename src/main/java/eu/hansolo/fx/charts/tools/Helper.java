@@ -17,9 +17,13 @@
 package eu.hansolo.fx.charts.tools;
 
 import eu.hansolo.fx.charts.TickLabelOrientation;
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
+import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.fx.charts.data.XYItem;
 import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
@@ -29,6 +33,9 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Polygon;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -41,6 +48,8 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
@@ -880,5 +889,46 @@ public class Helper {
     public static final void enableNode(final Node NODE, final boolean ENABLE) {
         NODE.setVisible(ENABLE);
         NODE.setManaged(ENABLE);
+    }
+
+    public static final void orderChartItems(final List<ChartItem> ITEMS, final Order ORDER) {
+        if (Order.ASCENDING == ORDER) {
+            Collections.sort(ITEMS, Comparator.comparingDouble(ChartItem::getValue));
+        } else {
+            Collections.sort(ITEMS, Comparator.comparingDouble(ChartItem::getValue).reversed());
+        }
+    }
+
+    public static final void orderXYChartItemsByX(final List<XYChartItem> ITEMS, final Order ORDER) {
+        if (Order.ASCENDING == ORDER) {
+            Collections.sort(ITEMS, Comparator.comparingDouble(XYChartItem::getX));
+        } else {
+            Collections.sort(ITEMS, Comparator.comparingDouble(XYChartItem::getX).reversed());
+        }
+    }
+
+    public static final CtxDimension getTextDimension(final String TEXT, final Font FONT) {
+        Text text = new Text(TEXT);
+        text.setFont(FONT);
+        double textWidth  = text.getBoundsInLocal().getWidth();
+        double textHeight = text.getBoundsInLocal().getHeight();
+        text = null;
+        CtxDimension dim = new CtxDimension(textWidth, textHeight);
+        return dim;
+    }
+
+    public static final void drawTextWithBackground(final GraphicsContext CTX, final String TEXT, final Font FONT, final Color TEXT_BACKGROUND, final Color TEXT_FILL, final double X, final double Y) {
+        CtxDimension dim = getTextDimension(TEXT, FONT);
+        double textWidth  = dim.getWidth() * 1.2;
+        double textHeight = dim.getHeight();
+        CTX.save();
+        CTX.setFont(FONT);
+        CTX.setTextBaseline(VPos.CENTER);
+        CTX.setTextAlign(TextAlignment.CENTER);
+        CTX.setFill(TEXT_BACKGROUND);
+        CTX.fillRect(X - textWidth * 0.5, Y - textHeight * 0.5, textWidth, textHeight);
+        CTX.setFill(TEXT_FILL);
+        CTX.fillText(TEXT, X, Y);
+        CTX.restore();
     }
 }

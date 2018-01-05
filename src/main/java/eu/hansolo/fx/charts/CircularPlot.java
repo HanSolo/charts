@@ -478,7 +478,7 @@ public class CircularPlot extends Region {
 
             // Draw outer circle segments
             ctx.setLineWidth(mainLineWidth);
-            ctx.setStroke(item.getFillColor());
+            ctx.setStroke(item.getFill());
             ctx.strokeArc(chartOffset, chartOffset, chartSize, chartSize, -angle, -angleRange, ArcType.OPEN);
 
             // Draw sum of outgoing at the end of the segment
@@ -588,7 +588,7 @@ public class CircularPlot extends Region {
 
                 // Draw flow
                 Path path = new Path();
-                path.setFill(Helper.getColorWithOpacity(item.getFillColor(), getConnectionOpacity()));
+                path.setFill(Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity()));
                 path.moveTo(p0.getX(), p0.getY());
                 path.quadraticCurveTo(p4.getX(), p4.getY(), p2.getX(), p2.getY());             // curve from p4 -> p4 -> p2
                 if (getShowFlowDirection()) {

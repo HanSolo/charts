@@ -437,7 +437,7 @@ public class CoxcombChart extends Region {
             ctx.save();
             // Draw segment
             ctx.setLineWidth(barWidth);
-            ctx.setStroke(item.getFillColor());
+            ctx.setStroke(item.getFill());
             ctx.strokeArc(xy, xy, wh, wh, startAngle, angle, ArcType.OPEN);
 
             // Set Segment Clipping
@@ -506,7 +506,7 @@ public class CoxcombChart extends Region {
                 tx = center + radius * Math.cos(Math.toRadians(endAngle - angle * 0.5));
                 ty = center - radius * Math.sin(Math.toRadians(endAngle - angle * 0.5));
                 if (isAutoColor) {
-                    ctx.setFill(Helper.isDark(item.getFillColor()) ? Color.WHITE : Color.BLACK);
+                    ctx.setFill(Helper.isDark(item.getFill()) ? Color.WHITE : Color.BLACK);
                 } else {
                     ctx.setFill(textColor);
                 }

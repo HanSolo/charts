@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.SeriesEvent;
@@ -163,6 +164,8 @@ public abstract class Series<T extends Item> {
         }
         return fill;
     }
+
+    public void setSymbol(final Symbol SYMBOL) { items.forEach(item -> item.setSymbol(SYMBOL)); }
 
     public void setPointColor(final Color COLOR) {}
 

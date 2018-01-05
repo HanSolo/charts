@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * Copyright (c) 2018 by Gerrit Grunwald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.data;
+package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.Symbol;
-import javafx.scene.paint.Color;
+public enum PolarTickStep {
+    FIVE(5), FIFTEEN(15), FOURTY_FIVE(45), NINETY(90);
 
+    private final double VALUE;
 
-public interface Item {
+    PolarTickStep(final double VALUE) {
+        this.VALUE = VALUE;
+    }
 
-    String getName();
-
-    Color getFill();
-
-    Color getStroke();
-
-    Symbol getSymbol();
-    void setSymbol(Symbol symbol);
+    public double get() { return VALUE; }
 }

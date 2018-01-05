@@ -583,7 +583,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         Color darkColor   = getDarkTextColor();
         root.stream().forEach(node -> {
             T       item          = node.getItem();
-            boolean darkFillColor = Helper.isDark(item.getFillColor());
+            boolean darkFillColor = Helper.isDark(item.getFill());
             boolean darkTextColor = Helper.isDark(item.getTextColor());
             if (darkFillColor && darkTextColor) { item.setTextColor(brightColor); }
             if (!darkFillColor && !darkTextColor) { item.setTextColor(darkColor); }
@@ -645,13 +645,13 @@ public class SunburstChart<T extends ChartItem> extends Region {
             for (TreeNode node : nodesAtLevel) {
                 ChartItem segmentData  = node.getItem();
                 double    segmentAngle = node.getParentAngle() * node.getPercentage();
-                Color     segmentColor = getUseColorFromParent() ? node.getMyRoot().getItem().getFillColor() : segmentData.getFillColor();
+                Paint     segmentColor = getUseColorFromParent() ? node.getMyRoot().getItem().getFill() : segmentData.getFill();
 
                 segmentStartAngle = 90 + segmentEndAngle;
                 segmentEndAngle  -= segmentAngle;
 
                 // Only draw if segment fill color is not TRANSPARENT
-                if (!Color.TRANSPARENT.equals(segmentData.getFillColor())) {
+                if (!Color.TRANSPARENT.equals(segmentData.getFill())) {
                     double value = segmentData.getValue();
 
                     if (isInteractive) {
@@ -712,7 +712,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         segmentPane.getChildren().setAll(segments);
     }
 
-    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Color FILL, final Color STROKE, final TreeNode NODE) {
+    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Paint FILL, final Color STROKE, final TreeNode NODE) {
         double  startAngleRad = Math.toRadians(START_ANGLE + 90);
         double  endAngleRad   = Math.toRadians(END_ANGLE + 90);
         boolean largeAngle    = Math.abs(END_ANGLE - START_ANGLE) > 180.0;

@@ -323,7 +323,7 @@ public class NestedBarChart extends Region implements ChartArea {
             // Draw sub bars within main bar
             for (ChartItem item : s.getItems()) {
                 double innerBarHeight = item.getValue() * stepY;
-                ctx.setFill(item.getFillColor());
+                ctx.setFill(item.getFill());
                 ctx.fillRect(minX, height - innerBarHeight, innerBarWidth, innerBarHeight);
                 minX += innerBarWidth;
             }

@@ -279,6 +279,19 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
     public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
     public double getRangeZ() { return getUpperBoundZ() - getLowerBoundZ(); }
 
+    public double getDataMinX() { return listOfSeries.stream().mapToDouble(XYZSeries::getMinX).min().getAsDouble(); }
+    public double getDataMaxX() { return listOfSeries.stream().mapToDouble(XYZSeries::getMaxX).max().getAsDouble(); }
+
+    public double getDataMinY() { return listOfSeries.stream().mapToDouble(XYZSeries::getMinY).min().getAsDouble(); }
+    public double getDataMaxY() { return listOfSeries.stream().mapToDouble(XYZSeries::getMaxY).max().getAsDouble(); }
+
+    public double getDataMinZ() { return listOfSeries.stream().mapToDouble(XYZSeries::getMinZ).min().getAsDouble(); }
+    public double getDataMaxZ() { return listOfSeries.stream().mapToDouble(XYZSeries::getMaxZ).max().getAsDouble(); }
+
+    public double getDataRangeX() { return getDataMaxX() - getDataMinX(); }
+    public double getDataRangeY() { return getDataMaxY() - getDataMinY(); }
+    public double getDataRangeZ() { return getDataMaxZ() - getDataMinZ(); }
+
     public List<XYZSeries<T>> getListOfSeries() { return listOfSeries; }
 
 
@@ -309,7 +322,7 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
             double z     = (item.getZ() - LOWER_BOUND_Z) * scaleZ;
             double halfZ = z * 0.5;
             ctx.setStroke(Color.TRANSPARENT);
-            ctx.setFill(item.getFillColor());
+            ctx.setFill(item.getFill());
             ctx.fillOval(x - halfZ, height - y - halfZ, z, z);
 
         }

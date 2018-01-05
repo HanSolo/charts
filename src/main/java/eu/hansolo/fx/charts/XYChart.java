@@ -74,6 +74,7 @@ public class XYChart<T extends XYItem> extends Region {
     }
     public XYChart(final XYPane<T> XY_PANE, final Grid GRID, final Axis... AXIS) {
         if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
+        if (XY_PANE.containsPolarChart()) { throw new IllegalArgumentException("XYPane contains Polar chart type"); }
         xyPane = XY_PANE;
         axis   = Arrays.asList(AXIS);
         grid   = GRID;
@@ -110,8 +111,6 @@ public class XYChart<T extends XYItem> extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        // add listeners to your propertes like
-        //value.addListener(o -> handleControlPropertyChanged("VALUE"));
     }
 
 

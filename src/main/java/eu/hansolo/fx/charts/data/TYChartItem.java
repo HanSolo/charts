@@ -40,8 +40,8 @@ public class TYChartItem extends XYChartItem {
     public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color COLOR) {
         this(T, Y, NAME, COLOR, Symbol.CIRCLE);
     }
-    public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color COLOR, final Symbol SYMBOL) {
-        super(T.toEpochSecond(Helper.getZoneOffset()), Y, NAME, COLOR, SYMBOL);
+    public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color FILL, final Symbol SYMBOL) {
+        super(T.toEpochSecond(Helper.getZoneOffset()), Y, NAME, FILL, Color.TRANSPARENT, SYMBOL);
         _t = T;
     }
 
@@ -74,7 +74,6 @@ public class TYChartItem extends XYChartItem {
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
                                   .append("  \"t\":").append(getT()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
-                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();

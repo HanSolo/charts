@@ -17,23 +17,31 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Paint;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,8 +49,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import static eu.hansolo.fx.charts.ChartType.SMOOTH_POLAR;
 import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
@@ -50,39 +60,47 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
  * Created by hansolo on 16.07.17.
  */
 public class XYPane<T extends XYItem> extends Region implements ChartArea {
-    private static final double                PREFERRED_WIDTH  = 250;
-    private static final double                PREFERRED_HEIGHT = 250;
-    private static final double                MINIMUM_WIDTH    = 0;
-    private static final double                MINIMUM_HEIGHT   = 0;
-    private static final double                MAXIMUM_WIDTH    = 4096;
-    private static final double                MAXIMUM_HEIGHT   = 4096;
-    private static final double                MIN_SYMBOL_SIZE  = 2;
-    private static final double                MAX_SYMBOL_SIZE  = 6;
-    private static final int                   SUB_DIVISIONS    = 24;
-    private static       double                aspectRatio;
-    private              boolean               keepAspect;
-    private              double                size;
-    private              double                width;
-    private              double                height;
-    private              Paint                 _chartBackground;
-    private              ObjectProperty<Paint> chartBackground;
-    private              List<XYSeries<T>>     listOfSeries;
-    private              Canvas                canvas;
-    private              GraphicsContext       ctx;
-    private              double                scaleX;
-    private              double                scaleY;
-    private              double                symbolSize;
-    private              int                   noOfBands;
-    private              double                _lowerBoundX;
-    private              DoubleProperty        lowerBoundX;
-    private              double                _upperBoundX;
-    private              DoubleProperty        upperBoundX;
-    private              double                _lowerBoundY;
-    private              DoubleProperty        lowerBoundY;
-    private              double                _upperBoundY;
-    private              DoubleProperty        upperBoundY;
-    private              boolean               referenceZero;
-    private              Tooltip               tooltip;
+    private static final double                         PREFERRED_WIDTH  = 250;
+    private static final double                         PREFERRED_HEIGHT = 250;
+    private static final double                         MINIMUM_WIDTH    = 0;
+    private static final double                         MINIMUM_HEIGHT   = 0;
+    private static final double                         MAXIMUM_WIDTH    = 4096;
+    private static final double                         MAXIMUM_HEIGHT   = 4096;
+    private static final double                         MIN_SYMBOL_SIZE  = 2;
+    private static final double                         MAX_SYMBOL_SIZE  = 6;
+    private static final int                            SUB_DIVISIONS    = 24;
+    private static       double                         aspectRatio;
+    private              boolean                        keepAspect;
+    private              double                         size;
+    private              double                         width;
+    private              double                         height;
+    private              Paint                          _chartBackground;
+    private              ObjectProperty<Paint>          chartBackground;
+    private              List<XYSeries<T>>              listOfSeries;
+    private              Canvas                         canvas;
+    private              GraphicsContext                ctx;
+    private              double                         scaleX;
+    private              double                         scaleY;
+    private              double                         symbolSize;
+    private              int                            noOfBands;
+    private              double                         _lowerBoundX;
+    private              DoubleProperty                 lowerBoundX;
+    private              double                         _upperBoundX;
+    private              DoubleProperty                 upperBoundX;
+    private              double                         _lowerBoundY;
+    private              DoubleProperty                 lowerBoundY;
+    private              double                         _upperBoundY;
+    private              DoubleProperty                 upperBoundY;
+    private              boolean                        referenceZero;
+    private              Tooltip                        tooltip;
+    private              double                         _thresholdY;
+    private              DoubleProperty                 thresholdY;
+    private              boolean                        _thresholdYVisible;
+    private              BooleanProperty                thresholdYVisible;
+    private              Color                          _thresholdYColor;
+    private              ObjectProperty<Color>          thresholdYColor;
+    private              PolarTickStep                  _polarTickStep;
+    private              ObjectProperty<PolarTickStep>  polarTickStep;
 
 
     // ******************** Constructors **************************************
@@ -94,19 +112,23 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
     public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect      = false;
-        _chartBackground = BACKGROUND;
-        listOfSeries    = FXCollections.observableArrayList(SERIES);
-        scaleX          = 1;
-        scaleY          = 1;
-        symbolSize      = 2;
-        noOfBands       = clamp(1, 5, BANDS);
-        _lowerBoundX    = 0;
-        _upperBoundX    = 100;
-        _lowerBoundY    = 0;
-        _upperBoundY    = 100;
-        referenceZero   = true;
+        aspectRatio        = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect         = false;
+        _chartBackground   = BACKGROUND;
+        listOfSeries       = FXCollections.observableArrayList(SERIES);
+        scaleX             = 1;
+        scaleY             = 1;
+        symbolSize         = 2;
+        noOfBands          = clamp(1, 5, BANDS);
+        _lowerBoundX       = 0;
+        _upperBoundX       = 100;
+        _lowerBoundY       = 0;
+        _upperBoundY       = 100;
+        referenceZero      = true;
+        _thresholdY        = 100;
+        _thresholdYVisible = false;
+        _thresholdYColor   = Color.RED;
+        _polarTickStep     = PolarTickStep.FOURTY_FIVE;
 
         initGraphics();
         registerListeners();
@@ -272,8 +294,108 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
     public double getRangeX() {  return getUpperBoundX() - getLowerBoundX();  }
     public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
+
+    public double getDataMinX() { return listOfSeries.stream().mapToDouble(XYSeries::getMinX).min().getAsDouble(); }
+    public double getDataMaxX() { return listOfSeries.stream().mapToDouble(XYSeries::getMaxX).max().getAsDouble(); }
+
+    public double getDataMinY() { return listOfSeries.stream().mapToDouble(XYSeries::getMinY).min().getAsDouble(); }
+    public double getDataMaxY() { return listOfSeries.stream().mapToDouble(XYSeries::getMaxY).max().getAsDouble(); }
+
+    public double getDataRangeX() { return getDataMaxX() - getDataMinX(); }
+    public double getDataRangeY() { return getDataMaxY() - getDataMinY(); }
     
     public List<XYSeries<T>> getListOfSeries() { return listOfSeries; }
+
+    public double getThresholdY() { return null == thresholdY ? _thresholdY : thresholdY.get(); }
+    public void setThresholdY(final double THRESHOLD) {
+        if (null == thresholdY) {
+            _thresholdY = THRESHOLD;
+            redraw();
+        } else {
+            thresholdY.set(THRESHOLD);
+        }
+    }
+    public DoubleProperty thresholdYProperty() {
+        if (null == thresholdY) {
+            thresholdY = new DoublePropertyBase(_thresholdY) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "thresholdY"; }
+            };
+        }
+        return thresholdY;
+    }
+
+    public boolean isThresholdYVisible() { return null == thresholdYVisible ? _thresholdYVisible : thresholdYVisible.get(); }
+    public void setThresholdYVisible(final boolean VISIBLE) {
+        if (null == thresholdYVisible) {
+            _thresholdYVisible = VISIBLE;
+            redraw();
+        } else {
+            thresholdYVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty thresholdYVisibleProperty() {
+        if (null == thresholdYVisible) {
+            thresholdYVisible = new BooleanPropertyBase(_thresholdYVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "thresholdYVisible"; }
+            };
+        }
+        return thresholdYVisible;
+    }
+
+    public Color getThresholdYColor() { return null == thresholdYColor ? _thresholdYColor : thresholdYColor.get(); }
+    public void setThresholdYColor(final Color COLOR) {
+        if (null == thresholdYColor) {
+            _thresholdYColor = COLOR;
+            redraw();
+        } else {
+            thresholdYColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> thresholdYColorProperty() {
+        if (null == thresholdYColor) {
+            thresholdYColor = new ObjectPropertyBase<Color>(_thresholdYColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "thresholdYColor"; }
+            };
+            _thresholdYColor = null;
+        }
+        return thresholdYColor;
+    }
+
+    public PolarTickStep getPolarTickStep() { return null == polarTickStep ? _polarTickStep : polarTickStep.get(); }
+    public void setPolarTickStep(final PolarTickStep STEP) {
+        if (null == polarTickStep) {
+            _polarTickStep = STEP;
+            drawChart();
+        } else {
+            polarTickStep.set(STEP);
+        }
+    }
+    public ObjectProperty<PolarTickStep> polarTickStepProperty() {
+        if (null == polarTickStep) {
+            polarTickStep = new ObjectPropertyBase<PolarTickStep>() {
+                @Override protected void invalidated() { drawChart(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "polarTickStep"; }
+            };
+            _polarTickStep = null;
+        }
+        return polarTickStep;
+    }
+
+    public boolean containsPolarChart() {
+        for(XYSeries<T> series : listOfSeries) {
+            ChartType type = series.getChartType();
+            if (ChartType.POLAR == type ||
+                SMOOTH_POLAR == type) { return true; }
+        }
+        return false;
+    }
 
 
     // ******************** Draw Chart ****************************************
@@ -305,8 +427,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             }
         }
 
-
-        listOfSeries.forEach(series -> {
+        if (containsPolarChart()) {
+            drawPolarOverlay(getPolarTickStep().get());
+        }
+        for (XYSeries<T> series : listOfSeries) {
             final ChartType TYPE        = series.getChartType();
             final boolean   SHOW_POINTS = series.isShowPoints();
             switch(TYPE) {
@@ -317,8 +441,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 case SCATTER          : drawScatter(series) ;break;
                 case HORIZON          : drawHorizon(series, false); break;
                 case SMOOTHED_HORIZON : drawHorizon(series, true); break;
+                case POLAR            :
+                case SMOOTH_POLAR     : drawPolar(series); break;
             }
-        });
+        };
     }
 
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
@@ -370,7 +496,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getFillColor(), item.getSymbol());
+            drawSymbol(x, y, item.getFill(), item.getStroke(), item.getSymbol());
         }
     }
 
@@ -725,6 +851,143 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         if (SERIES_2.isShowPoints()) { drawSymbols(SERIES_2); }
     }
 
+    private void drawPolar(final XYSeries<T> SERIES) {
+        final double  CENTER_X      = 0.5 * size;
+        final double  CENTER_Y      = CENTER_X;
+        final double  CIRCLE_SIZE   = 0.9 * size;
+        final double  LOWER_BOUND_Y = getLowerBoundY();
+        final double  DATA_RANGE    = getRangeY();
+        final double  RANGE         = 0.35714 * CIRCLE_SIZE;
+        final double  OFFSET        = 0.14286 * CIRCLE_SIZE;
+        final int     NO_OF_ITEMS   = SERIES.getItems().size();
+        final boolean SHOW_POINTS   = SERIES.isShowPoints();
+
+        // draw the chart data
+        ctx.save();
+        if (SERIES.getFill() instanceof RadialGradient) {
+            ctx.setFill(new RadialGradient(0, 0, size  * 0.5, size * 0.5, size * 0.45, false, CycleMethod.NO_CYCLE, ((RadialGradient) SERIES.getFill()).getStops()));
+        } else {
+            ctx.setFill(SERIES.getFill());
+        }
+        ctx.setStroke(SERIES.getStroke());
+
+        double  radAngle = Math.toRadians(180);
+        Point[] points   = new Point[NO_OF_ITEMS + 1];
+
+        T       item     = SERIES.getItems().get(0);
+        double  r1       = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+        double  phi      = Math.toRadians(Helper.clamp(0.0, 360.0, item.getX()));
+        double  x        = CENTER_X + (-Math.sin(radAngle + phi) * r1);
+        double  y        = CENTER_Y + (+Math.cos(radAngle + phi) * r1);
+        points[0]        = new Point(x, y);
+
+        for (int i = 1 ; i < NO_OF_ITEMS  ;i++) {
+            item = SERIES.getItems().get(i);
+            r1   = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+            phi  = Math.toRadians(Helper.clamp(0.0, 360.0, item.getX()));
+            x = CENTER_X + (-Math.sin(radAngle + phi) * r1);
+            y = CENTER_Y + (+Math.cos(radAngle + phi) * r1);
+            points[i] = new Point(x, y);
+        }
+        points[points.length - 1] = points[0]; // last point == first point
+
+        if (SMOOTH_POLAR == SERIES.getChartType()) {
+            Point[] interpolatedPoints = Helper.subdividePoints(points, 16);
+            ctx.beginPath();
+            ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());
+            for (int i = 0 ; i < interpolatedPoints.length - 1 ; i++) {
+                Point point = interpolatedPoints[i];
+                ctx.lineTo(point.getX(), point.getY());
+            }
+            ctx.lineTo(interpolatedPoints[interpolatedPoints.length - 1].getX(), interpolatedPoints[interpolatedPoints.length - 1].getY());
+            ctx.closePath();
+        } else {
+            ctx.beginPath();
+            ctx.moveTo(points[0].getX(), points[0].getY());
+            for (int i = 0; i < points.length - 1; i++) {
+                Point point = points[i];
+                ctx.lineTo(point.getX(), point.getY());
+            }
+            ctx.lineTo(points[points.length - 1].getX(), points[points.length - 1].getY());
+            ctx.closePath();
+        }
+
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+
+        if (SHOW_POINTS) {
+            for (Point point : points) {
+                drawSymbol(point.getX(), point.getY(), item.getFill(), item.getStroke(), item.getSymbol());
+            }
+        }
+
+    }
+
+    private void drawPolarOverlay(final double ANGLE_STEP) {
+        final double CENTER_X      = 0.5 * size;
+        final double CENTER_Y      = CENTER_X;
+        final double CIRCLE_SIZE   = 0.90 * size;
+        final double DATA_RANGE    = getRangeY();
+        final double MIN_VALUE     = getDataMinY();
+        final double RANGE         = 0.35714 * CIRCLE_SIZE;
+        final double OFFSET        = 0.14286 * CIRCLE_SIZE;
+        final double NO_OF_SECTORS = 360.0 / ANGLE_STEP;
+
+        // draw concentric rings
+        ctx.setLineWidth(1);
+        ctx.setStroke(Color.GRAY);
+        double ringStepSize = size / 20.0;
+        double pos          = 0.5 * (size - CIRCLE_SIZE);
+        double ringSize     = CIRCLE_SIZE;
+        for (int i = 0 ; i < 11 ; i++) {
+            ctx.strokeOval(pos, pos, ringSize, ringSize);
+            pos      += ringStepSize;
+            ringSize -= 2 * ringStepSize;
+        }
+
+        // draw star lines
+        ctx.save();
+        for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
+            ctx.strokeLine(CENTER_X, 0.05 * size, CENTER_X, 0.5 * size);
+            Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, ANGLE_STEP);
+        }
+        ctx.restore();
+
+        // draw threshold line
+        if (isThresholdYVisible()) {
+            double r = ((getThresholdY() - MIN_VALUE) / DATA_RANGE);
+            ctx.setLineWidth(clamp(1d, 3d, size * 0.005));
+            ctx.setStroke(getThresholdYColor());
+            ctx.strokeOval(0.5 * size - OFFSET - r * RANGE, 0.5 * size - OFFSET - r * RANGE,
+                           2 * (r * RANGE + OFFSET), 2 * (r * RANGE + OFFSET));
+        }
+
+        ctx.setTextAlign(TextAlignment.CENTER);
+        ctx.setTextBaseline(VPos.CENTER);
+        ctx.setFill(Color.BLACK);
+
+        // draw min and max Text
+        Font   font         = Fonts.latoRegular(0.025 * size);
+        String minValueText = String.format(Locale.US, "%.0f", getLowerBoundY());
+        String maxValueText = String.format(Locale.US, "%.0f", getUpperBoundY());
+        ctx.save();
+        ctx.setFont(font);
+        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - size * 0.018);
+        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - CIRCLE_SIZE * 0.48);
+        ctx.restore();
+
+        // draw axis text
+        ctx.save();
+        ctx.setFont(Fonts.latoRegular(0.04 * size));
+        for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
+            ctx.fillText(String.format(Locale.US, "%.0f", i * ANGLE_STEP), CENTER_X, size * 0.02);
+            Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, ANGLE_STEP);
+        }
+        ctx.restore();
+    }
+
     private void drawPath(final Map<Integer, List<Point>> MAP_OF_BANDS, final double BAND_WIDTH, final List<Color> COLORS) {
         double oldX = 0;
         for (int band = 0 ; band < getNoOfBands() ; band++) {
@@ -839,30 +1102,36 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getFillColor(), item.getSymbol());
+            drawSymbol(x, y, item.getFill(), item.getStroke(), item.getSymbol());
         }
     }
 
-    private void drawSymbol(final double X, final double Y, final Color COLOR, final Symbol SYMBOL) {
+    private void drawSymbol(final double X, final double Y, final Paint FILL, final Paint STROKE, final Symbol SYMBOL) {
         double halfSymbolSize = symbolSize * 0.5;
         ctx.save();
         switch(SYMBOL) {
             case NONE:
                 break;
             case SQUARE:
-                ctx.setStroke(Color.TRANSPARENT);
-                ctx.setFill(COLOR);
+                ctx.setStroke(STROKE);
+                ctx.setFill(FILL);
                 ctx.fillRect(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
+                ctx.strokeRect(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
                 break;
             case TRIANGLE:
-                ctx.setStroke(COLOR);
-                ctx.setFill(null);
-                ctx.strokeLine(X, Y - halfSymbolSize, X + halfSymbolSize, Y + halfSymbolSize);
-                ctx.strokeLine(X + halfSymbolSize, Y + halfSymbolSize, X - halfSymbolSize, Y + halfSymbolSize);
-                ctx.strokeLine(X - halfSymbolSize, Y + halfSymbolSize, X, Y - halfSymbolSize);
+                ctx.setStroke(STROKE);
+                ctx.setFill(FILL);
+                ctx.beginPath();
+                ctx.moveTo(X, Y - halfSymbolSize);
+                ctx.lineTo(X + halfSymbolSize, Y + halfSymbolSize);
+                ctx.lineTo(X - halfSymbolSize, Y + halfSymbolSize);
+                ctx.lineTo(X, Y - halfSymbolSize);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
                 break;
             case STAR:
-                ctx.setStroke(COLOR);
+                ctx.setStroke(STROKE);
                 ctx.setFill(null);
                 ctx.strokeLine(X - halfSymbolSize, Y, X + halfSymbolSize, Y);
                 ctx.strokeLine(X, Y - halfSymbolSize, X, Y + halfSymbolSize);
@@ -870,16 +1139,17 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 ctx.strokeLine(X + halfSymbolSize, Y - halfSymbolSize, X - halfSymbolSize, Y + halfSymbolSize);
                 break;
             case CROSS:
-                ctx.setStroke(COLOR);
+                ctx.setStroke(STROKE);
                 ctx.setFill(null);
                 ctx.strokeLine(X - halfSymbolSize, Y, X + halfSymbolSize, Y);
                 ctx.strokeLine(X, Y - halfSymbolSize, X, Y + halfSymbolSize);
                 break;
             case CIRCLE:
             default    :
-                ctx.setStroke(Color.TRANSPARENT);
-                ctx.setFill(COLOR);
+                ctx.setStroke(STROKE);
+                ctx.setFill(FILL);
                 ctx.fillOval(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
+                ctx.strokeOval(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
                 break;
         }
         ctx.restore();

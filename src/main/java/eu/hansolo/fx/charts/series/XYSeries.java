@@ -78,6 +78,6 @@ public class XYSeries<T extends XYItem> extends Series {
 
     @Override public void setPointColor(final Color COLOR) {
         if (getItems().isEmpty()) { return; }
-        getItems().forEach(item -> ((XYChartItem) item).setColor(COLOR));
+        getItems().forEach(item -> ((XYChartItem) item).setFill(COLOR));
     }
 }

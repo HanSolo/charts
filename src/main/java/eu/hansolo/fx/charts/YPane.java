@@ -40,6 +40,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -261,7 +262,22 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
     public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
 
+    public double getDataMinY() { return listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble(); }
+    public double getDataMaxY() { return listOfSeries.stream().mapToDouble(YSeries::getMaxY).max().getAsDouble(); }
+
+    public double getDataRangeY() { return getDataMaxY() - getDataMinY(); }
+
     public List<YSeries<T>> getListOfSeries() { return listOfSeries; }
+
+    public boolean containsRadarChart() {
+        for(YSeries<T> series : listOfSeries) {
+            ChartType type = series.getChartType();
+            if (ChartType.RADAR_POLYGON == type ||
+                ChartType.RADAR_SECTOR == type  ||
+                ChartType.SMOOTH_RADAR_POLYGON == type) { return true; }
+        }
+        return false;
+    }
 
 
     // ******************** Draw Chart ****************************************
@@ -272,10 +288,10 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         ctx.setFill(getChartBackground());
         ctx.fillRect(0, 0, width, height);
 
-        //double    minValue = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
-        ChartType type     = listOfSeries.get(0).getChartType();
-
-        listOfSeries.forEach(series -> {
+        if (containsRadarChart()) {
+            drawRadarOverlay(listOfSeries.get(0).getItems().size(), listOfSeries.get(0).getChartType());
+        }
+        for(YSeries<T> series : listOfSeries) {
             final ChartType TYPE = series.getChartType();
             switch(TYPE) {
                 case DONUT               : drawDonut(series); break;
@@ -283,19 +299,6 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 case SMOOTH_RADAR_POLYGON:
                 case RADAR_SECTOR        : drawRadar(series); break;
             }
-        });
-        boolean containsRadarChart = false;
-        for(YSeries<T> series : listOfSeries) {
-            final ChartType TYPE = series.getChartType();
-            if (ChartType.RADAR_SECTOR         == TYPE ||
-                ChartType.RADAR_POLYGON        == TYPE ||
-                ChartType.SMOOTH_RADAR_POLYGON == TYPE) {
-                containsRadarChart = true;
-                break;
-            }
-        }
-        if (containsRadarChart) {
-            drawRadarOverlay(listOfSeries.get(0).getItems().size(), listOfSeries.get(0).getChartType());
         }
     }
 
@@ -327,7 +330,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
             // Segment
             ctx.setLineWidth(barWidth);
-            ctx.setStroke(item.getFillColor());
+            ctx.setStroke(item.getFill());
             ctx.strokeArc(xy, xy, wh, wh, startAngle, -angle, ArcType.OPEN);
 
             // Percentage
@@ -406,7 +409,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
 
-                Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 8);
+                Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 16);
 
                 ctx.beginPath();
                 ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());
@@ -437,7 +440,15 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         }
         ctx.restore();
 
-        //drawRadarOverlay(NO_OF_SECTORS, TYPE);
+        // draw min and max Text
+        Font   font         = Fonts.latoRegular(0.025 * size);
+        String minValueText = String.format(Locale.US, "%.0f", getLowerBoundY());
+        String maxValueText = String.format(Locale.US, "%.0f", getUpperBoundY());
+        ctx.save();
+        ctx.setFont(font);
+        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - size * 0.018);
+        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - CIRCLE_SIZE * 0.48);
+        ctx.restore();
     }
 
     private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {

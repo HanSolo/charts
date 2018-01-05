@@ -28,12 +28,13 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Color;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class MatrixChartItem implements MatrixItem {
-    private final ItemEvent DATA_EVENT = new ItemEvent(MatrixChartItem.this);
+    private final ItemEvent                         ITEM_EVENT = new ItemEvent(MatrixChartItem.this);
     private CopyOnWriteArrayList<ItemEventListener> listeners;
     private int                                     _x;
     private IntegerProperty                         x;
@@ -43,8 +44,10 @@ public class MatrixChartItem implements MatrixItem {
     private DoubleProperty                          z;
     private String                                  _name;
     private StringProperty                          name;
-    private Color                                   _color;
-    private ObjectProperty<Color>                   color;
+    private Color                                   _fill;
+    private ObjectProperty<Color>                   fill;
+    private Color                                   _stroke;
+    private ObjectProperty<Color>                   stroke;
     private Symbol                                  _symbol;
     private ObjectProperty<Symbol>                  symbol;
 
@@ -59,12 +62,13 @@ public class MatrixChartItem implements MatrixItem {
     public MatrixChartItem(final int X, final int Y, final double Z, final String NAME) {
         this(X, Y, Z, NAME, Color.RED);
     }
-    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final Color COLOR) {
+    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final Color FILL) {
         _x        = X;
         _y        = Y;
         _z        = Z;
         _name     = NAME;
-        _color    = COLOR;
+        _fill     = FILL;
+        _stroke   = Color.TRANSPARENT;
         _symbol   = Symbol.NONE;
         listeners = new CopyOnWriteArrayList<>();
     }
@@ -75,7 +79,7 @@ public class MatrixChartItem implements MatrixItem {
     @Override public void setX(final int X) {
         if (null == x) {
             _x = X;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             x.set(X);
         }
@@ -83,7 +87,7 @@ public class MatrixChartItem implements MatrixItem {
     public IntegerProperty xProperty() {
         if (null == x) {
             x = new IntegerPropertyBase(_x) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
@@ -95,7 +99,7 @@ public class MatrixChartItem implements MatrixItem {
     @Override public void setY(final int Y) {
         if (null == y) {
             _y = Y;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             y.set(Y);
         }
@@ -103,7 +107,7 @@ public class MatrixChartItem implements MatrixItem {
     @Override public IntegerProperty yProperty() {
         if (null == y) {
             y = new IntegerPropertyBase(_y) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
@@ -115,7 +119,7 @@ public class MatrixChartItem implements MatrixItem {
     @Override public void setZ(final double Z) {
         if (null == z) {
             _z = Z;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             z.set(Z);
         }
@@ -123,7 +127,7 @@ public class MatrixChartItem implements MatrixItem {
     @Override public DoubleProperty zProperty() {
         if (null == z) {
             z = new DoublePropertyBase(_z) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "z"; }
             };
@@ -135,7 +139,7 @@ public class MatrixChartItem implements MatrixItem {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(DATA_EVENT);
+            fireItemEvent(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -143,7 +147,7 @@ public class MatrixChartItem implements MatrixItem {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return MatrixChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -152,25 +156,46 @@ public class MatrixChartItem implements MatrixItem {
         return name;
     }
 
-    @Override public Color getFillColor() { return null == color ? _color : color.get(); }
-    public void setColor(final Color COLOR) {
-        if (null == color) {
-            _color = COLOR;
-            fireItemEvent(DATA_EVENT);
+    @Override public Color getFill() { return null == fill ? _fill : fill.get(); }
+    public void setFill(final Color FILL) {
+        if (null == fill) {
+            _fill = FILL;
+            fireItemEvent(ITEM_EVENT);
         } else {
-            color.set(COLOR);
+            fill.set(FILL);
         }
     }
-    public ObjectProperty<Color> colorProperty() {
-        if (null == color) {
-            color = new ObjectPropertyBase<Color>(_color) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+    public ObjectProperty<Color> fillProperty() {
+        if (null == fill) {
+            fill = new ObjectPropertyBase<Color>(_fill) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() { return MatrixChartItem.this; }
-                @Override public String getName() { return "color"; }
+                @Override public String getName() { return "fill"; }
             };
-            _color = null;
+            _fill = null;
         }
-        return color;
+        return fill;
+    }
+
+    @Override public Color getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Color STROKE) {
+        if (null == stroke) {
+            _stroke = STROKE;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            stroke.set(STROKE);
+        }
+    }
+    public ObjectProperty<Color> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<Color>(_stroke) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
+                @Override public String getName() { return "stroke"; }
+            };
+            _stroke = null;
+        }
+        return stroke;
     }
 
     @Override public Symbol getSymbol() { return Symbol.NONE; }
@@ -178,7 +203,7 @@ public class MatrixChartItem implements MatrixItem {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(DATA_EVENT); }
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
                 @Override public Object getBean() {  return MatrixChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -204,7 +229,6 @@ public class MatrixChartItem implements MatrixItem {
                                   .append("  \"x\":").append(getX()).append(",\n")
                                   .append("  \"y\":").append(getY()).append(",\n")
                                   .append("  \"z\":").append(getZ()).append(",\n")
-                                  .append("  \"color\":\"").append(getFillColor().toString().replace("0x", "#")).append("\",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();
