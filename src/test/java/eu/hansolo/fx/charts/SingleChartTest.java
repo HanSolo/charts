@@ -87,10 +87,10 @@ public class SingleChartTest extends Application {
         xySeries3 = new XYSeries(xyItem3, ChartType.LINE, Color.rgb(0, 0, 255, 0.5), Color.BLUE);
         xySeries4 = new XYSeries(xyItem4, ChartType.LINE, Color.rgb(255, 0, 255, 0.5), Color.MAGENTA);
 
-        xySeries1.setShowPoints(false);
-        xySeries2.setShowPoints(false);
-        xySeries3.setShowPoints(false);
-        xySeries4.setShowPoints(false);
+        xySeries1.setSymbolsVisible(false);
+        xySeries2.setSymbolsVisible(false);
+        xySeries3.setSymbolsVisible(false);
+        xySeries4.setSymbolsVisible(false);
 
         // XYChart
         Converter tempConverter     = new Converter(TEMPERATURE, CELSIUS); // Type Temperature with BaseUnit Celsius

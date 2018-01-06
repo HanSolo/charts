@@ -19,7 +19,6 @@ package eu.hansolo.fx.charts.series;
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.XYItem;
-import eu.hansolo.fx.charts.data.XYChartItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -32,7 +31,6 @@ import java.util.List;
  * Created by hansolo on 16.07.17.
  */
 public class XYSeries<T extends XYItem> extends Series {
-    private boolean _showPoints;
 
     // ******************** Constructors **************************************
     public XYSeries() {
@@ -56,9 +54,9 @@ public class XYSeries<T extends XYItem> extends Series {
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final boolean SHOW_POINTS) {
         this(ITEMS, TYPE, NAME, FILL, STROKE, Symbol.CIRCLE, SHOW_POINTS);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL, final boolean SHOW_POINTS) {
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL, final boolean SYMBOLS_VISIBLE) {
         super(ITEMS, TYPE, NAME, FILL, STROKE, SYMBOL);
-        _showPoints = SHOW_POINTS;
+        setSymbolsVisible(SYMBOLS_VISIBLE);
     }
 
 
@@ -76,7 +74,4 @@ public class XYSeries<T extends XYItem> extends Series {
 
     public double getSumOfXValues() { return getItems().stream().mapToDouble(T::getX).sum(); }
     public double getSumOfYValues() { return getItems().stream().mapToDouble(T::getY).sum(); }
-
-    public boolean isShowPoints() { return _showPoints; }
-    public void setShowPoints(final boolean SHOW) { _showPoints = SHOW; }
 }

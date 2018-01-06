@@ -19,8 +19,10 @@ package eu.hansolo.fx.charts.series;
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.MatrixItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -89,6 +91,11 @@ public class MatrixItemSeriesBuilder<B extends MatrixItemSeriesBuilder<B>> {
         return (B)this;
     }
 
+    public final B symbolsVisible(final boolean VISIBLE) {
+        properties.put("symbolsVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
 
     public final MatrixItemSeries build() {
         final MatrixItemSeries SERIES = new MatrixItemSeries();
@@ -115,6 +122,8 @@ public class MatrixItemSeriesBuilder<B extends MatrixItemSeriesBuilder<B>> {
                 SERIES.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
             } else if ("chartType".equals(key)) {
                 SERIES.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
+            } else if ("symbolsVisible".equals(key)) {
+                SERIES.setSymbolsVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return SERIES;

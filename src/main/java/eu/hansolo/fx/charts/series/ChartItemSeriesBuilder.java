@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.ChartItem;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -86,6 +87,11 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
 
     public final B chartType(final ChartType TYPE) {
         properties.put("chartType", new SimpleObjectProperty<>(TYPE));
+        return (B)this;
+    }
+
+    public final B symbolsVisible(final boolean VISIBLE) {
+        properties.put("symbolsVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 

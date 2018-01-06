@@ -431,7 +431,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         }
         for (XYSeries<T> series : listOfSeries) {
             final ChartType TYPE        = series.getChartType();
-            final boolean   SHOW_POINTS = series.isShowPoints();
+            final boolean   SHOW_POINTS = series.getSymbolsVisible();
             switch(TYPE) {
                 case LINE             : drawLine(series, SHOW_POINTS); break;
                 case SMOOTH_LINE      : drawSmoothLine(series, SHOW_POINTS); break;
@@ -738,8 +738,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         cachedItems.clear();
 
 
-        if (SERIES_1.isShowPoints()) { drawSymbols(SERIES_1); }
-        if (SERIES_2.isShowPoints()) { drawSymbols(SERIES_2); }
+        if (SERIES_1.getSymbolsVisible()) { drawSymbols(SERIES_1); }
+        if (SERIES_2.getSymbolsVisible()) { drawSymbols(SERIES_2); }
     }
 
     private void drawSmoothLineDelta(final XYSeries<T> SERIES_1, final XYSeries<T> SERIES_2) {
@@ -860,8 +860,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         cachedItems.clear();
 
 
-        if (SERIES_1.isShowPoints()) { drawSymbols(SERIES_1); }
-        if (SERIES_2.isShowPoints()) { drawSymbols(SERIES_2); }
+        if (SERIES_1.getSymbolsVisible()) { drawSymbols(SERIES_1); }
+        if (SERIES_2.getSymbolsVisible()) { drawSymbols(SERIES_2); }
     }
 
     private void drawPolar(final XYSeries<T> SERIES) {
@@ -873,7 +873,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double  RANGE         = 0.35714 * CIRCLE_SIZE;
         final double  OFFSET        = 0.14286 * CIRCLE_SIZE;
         final int     NO_OF_ITEMS   = SERIES.getItems().size();
-        final boolean SHOW_POINTS   = SERIES.isShowPoints();
+        final boolean SHOW_POINTS   = SERIES.getSymbolsVisible();
 
         // draw the chart data
         ctx.save();

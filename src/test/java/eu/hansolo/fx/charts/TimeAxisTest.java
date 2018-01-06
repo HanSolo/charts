@@ -65,7 +65,7 @@ public class TimeAxisTest extends Application {
         }
 
         tySeries1 = new XYSeries(tyData1, ChartType.LINE, Color.RED, Color.rgb(255, 0, 0, 0.5));
-        tySeries1.setShowPoints(false);
+        tySeries1.setSymbolsVisible(false);
 
         // XYChart
         Converter tempConverter     = new Converter(TEMPERATURE, CELSIUS); // Type Temperature with BaseUnit Celsius

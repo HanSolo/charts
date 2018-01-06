@@ -16,7 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;
 import eu.hansolo.fx.charts.data.YChartItem;
@@ -70,7 +69,7 @@ public class LogChartTest extends Application {
         }
 
         xySeries1 = new XYSeries<>(xyData1, ChartType.LINE, Color.rgb(255, 0, 255, 0.5));
-        xySeries1.setShowPoints(false);
+        xySeries1.setSymbolsVisible(false);
 
         // SmoothLineChart
         smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);

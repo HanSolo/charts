@@ -22,6 +22,8 @@ import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -54,6 +56,8 @@ public abstract class Series<T extends Item> {
     protected       ObjectProperty<Color>                     symbolStroke;
     protected       Symbol                                    _symbol;
     protected       ObjectProperty<Symbol>                    symbol;
+    protected       boolean                                   _symbolsVisible;
+    protected       BooleanProperty                           symbolsVisible;
     protected       ChartType                                 chartType;
     protected       ObservableList<T>                         items;
     private         CopyOnWriteArrayList<SeriesEventListener> listeners;
@@ -89,15 +93,16 @@ public abstract class Series<T extends Item> {
         this(ITEMS, TYPE, NAME, FILL, STROKE, Color.BLACK, Color.BLACK, SYMBOL);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Color SYMBOL_FILL, final Color SYMBOL_STROKE, final Symbol SYMBOL) {
-        _name         = NAME;
-        _fill         = FILL;
-        _stroke       = STROKE;
-        _symbolFill   = SYMBOL_FILL;
-        _symbolStroke = SYMBOL_STROKE;
-        _symbol       = SYMBOL;
-        chartType     = TYPE;
-        items         = FXCollections.observableArrayList();
-        listeners     = new CopyOnWriteArrayList<>();
+        _name           = NAME;
+        _fill           = FILL;
+        _stroke         = STROKE;
+        _symbolFill     = SYMBOL_FILL;
+        _symbolStroke   = SYMBOL_STROKE;
+        _symbol         = SYMBOL;
+        _symbolsVisible = true;
+        chartType       = TYPE;
+        items           = FXCollections.observableArrayList();
+        listeners       = new CopyOnWriteArrayList<>();
 
         if (null != ITEMS) { items.setAll(ITEMS); }
     }
@@ -242,6 +247,26 @@ public abstract class Series<T extends Item> {
             _symbol = null;
         }
         return symbol;
+    }
+
+    public boolean getSymbolsVisible() { return null == symbolsVisible ? _symbolsVisible : symbolsVisible.get(); }
+    public void setSymbolsVisible(final boolean VISIBLE) {
+        if (null == symbolsVisible) {
+            _symbolsVisible = VISIBLE;
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            symbolsVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty symbolsVisibleProperty() {
+        if (null == symbolsVisible) {
+            symbolsVisible = new BooleanPropertyBase(_symbolsVisible) {
+                @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "symbolsVisible"; }
+            };
+        }
+        return symbolsVisible;
     }
 
     public ChartType getChartType() { return chartType; }

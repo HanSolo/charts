@@ -118,25 +118,27 @@ public class ChartTest extends Application {
                                    .stroke(Color.MAGENTA)
                                    .symbolFill(Color.RED)
                                    .symbolStroke(Color.TRANSPARENT)
+                                   .symbolsVisible(true)
                                    .build();
 
-        xySeries2 = new XYSeries<>(xyItem2, ChartType.AREA);
+        xySeries2 = XYSeriesBuilder.create()
+                                   .items(xyItem2)
+                                   .chartType(ChartType.AREA)
+                                   .fill(Color.TRANSPARENT)
+                                   .stroke(Color.BLUE)
+                                   .symbolFill(Color.BLUE)
+                                   .symbolStroke(Color.TRANSPARENT)
+                                   .symbolsVisible(true)
+                                   .build();
+
         xySeries3 = new XYSeries<>(xyItem3, ChartType.SMOOTH_LINE);
         xySeries4 = new XYSeries<>(xyItem1, ChartType.SMOOTH_AREA);
-        
-        xySeries2.setSymbolFill(Color.BLUE);
+
         xySeries3.setSymbolFill(Color.LIME);
         xySeries4.setSymbolFill(Color.MAGENTA);
 
-        xySeries2.setSymbolStroke(Color.TRANSPARENT);
         xySeries3.setSymbolStroke(Color.TRANSPARENT);
         xySeries4.setSymbolStroke(Color.TRANSPARENT);
-
-
-        //xySeries1.setShowPoints(false);
-        //xySeries2.setShowPoints(false);
-        //xySeries3.setShowPoints(false);
-        //xySeries4.setShowPoints(false);
 
 
         ySeries    = new YSeries(yItem, ChartType.DONUT);
