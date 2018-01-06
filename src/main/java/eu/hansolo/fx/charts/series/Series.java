@@ -115,6 +115,7 @@ public abstract class Series<T extends Item> {
 
     // ******************** Methods *******************************************
     public ObservableList<T> getItems() { return items; }
+    public void setItems(final T... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<T> ITEMS) { items.setAll(ITEMS); }
 
     public String getName() { return null == name ? _name : name.get(); }

@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;
 import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
+import eu.hansolo.fx.charts.series.XYSeriesBuilder;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.animation.AnimationTimer;
@@ -110,17 +111,23 @@ public class ChartTest extends Application {
             xyzItem.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
-        xySeries1 = new XYSeries<>(xyItem1, ChartType.LINE);
+        xySeries1 = XYSeriesBuilder.create()
+                                   .items(xyItem1)
+                                   .chartType(ChartType.LINE)
+                                   .fill(Color.TRANSPARENT)
+                                   .stroke(Color.MAGENTA)
+                                   .symbolFill(Color.RED)
+                                   .symbolStroke(Color.TRANSPARENT)
+                                   .build();
+
         xySeries2 = new XYSeries<>(xyItem2, ChartType.AREA);
         xySeries3 = new XYSeries<>(xyItem3, ChartType.SMOOTH_LINE);
         xySeries4 = new XYSeries<>(xyItem1, ChartType.SMOOTH_AREA);
-
-        xySeries1.setSymbolFill(Color.RED);
+        
         xySeries2.setSymbolFill(Color.BLUE);
         xySeries3.setSymbolFill(Color.LIME);
         xySeries4.setSymbolFill(Color.MAGENTA);
 
-        xySeries1.setSymbolStroke(Color.TRANSPARENT);
         xySeries2.setSymbolStroke(Color.TRANSPARENT);
         xySeries3.setSymbolStroke(Color.TRANSPARENT);
         xySeries4.setSymbolStroke(Color.TRANSPARENT);
