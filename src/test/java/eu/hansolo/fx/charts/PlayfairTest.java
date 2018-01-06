@@ -16,7 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
@@ -85,8 +84,8 @@ public class PlayfairTest extends Application {
         xySeries1 = new XYSeries<>(xyData1, ChartType.SMOOTH_LINE_DELTA, true);
         xySeries2 = new XYSeries<>(xyData2, ChartType.SMOOTH_LINE_DELTA, true);
 
-        xySeries1.setPointColor(item1Color);
-        xySeries2.setPointColor(item2Color);
+        xySeries1.setSymbolFill(item1Color);
+        xySeries2.setSymbolFill(item2Color);
 
         xySeries1.setStroke(item1Color);
         //xySeries1.setFill(Color.colorToRGB(0, 200, 0, 0.35));

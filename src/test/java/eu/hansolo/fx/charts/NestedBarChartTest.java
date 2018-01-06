@@ -52,10 +52,10 @@ public class NestedBarChartTest extends Application {
         ChartItem p3Q4 = new ChartItem("Product 3", 4.5, AMBER_300.get());
         ChartItem p4Q4 = new ChartItem("Product 4", 2.25, AMBER_100.get());
 
-        ChartItemSeries<ChartItem> q1 = new ChartItemSeries<>(ChartType.NESTED_BAR, "1st Quarter", Color.TRANSPARENT, CYAN_900.get(), p1Q1, p2Q1, p3Q1, p4Q1);
-        ChartItemSeries<ChartItem> q2 = new ChartItemSeries<>(ChartType.NESTED_BAR, "2nd Quarter", Color.TRANSPARENT, PURPLE_900.get(), p1Q2, p2Q2, p3Q2, p4Q2);
-        ChartItemSeries<ChartItem> q3 = new ChartItemSeries<>(ChartType.NESTED_BAR, "3rd Quarter", Color.TRANSPARENT, PINK_900.get(), p1Q3, p2Q3, p3Q3, p4Q3);
-        ChartItemSeries<ChartItem> q4 = new ChartItemSeries<>(ChartType.NESTED_BAR, "4th Quarter", Color.TRANSPARENT, AMBER_900.get(), p1Q4, p2Q4, p3Q4, p4Q4);
+        ChartItemSeries<ChartItem> q1 = new ChartItemSeries<>(ChartType.NESTED_BAR, "1st Quarter", CYAN_900.get(), Color.TRANSPARENT, p1Q1, p2Q1, p3Q1, p4Q1);
+        ChartItemSeries<ChartItem> q2 = new ChartItemSeries<>(ChartType.NESTED_BAR, "2nd Quarter", PURPLE_900.get(), Color.TRANSPARENT, p1Q2, p2Q2, p3Q2, p4Q2);
+        ChartItemSeries<ChartItem> q3 = new ChartItemSeries<>(ChartType.NESTED_BAR, "3rd Quarter", PINK_900.get(), Color.TRANSPARENT, p1Q3, p2Q3, p3Q3, p4Q3);
+        ChartItemSeries<ChartItem> q4 = new ChartItemSeries<>(ChartType.NESTED_BAR, "4th Quarter", AMBER_900.get(), Color.TRANSPARENT, p1Q4, p2Q4, p3Q4, p4Q4);
 
 
         chart = new NestedBarChart(q1, q2, q3, q4);

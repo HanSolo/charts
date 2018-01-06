@@ -52,16 +52,16 @@ public class XYZChartItem implements XYZItem {
 
     // ******************** Constructors **********************************
     public XYZChartItem() {
-        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYZChartItem(final double X, final double Y, final double Z) {
-        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL) {
-        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
         _x        = X;

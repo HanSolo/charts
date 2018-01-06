@@ -41,13 +41,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public abstract class Series<T extends Item> {
-    public    final SeriesEvent                               REDRAW = new SeriesEvent(Series.this, EventType.UPDATE);
+    public    final SeriesEvent                               UPDATE_EVENT = new SeriesEvent(Series.this, EventType.UPDATE);
     protected       String                                    _name;
     protected       StringProperty                            name;
-    protected       Paint                                     _stroke;
-    protected       ObjectProperty<Paint>                     stroke;
     protected       Paint                                     _fill;
     protected       ObjectProperty<Paint>                     fill;
+    protected       Paint                                     _stroke;
+    protected       ObjectProperty<Paint>                     stroke;
+    protected       Color                                     _symbolFill;
+    protected       ObjectProperty<Color>                     symbolFill;
+    protected       Color                                     _symbolStroke;
+    protected       ObjectProperty<Color>                     symbolStroke;
+    protected       Symbol                                    _symbol;
+    protected       ObjectProperty<Symbol>                    symbol;
     protected       ChartType                                 chartType;
     protected       ObservableList<T>                         items;
     private         CopyOnWriteArrayList<SeriesEventListener> listeners;
@@ -56,33 +62,42 @@ public abstract class Series<T extends Item> {
 
     // ******************** Constructors **************************************
     public Series() {
-        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
+        this(null, ChartType.SCATTER, "", Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
     public Series(final T... ITEMS) {
-        this(Arrays.asList(ITEMS), ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT);
+        this(Arrays.asList(ITEMS), ChartType.SCATTER, "", Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
     public Series(final ChartType TYPE, final T... ITEMS) {
-        this(Arrays.asList(ITEMS), TYPE, "", Color.BLACK, Color.TRANSPARENT);
+        this(Arrays.asList(ITEMS), TYPE, "", Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, "", Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
     public Series(final ChartType TYPE, final String NAME, final T... ITEMS) {
-        this(Arrays.asList(ITEMS), TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+        this(Arrays.asList(ITEMS), TYPE, NAME, Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
-        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, NAME, Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, Symbol.CIRCLE);
     }
-    public Series(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
-        this(Arrays.asList(ITEMS), TYPE, NAME, STROKE, FILL);
+    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Symbol SYMBOL) {
+        this(ITEMS, TYPE, NAME, Color.TRANSPARENT, Color.BLACK, Color.BLACK, Color.BLACK, SYMBOL);
     }
-    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
-        _name     = NAME;
-        _stroke   = STROKE;
-        _fill     = FILL;
-        chartType = TYPE;
-        items     = FXCollections.observableArrayList();
-        listeners = new CopyOnWriteArrayList<>();
+    public Series(final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL, final T... ITEMS) {
+        this(Arrays.asList(ITEMS), TYPE, NAME, FILL, STROKE, Color.BLACK, Color.BLACK, SYMBOL);
+    }
+    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL) {
+        this(ITEMS, TYPE, NAME, FILL, STROKE, Color.BLACK, Color.BLACK, SYMBOL);
+    }
+    public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Color SYMBOL_FILL, final Color SYMBOL_STROKE, final Symbol SYMBOL) {
+        _name         = NAME;
+        _fill         = FILL;
+        _stroke       = STROKE;
+        _symbolFill   = SYMBOL_FILL;
+        _symbolStroke = SYMBOL_STROKE;
+        _symbol       = SYMBOL;
+        chartType     = TYPE;
+        items         = FXCollections.observableArrayList();
+        listeners     = new CopyOnWriteArrayList<>();
 
         if (null != ITEMS) { items.setAll(ITEMS); }
     }
@@ -90,7 +105,7 @@ public abstract class Series<T extends Item> {
 
     // ******************** Initialization ************************************
     private void init() {
-        itemListener = change -> fireSeriesEvent(REDRAW);
+        itemListener = change -> fireSeriesEvent(UPDATE_EVENT);
     }
 
     private void registerListeners() {
@@ -106,7 +121,7 @@ public abstract class Series<T extends Item> {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireSeriesEvent(REDRAW);
+            fireSeriesEvent(UPDATE_EVENT);
         } else {
             name.set(NAME);
         }
@@ -114,34 +129,13 @@ public abstract class Series<T extends Item> {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireSeriesEvent(REDRAW); }
+                @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return Series.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
         }
         return name;
-    }
-
-    public Paint getStroke() { return null == stroke ? _stroke : stroke.get(); }
-    public void setStroke(final Paint PAINT) {
-        if (null == stroke) {
-            _stroke = PAINT;
-            refresh();
-        } else {
-            stroke.set(PAINT);
-        }
-    }
-    public ObjectProperty<Paint> strokeProperty() {
-        if (null == stroke) {
-            stroke = new ObjectPropertyBase<Paint>(_stroke) {
-                @Override protected void invalidated() { refresh(); }
-                @Override public Object getBean() {  return Series.this; }
-                @Override public String getName() { return "stroke"; }
-            };
-            _stroke = null;
-        }
-        return stroke;
     }
 
     public Paint getFill() { return null == fill ? _fill : fill.get(); }
@@ -165,9 +159,89 @@ public abstract class Series<T extends Item> {
         return fill;
     }
 
-    public void setSymbol(final Symbol SYMBOL) { items.forEach(item -> item.setSymbol(SYMBOL)); }
+    public Paint getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Paint PAINT) {
+        if (null == stroke) {
+            _stroke = PAINT;
+            refresh();
+        } else {
+            stroke.set(PAINT);
+        }
+    }
+    public ObjectProperty<Paint> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<Paint>(_stroke) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() {  return Series.this; }
+                @Override public String getName() { return "stroke"; }
+            };
+            _stroke = null;
+        }
+        return stroke;
+    }
 
-    public void setPointColor(final Color COLOR) {}
+    public Color getSymbolFill() { return null == symbolFill ? _symbolFill : symbolFill.get(); }
+    public void setSymbolFill(final Color COLOR) {
+        if (null == symbolFill) {
+            _symbolFill = COLOR;
+            refresh();
+        } else {
+            symbolFill.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> symbolFillProperty() {
+        if (null == symbolFill) {
+            symbolFill = new ObjectPropertyBase<Color>(_symbolFill) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "symbolFill"; }
+            };
+            _symbolFill = null;
+        }
+        return symbolFill;
+    }
+
+    public Color getSymbolStroke() { return null == symbolStroke ? _symbolStroke : symbolStroke.get(); }
+    public void setSymbolStroke(final Color COLOR) {
+        if (null == symbolStroke) {
+            _symbolStroke = COLOR;
+            refresh();
+        } else {
+            symbolStroke.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> symbolStrokeProperty() {
+        if (null == symbolStroke) {
+            symbolStroke = new ObjectPropertyBase<Color>(_symbolStroke) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() {  return Series.this; }
+                @Override public String getName() { return "symbolStroke"; }
+            };
+            _symbolStroke = null;
+        }
+        return symbolStroke;
+    }
+    
+    public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }
+    public void setSymbol(final Symbol SYMBOL) {
+        if (null == symbol) {
+            _symbol = SYMBOL;
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            symbol.set(SYMBOL);
+        }
+    }
+    public ObjectProperty<Symbol> symbolProperty() {
+        if (null == symbol) {
+            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
+                @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
+                @Override public Object getBean() {  return Series.this;  }
+                @Override public String getName() {  return "symbol";  }
+            };
+            _symbol = null;
+        }
+        return symbol;
+    }
 
     public ChartType getChartType() { return chartType; }
     public void setChartType(final ChartType TYPE) {
@@ -179,7 +253,7 @@ public abstract class Series<T extends Item> {
 
     public void dispose() { items.remove(itemListener); }
 
-    public void refresh() { fireSeriesEvent(REDRAW); }
+    public void refresh() { fireSeriesEvent(UPDATE_EVENT); }
 
 
     // ******************** Event handling ************************************

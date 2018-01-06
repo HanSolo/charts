@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import javafx.collections.ObservableList;
@@ -35,25 +36,28 @@ public class XYSeries<T extends XYItem> extends Series {
 
     // ******************** Constructors **************************************
     public XYSeries() {
-        this(null, ChartType.SCATTER, "", Color.BLACK, Color.TRANSPARENT, true);
+        this(null, ChartType.SCATTER, "", Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE,true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT, true);
+        this(ITEMS, TYPE, "", Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE,true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final boolean SHOW_POINTS) {
-        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT, SHOW_POINTS);
+        this(ITEMS, TYPE, "", Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE, SHOW_POINTS);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE) {
-        this(ITEMS, TYPE, "", STROKE, Color.TRANSPARENT, true);
+        this(ITEMS, TYPE, "", Color.TRANSPARENT, STROKE, Symbol.CIRCLE,true);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE, final Paint FILL) {
-        this(ITEMS, TYPE, "", STROKE, FILL, true);
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final Paint FILL, final Paint STROKE) {
+        this(ITEMS, TYPE, "", FILL, STROKE, Symbol.CIRCLE,true);
     }
     public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
-        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT, true);
+        this(ITEMS, TYPE, NAME, Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE,true);
     }
-    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final boolean SHOW_POINTS) {
-        super(ITEMS, TYPE, NAME, STROKE, FILL);
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final boolean SHOW_POINTS) {
+        this(ITEMS, TYPE, NAME, FILL, STROKE, Symbol.CIRCLE, SHOW_POINTS);
+    }
+    public XYSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL, final boolean SHOW_POINTS) {
+        super(ITEMS, TYPE, NAME, FILL, STROKE, SYMBOL);
         _showPoints = SHOW_POINTS;
     }
 
@@ -75,9 +79,4 @@ public class XYSeries<T extends XYItem> extends Series {
 
     public boolean isShowPoints() { return _showPoints; }
     public void setShowPoints(final boolean SHOW) { _showPoints = SHOW; }
-
-    @Override public void setPointColor(final Color COLOR) {
-        if (getItems().isEmpty()) { return; }
-        getItems().forEach(item -> ((XYChartItem) item).setFill(COLOR));
-    }
 }

@@ -125,18 +125,7 @@ public class SankeyPlot extends Region {
     public SankeyPlot() {
         items              = FXCollections.observableArrayList();
         itemListener       = e -> redraw();
-        itemListListener   = c -> {
-            /*
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    //c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
-                } else if (c.wasRemoved()) {
-                    //c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
-                }
-            }
-            */
-            prepareData();
-        };
+        itemListListener   = c -> prepareData();
 
         itemsPerLevel      = new LinkedHashMap<>();
 
@@ -737,98 +726,6 @@ public class SankeyPlot extends Region {
     }
 
     private void redraw() {
-        /*
-        ctx.clearRect(0, 0, width, height);
-        boolean useItemColor         = getUseItemColor();
-        Color   itemColor            = getItemColor();
-        Color   textColor            = getTextColor();
-        boolean showFlowDirection    = getShowFlowDirection();
-        double  showDirectionOffsetX = size * 0.01875;
-        double  connectionOpacity    = getConnectionOpacity();
-
-        // Draw bezier curves between items
-        for (int level = minLevel ; level <= maxLevel ; level++) {
-            List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
-            int nextLevel   = level + 1;
-
-            // Go through all item data of the current level
-            for (PlotItemData itemData : itemDataInLevel) {
-                PlotItem  item   = itemData.getPlotItem();
-                CtxBounds bounds = itemData.getBounds();
-
-                // Outgoing
-                if (level < maxLevel) {
-                    List<PlotItemData> nextLevelItemDataList = itemsPerLevel.get(nextLevel);
-                    for (PlotItem outgoingItem : item.getOutgoing().keySet()) {
-                        Optional<PlotItemData> targetItemDataOptional = nextLevelItemDataList.stream().filter(id -> id.getPlotItem().equals(outgoingItem)).findFirst();
-                        if (!targetItemDataOptional.isPresent()) { continue; }
-
-                        PlotItemData targetItemData   = targetItemDataOptional.get();
-                        CtxBounds    targetItemBounds = targetItemData.getBounds();
-                        PlotItem     targetItem       = targetItemData.getPlotItem();
-
-                        // Calculate y start position in target item dependent on item index in target incoming
-                        double targetIncomingOffsetY = 0;
-                        for (PlotItem incomingItem : targetItem.getIncoming().keySet()) {
-                            if (incomingItem.equals(item)) { break; }
-                            targetIncomingOffsetY += targetItem.getIncoming().get(incomingItem) * scaleY;
-                        }
-
-                        // Calculate the offset in x direction for the bezier curve control points
-                        double ctrlPointOffsetX = (targetItemBounds.getMinX() - bounds.getMaxX()) * 0.25;
-
-                        // Calculate the value of the current item in y direction
-                        double valueY = item.getOutgoing().get(outgoingItem) * scaleY;
-
-                        // Set Gradient from current item to outgoing items
-                        if (StreamFillMode.COLOR == getStreamFillMode()) {
-                            ctx.setFill(getStreamColor());
-                        } else {
-                            ctx.setFill(new LinearGradient(0, 0, 1, 0,
-                                                           true, CycleMethod.NO_CYCLE,
-                                                           new Stop(0, Helper.getColorWithOpacity(item.getFillColor(), connectionOpacity)),
-                                                           new Stop(1, Helper.getColorWithOpacity(outgoingItem.getFillColor(), connectionOpacity))));
-                        }
-
-                        // Draw the bezier curve
-                        ctx.beginPath();
-                        ctx.moveTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
-                        if (showFlowDirection) {
-                            ctx.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
-                                              targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
-                                              targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY);
-                            ctx.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + valueY * 0.5);
-                            ctx.lineTo(targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + valueY);
-                        } else {
-                            ctx.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
-                                              targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
-                                              targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY);
-                            ctx.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + valueY);
-                        }
-
-                        itemData.addToOutgoingOffset(valueY);
-                        targetItemData.addToIncomingOffset(valueY);
-                        ctx.bezierCurveTo(targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + valueY,
-                                          bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
-                                          bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
-                        ctx.lineTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
-                        ctx.closePath();
-                        ctx.fill();
-                    }
-                }
-
-                // Draw item boxes with their labels
-                ctx.setFill(useItemColor ? item.getFillColor() : itemColor);
-                ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
-
-                ctx.setFill(textColor);
-                ctx.setTextAlign(level == maxLevel ? TextAlignment.RIGHT : TextAlignment.LEFT);
-                ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
-            }
-        }
-        */
-
-
         ctx.clearRect(0, 0, width, height);
         paths.forEach((path, plotItem) -> {
             path.draw(ctx, true, false);

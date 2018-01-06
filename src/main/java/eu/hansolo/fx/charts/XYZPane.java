@@ -316,15 +316,23 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
         final double LOWER_BOUND_Z = getLowerBoundZ();
 
-        for (XYZItem item : SERIES.getItems()) {
-            double x     = (item.getX() - LOWER_BOUND_X) * scaleX;
-            double y     = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            double z     = (item.getZ() - LOWER_BOUND_Z) * scaleZ;
-            double halfZ = z * 0.5;
-            ctx.setStroke(Color.TRANSPARENT);
-            ctx.setFill(item.getFill());
-            ctx.fillOval(x - halfZ, height - y - halfZ, z, z);
+        Paint  seriesFill   = SERIES.getFill();
+        Paint  seriesStroke = SERIES.getStroke();
+        for (T item : SERIES.getItems()) {
+            double x        = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y        = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            double diameter = (item.getZ() - LOWER_BOUND_Z) * scaleZ;
+            double radius   = diameter * 0.5;
 
+            Symbol itemSymbol = item.getSymbol();
+            if (Symbol.NONE == itemSymbol) {
+                ctx.setFill(seriesFill);
+                ctx.setStroke(seriesStroke);
+            } else {
+                ctx.setFill(item.getFill());
+                ctx.setStroke(item.getStroke());
+            }
+            ctx.fillOval(x - radius, height - y - radius, diameter, diameter);
         }
     }
 

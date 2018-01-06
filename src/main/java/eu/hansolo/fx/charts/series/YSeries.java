@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.YItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
@@ -30,19 +31,22 @@ public class YSeries<T extends YItem> extends Series {
 
     // ******************** Constructors **************************************
     public YSeries() {
-        this(null, ChartType.DONUT, "", Color.BLACK, Color.TRANSPARENT);
+        this(null, ChartType.DONUT, "", Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE);
     }
     public YSeries(final List<T> ITEMS, final ChartType TYPE) {
-        this(ITEMS, TYPE, "", Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, "", Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE);
     }
     public YSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
-        this(ITEMS, TYPE, NAME, Color.BLACK, Color.TRANSPARENT);
+        this(ITEMS, TYPE, NAME, Color.TRANSPARENT, Color.BLACK, Symbol.CIRCLE);
     }
-    public YSeries(final List<T> ITEMS, final ChartType TYPE, final Paint STROKE, final Paint FILL) {
-        this(ITEMS, TYPE, "", STROKE, FILL);
+    public YSeries(final List<T> ITEMS, final ChartType TYPE, final Paint FILL, final Paint STROKE) {
+        this(ITEMS, TYPE, "", FILL, STROKE, Symbol.CIRCLE);
     }
-    public YSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
-        super(ITEMS, TYPE, NAME, STROKE, FILL);
+    public YSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE) {
+        super(ITEMS, TYPE, NAME, FILL, STROKE, Symbol.CIRCLE);
+    }
+    public YSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL) {
+        super(ITEMS, TYPE, NAME, FILL, STROKE, SYMBOL);
     }
 
 

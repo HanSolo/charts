@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.XYZItem;
 import javafx.collections.ObservableList;
 
@@ -35,6 +36,9 @@ public class XYZSeries<T extends XYZItem> extends Series {
     }
     public XYZSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
         super(ITEMS, TYPE, NAME);
+    }
+    public XYZSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Symbol SYMBOL) {
+        super(ITEMS, TYPE, NAME, SYMBOL);
     }
 
 

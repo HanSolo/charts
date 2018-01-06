@@ -70,22 +70,22 @@ public class SingleChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYChartItem> xyData1 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYChartItem> xyData2 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYChartItem> xyData3 = new ArrayList<>(NO_OF_X_VALUES);
-        List<XYChartItem> xyData4 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyItem1 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyItem2 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyItem3 = new ArrayList<>(NO_OF_X_VALUES);
+        List<XYChartItem> xyItem4 = new ArrayList<>(NO_OF_X_VALUES);
 
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyData1.add(new XYChartItem(i, RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData2.add(new XYChartItem(i, RND.nextDouble() * 7 + RND.nextDouble() * 3, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData3.add(new XYChartItem(i, RND.nextDouble() * 3 + RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData4.add(new XYChartItem(i, RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem1.add(new XYChartItem(i, RND.nextDouble() * 12 + RND.nextDouble() * 6, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem2.add(new XYChartItem(i, RND.nextDouble() * 7 + RND.nextDouble() * 3, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem3.add(new XYChartItem(i, RND.nextDouble() * 3 + RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem4.add(new XYChartItem(i, RND.nextDouble() * 4, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
-        xySeries1 = new XYSeries(xyData1, ChartType.LINE, Color.RED, Color.rgb(255, 0, 0, 0.5));
-        xySeries2 = new XYSeries(xyData2, ChartType.LINE, Color.LIME, Color.rgb(0, 255, 0, 0.5));
-        xySeries3 = new XYSeries(xyData3, ChartType.LINE, Color.BLUE, Color.rgb(0, 0, 255, 0.5));
-        xySeries4 = new XYSeries(xyData4, ChartType.LINE, Color.MAGENTA, Color.rgb(255, 0, 255, 0.5));
+        xySeries1 = new XYSeries(xyItem1, ChartType.LINE, Color.rgb(255, 0, 0, 0.5), Color.RED);
+        xySeries2 = new XYSeries(xyItem2, ChartType.LINE, Color.rgb(0, 255, 0, 0.5), Color.LIME);
+        xySeries3 = new XYSeries(xyItem3, ChartType.LINE, Color.rgb(0, 0, 255, 0.5), Color.BLUE);
+        xySeries4 = new XYSeries(xyItem4, ChartType.LINE, Color.rgb(255, 0, 255, 0.5), Color.MAGENTA);
 
         xySeries1.setShowPoints(false);
         xySeries2.setShowPoints(false);
@@ -104,18 +104,18 @@ public class SingleChartTest extends Application {
                                 lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
 
         // YChart
-        List<YChartItem> yData1 = new ArrayList<>(20);
-        List<YChartItem> yData2 = new ArrayList<>(20);
-        List<YChartItem> yData3 = new ArrayList<>(20);
+        List<YChartItem> yItem1 = new ArrayList<>(20);
+        List<YChartItem> yItem2 = new ArrayList<>(20);
+        List<YChartItem> yItem3 = new ArrayList<>(20);
         for (int i = 0 ; i < 20 ; i++) {
-            yData1.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yData2.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yData3.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem1.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem2.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem3.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
-        ySeries1 = new YSeries(yData1, ChartType.RADAR_SECTOR, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))));
-        ySeries2 = new YSeries(yData2, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.5))));
-        ySeries3 = new YSeries(yData3, ChartType.SMOOTH_RADAR_POLYGON, Color.TRANSPARENT, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(255, 0, 255, 0.5))));
+        ySeries1 = new YSeries(yItem1, ChartType.RADAR_SECTOR, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))), Color.TRANSPARENT);
+        ySeries2 = new YSeries(yItem2, ChartType.SMOOTH_RADAR_POLYGON, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.5))), Color.TRANSPARENT);
+        ySeries3 = new YSeries(yItem3, ChartType.SMOOTH_RADAR_POLYGON, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(255, 0, 255, 0.5))), Color.TRANSPARENT);
         yChart   = new YChart(new YPane(ySeries1, ySeries2, ySeries3));
 
         lastTimerCall = System.nanoTime();

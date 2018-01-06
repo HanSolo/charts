@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.MatrixItem;
 import javafx.collections.ObservableList;
 
@@ -35,7 +36,7 @@ public class MatrixItemSeries<T extends MatrixItem> extends Series {
         this(ITEMS, TYPE, "");
     }
     public MatrixItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME) {
-        super(ITEMS, TYPE, NAME);
+        super(ITEMS, TYPE, NAME, Symbol.NONE);
     }
 
 

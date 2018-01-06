@@ -164,7 +164,6 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             final double LOWER_BOUND_Y = getLowerBoundY();
             double x = (e.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (e.getY() - LOWER_BOUND_Y) * scaleY;
-            System.out.println(x + ", " + y);
         });
     }
 
@@ -450,10 +449,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        double oldX = 0;
-        double oldY = height;
+        List<T> items = SERIES.getItems();
+        double  oldX  = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double  oldY  = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
+        ctx.moveTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
+
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
@@ -468,19 +471,25 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void drawArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        double oldX = 0;
+        List<T> items     = SERIES.getItems();
+        int     noOfItems = items.size();
+        double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         ctx.beginPath();
-        ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
-        for (T item : SERIES.getItems()) {
+        ctx.moveTo(oldX, oldY);
+
+        for (int i = 1 ; i < noOfItems ; i++) {
+            T item = items.get(i);
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             ctx.lineTo(x, y);
             oldX = x;
         }
         ctx.lineTo(oldX, height);
-        ctx.lineTo(0, height);
+        ctx.lineTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -523,17 +532,21 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void drawSmoothArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
+        List<T> items     = SERIES.getItems();
+        int     noOfItems = items.size();
+        double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
-        double oldX = 0;
 
-        List<Point> points = new ArrayList<>(SERIES.getItems().size());
-        SERIES.getItems().forEach(item -> points.add(new Point(item.getX(), item.getY())));
+        List<Point> points = new ArrayList<>(items.size());
+        items.forEach(item -> points.add(new Point(item.getX(), item.getY())));
 
         Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), SUB_DIVISIONS);
 
         ctx.beginPath();
-        ctx.moveTo(SERIES.getItems().get(0).getX() * scaleX, height);
+        ctx.moveTo(oldX, oldY);
         for(Point p : interpolatedPoints) {
             double x = (p.getX() - LOWER_BOUND_X) * scaleX;
             ctx.lineTo(x, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
@@ -541,7 +554,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         }
 
         ctx.lineTo(oldX, height);
-        ctx.lineTo(0, height);
+        ctx.lineTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
@@ -918,8 +931,16 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.restore();
 
         if (SHOW_POINTS) {
+            Symbol seriesSymbol = SERIES.getSymbol();
+            Paint  symbolFill   = SERIES.getSymbolFill();
+            Paint  symbolStroke = SERIES.getSymbolStroke();
             for (Point point : points) {
-                drawSymbol(point.getX(), point.getY(), item.getFill(), item.getStroke(), item.getSymbol());
+                Symbol itemSymbol = item.getSymbol();
+                if (Symbol.NONE == itemSymbol) {
+                    drawSymbol(point.getX(), point.getY(), symbolFill, symbolStroke, seriesSymbol);
+                } else {
+                    drawSymbol(point.getX(), point.getY(), item.getFill(), item.getStroke(), itemSymbol);
+                }
             }
         }
 
@@ -1099,10 +1120,18 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void drawSymbols(final XYSeries<T> SERIES) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
+        Symbol       seriesSymbol  = SERIES.getSymbol();
+        Color        symbolFill    = SERIES.getSymbolFill();
+        Color        symbolStroke  = SERIES.getSymbolStroke();
         for (T item : SERIES.getItems()) {
-            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
-            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getFill(), item.getStroke(), item.getSymbol());
+            double x          = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y          = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            Symbol itemSymbol = item.getSymbol();
+            if (Symbol.NONE == itemSymbol) {
+                drawSymbol(x, y, symbolFill, symbolStroke, seriesSymbol);
+            } else {
+                drawSymbol(x, y, item.getFill(), item.getStroke(), itemSymbol);
+            }
         }
     }
 

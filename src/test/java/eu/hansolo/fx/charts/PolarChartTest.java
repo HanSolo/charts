@@ -66,9 +66,11 @@ public class PolarChartTest extends Application {
 
         Helper.orderXYChartItemsByX(xyItems1, Order.ASCENDING);
 
-        xySeries1 = new XYSeries(xyItems1, ChartType.POLAR, Color.RED, Color.rgb(255, 0, 0, 0.5));
+        xySeries1 = new XYSeries(xyItems1, ChartType.POLAR, Color.rgb(255, 0, 0, 0.5), Color.RED);
         //xySeries1.setShowPoints(false);
         xySeries1.setStroke(Color.rgb(90, 90, 90));
+        xySeries1.setSymbolStroke(Color.LIME);
+        xySeries1.setSymbolFill(Color.GREEN);
         xySeries1.setSymbol(Symbol.SQUARE);
 
         XYPane polarPane = new XYPane(xySeries1);

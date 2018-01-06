@@ -1455,7 +1455,7 @@ public class Axis extends Region {
                 } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick mark
                     drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
-                } else if (tickMarkCounter % 10 == 0) {
+                } /*else if (tickMarkCounter % 10 == 0) {
                     // Draw major tick mark based on number of tick marks
                     isMinValue = Double.compare(minValue, counter) == 0;
                     isMaxValue = Double.compare(maxValue, counter) == 0;
@@ -1482,6 +1482,7 @@ public class Axis extends Region {
                 } else if (tickMarkCounter % 1 == 0) {
                     drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
                 }
+                */
 
                 counterBD = counterBD.add(minorTickSpaceBD);
                 counter = counterBD.doubleValue();

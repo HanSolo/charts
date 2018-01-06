@@ -32,13 +32,13 @@ public class TYChartItem extends XYChartItem {
 
     // ******************** Constructors **********************************
     public TYChartItem() {
-        this(LocalDateTime.now(), 0, "", Color.RED, Symbol.CIRCLE);
+        this(LocalDateTime.now(), 0, "", Color.RED, Symbol.NONE);
     }
     public TYChartItem(final LocalDateTime T, final double Y, final String NAME) {
-        this(T, Y, NAME, Color.RED, Symbol.CIRCLE);
+        this(T, Y, NAME, Color.RED, Symbol.NONE);
     }
     public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color COLOR) {
-        this(T, Y, NAME, COLOR, Symbol.CIRCLE);
+        this(T, Y, NAME, COLOR, Symbol.NONE);
     }
     public TYChartItem(final LocalDateTime T, final double Y, final String NAME, final Color FILL, final Symbol SYMBOL) {
         super(T.toEpochSecond(Helper.getZoneOffset()), Y, NAME, FILL, Color.TRANSPARENT, SYMBOL);

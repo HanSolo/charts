@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.ChartItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Paint;
@@ -28,11 +29,14 @@ import java.util.List;
 public class ChartItemSeries<T extends ChartItem> extends Series<T> {
 
     // ******************** Constructors **************************************
-    public ChartItemSeries(final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL, final T... ITEMS) {
-        super(Arrays.asList(ITEMS), TYPE, NAME, STROKE, FILL);
+    public ChartItemSeries(final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final T... ITEMS) {
+        super(Arrays.asList(ITEMS), TYPE, NAME, FILL, STROKE, Symbol.NONE);
     }
-    public ChartItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint STROKE, final Paint FILL) {
-       super(ITEMS, TYPE, NAME, STROKE, FILL);
+    public ChartItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE) {
+       super(ITEMS, TYPE, NAME, FILL, STROKE, Symbol.NONE);
+    }
+    public ChartItemSeries(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Symbol SYMBOL) {
+        super(ITEMS, TYPE, NAME, FILL, STROKE, SYMBOL);
     }
 
 

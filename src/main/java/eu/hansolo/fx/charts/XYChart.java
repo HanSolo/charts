@@ -265,7 +265,7 @@ public class XYChart<T extends XYItem> extends Region {
                 AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? AXIS_WIDTH : 0d);
             }
         });
-        if (hasCenterYAxis) { yAxisC.zeroPositionProperty().addListener(o -> System.out.println(yAxisC.getZeroPosition())); AnchorPane.setLeftAnchor(yAxisC, yAxisC.getZeroPosition()); }
+        if (hasCenterYAxis) { AnchorPane.setLeftAnchor(yAxisC, yAxisC.getZeroPosition()); }
         if (hasCenterXAxis) { AnchorPane.setTopAnchor(xAxisC, xAxisC.getZeroPosition()); }
     }
 

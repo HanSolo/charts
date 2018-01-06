@@ -16,16 +16,13 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.XYZItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;
-import eu.hansolo.fx.charts.data.YItem;
 import eu.hansolo.fx.charts.data.YChartItem;
+import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
-import eu.hansolo.fx.charts.series.XYSeries;
-import eu.hansolo.fx.charts.converter.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
@@ -45,8 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static eu.hansolo.fx.charts.converter.Converter.Category.*;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.*;
+import static eu.hansolo.fx.charts.converter.Converter.Category.TEMPERATURE;
+import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.CELSIUS;
+import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.FAHRENHEIT;
 
 
 /**
@@ -97,25 +95,36 @@ public class ChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYChartItem>  xyData1 = new ArrayList<>(20);
-        List<XYChartItem>  xyData2 = new ArrayList<>(20);
-        List<XYChartItem>  xyData3 = new ArrayList<>(20);
-        List<YChartItem>   yData   = new ArrayList<>(20);
-        List<XYZChartItem> xyzData = new ArrayList<>(20);
+        List<XYChartItem>  xyItem1 = new ArrayList<>(20);
+        List<XYChartItem>  xyItem2 = new ArrayList<>(20);
+        List<XYChartItem>  xyItem3 = new ArrayList<>(20);
+        List<YChartItem>   yItem   = new ArrayList<>(20);
+        List<XYZChartItem> xyzItem = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyData1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData2.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyData3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem2.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItem3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
-            yData.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
-            xyzData.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
+            xyzItem.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
-        xySeries1 = new XYSeries<>(xyData1, ChartType.LINE);
-        xySeries2 = new XYSeries<>(xyData2, ChartType.AREA);
-        xySeries3 = new XYSeries<>(xyData3, ChartType.SMOOTH_LINE);
-        xySeries4 = new XYSeries<>(xyData1, ChartType.SMOOTH_AREA);
+        xySeries1 = new XYSeries<>(xyItem1, ChartType.LINE);
+        xySeries2 = new XYSeries<>(xyItem2, ChartType.AREA);
+        xySeries3 = new XYSeries<>(xyItem3, ChartType.SMOOTH_LINE);
+        xySeries4 = new XYSeries<>(xyItem1, ChartType.SMOOTH_AREA);
+
+        xySeries1.setSymbolFill(Color.RED);
+        xySeries2.setSymbolFill(Color.BLUE);
+        xySeries3.setSymbolFill(Color.LIME);
+        xySeries4.setSymbolFill(Color.MAGENTA);
+
+        xySeries1.setSymbolStroke(Color.TRANSPARENT);
+        xySeries2.setSymbolStroke(Color.TRANSPARENT);
+        xySeries3.setSymbolStroke(Color.TRANSPARENT);
+        xySeries4.setSymbolStroke(Color.TRANSPARENT);
+
 
         //xySeries1.setShowPoints(false);
         //xySeries2.setShowPoints(false);
@@ -123,10 +132,10 @@ public class ChartTest extends Application {
         //xySeries4.setShowPoints(false);
 
 
-        ySeries    = new YSeries(yData, ChartType.DONUT);
+        ySeries    = new YSeries(yItem, ChartType.DONUT);
         donutChart = new YPane(ySeries);
 
-        xyzSeries   = new XYZSeries(xyzData, ChartType.BUBBLE);
+        xyzSeries   = new XYZSeries(xyzItem, ChartType.BUBBLE);
         bubbleChart = new XYZPane(xyzSeries);
 
         // LineChart
@@ -143,8 +152,7 @@ public class ChartTest extends Application {
         lineChartYAxisLeft.setZeroColor(Color.BLACK);
         lineChartYAxisCenter.setAxisColor(Color.MAGENTA);
 
-        lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1),
-                                  lineChartYAxisLeft, lineChartYAxisCenter, lineChartYAxisRight, lineChartXAxisBottom);
+        lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1), lineChartYAxisLeft, lineChartYAxisCenter, lineChartYAxisRight, lineChartXAxisBottom);
 
         Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
         lineChart.setGrid(grid1);
@@ -153,8 +161,7 @@ public class ChartTest extends Application {
         // AreaChart
         areaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         areaChartYAxisLeft   = createLeftYAxis(0, 20, true);
-        areaChart            = new XYChart<>(new XYPane(xySeries2),
-                                             areaChartXAxisBottom, areaChartYAxisLeft);
+        areaChart            = new XYChart<>(new XYPane(xySeries2), areaChartXAxisBottom, areaChartYAxisLeft);
 
         xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 0.75)), new Stop(1.0, Color.rgb(0, 255, 255, 0.25))));
         xySeries2.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 1.0)), new Stop(1.0, Color.rgb(0, 255, 255, 1.0))));
@@ -163,8 +170,7 @@ public class ChartTest extends Application {
         // SmoothLineChart
         smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothLineChartYAxisLeft   = createLeftYAxis(0, 20, true);
-        smoothLineChart            = new XYChart<>(new XYPane(xySeries3),
-                                                   smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
+        smoothLineChart            = new XYChart<>(new XYPane(xySeries3), smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
 
         Grid grid2 = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
         smoothLineChart.setGrid(grid2);
@@ -172,8 +178,7 @@ public class ChartTest extends Application {
         // SmoothAreaChart
         smoothAreaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothAreaChartYAxisLeft   = createLeftYAxis(0, 20, true);
-        smoothAreaChart            = new XYChart<>(new XYPane(xySeries4),
-                                                   smoothAreaChartYAxisLeft, smoothAreaChartXAxisBottom);
+        smoothAreaChart            = new XYChart<>(new XYPane(xySeries4), smoothAreaChartYAxisLeft, smoothAreaChartXAxisBottom);
 
         xySeries4.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
         xySeries4.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 1.0)), new Stop(1.0, Color.TRANSPARENT)));

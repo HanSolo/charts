@@ -49,13 +49,13 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
 
     // ******************** Constructors **********************************
     public YChartItem() {
-        this(0, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public YChartItem(final double Y, final String NAME) {
-        this(Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public YChartItem(final double Y, final String NAME, final Color FILL) {
-        this(Y, NAME, FILL, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
     }
     public YChartItem(final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
         _y        = Y;

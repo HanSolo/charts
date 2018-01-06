@@ -53,19 +53,19 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
 
     // ******************** Constructors **********************************
     public XYChartItem() {
-        this(0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYChartItem(final double X, final double Y) {
-        this(X, Y, "", Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYChartItem(final double X, final double Y, final Color FILL) {
-        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYChartItem(final double X, final double Y, final String NAME) {
-        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYChartItem(final double X, final double Y, final String NAME, final Color FILL) {
-        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.CIRCLE);
+        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
     }
     public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
         _x        = X;
