@@ -439,16 +439,6 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 break;
         }
         ctx.restore();
-
-        // draw min and max Text
-        Font   font         = Fonts.latoRegular(0.025 * size);
-        String minValueText = String.format(Locale.US, "%.0f", getLowerBoundY());
-        String maxValueText = String.format(Locale.US, "%.0f", getUpperBoundY());
-        ctx.save();
-        ctx.setFont(font);
-        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - size * 0.018);
-        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - CIRCLE_SIZE * 0.48);
-        ctx.restore();
     }
 
     private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {
@@ -509,6 +499,16 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         }
         ctx.restore();
 
+        ctx.restore();
+
+        // draw min and max Text
+        Font   font         = Fonts.latoRegular(0.025 * size);
+        String minValueText = String.format(Locale.US, "%.0f", getLowerBoundY());
+        String maxValueText = String.format(Locale.US, "%.0f", getUpperBoundY());
+        ctx.save();
+        ctx.setFont(font);
+        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - size * 0.018);
+        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - CIRCLE_SIZE * 0.48);
         ctx.restore();
     }
 

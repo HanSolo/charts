@@ -426,9 +426,6 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             }
         }
 
-        if (containsPolarChart()) {
-            drawPolarOverlay(getPolarTickStep().get());
-        }
         for (XYSeries<T> series : listOfSeries) {
             final ChartType TYPE        = series.getChartType();
             final boolean   SHOW_POINTS = series.getSymbolsVisible();
@@ -874,6 +871,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double  OFFSET        = 0.14286 * CIRCLE_SIZE;
         final int     NO_OF_ITEMS   = SERIES.getItems().size();
         final boolean SHOW_POINTS   = SERIES.getSymbolsVisible();
+
+        drawPolarOverlay(getPolarTickStep().get());
 
         // draw the chart data
         ctx.save();
