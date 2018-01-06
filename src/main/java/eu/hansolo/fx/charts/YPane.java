@@ -82,7 +82,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
     // ******************** Constructors **************************************
     public YPane(final YSeries<T>... SERIES) {
-        this(Color.WHITE, SERIES);
+        this(Color.TRANSPARENT, SERIES);
     }
     public YPane(final Paint BACKGROUND, final YSeries<T>... SERIES) {
         getStylesheets().add(YPane.class.getResource("chart.css").toExternalForm());
@@ -369,6 +369,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         } else {
             ctx.setFill(SERIES.getFill());
         }
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
 
         switch(SERIES.getChartType()) {

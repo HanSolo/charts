@@ -105,10 +105,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
     // ******************** Constructors **************************************
     public XYPane(final XYSeries<T>... SERIES) {
-        this(Color.WHITE, 1,  SERIES);
+        this(Color.TRANSPARENT, 1,  SERIES);
     }
     public XYPane(final int BANDS, final XYSeries<T>... SERIES) {
-        this(Color.WHITE, BANDS, SERIES);
+        this(Color.TRANSPARENT, BANDS, SERIES);
     }
     public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
@@ -450,9 +450,9 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         double  oldX  = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
         double  oldY  = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
 
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
-        ctx.moveTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
 
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
@@ -473,6 +473,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
         double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
 
+        // Fill Area
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
         ctx.beginPath();
@@ -489,7 +491,17 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.lineTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
         ctx.closePath();
         ctx.fill();
-        ctx.stroke();
+
+        // Draw Line
+        oldX = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        oldY = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        for (T item : SERIES.getItems()) {
+            double x = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            ctx.strokeLine(oldX, oldY, x, y);
+            oldX = x;
+            oldY = y;
+        }
 
         if (SHOW_POINTS) { drawSymbols(SERIES); }
     }
@@ -499,16 +511,30 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
         ctx.setFill(Color.TRANSPARENT);
+
+        Symbol seriesSymbol = SERIES.getSymbol();
+        Paint  symbolFill   = SERIES.getSymbolFill();
+        Paint  symbolStroke = SERIES.getSymbolStroke();
+        double size         = SERIES.getSymbolSize() > -1 ? SERIES.getSymbolSize() : symbolSize;
+
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
-            drawSymbol(x, y, item.getFill(), item.getStroke(), item.getSymbol());
+
+            Symbol itemSymbol = item.getSymbol();
+            if (Symbol.NONE == itemSymbol) {
+                drawSymbol(x, y, symbolFill, symbolStroke, seriesSymbol, size);
+            } else {
+                drawSymbol(x, y, item.getFill(), item.getStroke(), itemSymbol, size);
+            }
         }
     }
 
     private void drawSmoothLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
+
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
 
@@ -530,10 +556,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         List<T> items     = SERIES.getItems();
-        int     noOfItems = items.size();
         double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
         double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
 
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(SERIES.getFill());
 
@@ -554,6 +580,11 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.lineTo((items.get(0).getX() - LOWER_BOUND_X) * scaleX, height);
         ctx.closePath();
         ctx.fill();
+
+        ctx.beginPath();
+        for(Point p : interpolatedPoints) {
+            ctx.lineTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
+        }
         ctx.stroke();
 
         if (SHOW_POINTS) { drawSymbols(SERIES); }
@@ -717,9 +748,11 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 }
             }
 
+            ctx.setLineWidth(SERIES_1.getStrokeWidth() > -1 ? SERIES_1.getStrokeWidth() : size * 0.0025);
             ctx.setStroke(series1Stroke);
             ctx.strokeLine((lastXyData1.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData1.getY() - LOWER_BOUND_Y) * scaleY, (xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
 
+            ctx.setLineWidth(SERIES_2.getStrokeWidth() > -1 ? SERIES_2.getStrokeWidth() : size * 0.0025);
             ctx.setStroke(series2Stroke);
             ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
         }
@@ -839,9 +872,11 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 }
             }
 
+            ctx.setLineWidth(SERIES_1.getStrokeWidth() > -1 ? SERIES_1.getStrokeWidth() : size * 0.0025);
             ctx.setStroke(series1Stroke);
             ctx.strokeLine((lastXyData1.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData1.getY() - LOWER_BOUND_Y) * scaleY, (xyData1.getX() - LOWER_BOUND_X) * scaleX, height - (xyData1.getY() - LOWER_BOUND_Y) * scaleY);
 
+            ctx.setLineWidth(SERIES_2.getStrokeWidth() > -1 ? SERIES_2.getStrokeWidth() : size * 0.0025);
             ctx.setStroke(series2Stroke);
             ctx.strokeLine((lastXyData2.getX() - LOWER_BOUND_X) * scaleX, height - (lastXyData2.getY() - LOWER_BOUND_Y) * scaleY, (xyData2.getX() - LOWER_BOUND_X) * scaleX, height - (xyData2.getY() - LOWER_BOUND_Y) * scaleY);
         }
@@ -881,6 +916,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         } else {
             ctx.setFill(SERIES.getFill());
         }
+        ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
 
         double  radAngle = Math.toRadians(180);
@@ -933,12 +969,13 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             Symbol seriesSymbol = SERIES.getSymbol();
             Paint  symbolFill   = SERIES.getSymbolFill();
             Paint  symbolStroke = SERIES.getSymbolStroke();
+            double size         = SERIES.getSymbolSize() > -1 ? SERIES.getSymbolSize() : symbolSize;
             for (Point point : points) {
                 Symbol itemSymbol = item.getSymbol();
                 if (Symbol.NONE == itemSymbol) {
-                    drawSymbol(point.getX(), point.getY(), symbolFill, symbolStroke, seriesSymbol);
+                    drawSymbol(point.getX(), point.getY(), symbolFill, symbolStroke, seriesSymbol, size);
                 } else {
-                    drawSymbol(point.getX(), point.getY(), item.getFill(), item.getStroke(), itemSymbol);
+                    drawSymbol(point.getX(), point.getY(), item.getFill(), item.getStroke(), itemSymbol, size);
                 }
             }
         }
@@ -1122,20 +1159,21 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         Symbol       seriesSymbol  = SERIES.getSymbol();
         Color        symbolFill    = SERIES.getSymbolFill();
         Color        symbolStroke  = SERIES.getSymbolStroke();
+        double       size          = SERIES.getSymbolSize() > -1 ? SERIES.getSymbolSize() : symbolSize;
         for (T item : SERIES.getItems()) {
             double x          = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y          = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             Symbol itemSymbol = item.getSymbol();
             if (Symbol.NONE == itemSymbol) {
-                drawSymbol(x, y, symbolFill, symbolStroke, seriesSymbol);
+                drawSymbol(x, y, symbolFill, symbolStroke, seriesSymbol, size);
             } else {
-                drawSymbol(x, y, item.getFill(), item.getStroke(), itemSymbol);
+                drawSymbol(x, y, item.getFill(), item.getStroke(), itemSymbol, size);
             }
         }
     }
 
-    private void drawSymbol(final double X, final double Y, final Paint FILL, final Paint STROKE, final Symbol SYMBOL) {
-        double halfSymbolSize = symbolSize * 0.5;
+    private void drawSymbol(final double X, final double Y, final Paint FILL, final Paint STROKE, final Symbol SYMBOL, final double SYMBOL_SIZE) {
+        double halfSymbolSize = SYMBOL_SIZE * 0.5;
         ctx.save();
         switch(SYMBOL) {
             case NONE:
@@ -1143,8 +1181,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             case SQUARE:
                 ctx.setStroke(STROKE);
                 ctx.setFill(FILL);
-                ctx.fillRect(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
-                ctx.strokeRect(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
+                ctx.fillRect(X - halfSymbolSize, Y - halfSymbolSize, SYMBOL_SIZE, SYMBOL_SIZE);
+                ctx.strokeRect(X - halfSymbolSize, Y - halfSymbolSize, SYMBOL_SIZE, SYMBOL_SIZE);
                 break;
             case TRIANGLE:
                 ctx.setStroke(STROKE);
@@ -1176,8 +1214,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             default    :
                 ctx.setStroke(STROKE);
                 ctx.setFill(FILL);
-                ctx.fillOval(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
-                ctx.strokeOval(X - halfSymbolSize, Y - halfSymbolSize, symbolSize, symbolSize);
+                ctx.fillOval(X - halfSymbolSize, Y - halfSymbolSize, SYMBOL_SIZE, SYMBOL_SIZE);
+                ctx.strokeOval(X - halfSymbolSize, Y - halfSymbolSize, SYMBOL_SIZE, SYMBOL_SIZE);
                 break;
         }
         ctx.restore();

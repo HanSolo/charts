@@ -96,15 +96,15 @@ public class ChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYChartItem>  xyItem1 = new ArrayList<>(20);
-        List<XYChartItem>  xyItem2 = new ArrayList<>(20);
-        List<XYChartItem>  xyItem3 = new ArrayList<>(20);
+        List<XYChartItem>  xyItems1 = new ArrayList<>(20);
+        List<XYChartItem>  xyItems2 = new ArrayList<>(20);
+        List<XYChartItem>  xyItems3 = new ArrayList<>(20);
         List<YChartItem>   yItem   = new ArrayList<>(20);
         List<XYZChartItem> xyzItem = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
-            xyItem1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyItem2.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
-            xyItem3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItems1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItems2.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
+            xyItems3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
             yItem.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
@@ -112,7 +112,7 @@ public class ChartTest extends Application {
         }
 
         xySeries1 = XYSeriesBuilder.create()
-                                   .items(xyItem1)
+                                   .items(xyItems1)
                                    .chartType(ChartType.LINE)
                                    .fill(Color.TRANSPARENT)
                                    .stroke(Color.MAGENTA)
@@ -122,7 +122,7 @@ public class ChartTest extends Application {
                                    .build();
 
         xySeries2 = XYSeriesBuilder.create()
-                                   .items(xyItem2)
+                                   .items(xyItems2)
                                    .chartType(ChartType.AREA)
                                    .fill(Color.TRANSPARENT)
                                    .stroke(Color.BLUE)
@@ -131,8 +131,8 @@ public class ChartTest extends Application {
                                    .symbolsVisible(true)
                                    .build();
 
-        xySeries3 = new XYSeries<>(xyItem3, ChartType.SMOOTH_LINE);
-        xySeries4 = new XYSeries<>(xyItem1, ChartType.SMOOTH_AREA);
+        xySeries3 = new XYSeries<>(xyItems3, ChartType.SMOOTH_LINE);
+        xySeries4 = new XYSeries<>(xyItems1, ChartType.SMOOTH_AREA);
 
         xySeries3.setSymbolFill(Color.LIME);
         xySeries4.setSymbolFill(Color.MAGENTA);

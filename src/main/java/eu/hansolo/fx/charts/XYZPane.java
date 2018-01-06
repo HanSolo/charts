@@ -72,7 +72,7 @@ public class XYZPane<T extends XYZItem> extends Region implements ChartArea {
 
     // ******************** Constructors **************************************
     public XYZPane(final XYZSeries<T>... SERIES) {
-        this(Color.WHITE, SERIES);
+        this(Color.TRANSPARENT, SERIES);
     }
     public XYZPane(final Paint BACKGROUND, final XYZSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());

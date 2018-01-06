@@ -632,6 +632,12 @@ public class Axis extends Region {
         return titleColor;
     }
 
+    public void setTickMarkColor(final Color COLOR) {
+        setMinorTickMarkColor(COLOR);
+        setMediumTickMarkColor(COLOR);
+        setMajorTickMarkColor(COLOR);
+    }
+
     public Color getMinorTickMarkColor() { return null == minorTickMarkColor ? _minorTickMarkColor : minorTickMarkColor.get(); }
     public void setMinorTickMarkColor(final Color COLOR) {
         if (null == minorTickMarkColor) {
@@ -1311,6 +1317,7 @@ public class Axis extends Region {
             double     counter          = minValue;
             double     range            = getRange();
 
+            axisCtx.setStroke(getAxisColor());
             axisCtx.setLineWidth(majorLineWidth);
 
             // Draw axis

@@ -20,9 +20,11 @@ import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.YItem;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -96,6 +98,16 @@ public class YSeriesBuilder<B extends YSeriesBuilder<B>> {
         return (B)this;
     }
 
+    public final B symbolSize(final double SIZE) {
+        properties.put("symbolSize", new SimpleDoubleProperty(SIZE));
+        return (B)this;
+    }
+
+    public final B strokeWidth(final double WIDTH) {
+        properties.put("strokeWidth", new SimpleDoubleProperty(WIDTH));
+        return (B)this;
+    }
+
     
     public final YSeries build() {
         final YSeries SERIES = new YSeries();
@@ -124,6 +136,10 @@ public class YSeriesBuilder<B extends YSeriesBuilder<B>> {
                 SERIES.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
             } else if ("symbolsVisible".equals(key)) {
                 SERIES.setSymbolsVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("symbolSize".equals(key)) {
+                SERIES.setSymbolSize(((DoubleProperty) properties.get(key)).get());
+            } else if ("strokeWidth".equals(key)) {
+                SERIES.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
             }
         }
         return SERIES;

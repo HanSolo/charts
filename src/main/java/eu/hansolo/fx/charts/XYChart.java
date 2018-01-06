@@ -171,9 +171,9 @@ public class XYChart<T extends XYItem> extends Region {
 
     public void setGrid(final Grid GRID) {
         if (null == GRID) return;
-        if (null != grid) { pane.getChildren().remove(1); }
+        if (null != grid) { pane.getChildren().remove(0); }
         grid = GRID;
-        pane.getChildren().add(1, grid);
+        pane.getChildren().add(0, grid);
         adjustGridAnchors();
     }
 

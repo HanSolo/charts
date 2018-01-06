@@ -22,8 +22,11 @@ import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -58,6 +61,10 @@ public abstract class Series<T extends Item> {
     protected       ObjectProperty<Symbol>                    symbol;
     protected       boolean                                   _symbolsVisible;
     protected       BooleanProperty                           symbolsVisible;
+    protected       double                                    _symbolSize;
+    protected       DoubleProperty                            symbolSize;
+    protected       double                                    _strokeWidth;
+    protected       DoubleProperty                            strokeWidth;
     protected       ChartType                                 chartType;
     protected       ObservableList<T>                         items;
     private         CopyOnWriteArrayList<SeriesEventListener> listeners;
@@ -100,6 +107,8 @@ public abstract class Series<T extends Item> {
         _symbolStroke   = SYMBOL_STROKE;
         _symbol         = SYMBOL;
         _symbolsVisible = true;
+        _symbolSize     = -1;
+        _strokeWidth    = -1;
         chartType       = TYPE;
         items           = FXCollections.observableArrayList();
         listeners       = new CopyOnWriteArrayList<>();
@@ -273,6 +282,52 @@ public abstract class Series<T extends Item> {
     public void setChartType(final ChartType TYPE) {
         chartType = TYPE;
         refresh();
+    }
+
+    public double getSymbolSize() { return null == symbolSize ? _symbolSize : symbolSize.get(); }
+    public void setSymbolSize(final double SIZE) {
+        if (null == symbolSize) {
+            _symbolSize = Helper.clamp(1, 24, SIZE);
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            symbolSize.set(SIZE);
+        }
+    }
+    public DoubleProperty symbolSizeProperty() {
+        if (null == symbolSize) {
+            symbolSize = new DoublePropertyBase(_symbolSize) {
+                @Override protected void invalidated() {
+                    set(Helper.clamp(1, 24, get()));
+                    fireSeriesEvent(UPDATE_EVENT);
+                }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "symbolSize"; }
+            };
+        }
+        return symbolSize;
+    }
+
+    public double getStrokeWidth() { return null == strokeWidth ? _strokeWidth : strokeWidth.get(); }
+    public void setStrokeWidth(final double WIDTH) {
+        if (null == strokeWidth) {
+            _strokeWidth = Helper.clamp(1, 24, WIDTH);
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            strokeWidth.set(WIDTH);
+        }
+    }
+    public DoubleProperty strokeWidthProperty() {
+        if (null == strokeWidth) {
+            strokeWidth = new DoublePropertyBase(_strokeWidth) {
+                @Override protected void invalidated() {
+                    set(Helper.clamp(1, 24, get()));
+                    fireSeriesEvent(UPDATE_EVENT);
+                }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "strokeWidth"; }
+            };
+        }
+        return strokeWidth;
     }
 
     public int getNoOfItems() { return items.size(); }
