@@ -16,6 +16,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.TickLabelFormat;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -233,6 +235,16 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B categories(final String... CATEGORIES) {
+        properties.put("categoriesArray", new SimpleObjectProperty<>(CATEGORIES));
+        return (B)this;
+    }
+
+    public final B categories(final List<String> CATEGORIES) {
+        properties.put("categoriesList", new SimpleObjectProperty(CATEGORIES));
+        return (B)this;
+    }
+
 
     // General properties
     public final B prefSize(final double WIDTH, final double HEIGHT) {
@@ -310,6 +322,13 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
 
     public final Axis build() {
         final Axis CONTROL = new Axis(orientation, position);
+
+        if (properties.keySet().contains("categoriesArray")) {
+            CONTROL.setCategories(((ObjectProperty<String[]>) properties.get("categoriesArray")).get());
+        }
+        if(properties.keySet().contains("categoriesList")) {
+            CONTROL.setCategories(((ObjectProperty<List<String>>) properties.get("categoriesList")).get());
+        }
 
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {

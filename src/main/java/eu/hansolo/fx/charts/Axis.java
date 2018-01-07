@@ -53,6 +53,8 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -151,6 +153,7 @@ public class Axis extends Region {
     private              ObjectProperty<ZoneId>               zoneId;
     private              String                               _dateTimeFormatPattern;
     private              StringProperty                       dateTimeFormatPattern;
+    private              List<String>                         categories;
     private              DateTimeFormatter                    dateTimeFormatter;
     private              Interval                             currentInterval;
 
@@ -218,6 +221,7 @@ public class Axis extends Region {
         _dateTimeFormatPattern            = "dd.MM.YY HH:mm:ss";
         currentInterval                   = Interval.SECOND_1;
         dateTimeFormatter                 = DateTimeFormatter.ofPattern(_dateTimeFormatPattern, _locale);
+        categories                        = new LinkedList<>();
         tickLabelFormatString             = new StringBuilder("%.").append(Integer.toString(_decimals)).append("f").toString();
 
         initGraphics();
@@ -1033,6 +1037,14 @@ public class Axis extends Region {
         return titleFontSize;
     }
 
+    public List<String> getCategories() { return categories; }
+    public void setCategories(final String... CATEGORIES) { setCategories(Arrays.asList(CATEGORIES)); }
+    public void setCategories(final List<String> CATEGORIES) {
+        categories.clear();
+        CATEGORIES.forEach(category -> categories.add(category));
+        redraw();
+    }
+
     public boolean isValueOnAxis(final Double VALUE) {
         return Double.compare(VALUE, getMinValue()) >= 0 && Double.compare(VALUE, getMaxValue()) <= 0;
     }
@@ -1308,7 +1320,7 @@ public class Axis extends Region {
         double      maxTextWidth;
 
 
-        if (AxisType.LINEAR ==axisType) {
+        if (AxisType.LINEAR == axisType || AxisType.TEXT == axisType) {
             // ******************** Linear ************************************
             boolean    fullRange        = (minValue < 0 && maxValue > 0);
             double     minorTickSpace   = getMinorTickSpace();
@@ -1321,6 +1333,7 @@ public class Axis extends Region {
             BigDecimal counterBD        = BigDecimal.valueOf(minValue);
             double     counter          = minValue;
             double     range            = getRange();
+            int        noOfCategories   = categories.size();
 
             axisCtx.setStroke(getAxisColor());
             axisCtx.setLineWidth(majorLineWidth);
@@ -1344,8 +1357,9 @@ public class Axis extends Region {
             // Main Loop for tick marks and labels
             BigDecimal tmpStepBD = new BigDecimal(tmpStepSize);
             tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
-            double tmpStep         = tmpStepBD.doubleValue();
-            int    tickMarkCounter = 0;
+            double tmpStep          = tmpStepBD.doubleValue();
+            int    tickMarkCounter  = 0;
+            int    tickLabelCounter = 0;
             for (double i = 0; Double.compare(-range - tmpStep, i) <= 0; i -= tmpStep) {
                 double fixedPosition = (counter - minValue) * stepSize;
                 if (VERTICAL == orientation) {
@@ -1426,7 +1440,6 @@ public class Axis extends Region {
                     }
                 }
 
-
                 if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick mark
                     isMinValue = Double.compare(minValue, counter) == 0;
@@ -1454,6 +1467,13 @@ public class Axis extends Region {
                             } else {
                                 tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
                             }
+                        } else if (AxisType.TEXT == axisType) {
+                            if (tickLabelCounter < noOfCategories) {
+                                tickLabelString = categories.get(tickLabelCounter);
+                            } else {
+                                tickLabelString = "";
+                            }
+                            tickLabelCounter++;
                         } else {
                             // Date Axis
                             tickLabelString = dateTimeFormatter.format(toLocalDateTime((long) (minValue - i) * 1000));
@@ -1500,7 +1520,7 @@ public class Axis extends Region {
                 counter = counterBD.doubleValue();
                 if (counter > maxValue) break;
             }
-        } else {
+        } else if (AxisType.LOGARITHMIC == axisType){
             // ******************** Logarithmic *******************************
             tickLabelFormatString = "%6.0e";
             double logLowerBound = Math.log10(getMinValue());

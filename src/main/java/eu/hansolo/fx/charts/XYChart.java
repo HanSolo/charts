@@ -43,7 +43,6 @@ public class XYChart<T extends XYItem> extends Region {
     private static final double         MINIMUM_HEIGHT   = 50;
     private static final double         MAXIMUM_WIDTH    = 4096;
     private static final double         MAXIMUM_HEIGHT   = 4096;
-    private static final Double         AXIS_WIDTH       = 25d;
     private              double         width;
     private              double         height;
     private              XYPane<T>      xyPane;
@@ -54,6 +53,10 @@ public class XYChart<T extends XYItem> extends Region {
     private              Axis           xAxisT;
     private              Axis           xAxisC;
     private              Axis           xAxisB;
+    private              double         topAxisHeight;
+    private              double         rightAxisWidth;
+    private              double         bottomAxisHeight;
+    private              double         leftAxisWidth;
     private              Grid           grid;
     private              boolean        hasLeftYAxis;
     private              boolean        hasCenterYAxis;
@@ -190,6 +193,7 @@ public class XYChart<T extends XYItem> extends Region {
                     switch(position) {
                         case TOP:
                             hasTopXAxis    = true;
+                            topAxisHeight  = axis.getPrefHeight();
                             xAxisT         = axis;
                             break;
                         case CENTER:
@@ -197,8 +201,9 @@ public class XYChart<T extends XYItem> extends Region {
                             xAxisC         = axis;
                             break;
                         case BOTTOM:
-                            hasBottomXAxis = true;
-                            xAxisB         = axis;
+                            hasBottomXAxis   = true;
+                            bottomAxisHeight = axis.getPrefHeight();
+                            xAxisB           = axis;
                             break;
                         default:
                             hasTopXAxis    = false;
@@ -211,6 +216,7 @@ public class XYChart<T extends XYItem> extends Region {
                     switch(position) {
                         case LEFT:
                             hasLeftYAxis   = true;
+                            leftAxisWidth  = axis.getPrefWidth();
                             yAxisL         = axis;
                             break;
                         case CENTER:
@@ -219,6 +225,7 @@ public class XYChart<T extends XYItem> extends Region {
                             break;
                         case RIGHT:
                             hasRightYAxis  = true;
+                            rightAxisWidth = axis.getPrefWidth();
                             yAxisR         = axis;
                             break;
                         default:
@@ -253,17 +260,17 @@ public class XYChart<T extends XYItem> extends Region {
     private void adjustAxisAnchors() {
         axis.forEach(axis -> {
             if (Orientation.HORIZONTAL == axis.getOrientation()) {
-                AnchorPane.setLeftAnchor(axis, hasLeftYAxis ? AXIS_WIDTH : 0d);
-                AnchorPane.setRightAnchor(axis, hasRightYAxis ? AXIS_WIDTH : 0d);
+                AnchorPane.setLeftAnchor(axis, hasLeftYAxis ? leftAxisWidth : 0d);
+                AnchorPane.setRightAnchor(axis, hasRightYAxis ? rightAxisWidth : 0d);
 
-                AnchorPane.setLeftAnchor(xyPane, hasLeftYAxis ? AXIS_WIDTH : 0d);
-                AnchorPane.setRightAnchor(xyPane, hasRightYAxis ? AXIS_WIDTH : 0d);
+                AnchorPane.setLeftAnchor(xyPane, hasLeftYAxis ? leftAxisWidth : 0d);
+                AnchorPane.setRightAnchor(xyPane, hasRightYAxis ? rightAxisWidth : 0d);
             } else {
-                AnchorPane.setTopAnchor(axis, hasTopXAxis ? AXIS_WIDTH : 0d);
-                AnchorPane.setBottomAnchor(axis, hasBottomXAxis ? AXIS_WIDTH : 0d);
+                AnchorPane.setTopAnchor(axis, hasTopXAxis ? topAxisHeight : 0d);
+                AnchorPane.setBottomAnchor(axis, hasBottomXAxis ? bottomAxisHeight : 0d);
 
-                AnchorPane.setTopAnchor(xyPane, hasTopXAxis ? AXIS_WIDTH : 0d);
-                AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? AXIS_WIDTH : 0d);
+                AnchorPane.setTopAnchor(xyPane, hasTopXAxis ? topAxisHeight : 0d);
+                AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? bottomAxisHeight : 0d);
             }
         });
         if (hasCenterYAxis) { AnchorPane.setLeftAnchor(yAxisC, yAxisC.getZeroPosition()); }
@@ -272,10 +279,10 @@ public class XYChart<T extends XYItem> extends Region {
 
     private void adjustGridAnchors() {
         if (null == grid) return;
-        AnchorPane.setLeftAnchor(grid, hasLeftYAxis ? AXIS_WIDTH : 0d);
-        AnchorPane.setRightAnchor(grid, hasRightYAxis ? AXIS_WIDTH : 0d);
-        AnchorPane.setTopAnchor(grid, hasTopXAxis ? AXIS_WIDTH : 0d);
-        AnchorPane.setBottomAnchor(grid, hasBottomXAxis ? AXIS_WIDTH : 0d);
+        AnchorPane.setLeftAnchor(grid, hasLeftYAxis ? leftAxisWidth : 0d);
+        AnchorPane.setRightAnchor(grid, hasRightYAxis ? rightAxisWidth : 0d);
+        AnchorPane.setTopAnchor(grid, hasTopXAxis ? topAxisHeight : 0d);
+        AnchorPane.setBottomAnchor(grid, hasBottomXAxis ? bottomAxisHeight : 0d);
     }
 
 

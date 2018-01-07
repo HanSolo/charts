@@ -95,13 +95,14 @@ public class LineChartTest extends Application {
         xAxisBottom = AxisBuilder.create(Orientation.HORIZONTAL, Position.BOTTOM)
                                  .type(AxisType.LINEAR)
                                  .prefHeight(AXIS_WIDTH)
+                                 .categories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
                                  .minValue(1)
                                  .maxValue(13)
                                  .autoScale(true)
                                  .axisColor(Color.TRANSPARENT)
                                  .tickLabelColor(Color.web("#85949B"))
                                  .tickMarkColor(Color.web("#85949B"))
-                                 .tickMarksVisible(false)
+                                 //.tickMarksVisible(false)
                                  .build();
         AnchorPane.setBottomAnchor(xAxisBottom, 0d);
         AnchorPane.setLeftAnchor(xAxisBottom, AXIS_WIDTH);
@@ -116,7 +117,7 @@ public class LineChartTest extends Application {
                                .axisColor(Color.TRANSPARENT)
                                .tickLabelColor(Color.web("#85949B"))
                                .tickMarkColor(Color.web("#85949B"))
-                               .tickMarksVisible(false)
+                               //.tickMarksVisible(false)
                                .build();
         AnchorPane.setTopAnchor(yAxisLeft, 0d);
         AnchorPane.setBottomAnchor(yAxisLeft, AXIS_WIDTH);
