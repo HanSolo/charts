@@ -390,18 +390,6 @@ public class Axis extends Region {
         return maxValue;
     }
 
-    public void setMinMax(final double MIN_VALUE, final double MAX_VALUE) {
-        setMinValue(MIN_VALUE);
-        setMaxValue(MAX_VALUE);
-        resize();
-    }
-    
-    public double getRange() { return getMaxValue() - getMinValue(); }
-
-    public void shift(final double VALUE) {
-        setMinMax(getMinValue() + VALUE, getMaxValue() + VALUE);
-    }
-
     public LocalDateTime getEnd() { return null == end ? _end : end.get(); }
     public void setEnd(final LocalDateTime DATE_TIME) {
         if (null == end) {
@@ -963,13 +951,6 @@ public class Axis extends Region {
         return dateTimeFormatPattern;
     }
 
-    public boolean isValueOnAxis(final Double VALUE) {
-        return Double.compare(VALUE, getMinValue()) >= 0 && Double.compare(VALUE, getMaxValue()) <= 0;
-    }
-    public boolean isValueOnAxis(final LocalDateTime DATE_TIME) {
-        return DATE_TIME.isAfter(getStart()) && DATE_TIME.isBefore(getEnd());
-    }
-    
     public TickLabelFormat getTickLabelFormat() { return null == tickLabelFormat ? _tickLabelFormat : tickLabelFormat.get(); }
     public void setTickLabelFormat(final TickLabelFormat FORMAT) {
         if (null == tickLabelFormat) {
@@ -1016,7 +997,7 @@ public class Axis extends Region {
         if (null == tickLabelFontSize) {
             _tickLabelFontSize = SIZE;
             tickLabelFont      = Fonts.latoLight(SIZE);
-            drawAxis();
+            redraw();
         } else {
             tickLabelFontSize.set(SIZE);
         }
@@ -1026,7 +1007,7 @@ public class Axis extends Region {
             tickLabelFontSize = new DoublePropertyBase(_tickLabelFontSize) {
                 @Override protected void invalidated() {
                     tickLabelFont = Fonts.latoLight(get());
-                    drawAxis();
+                    redraw();
                 }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "tickLabelFontSize"; }
@@ -1040,7 +1021,7 @@ public class Axis extends Region {
         if (null == titleFontSize) {
             _titleFontSize = SIZE;
             titleFont      = Fonts.latoRegular(getTitleFontSize());
-            drawAxis();
+            redraw();
         } else {
             titleFontSize.set(SIZE);
         }
@@ -1050,13 +1031,32 @@ public class Axis extends Region {
             titleFontSize = new DoublePropertyBase(_titleFontSize) {
                 @Override protected void invalidated() {
                     titleFont = Fonts.latoRegular(get());
-                    drawAxis();
+                    redraw();
                 }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "titleFontSize"; }
             };
         }
         return titleFontSize;
+    }
+
+    public boolean isValueOnAxis(final Double VALUE) {
+        return Double.compare(VALUE, getMinValue()) >= 0 && Double.compare(VALUE, getMaxValue()) <= 0;
+    }
+    public boolean isValueOnAxis(final LocalDateTime DATE_TIME) {
+        return DATE_TIME.isAfter(getStart()) && DATE_TIME.isBefore(getEnd());
+    }
+
+    public void setMinMax(final double MIN_VALUE, final double MAX_VALUE) {
+        setMinValue(MIN_VALUE);
+        setMaxValue(MAX_VALUE);
+        resize();
+    }
+
+    public double getRange() { return getMaxValue() - getMinValue(); }
+
+    public void shift(final double VALUE) {
+        setMinMax(getMinValue() + VALUE, getMaxValue() + VALUE);
     }
 
     private void calcAutoScale() {
