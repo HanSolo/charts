@@ -182,7 +182,6 @@ public class Axis extends Region {
             }
         }
 
-        getStylesheets().add(Axis.class.getResource("chart.css").toExternalForm());
         _minValue                         = MIN_VALUE;
         _maxValue                         = MAX_VALUE;
         
@@ -620,12 +619,6 @@ public class Axis extends Region {
         return titleColor;
     }
 
-    public void setTickMarkColor(final Color COLOR) {
-        setMinorTickMarkColor(COLOR);
-        setMediumTickMarkColor(COLOR);
-        setMajorTickMarkColor(COLOR);
-    }
-
     public Color getMinorTickMarkColor() { return null == minorTickMarkColor ? _minorTickMarkColor : minorTickMarkColor.get(); }
     public void setMinorTickMarkColor(final Color COLOR) {
         if (null == minorTickMarkColor) {
@@ -1054,6 +1047,18 @@ public class Axis extends Region {
     }
 
     public double getRange() { return getMaxValue() - getMinValue(); }
+
+    public void setTickMarkColor(final Color COLOR) {
+        setMinorTickMarkColor(COLOR);
+        setMediumTickMarkColor(COLOR);
+        setMajorTickMarkColor(COLOR);
+    }
+
+    public void setTickMarksVisible(final boolean VISIBLE) {
+        setMinorTickMarksVisible(VISIBLE);
+        setMediumTickMarksVisible(VISIBLE);
+        setMajorTickMarksVisible(VISIBLE);
+    }
 
     public void shift(final double VALUE) {
         setMinMax(getMinValue() + VALUE, getMaxValue() + VALUE);

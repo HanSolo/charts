@@ -68,34 +68,48 @@ public class LineChartTest extends Application {
                                    .symbolsVisible(true)
                                    .build();
 
-        xAxisBottom = createBottomXAxis(1, 12, true, AXIS_WIDTH);
-        xAxisBottom.setAxisColor(Color.TRANSPARENT);
-        xAxisBottom.setTickLabelColor(Color.web("#85949B"));
-        xAxisBottom.setTickMarkColor(Color.web("#85949B"));
-        xAxisBottom.setMinorTickMarksVisible(false);
-        xAxisBottom.setMediumTickMarksVisible(false);
-        xAxisBottom.setMajorTickMarksVisible(false);
+        xAxisBottom = AxisBuilder.create(Orientation.HORIZONTAL, Position.BOTTOM)
+                                 .type(AxisType.LINEAR)
+                                 .prefHeight(AXIS_WIDTH)
+                                 .minValue(1)
+                                 .maxValue(13)
+                                 .autoScale(true)
+                                 .axisColor(Color.TRANSPARENT)
+                                 .tickLabelColor(Color.web("#85949B"))
+                                 .tickMarkColor(Color.web("#85949B"))
+                                 .tickMarksVisible(false)
+                                 .build();
+        AnchorPane.setBottomAnchor(xAxisBottom, 0d);
+        AnchorPane.setLeftAnchor(xAxisBottom, AXIS_WIDTH);
+        AnchorPane.setRightAnchor(xAxisBottom, AXIS_WIDTH);
 
-        yAxisLeft = createLeftYAxis(0, 1000, true, AXIS_WIDTH);
-        yAxisLeft.setAxisColor(Color.TRANSPARENT);
-        yAxisLeft.setTickLabelColor(Color.web("#85949B"));
-        yAxisLeft.setTickMarkColor(Color.web("#85949B"));
-        yAxisLeft.setMinorTickMarksVisible(false);
-        yAxisLeft.setMediumTickMarksVisible(false);
-        yAxisLeft.setMajorTickMarksVisible(false);
+        yAxisLeft = AxisBuilder.create(Orientation.VERTICAL, Position.LEFT)
+                               .type(AxisType.LINEAR)
+                               .prefWidth(AXIS_WIDTH)
+                               .minValue(0)
+                               .maxValue(1000)
+                               .autoScale(true)
+                               .axisColor(Color.TRANSPARENT)
+                               .tickLabelColor(Color.web("#85949B"))
+                               .tickMarkColor(Color.web("#85949B"))
+                               .tickMarksVisible(false)
+                               .build();
+        AnchorPane.setTopAnchor(yAxisLeft, 0d);
+        AnchorPane.setBottomAnchor(yAxisLeft, AXIS_WIDTH);
+        AnchorPane.setLeftAnchor(yAxisLeft, 0d);
+
+        Grid grid = GridBuilder.create(xAxisBottom, yAxisLeft)
+                               .gridLinePaint(Color.web("#384C57"))
+                               .minorHGridLinesVisible(false)
+                               .mediumHGridLinesVisible(false)
+                               .minorVGridLinesVisible(false)
+                               .mediumVGridLinesVisible(false)
+                               .gridLineDashes(4, 4)
+                               .build();
 
         XYPane lineChartPane = new XYPane(xySeries1);
 
         lineChart = new XYChart<>(lineChartPane, yAxisLeft, xAxisBottom);
-
-        Grid grid = new Grid(xAxisBottom, yAxisLeft);
-        grid.setGridLinePaint(Color.web("#384C57"));
-        grid.setMinorHGridLinesVisible(false);
-        grid.setMediumHGridLinesVisible(false);
-        grid.setMinorVGridLinesVisible(false);
-        grid.setMediumVGridLinesVisible(false);
-        grid.setGridLineDashes(4, 4);
-
         lineChart.setGrid(grid);
     }
 

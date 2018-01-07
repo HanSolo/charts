@@ -83,33 +83,33 @@ public class GridBuilder<B extends GridBuilder<B>> {
         return (B)this;
     }
 
-    public final B majorHGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("majorHGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B majorHGridLinesVisible(final boolean VISIBLE) {
+        properties.put("majorHGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
-    public final B mediumHGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("mediumHGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B mediumHGridLinesVisible(final boolean VISIBLE) {
+        properties.put("mediumHGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
-    public final B minorHGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("minorHGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B minorHGridLinesVisible(final boolean VISIBLE) {
+        properties.put("minorHGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
-    public final B majorVGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("majorVGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B majorVGridLinesVisible(final boolean VISIBLE) {
+        properties.put("majorVGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
-    public final B mediumVGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("mediumVGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B mediumVGridLinesVisible(final boolean VISIBLE) {
+        properties.put("mediumVGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
-    public final B minorVGridLinesVisible(final boolean BOOLEAN) {
-        properties.put("minorVGridLinesVisible", new SimpleBooleanProperty(BOOLEAN));
+    public final B minorVGridLinesVisible(final boolean VISIBLE) {
+        properties.put("minorVGridLinesVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -118,7 +118,7 @@ public class GridBuilder<B extends GridBuilder<B>> {
         return (B)this;
     }
 
-    public final B gridLineDashes(final double[] DASHES) {
+    public final B gridLineDashes(final double... DASHES) {
         properties.put("dashesArray", new SimpleObjectProperty<>(DASHES));
         return (B)this;
     }

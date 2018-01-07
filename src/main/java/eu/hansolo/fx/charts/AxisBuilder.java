@@ -47,15 +47,20 @@ import java.util.Locale;
  */
 public class AxisBuilder<B extends AxisBuilder<B>> {
     private HashMap<String, Property> properties = new HashMap<>();
+    private Orientation               orientation;
+    private Position                  position;
 
 
     // ******************** Constructors **************************************
-    protected AxisBuilder() {}
+    protected AxisBuilder(final Orientation ORIENTATION, final Position POSITION) {
+        orientation = ORIENTATION;
+        position    = POSITION;
+    }
 
 
     // ******************** Methods *******************************************
-    public static final AxisBuilder create() {
-        return new AxisBuilder();
+    public static final AxisBuilder create(final Orientation ORIENTATION, final Position POSITION) {
+        return new AxisBuilder(ORIENTATION, POSITION);
     }
 
     public final B minValue(final double MIN_VALUE) {
@@ -98,16 +103,6 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
-    public final B orientation(final Orientation ORIENTATION) {
-        properties.put("orientation", new SimpleObjectProperty(ORIENTATION));
-        return (B)this;
-    }
-
-    public final B position(final Position POS) {
-        properties.put("position", new SimpleObjectProperty(POS));
-        return (B)this;
-    }
-
     public final B axisBackgroundColor(final Color COLOR) {
         properties.put("axisBackgroundColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
@@ -128,6 +123,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B tickMarkColor(final Color COLOR) {
+        properties.put("tickMarkColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
     public final B minorTickMarkColor(final Color COLOR) {
         properties.put("minorTickMarkColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
@@ -140,6 +140,26 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
 
     public final B majorTickMarkColor(final Color COLOR) {
         properties.put("majorTickMarkColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B tickMarksVisible(final boolean VISIBLE) {
+        properties.put("tickMarksVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B minorTickMarksVisible(final boolean VISIBLE) {
+        properties.put("minorTickMarksVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B mediumTickMarksVisible(final boolean VISIBLE) {
+        properties.put("mediumTickMarksVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B majorTickMarksVisible(final boolean VISIBLE) {
+        properties.put("majorTickMarksVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -289,7 +309,7 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
 
 
     public final Axis build() {
-        final Axis CONTROL = new Axis();
+        final Axis CONTROL = new Axis(orientation, position);
 
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {
@@ -344,10 +364,6 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setUnit(((StringProperty) properties.get(key)).get());
             } else if ("axisType".equals(key)) {
                 CONTROL.setType(((ObjectProperty<AxisType>) properties.get(key)).get());
-            } else if ("orientation".equals(key)) {
-                CONTROL.setOrientation(((ObjectProperty<Orientation>) properties.get(key)).get());
-            } else if ("position".equals(key)) {
-                CONTROL.setPosition(((ObjectProperty<Position>) properties.get(key)).get());
             } else if ("axisBackgroundColor".equals(key)) {
                 CONTROL.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("axisColor".equals(key)) {
@@ -356,12 +372,22 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("titleColor".equals(key)) {
                 CONTROL.setTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("tickMarkColor".equals(key)) {
+                CONTROL.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("minorTickMarkColor".equals(key)) {
                 CONTROL.setMinorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("mediumTickMarkColor".equals(key)) {
                 CONTROL.setMediumTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("majorTickMarkColor".equals(key)) {
                 CONTROL.setMajorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("tickMarksVisible".equals(key)) {
+                CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("minorTickMarksVisible".equals(key)) {
+                CONTROL.setMinorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("mediumTickMarksVisible".equals(key)) {
+                CONTROL.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("majorTickMarksVisible".equals(key)) {
+                CONTROL.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("zeroColor".equals(key)) {
                 CONTROL.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("minorTickSpace".equals(key)) {
