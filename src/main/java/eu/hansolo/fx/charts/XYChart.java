@@ -104,6 +104,7 @@ public class XYChart<T extends XYItem> extends Region {
 
         pane = new AnchorPane(xyPane);
         pane.getChildren().addAll(axis);
+        setGrid(grid);
 
         getChildren().setAll(pane);
     }
@@ -171,7 +172,7 @@ public class XYChart<T extends XYItem> extends Region {
 
     public void setGrid(final Grid GRID) {
         if (null == GRID) return;
-        if (null != grid) { pane.getChildren().remove(0); }
+        if (null != grid) { pane.getChildren().remove(grid); }
         grid = GRID;
         pane.getChildren().add(0, grid);
         adjustGridAnchors();

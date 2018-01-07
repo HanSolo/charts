@@ -38,14 +38,38 @@ import javafx.scene.Scene;
  * Time: 11:23
  */
 public class LineChartTest extends Application {
-    private static final Double  AXIS_WIDTH     = 50d;
+    private static final Double  AXIS_WIDTH = 50d;
     private XYChart<XYChartItem> lineChart;
     private XYSeries             xySeries1;
+    private XYSeries             xySeries2;
     private Axis                 xAxisBottom;
     private Axis                 yAxisLeft;
 
     @Override public void init() {
         xySeries1 = XYSeriesBuilder.create()
+                                   .items(new XYChartItem(1, 600, "Jan"),
+                                          new XYChartItem(2, 760, "Feb"),
+                                          new XYChartItem(3, 585, "Mar"),
+                                          new XYChartItem(4, 410, "Apr"),
+                                          new XYChartItem(5, 605, "May"),
+                                          new XYChartItem(6, 825, "Jun"),
+                                          new XYChartItem(7, 595, "Jul"),
+                                          new XYChartItem(8, 300, "Aug"),
+                                          new XYChartItem(9, 515, "Sep"),
+                                          new XYChartItem(10, 780, "Oct"),
+                                          new XYChartItem(11, 570, "Nov"),
+                                          new XYChartItem(12, 620, "Dec"))
+                                   .chartType(ChartType.SMOOTH_AREA)
+                                   .fill(Color.web("#00AEF520"))
+                                   .stroke(Color.web("#00AEF5"))
+                                   .symbolFill(Color.web("#00AEF5"))
+                                   .symbolStroke(Color.web("#293C47"))
+                                   .symbolSize(10)
+                                   .strokeWidth(3)
+                                   .symbolsVisible(true)
+                                   .build();
+
+        xySeries2 = XYSeriesBuilder.create()
                                    .items(new XYChartItem(1, 280, "Jan"),
                                           new XYChartItem(2, 190, "Feb"),
                                           new XYChartItem(3, 280, "Mar"),
@@ -107,10 +131,9 @@ public class LineChartTest extends Application {
                                .gridLineDashes(4, 4)
                                .build();
 
-        XYPane lineChartPane = new XYPane(xySeries1);
+        XYPane lineChartPane = new XYPane(xySeries1, xySeries2);
 
-        lineChart = new XYChart<>(lineChartPane, yAxisLeft, xAxisBottom);
-        lineChart.setGrid(grid);
+        lineChart = new XYChart<>(lineChartPane, grid, yAxisLeft, xAxisBottom);
     }
 
     @Override public void start(Stage stage) {
