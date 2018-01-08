@@ -85,7 +85,10 @@ public class PlayfairTest extends Application {
         xySeries2 = new XYSeries<>(xyData2, ChartType.SMOOTH_LINE_DELTA, true);
 
         xySeries1.setSymbolFill(item1Color);
+        xySeries1.setSymbolStroke(item1Color.darker());
+
         xySeries2.setSymbolFill(item2Color);
+        xySeries2.setSymbolStroke(item2Color.darker());
 
         xySeries1.setStroke(item1Color);
         //xySeries1.setFill(Color.colorToRGB(0, 200, 0, 0.35));

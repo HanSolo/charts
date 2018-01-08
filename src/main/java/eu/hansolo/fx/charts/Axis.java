@@ -1303,7 +1303,7 @@ public class Axis extends Region {
         } else {
             minPosition             = 0;
             maxPosition             = width;
-            textPosition            = height * 0.4;
+            textPosition            = height * 0.5;
             maxMajorTickMarkLength  = height * 0.2;
             maxMediumTickMarkLength = height * 0.175;
             maxMinorTickMarkLength  = height * 0.1;
@@ -1423,7 +1423,7 @@ public class Axis extends Region {
                         outerPointX  = fixedPosition;
                         outerPointY  = anchorY;
                         textPointX   = fixedPosition;
-                        textPointY   = innerPointY + textPosition - tickLabelFontSize * 0.5;
+                        textPointY   = innerPointY + textPosition - tickLabelFontSize * 0.8;
                         maxTextWidth = majorTickSpace * stepSize;
                     } else if (Position.TOP == position) {
                         innerPointX  = fixedPosition;
@@ -1570,19 +1570,19 @@ public class Axis extends Region {
                         isMaxValue    = i == 0;
                         fixedPosition = maxPosition - i * section - (stepSize * section);
                         if (Position.LEFT == position) {
-                            innerPointX  = anchorXPlusOffset - 0.5 * width;
+                            innerPointX  = anchorXPlusOffset - maxMajorTickMarkLength;
                             innerPointY  = fixedPosition;
-                            minorPointX  = anchorXPlusOffset - 0.3 * width;
+                            minorPointX  = anchorXPlusOffset - maxMinorTickMarkLength;
                             minorPointY  = fixedPosition;
                             outerPointX  = anchorXPlusOffset;
                             outerPointY  = fixedPosition;
-                            textPointX   = anchorXPlusOffset - 0.6 * width;
+                            textPointX   = anchorXPlusOffset - textPosition;
                             textPointY   = fixedPosition;
                             maxTextWidth = 0.6 * width;
                         } else {
-                            innerPointX  = anchorX + 0.5 * width;
+                            innerPointX  = anchorX + maxMajorTickMarkLength;
                             innerPointY  = fixedPosition;
-                            minorPointX  = anchorX + 0.3 * width;
+                            minorPointX  = anchorX + maxMinorTickMarkLength;
                             minorPointY  = fixedPosition;
                             outerPointX  = anchorX;
                             outerPointY  = fixedPosition;
@@ -1596,23 +1596,23 @@ public class Axis extends Region {
                         fixedPosition = i * section + (stepSize * section);
                         if (Position.BOTTOM == position) {
                             innerPointX  = fixedPosition;
-                            innerPointY  = anchorY + 0.5 * height;
+                            innerPointY  = anchorY + maxMajorTickMarkLength;
                             minorPointX  = fixedPosition;
-                            minorPointY  = anchorY + 0.3 * height;
+                            minorPointY  = anchorY + maxMinorTickMarkLength;
                             outerPointX  = fixedPosition;
                             outerPointY  = anchorY;
                             textPointX   = fixedPosition;
-                            textPointY   = anchorY + 0.8 * height;
+                            textPointY   = anchorY + textPosition - tickLabelFontSize * 0.2;
                             maxTextWidth = section;
                         } else {
                             innerPointX  = fixedPosition;
-                            innerPointY  = anchorYPlusOffset - 0.5 * height;
+                            innerPointY  = anchorYPlusOffset - maxMajorTickMarkLength;
                             minorPointX  = fixedPosition;
-                            minorPointY  = anchorYPlusOffset - 0.3 * height;
+                            minorPointY  = anchorYPlusOffset - maxMinorTickMarkLength;
                             outerPointX  = fixedPosition;
                             outerPointY  = anchorYPlusOffset;
                             textPointX   = fixedPosition;
-                            textPointY   = anchorY + 0.2 * height;
+                            textPointY   = anchorY - textPosition + tickLabelFontSize * 0.5;
                             maxTextWidth = section;
                         }
                     }
