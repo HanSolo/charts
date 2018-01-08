@@ -456,25 +456,25 @@ public class Grid extends Region {
         Paint mediumVGridColor = null == getMediumVGridLinePaint() ? Helper.getColorWithOpacity(xAxis.getMediumTickMarkColor(), getGridOpacity()) : getMediumVGridLinePaint();
         Paint majorVGridColor  = null == getMinorVGridLinePaint()  ? Helper.getColorWithOpacity(xAxis.getMajorTickMarkColor(), getGridOpacity())  : getMinorVGridLinePaint();
 
-        boolean isLinearXAxis   = AxisType.LINEAR == xAxis.getType();
-        double  minX            = xAxis.getMinValue();
-        double  maxX            = xAxis.getMaxValue();
-        boolean fullRangeX      = (minX < 0 && maxX > 0);
-        double  minorTickSpaceX = xAxis.getMinorTickSpace();
-        double  majorTickSpaceX = xAxis.getMajorTickSpace();
-        double  rangeX          = xAxis.getRange();
-        double  stepSizeX       = Math.abs(width / rangeX);
-        double  zeroPositionX   = xAxis.getZeroPosition();
+        AxisType xAxisType       = xAxis.getType();
+        double   minX            = xAxis.getMinValue();
+        double   maxX            = xAxis.getMaxValue();
+        boolean  fullRangeX      = (minX < 0 && maxX > 0);
+        double   minorTickSpaceX = xAxis.getMinorTickSpace();
+        double   majorTickSpaceX = xAxis.getMajorTickSpace();
+        double   rangeX          = xAxis.getRange();
+        double   stepSizeX       = Math.abs(width / rangeX);
+        double   zeroPositionX   = xAxis.getZeroPosition();
 
-        boolean isLinearYAxis   = AxisType.LINEAR == yAxis.getType();
-        double  minY            = yAxis.getMinValue();
-        double  maxY            = yAxis.getMaxValue();
-        boolean fullRangeY      = (minY < 0 && maxY > 0);
-        double  minorTickSpaceY = yAxis.getMinorTickSpace();
-        double  majorTickSpaceY = yAxis.getMajorTickSpace();
-        double  rangeY          = yAxis.getRange();
-        double  stepSizeY       = Math.abs(height / rangeY);
-        double  zeroPositionY   = yAxis.getZeroPosition();
+        AxisType yAxisType       = yAxis.getType();
+        double   minY            = yAxis.getMinValue();
+        double   maxY            = yAxis.getMaxValue();
+        boolean  fullRangeY      = (minY < 0 && maxY > 0);
+        double   minorTickSpaceY = yAxis.getMinorTickSpace();
+        double   majorTickSpaceY = yAxis.getMajorTickSpace();
+        double   rangeY          = yAxis.getRange();
+        double   stepSizeY       = Math.abs(height / rangeY);
+        double   zeroPositionY   = yAxis.getZeroPosition();
         
         BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpaceX);
         BigDecimal majorTickSpaceBD = BigDecimal.valueOf(majorTickSpaceX);
@@ -482,7 +482,7 @@ public class Grid extends Region {
         BigDecimal mediumCheck5     = BigDecimal.valueOf(5 * minorTickSpaceX);
 
         // Main Loop for grid lines
-        if (isLinearXAxis) {
+        if (AxisType.LINEAR == xAxisType || AxisType.TEXT == xAxisType) {
             // ******************** Linear ************************************
             boolean    isZero;
             double     tmpStepSize = minorTickSpaceX;
@@ -528,7 +528,7 @@ public class Grid extends Region {
                 counter = counterBD.doubleValue();
                 if (counter > maxX) break;
             }
-        } else {
+        } else if (AxisType.LOGARITHMIC == xAxisType) {
             // ******************** Logarithmic *******************************
             double  logUpperBound         = Math.log10(xAxis.getMaxValue());
             double  section               = width / logUpperBound;
@@ -570,7 +570,7 @@ public class Grid extends Region {
         mediumCheck2     = BigDecimal.valueOf(2 * minorTickSpaceY);
         mediumCheck5     = BigDecimal.valueOf(5 * minorTickSpaceY);
 
-        if (isLinearYAxis) {
+        if (AxisType.LINEAR == yAxisType || AxisType.TEXT == yAxisType) {
             // ******************** Linear ************************************
             boolean    isZero;
             double     tmpStepSize = minorTickSpaceY;
@@ -616,7 +616,7 @@ public class Grid extends Region {
                 counter = counterBD.doubleValue();
                 if (counter > maxY) break;
             }
-        } else {
+        } else if (AxisType.LOGARITHMIC == yAxisType) {
             // ******************** Logarithmic *******************************
             double  logUpperBound         = Math.log10(yAxis.getMaxValue());
             double  section               = height / logUpperBound;
