@@ -1270,29 +1270,31 @@ public class Axis extends Region {
         axisCtx.setFont(tickLabelFont);
         axisCtx.setTextBaseline(VPos.CENTER);
 
-        AxisType    axisType                           = getType();
-        double      minValue                           = getMinValue();
-        double      maxValue                           = getMaxValue();
-        boolean     tickLabelsVisible                  = getTickLabelsVisible();
-        boolean     isOnlyFirstAndLastTickLabelVisible = isOnlyFirstAndLastTickLabelVisible();
-        double      tickLabelFontSize                  = getTickLabelFontSize();
-        Color       tickLabelColor                     = getTickLabelColor();
-        Color       zeroColor                          = getZeroColor();
-        Color       majorTickMarkColor                 = getMajorTickMarkColor();
-        boolean     majorTickMarksVisible              = getMajorTickMarksVisible();
-        Color       mediumTickMarkColor                = getMediumTickMarkColor();
-        boolean     mediumTickMarksVisible             = getMediumTickMarksVisible();
-        Color       minorTickMarkColor                 = getMinorTickMarkColor();
-        boolean     minorTickMarksVisible              = getMinorTickMarksVisible();
-        double      majorLineWidth                     = size * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : size * 0.007;
-        double      mediumLineWidth                    = size * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : size * 0.005;
-        double      minorLineWidth                     = size * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : size * 0.003;
-        double      maxMajorTickMarkLength;
-        double      maxMediumTickMarkLength;
-        double      maxMinorTickMarkLength;
-        double      textPosition;
-        double      minPosition;
-        double      maxPosition;
+        AxisType        axisType                           = getType();
+        boolean         isAutoScale                        = isAutoScale();
+        double          minValue                           = getMinValue();
+        double          maxValue                           = getMaxValue();
+        boolean         tickLabelsVisible                  = getTickLabelsVisible();
+        boolean         isOnlyFirstAndLastTickLabelVisible = isOnlyFirstAndLastTickLabelVisible();
+        double          tickLabelFontSize                  = getTickLabelFontSize();
+        TickLabelFormat tickLabelFormat                    = getTickLabelFormat();
+        Color           tickLabelColor                     = getTickLabelColor();
+        Color           zeroColor                          = getZeroColor();
+        Color           majorTickMarkColor                 = getMajorTickMarkColor();
+        boolean         majorTickMarksVisible              = getMajorTickMarksVisible();
+        Color           mediumTickMarkColor                = getMediumTickMarkColor();
+        boolean         mediumTickMarksVisible             = getMediumTickMarksVisible();
+        Color           minorTickMarkColor                 = getMinorTickMarkColor();
+        boolean         minorTickMarksVisible              = getMinorTickMarksVisible();
+        double          majorLineWidth                     = size * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : size * 0.007;
+        double          mediumLineWidth                    = size * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : size * 0.005;
+        double          minorLineWidth                     = size * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : size * 0.003;
+        double          maxMajorTickMarkLength;
+        double          maxMediumTickMarkLength;
+        double          maxMinorTickMarkLength;
+        double          textPosition;
+        double          minPosition;
+        double          maxPosition;
         if (VERTICAL == getOrientation()) {
             minPosition             = 0;
             maxPosition             = height;
@@ -1471,10 +1473,10 @@ public class Axis extends Region {
                     }
 
                     // Draw tick labels
-                    if (tickLabelsVisible && tickLabelFont.getSize() > 6) {
+                    if (tickLabelsVisible && tickLabelFontSize > 6) {
                         String tickLabelString;
                         if (AxisType.LINEAR == axisType) {
-                            if (TickLabelFormat.NUMBER == getTickLabelFormat()) {
+                            if (TickLabelFormat.NUMBER == tickLabelFormat) {
                                 tickLabelString = Orientation.HORIZONTAL == orientation ? String.format(locale, tickLabelFormatString, (minValue - i)) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
                             } else {
                                 tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
@@ -1485,8 +1487,8 @@ public class Axis extends Region {
                             } else {
                                 tickLabelString = "";
                             }
-                            if (isAutoScale()) {
-                                tickLabelCounter += (int) getMajorTickSpace();
+                            if (isAutoScale) {
+                                tickLabelCounter += (int) majorTickSpace;
                             } else {
                                 tickLabelCounter++;
                             }
@@ -1503,7 +1505,7 @@ public class Axis extends Region {
                 } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick mark
                     drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
-                } /*else if (tickMarkCounter % 10 == 0) {
+                } else if (!isAutoScale && tickMarkCounter % 10 == 0) {
                     // Draw major tick mark based on number of tick marks
                     isMinValue = Double.compare(minValue, counter) == 0;
                     isMaxValue = Double.compare(maxValue, counter) == 0;
@@ -1530,7 +1532,6 @@ public class Axis extends Region {
                 } else if (tickMarkCounter % 1 == 0) {
                     drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
                 }
-                */
 
                 counterBD = counterBD.add(minorTickSpaceBD);
                 counter = counterBD.doubleValue();
