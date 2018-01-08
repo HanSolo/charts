@@ -1287,14 +1287,26 @@ public class Axis extends Region {
         double      majorLineWidth                     = size * 0.007 < MIN_MAJOR_LINE_WIDTH ? MIN_MAJOR_LINE_WIDTH : size * 0.007;
         double      mediumLineWidth                    = size * 0.006 < MIN_MEDIUM_LINE_WIDTH ? MIN_MEDIUM_LINE_WIDTH : size * 0.005;
         double      minorLineWidth                     = size * 0.005 < MIN_MINOR_LINE_WIDTH ? MIN_MINOR_LINE_WIDTH : size * 0.003;
+        double      maxMajorTickMarkLength;
+        double      maxMediumTickMarkLength;
+        double      maxMinorTickMarkLength;
+        double      textPosition;
         double      minPosition;
         double      maxPosition;
         if (VERTICAL == getOrientation()) {
-            minPosition = 0;
-            maxPosition = height;
+            minPosition             = 0;
+            maxPosition             = height;
+            textPosition            = width * 0.3;
+            maxMajorTickMarkLength  = width * 0.2;
+            maxMediumTickMarkLength = width * 0.175;
+            maxMinorTickMarkLength  = width * 0.1;
         } else {
-            minPosition = 0;
-            maxPosition = width;
+            minPosition             = 0;
+            maxPosition             = width;
+            textPosition            = height * 0.4;
+            maxMajorTickMarkLength  = height * 0.2;
+            maxMediumTickMarkLength = height * 0.175;
+            maxMinorTickMarkLength  = height * 0.1;
         }
 
         Locale      locale            = getLocale();
@@ -1364,29 +1376,29 @@ public class Axis extends Region {
                 double fixedPosition = (counter - minValue) * stepSize;
                 if (VERTICAL == orientation) {
                     if (Position.LEFT == position) {
-                        innerPointX  = anchorXPlusOffset - 0.5 * width;
+                        innerPointX  = anchorXPlusOffset - maxMajorTickMarkLength;
                         innerPointY  = fixedPosition;
-                        mediumPointX = anchorXPlusOffset - 0.4 * width;
+                        mediumPointX = anchorXPlusOffset - maxMediumTickMarkLength;
                         mediumPointY = fixedPosition;
-                        minorPointX  = anchorXPlusOffset - 0.3 * width;
+                        minorPointX  = anchorXPlusOffset - maxMinorTickMarkLength;
                         minorPointY  = fixedPosition;
                         outerPointX  = anchorXPlusOffset;
                         outerPointY  = fixedPosition;
-                        textPointX   = anchorXPlusOffset - 0.6 * width;
+                        textPointX   = anchorXPlusOffset - textPosition;
                         textPointY   = fixedPosition;
                         maxTextWidth = 0.6 * width;
                     } else if (Position.RIGHT == position) {
-                        innerPointX  = anchorX + 0.5 * width;
+                        innerPointX  = anchorX + maxMajorTickMarkLength;
                         innerPointY  = fixedPosition;
-                        mediumPointX = anchorX + 0.4 * width;
+                        mediumPointX = anchorX + maxMediumTickMarkLength;
                         mediumPointY = fixedPosition;
-                        minorPointX  = anchorX + 0.3 * width;
+                        minorPointX  = anchorX + maxMinorTickMarkLength;
                         minorPointY  = fixedPosition;
                         outerPointX  = anchorX;
                         outerPointY  = fixedPosition;
                         textPointX   = anchorXPlusOffset;
                         textPointY   = fixedPosition;
-                        maxTextWidth = 0.6 * width;
+                        maxTextWidth = textPosition;
                     } else {
                         innerPointX  = anchorX - 0.25 * width;
                         innerPointY  = fixedPosition;
@@ -1398,32 +1410,32 @@ public class Axis extends Region {
                         outerPointY  = fixedPosition;
                         textPointX   = anchorXPlusOffset;
                         textPointY   = fixedPosition;
-                        maxTextWidth = 0.6 * width;
+                        maxTextWidth = textPosition;
                     }
                 } else {
                     if (Position.BOTTOM == position) {
                         innerPointX  = fixedPosition;
-                        innerPointY  = anchorY + 0.5 * height;
+                        innerPointY  = anchorY + maxMajorTickMarkLength;
                         mediumPointX = fixedPosition;
-                        mediumPointY = anchorY + 0.4 * height;
+                        mediumPointY = anchorY + maxMediumTickMarkLength;
                         minorPointX  = fixedPosition;
-                        minorPointY  = anchorY + 0.3 * height;
+                        minorPointY  = anchorY + maxMinorTickMarkLength;
                         outerPointX  = fixedPosition;
                         outerPointY  = anchorY;
                         textPointX   = fixedPosition;
-                        textPointY   = innerPointY + tickLabelFontSize * 0.6;
+                        textPointY   = innerPointY + textPosition - tickLabelFontSize * 0.5;
                         maxTextWidth = majorTickSpace * stepSize;
                     } else if (Position.TOP == position) {
                         innerPointX  = fixedPosition;
-                        innerPointY  = anchorYPlusOffset - 0.5 * height;
+                        innerPointY  = anchorYPlusOffset - maxMajorTickMarkLength;
                         mediumPointX = fixedPosition;
-                        mediumPointY = anchorYPlusOffset - 0.4 * height;
+                        mediumPointY = anchorYPlusOffset - maxMediumTickMarkLength;
                         minorPointX  = fixedPosition;
-                        minorPointY  = anchorYPlusOffset - 0.3 * height;
+                        minorPointY  = anchorYPlusOffset - maxMinorTickMarkLength;
                         outerPointX  = fixedPosition;
                         outerPointY  = anchorYPlusOffset;
                         textPointX   = fixedPosition;
-                        textPointY   = innerPointY - tickLabelFontSize * 0.6;
+                        textPointY   = innerPointY - textPosition + tickLabelFontSize * 0.5;
                         maxTextWidth = majorTickSpace * stepSize;
                     } else {
                         innerPointX  = fixedPosition;
@@ -1473,7 +1485,11 @@ public class Axis extends Region {
                             } else {
                                 tickLabelString = "";
                             }
-                            tickLabelCounter++;
+                            if (isAutoScale()) {
+                                tickLabelCounter += (int) getMajorTickSpace();
+                            } else {
+                                tickLabelCounter++;
+                            }
                         } else {
                             // Date Axis
                             tickLabelString = dateTimeFormatter.format(toLocalDateTime((long) (minValue - i) * 1000));

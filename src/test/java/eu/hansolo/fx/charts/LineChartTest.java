@@ -38,7 +38,7 @@ import javafx.scene.Scene;
  * Time: 11:23
  */
 public class LineChartTest extends Application {
-    private static final Double  AXIS_WIDTH = 50d;
+    private static final Double  AXIS_WIDTH = 25d;
     private XYChart<XYChartItem> lineChart;
     private XYSeries             xySeries1;
     private XYSeries             xySeries2;
@@ -93,9 +93,9 @@ public class LineChartTest extends Application {
                                    .build();
 
         xAxisBottom = AxisBuilder.create(Orientation.HORIZONTAL, Position.BOTTOM)
-                                 .type(AxisType.LINEAR)
+                                 .type(AxisType.TEXT)
                                  .prefHeight(AXIS_WIDTH)
-                                 .categories("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+                                 .categories("", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
                                  .minValue(1)
                                  .maxValue(13)
                                  .autoScale(true)
