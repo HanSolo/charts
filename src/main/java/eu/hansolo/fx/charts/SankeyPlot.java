@@ -125,7 +125,16 @@ public class SankeyPlot extends Region {
     public SankeyPlot() {
         items              = FXCollections.observableArrayList();
         itemListener       = e -> redraw();
-        itemListListener   = c -> prepareData();
+        itemListListener   = c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                }
+            }
+            prepareData();
+        };
 
         itemsPerLevel      = new LinkedHashMap<>();
 
@@ -609,8 +618,6 @@ public class SankeyPlot extends Region {
             }
         }
 
-        //redraw();
-
         createPaths();
         redraw();
     }
@@ -737,7 +744,6 @@ public class SankeyPlot extends Region {
         // Draw bezier curves between items
         for (int level = minLevel ; level <= maxLevel ; level++) {
             List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
-            int nextLevel   = level + 1;
 
             // Go through all item data of the current level
             for (PlotItemData itemData : itemDataInLevel) {
