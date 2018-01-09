@@ -39,7 +39,9 @@ import javafx.util.Duration;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -73,40 +75,40 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
     // ******************** Constructors **************************************
     public ChartItem() {
-        this("", 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this("", 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME) {
-        this(NAME, 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this(NAME, 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(double VALUE) {
-        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final double VALUE, final Instant TIMESTAMP) {
-        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
+        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800);
     }
     public ChartItem(final double VALUE, final Color FILL_COLOR) {
-        this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final Color FILL_COLOR) {
-        this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final double VALUE) {
-        this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Instant TIMESTAMP) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), true, 800);
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), true, 800);
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR, final Instant TIMESTAMP) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, true, 800);
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
@@ -166,8 +168,10 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setValue(final double VALUE) {
         if (null == value) {
             if (isAnimated()) {
+                oldValue = _value;
+                _value   = VALUE;
                 timeline.stop();
-                KeyValue kv1 = new KeyValue(currentValue, _value, Interpolator.EASE_BOTH);
+                KeyValue kv1 = new KeyValue(currentValue, oldValue, Interpolator.EASE_BOTH);
                 KeyValue kv2 = new KeyValue(currentValue, VALUE, Interpolator.EASE_BOTH);
                 KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
                 KeyFrame kf2 = new KeyFrame(Duration.millis(animationDuration), kv2);
@@ -296,6 +300,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     }
 
     public Instant getTimestamp() { return null == timestamp ? _timestamp : timestamp.get(); }
+    public void setTimestamp(final ZonedDateTime TIMESTAMP) { setTimestamp(TIMESTAMP.toInstant()); }
     public void setTimestamp(final Instant TIMESTAMP) {
         if (null == timestamp) {
             _timestamp = TIMESTAMP;
@@ -345,14 +350,25 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
     @Override public String toString() {
         return new StringBuilder().append("{\n")
-                                  .append("  \"name\":").append(name).append(",\n")
-                                  .append("  \"value\":").append(value).append(",\n")
+                                  .append("  \"name\":").append(getName()).append(",\n")
+                                  .append("  \"value\":").append(getValue()).append(",\n")
                                   .append("  \"timestamp\":").append(getTimestamp().toEpochMilli()).append(",\n")
                                   .append("}")
                                   .toString();
     }
 
     @Override public int compareTo(final ChartItem ITEM) { return Double.compare(getValue(), ITEM.getValue()); }
+
+    @Override public boolean equals(Object o) {
+        if (o == this) { return true; }
+        if (!(o instanceof ChartItem)) { return false; }
+
+        ChartItem item = (ChartItem) o;
+
+        return item.getName().equals(getName()) &&
+               item.getTimestamp().equals(getTimestamp()) &&
+               Double.compare(item.getValue(), getValue()) == 0;
+    }
 
 
     // ******************** Event Handling ************************************
