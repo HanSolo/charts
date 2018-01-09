@@ -31,6 +31,7 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 
 
@@ -58,17 +59,22 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
     }
 
     public final B fill(final Color COLOR) {
-        properties.put("fillColor", new SimpleObjectProperty(COLOR));
+        properties.put("fill", new SimpleObjectProperty(COLOR));
         return (B)this;
     }
 
     public final B stroke(final Color COLOR) {
-        properties.put("strokeColor", new SimpleObjectProperty(COLOR));
+        properties.put("stroke", new SimpleObjectProperty(COLOR));
         return (B)this;
     }
 
     public final B textColor(final Color COLOR) {
         properties.put("textColor", new SimpleObjectProperty(COLOR));
+        return (B)this;
+    }
+
+    public final B timestamp(final ZonedDateTime DATE_TIME) {
+        properties.put("timestampDateTime", new SimpleObjectProperty<>(DATE_TIME));
         return (B)this;
     }
 
@@ -94,7 +100,6 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
 
     public final ChartItem build() {
         final ChartItem ITEM = new ChartItem();
-
         for (String key : properties.keySet()) {
             if ("name".equals(key)) {
                 ITEM.setName(((StringProperty) properties.get(key)).get());
@@ -108,6 +113,8 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("timestamp".equals(key)) {
                 ITEM.setTimestamp(((ObjectProperty<Instant>) properties.get(key)).get());
+            } else if ("timestampDateTime".equals(key)) {
+                ITEM.setTimestamp(((ObjectProperty<ZonedDateTime>) properties.get(key)).get());
             } else if("symbol".equals(key)) {
                 ITEM.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
             } else if("animated".equals(key)) {
