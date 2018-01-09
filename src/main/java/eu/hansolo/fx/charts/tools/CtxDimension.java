@@ -119,6 +119,9 @@ public class CtxDimension {
         setMaxY(MAX_Y);
     }
 
+    public double getCenterX() { return minX + getWidth() * 0.5; }
+    public double getCenterY() { return minY + getHeight() * 0.5; }
+
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"minX\"  : ").append(getMinX()).append(",\n")
