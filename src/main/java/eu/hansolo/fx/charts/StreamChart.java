@@ -582,10 +582,11 @@ public class StreamChart extends Region {
                     path.closePath();
 
                     String tooltipText = new StringBuilder().append(item.getName())
-                                                            .append(" -> ")
-                                                            .append(targetItem.getName())
-                                                            .append(" ")
+                                                            .append(": ")
                                                             .append(String.format(getLocale(), formatString, value))
+                                                            .append(" -> ")
+                                                            .append(" ")
+                                                            .append(String.format(getLocale(), formatString, targetItem.getValue()))
                                                             .toString();
                     paths.put(path, tooltipText);
                 }

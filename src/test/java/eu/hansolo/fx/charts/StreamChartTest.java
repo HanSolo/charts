@@ -68,8 +68,6 @@ public class StreamChartTest extends Application {
             createChartItem("Gerrit", 5, 3, 1, Colors.LIMA.color),
             createChartItem("Gerrit", 4, 4, 1, Colors.LIMA.color),
             createChartItem("Gerrit", 2, 5, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 6, 6, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 8, 7, 1, Colors.LIMA.color),
 
             createChartItem("Sandra", 4, 1, 1, Colors.DARK_ORCHID.color),
             createChartItem("Sandra", 6, 2, 1, Colors.DARK_ORCHID.color),
@@ -99,6 +97,10 @@ public class StreamChartTest extends Application {
         streamChart = StreamChartBuilder.create()
                                         .items(items)
                                         .category(Category.DAY)
+                                        .autoItemWidth(false)
+                                        .itemWidth(20)
+                                        .itemGap(10)
+                                        .autoItemGap(false)
                                         .build();
     }
 
