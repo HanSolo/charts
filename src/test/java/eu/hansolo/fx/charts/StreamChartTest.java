@@ -64,21 +64,21 @@ public class StreamChartTest extends Application {
     @Override public void init() {
         ChartItem[] items = {
             createChartItem("Gerrit", 8, 1, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 3, 2, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 5, 3, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 4, 4, 1, Colors.LIMA.color),
-            createChartItem("Gerrit", 2, 5, 1, Colors.LIMA.color),
+            createChartItem("Gerrit", 5, 2, 1, Colors.LIMA.color),
+            createChartItem("Gerrit", 3, 3, 1, Colors.LIMA.color),
+            createChartItem("Gerrit", 2, 4, 1, Colors.LIMA.color),
+            createChartItem("Gerrit", 1, 5, 1, Colors.LIMA.color),
 
-            createChartItem("Sandra", 4, 1, 1, Colors.DARK_ORCHID.color),
-            createChartItem("Sandra", 6, 2, 1, Colors.DARK_ORCHID.color),
+            createChartItem("Sandra", 6, 1, 1, Colors.DARK_ORCHID.color),
+            createChartItem("Sandra", 4, 2, 1, Colors.DARK_ORCHID.color),
             createChartItem("Sandra", 3, 3, 1, Colors.DARK_ORCHID.color),
-            createChartItem("Sandra", 7, 4, 1, Colors.DARK_ORCHID.color),
+            createChartItem("Sandra", 2, 4, 1, Colors.DARK_ORCHID.color),
             createChartItem("Sandra", 3, 5, 1, Colors.DARK_ORCHID.color),
-            createChartItem("Sandra", 8, 6, 1, Colors.DARK_ORCHID.color),
-            createChartItem("Sandra", 5, 7, 1, Colors.DARK_ORCHID.color),
+            createChartItem("Sandra", 2, 6, 1, Colors.DARK_ORCHID.color),
+            createChartItem("Sandra", 2, 7, 1, Colors.DARK_ORCHID.color),
 
             //createChartItem("Lilli", 2, 1, 1, Colors.SPICY_PINK.color),
-            createChartItem("Lilli", 1, 2, 1, Colors.SPICY_PINK.color),
+            createChartItem("Lilli", 4, 2, 1, Colors.SPICY_PINK.color),
             createChartItem("Lilli", 3, 3, 1, Colors.SPICY_PINK.color),
             createChartItem("Lilli", 3, 4, 1, Colors.SPICY_PINK.color),
             createChartItem("Lilli", 2, 5, 1, Colors.SPICY_PINK.color),
@@ -88,10 +88,10 @@ public class StreamChartTest extends Application {
             //createChartItem("Anton", 2, 1, 1, Colors.SPICY_PINK.color),
             //createChartItem("Anton", 3, 2, 1, Colors.DARK_PASTEL_GREEN.color),
             //createChartItem("Anton", 2, 3, 1, Colors.DARK_PASTEL_GREEN.color),
-            createChartItem("Anton", 2, 4, 1, Colors.DARK_PASTEL_GREEN.color),
-            createChartItem("Anton", 1, 5, 1, Colors.DARK_PASTEL_GREEN.color),
+            createChartItem("Anton", 3, 4, 1, Colors.DARK_PASTEL_GREEN.color),
+            createChartItem("Anton", 4, 5, 1, Colors.DARK_PASTEL_GREEN.color),
             createChartItem("Anton", 3, 6, 1, Colors.DARK_PASTEL_GREEN.color),
-            createChartItem("Anton", 1, 7, 1, Colors.DARK_PASTEL_GREEN.color)
+            createChartItem("Anton", 2, 7, 1, Colors.DARK_PASTEL_GREEN.color)
             };
 
         streamChart = StreamChartBuilder.create()
@@ -100,7 +100,7 @@ public class StreamChartTest extends Application {
                                         .autoItemWidth(false)
                                         .itemWidth(20)
                                         .itemGap(10)
-                                        .autoItemGap(false)
+                                        .autoItemGap(true)
                                         .build();
     }
 

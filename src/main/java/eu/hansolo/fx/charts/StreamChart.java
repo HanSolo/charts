@@ -45,6 +45,8 @@ import javafx.scene.text.TextAlignment;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -71,18 +73,22 @@ import static java.util.stream.Collectors.toMap;
 @DefaultProperty("children")
 public class StreamChart extends Region {
     public enum Category {
-        DAY(TemporalAdjusters.ofDateAdjuster(d -> d)),
-        WEEK(TemporalAdjusters.previousOrSame(DayOfWeek.of(1))),
-        MONTH(TemporalAdjusters.firstDayOfMonth()),
-        YEAR(TemporalAdjusters.firstDayOfYear());
+        DAY(TemporalAdjusters.ofDateAdjuster(d -> d), DateTimeFormatter.ofPattern("dd MMM YYYY")),
+        WEEK(TemporalAdjusters.previousOrSame(DayOfWeek.of(1)), DateTimeFormatter.ofPattern("w")),
+        MONTH(TemporalAdjusters.firstDayOfMonth(), DateTimeFormatter.ofPattern("MMM")),
+        YEAR(TemporalAdjusters.firstDayOfYear(), DateTimeFormatter.ofPattern("YYYY"));
 
-        private TemporalAdjuster adjuster;
+        private TemporalAdjuster  adjuster;
+        private DateTimeFormatter formatter;
 
-        Category(final TemporalAdjuster ADJUSTER) {
-            adjuster = ADJUSTER;
+        Category(final TemporalAdjuster ADJUSTER, final DateTimeFormatter FORMATTER) {
+            adjuster  = ADJUSTER;
+            formatter = FORMATTER;
         }
 
         public TemporalAdjuster adjuster() { return adjuster; }
+
+        public DateTimeFormatter formatter() { return formatter; }
     }
     private static final double                            PREFERRED_WIDTH    = 600;
     private static final double                            PREFERRED_HEIGHT   = 400;
@@ -97,6 +103,7 @@ public class StreamChart extends Region {
     private              double                            size;
     private              double                            width;
     private              double                            height;
+    private              double                            reducedHeight;
     private              Canvas                            canvas;
     private              GraphicsContext                   ctx;
     private              Category                          _category;
@@ -487,7 +494,7 @@ public class StreamChart extends Region {
         double itemWidth     = isAutoItemWidth() ? size * 0.1 : getItemWidth();
         double verticalGap   = isAutoItemGap() ? size * 0.005 : getItemGap();
         double horizontalGap = (width - itemWidth) / (chartItems.keySet().size() - 1);
-        scaleY               = (height - (maxItems - 1) * verticalGap) / maxSum;
+        scaleY               = (reducedHeight - (maxItems - 1) * verticalGap) / maxSum;
         double spacerX;
         double spacerY;
         for (int category = 0 ; category < noOfCategories ; category++) {
@@ -498,8 +505,8 @@ public class StreamChart extends Region {
                 ChartItem item        = itemData.getChartItem();
                 double    itemHeight  = item.getValue() * scaleY;
                 double    textOffsetX = 2;
-                itemData.setBounds(spacerX , (height - itemHeight) - spacerY, itemWidth, itemHeight);
-                itemData.setTextPoint(spacerX + textOffsetX, (height - itemHeight) - spacerY + ctx.getFont().getSize());
+                itemData.setBounds(spacerX , (reducedHeight - itemHeight) - spacerY, itemWidth, itemHeight);
+                itemData.setTextPoint(spacerX + textOffsetX, (reducedHeight - itemHeight) - spacerY + ctx.getFont().getSize());
                 spacerY += itemHeight + verticalGap;
             }
         }
@@ -508,12 +515,17 @@ public class StreamChart extends Region {
         redraw();
     }
 
+    private <K, V> K getKeyByValue(final Map<K,V> MAP, final V VALUE) {
+        return MAP.keySet().stream().filter(key -> VALUE.equals(MAP.get(key))).findFirst().get();
+    }
+
 
     // ******************** Resizing ******************************************
     private void resize() {
-        width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
-        height = getHeight() - getInsets().getTop() - getInsets().getBottom();
-        size   = width < height ? width : height;
+        width         = getWidth() - getInsets().getLeft() - getInsets().getRight();
+        height        = getHeight() - getInsets().getTop() - getInsets().getBottom();
+        reducedHeight = height - height * 0.05;
+        size          = width < height ? width : height;
 
         if (width > 0 && height > 0) {
             canvas.setWidth(width);
@@ -597,8 +609,9 @@ public class StreamChart extends Region {
     private void redraw() {
         ctx.clearRect(0, 0, width, height);
         paths.forEach((path, plotItem) -> path.draw(ctx, true, true));
-        Color textColor      = getTextColor();
-        int   noOfCategories = chartItems.size();
+        Color             textColor      = getTextColor();
+        int               noOfCategories = chartItems.size();
+        DateTimeFormatter formatter      = getCategory().formatter();
 
         for (int category = 0 ; category < noOfCategories ; category++) {
             List<ChartItemData> itemDataInCategory = itemsPerCategory.get(category);
@@ -616,10 +629,15 @@ public class StreamChart extends Region {
                 ctx.setStroke(itemColor);
                 ctx.strokeRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
-                ctx.setFill(textColor);
-                ctx.setTextAlign(category == noOfCategories ? TextAlignment.RIGHT : TextAlignment.LEFT);
-                ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
+                if (item.getValue() > 1) {
+                    ctx.setFill(textColor);
+                    ctx.setTextAlign(category == noOfCategories ? TextAlignment.RIGHT : TextAlignment.LEFT);
+                    ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY(), bounds.getWidth());
+                }
             }
+            // Draw category text
+            ChartItemData firstItem = itemDataInCategory.get(0);
+            ctx.fillText(formatter.format(firstItem.getLocalDate()), firstItem.getTextPoint().getX(), reducedHeight + size * 0.02);
         }
     }
 
@@ -643,6 +661,8 @@ public class StreamChart extends Region {
 
         // ******************** Methods *******************************************
         public ChartItem getChartItem() { return chartItem; }
+
+        public LocalDate getLocalDate() { return chartItem.getTimestampAsLocalDate(ZoneId.systemDefault()); }
 
         public CtxBounds getBounds() { return bounds; }
         public void setBounds(final double X, final double Y, final double WIDTH, final double HEIGHT) {
