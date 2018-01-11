@@ -126,12 +126,6 @@ public class StreamChart extends Region {
     private              BooleanProperty                   autoItemGap;
     private              int                               _decimals;
     private              IntegerProperty                   decimals;
-    private              boolean                           _useItemColor;
-    private              BooleanProperty                   useItemColor;
-    private              Color                             _itemColor;
-    private              ObjectProperty<Color>             itemColor;
-    private              double                            _connectionOpacity;
-    private              DoubleProperty                    connectionOpacity;
     private              Locale                            _locale;
     private              ObjectProperty<Locale>            locale;
     private              String                            formatString;
@@ -147,11 +141,11 @@ public class StreamChart extends Region {
         this(CATEGORY, Arrays.asList(ITEMS));
     }
     public StreamChart(final Category CATEGORY, final List<ChartItem> ITEMS) {
-        items              = FXCollections.observableArrayList();
-        chartItems         = new LinkedHashMap<>();
-        itemsPerCategory   = new LinkedHashMap<>();
-        itemListener       = e -> redraw();
-        itemListListener   = c -> {
+        items            = FXCollections.observableArrayList();
+        chartItems       = new LinkedHashMap<>();
+        itemsPerCategory = new LinkedHashMap<>();
+        itemListener     = e -> redraw();
+        itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
@@ -161,19 +155,16 @@ public class StreamChart extends Region {
             }
             groupBy(getCategory());
         };
-        _category          = CATEGORY;
-        _textColor         = Color.BLACK;
-        _itemWidth         = DEFAULT_ITEM_WIDTH;
-        _autoItemWidth     = true;
-        _itemGap           = DEFAULT_NODE_GAP;
-        _autoItemGap       = true;
-        _decimals          = 0;
-        _useItemColor      = true;
-        _itemColor         = DEFAULT_ITEM_COLOR;
-        _connectionOpacity = DEFAULT_OPACITY;
-        _locale            = Locale.getDefault();
-        formatString       = "%." + _decimals + "f";
-        paths              = new LinkedHashMap<>();
+        _category        = CATEGORY;
+        _textColor       = Color.BLACK;
+        _itemWidth       = DEFAULT_ITEM_WIDTH;
+        _autoItemWidth   = true;
+        _itemGap         = DEFAULT_NODE_GAP;
+        _autoItemGap     = true;
+        _decimals        = 0;
+        _locale          = Locale.getDefault();
+        formatString     = "%." + _decimals + "f";
+        paths            = new LinkedHashMap<>();
 
         items.setAll(ITEMS);
 
@@ -637,7 +628,7 @@ public class StreamChart extends Region {
             }
             // Draw category text
             ChartItemData firstItem = itemDataInCategory.get(0);
-            ctx.fillText(formatter.format(firstItem.getLocalDate()), firstItem.getTextPoint().getX(), reducedHeight + size * 0.02);
+            ctx.fillText(formatter.format(firstItem.getLocalDate()), firstItem.getTextPoint().getX(), reducedHeight + size * 0.02, firstItem.bounds.getWidth());
         }
     }
 

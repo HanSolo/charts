@@ -97,8 +97,8 @@ public class StreamChartTest extends Application {
         streamChart = StreamChartBuilder.create()
                                         .items(items)
                                         .category(Category.DAY)
-                                        .autoItemWidth(false)
-                                        .itemWidth(20)
+                                        .autoItemWidth(true)
+                                        .itemWidth(80)
                                         .itemGap(10)
                                         .autoItemGap(true)
                                         .build();
