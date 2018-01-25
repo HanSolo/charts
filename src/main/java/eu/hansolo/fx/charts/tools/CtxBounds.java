@@ -91,6 +91,9 @@ public class CtxBounds {
         setY(x + SHIFT_Y);
     }
 
+    public double getCenterX() { return x + width * 0.5; }
+    public double getCenterY() { return y + height * 0.5; }
+
     public void set(final CtxBounds BOUNDS) {
         setX(BOUNDS.getX());
         setY(BOUNDS.getY());
@@ -103,9 +106,6 @@ public class CtxBounds {
         setWidth(WIDTH);
         setHeight(HEIGHT);
     }
-
-    public double getCenterX() { return x + width * 0.5; }
-    public double getCenterY() { return y + height * 0.5; }
 
     @Override public String toString() {
         return new StringBuilder().append("{\n")
