@@ -202,12 +202,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
                 }
                 @Override protected void invalidated() {
                     if (isAnimated()) {
-                        if (timeline.getCurrentRate() > 0) {
-                            // Only update values if timeline is already running
-                            oldValue = get();
-                        } else {
-                            // Start timeline only if it is NOT already running
-                            oldValue = get();
+                        if (Double.compare(timeline.getCurrentRate(), 0.0) == 0) {
+                            // Only start timeline if it is NOT already running
                             timeline.stop();
                             KeyValue kv1 = new KeyValue(currentValue, oldValue, Interpolator.EASE_BOTH);
                             KeyValue kv2 = new KeyValue(currentValue, get(), Interpolator.EASE_BOTH);
