@@ -21,7 +21,10 @@ import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -77,6 +80,10 @@ public class ConcentricRingChart extends Region {
     private              ObservableList<ChartItem>     items;
     private              Color                         _barBackgroundColor;
     private              ObjectProperty<Color>         barBackgroundColor;
+    private              boolean                       _sorted;
+    private              BooleanProperty               sorted;
+    private              Order                         _order;
+    private              ObjectProperty<Order>         order;
     private              ListChangeListener<ChartItem> chartItemListener;
     private              ItemEventListener             itemEventListener;
 
@@ -92,6 +99,8 @@ public class ConcentricRingChart extends Region {
         items = FXCollections.observableArrayList();
         items.setAll(ITEMS);
         _barBackgroundColor = Color.rgb(200, 200, 200);
+        _sorted             = false;
+        _order              = Order.ASCENDING;
         initGraphics();
         registerListeners();
     }
@@ -139,6 +148,7 @@ public class ConcentricRingChart extends Region {
             }
             drawChart();
         };
+        items.addListener(chartItemListener);
     }
 
 
@@ -155,6 +165,34 @@ public class ConcentricRingChart extends Region {
     @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
+
+    public List<ChartItem> getItems() { return items; }
+    public void setItems(final ChartItem... ITEMS) {
+        setItems(Arrays.asList(ITEMS));
+    }
+    public void setItems(final List<ChartItem> ITEMS) { items.setAll(ITEMS); }
+    public void addItem(final ChartItem ITEM) {
+        if (!items.contains(ITEM)) {
+            items.add(ITEM);
+        }
+    }
+    public void addItems(final ChartItem... ITEMS) {
+        addItems(Arrays.asList(ITEMS));
+    }
+    public void addItems(final List<ChartItem> ITEMS) {
+        ITEMS.forEach(item -> addItem(item));
+    }
+    public void removeItem(final ChartItem ITEM) {
+        if (items.contains(ITEM)) {
+            items.remove(ITEM);
+        }
+    }
+    public void removeItems(final ChartItem... ITEMS) {
+        removeItems(Arrays.asList(ITEMS));
+    }
+    public void removeItems(final List<ChartItem> ITEMS) {
+        ITEMS.forEach(item -> removeItem(item));
+    }
 
     public Color getBarBackgroundColor() { return null == barBackgroundColor ? _barBackgroundColor : barBackgroundColor.get(); }
     public void setBarBackgroundColor(final Color COLOR) {
@@ -177,13 +215,63 @@ public class ConcentricRingChart extends Region {
         return barBackgroundColor;
     }
 
+    public boolean isSorted() { return null == sorted ? _sorted : sorted.get(); }
+    public void setSorted(final boolean SORTED) {
+        if (null == sorted) {
+            _sorted = SORTED;
+            redraw();
+        } else {
+            sorted.set(SORTED);
+        }
+    }
+    public BooleanProperty sortedProperty() {
+        if (null == sorted) {
+            sorted = new BooleanPropertyBase(_sorted) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "sorted"; }
+            };
+        }
+        return sorted;
+    }
+
+    public Order getOrder() { return null == order ? _order : order.get(); }
+    public void setOrder(final Order ORDER) {
+        if (null == order) {
+            _order = ORDER;
+            redraw();
+        } else {
+            order.set(ORDER);
+        }
+    }
+    public ObjectProperty<Order> orderProperty() {
+        if (null == order) {
+            order = new ObjectPropertyBase<Order>(_order) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "order"; }
+            };
+            _order = null;
+        }
+        return order;
+    }
+
     private void drawChart() {
         double          canvasSize         = canvas.getWidth();
         double          radius             = canvasSize * 0.5;
         double          innerSpacer        = radius * 0.18;
         int             noOfItems          = items.size();
         double          barWidth           = (radius - innerSpacer) / noOfItems;
-        //List<ChartItem> sortedItems        = items.stream().sorted(Comparator.comparingDouble(ChartItem::getValue)).collect(Collectors.toList());
+        List<ChartItem> sortedItems;
+        if (isSorted()) {
+            if (Order.ASCENDING == getOrder()) {
+                sortedItems = items.stream().sorted(Comparator.comparingDouble(ChartItem::getValue)).collect(Collectors.toList());
+            } else {
+                sortedItems = items.stream().sorted(Comparator.comparingDouble(ChartItem::getValue).reversed()).collect(Collectors.toList());
+            }
+        } else {
+            sortedItems = items;
+        }
         //double          minValue           = noOfItems == 0 ? 0 : items.stream().min(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
         double          maxValue           = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
 
@@ -206,7 +294,7 @@ public class ConcentricRingChart extends Region {
         ctx.strokeArc(noOfItems * barWidth, noOfItems * barWidth, canvasSize - (2 * noOfItems * barWidth), canvasSize - (2 * noOfItems * barWidth), 90, -270, ArcType.OPEN);
 
         for (int i = 0 ; i < noOfItems ; i++) {
-            ChartItem item  = items.get(i);
+            ChartItem item  = sortedItems.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
             double    bkgXY = i * barWidth;
             double    bkgWH = canvasSize - (2 * i * barWidth);

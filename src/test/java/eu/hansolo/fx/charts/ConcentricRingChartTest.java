@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -59,7 +60,12 @@ public class ConcentricRingChartTest extends Application {
         chartData7 = ChartItemBuilder.create().name("Item 7").fill(Color.GREEN).animated(true).animationDuration(1000).build();
         chartData8 = ChartItemBuilder.create().name("Item 8").fill(Color.ORANGE).animated(true).animationDuration(1000).build();
 
-        chart = new ConcentricRingChart(chartData1, chartData2, chartData3, chartData4, chartData5, chartData6, chartData7, chartData8);
+        chart = ConcentricRingChartBuilder.create()
+                                          .items(chartData1, chartData2, chartData3, chartData4, chartData5, chartData6, chartData7, chartData8)
+                                          .sorted(true)
+                                          .order(Order.DESCENDING)
+                                          .build();
+
 
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
