@@ -128,8 +128,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _animated         = ANIMATED;
         currentValue      = new DoublePropertyBase(_value) {
             @Override protected void invalidated() {
-                oldValue = getValue();
-                setValue(get());
+                oldValue = ChartItem.this.getValue();
+                ChartItem.this.setValue(get());
                 fireItemEvent(UPDATE_EVENT);
             }
             @Override public Object getBean() { return ChartItem.this; }
@@ -168,15 +168,22 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setValue(final double VALUE) {
         if (null == value) {
             if (isAnimated()) {
-                oldValue = _value;
-                _value   = VALUE;
-                timeline.stop();
-                KeyValue kv1 = new KeyValue(currentValue, oldValue, Interpolator.EASE_BOTH);
-                KeyValue kv2 = new KeyValue(currentValue, VALUE, Interpolator.EASE_BOTH);
-                KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
-                KeyFrame kf2 = new KeyFrame(Duration.millis(animationDuration), kv2);
-                timeline.getKeyFrames().setAll(kf1, kf2);
-                timeline.play();
+                if (timeline.getCurrentRate() > 0) {
+                    // Only update values if timeline is already running
+                    oldValue = _value;
+                    _value   = VALUE;
+                } else {
+                    // Start timeline only if it is NOT already running
+                    oldValue = _value;
+                    _value = VALUE;
+                    timeline.stop();
+                    KeyValue kv1 = new KeyValue(currentValue, oldValue, Interpolator.EASE_BOTH);
+                    KeyValue kv2 = new KeyValue(currentValue, VALUE, Interpolator.EASE_BOTH);
+                    KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
+                    KeyFrame kf2 = new KeyFrame(Duration.millis(animationDuration), kv2);
+                    timeline.getKeyFrames().setAll(kf1, kf2);
+                    timeline.play();
+                }
             } else {
                 oldValue = _value;
                 _value = VALUE;
@@ -195,13 +202,20 @@ public class ChartItem implements Item, Comparable<ChartItem> {
                 }
                 @Override protected void invalidated() {
                     if (isAnimated()) {
-                        timeline.stop();
-                        KeyValue kv1 = new KeyValue(currentValue, getOldValue(), Interpolator.EASE_BOTH);
-                        KeyValue kv2 = new KeyValue(currentValue, get(), Interpolator.EASE_BOTH);
-                        KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
-                        KeyFrame kf2 = new KeyFrame(Duration.millis(animationDuration), kv2);
-                        timeline.getKeyFrames().setAll(kf1, kf2);
-                        timeline.play();
+                        if (timeline.getCurrentRate() > 0) {
+                            // Only update values if timeline is already running
+                            oldValue = get();
+                        } else {
+                            // Start timeline only if it is NOT already running
+                            oldValue = get();
+                            timeline.stop();
+                            KeyValue kv1 = new KeyValue(currentValue, oldValue, Interpolator.EASE_BOTH);
+                            KeyValue kv2 = new KeyValue(currentValue, get(), Interpolator.EASE_BOTH);
+                            KeyFrame kf1 = new KeyFrame(Duration.ZERO, kv1);
+                            KeyFrame kf2 = new KeyFrame(Duration.millis(animationDuration), kv2);
+                            timeline.getKeyFrames().setAll(kf1, kf2);
+                            timeline.play();
+                        }
                     } else {
                         fireItemEvent(FINISHED_EVENT);
                     }
