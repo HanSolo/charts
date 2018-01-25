@@ -109,7 +109,6 @@ public class MatrixHeatmapTest extends Application {
             int stop  = RND.nextInt(35 + 5);
             for (int y = 0 ; y < 40 ; y++) {
                 MatrixChartItem mdo = new MatrixChartItem(x, y, RND.nextDouble());
-
             }
         }
 
