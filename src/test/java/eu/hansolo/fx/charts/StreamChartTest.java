@@ -132,4 +132,3 @@ public class StreamChartTest extends Application {
         launch(args);
     }
 }
-
