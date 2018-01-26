@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.series.Series;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.NumberFormat;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.BooleanProperty;
@@ -32,39 +32,28 @@ import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 
 import java.util.HashMap;
-import java.util.List;
 
 
-public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>> {
-    private HashMap<String, Property> properties = new HashMap<>();
+public class ComparisonRingChartBuilder<B extends ComparisonRingChartBuilder<B>> {
+    private HashMap<String, Property>  properties = new HashMap<>();
+    private ChartItemSeries<ChartItem> series1;
+    private ChartItemSeries<ChartItem> series2;
 
 
     // ******************** Constructors **************************************
-    protected ConcentricRingChartBuilder() {}
+    protected ComparisonRingChartBuilder(final ChartItemSeries<ChartItem> SERIES_1, final ChartItemSeries<ChartItem> SERIES_2) {
+        series1 = SERIES_1;
+        series2 = SERIES_2;
+    }
 
 
     // ******************** Methods *******************************************
-    public static final ConcentricRingChartBuilder create() {
-        return new ConcentricRingChartBuilder();
+    public static final ComparisonRingChartBuilder create(final ChartItemSeries<ChartItem> SERIES_1, final ChartItemSeries<ChartItem> SERIES_2) {
+        return new ComparisonRingChartBuilder(SERIES_1, SERIES_2);
     }
 
-    public final B series(final Series<ChartItem> SERIES) {
-        properties.put("series", new SimpleObjectProperty(SERIES));
-        return (B) this;
-    }
-
-    public final B items(final ChartItem... ITEMS) {
-        properties.put("itemArray", new SimpleObjectProperty<>(ITEMS));
-        return (B) this;
-    }
-
-    public final B items(final List<ChartItem> ITEMS) {
-        properties.put("itemList", new SimpleObjectProperty<>(ITEMS));
-        return (B) this;
-    }
-
-    public final B barBackgroundFill(final Color COLOR) {
-        properties.put("barBackgroundFill", new SimpleObjectProperty<>(COLOR));
+    public final B barBackgroundColor(final Color COLOR) {
+        properties.put("barBackgroundColor", new SimpleObjectProperty<>(COLOR));
         return (B) this;
     }
 
@@ -80,11 +69,6 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
 
     public final B numberFormat(final NumberFormat FORMAT) {
         properties.put("numberFormat", new SimpleObjectProperty(FORMAT));
-        return (B)this;
-    }
-    
-    public final B itemLabelFill(final Color FILL) {
-        properties.put("itemLabelFill", new SimpleObjectProperty<>(FILL));
         return (B)this;
     }
 
@@ -162,18 +146,8 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
     }
 
 
-    public final ConcentricRingChart build() {
-        final ConcentricRingChart CONTROL = new ConcentricRingChart();
-
-        if (properties.keySet().contains("series")) {
-            CONTROL.setItems(((ObjectProperty<Series<ChartItem>>) properties.get("series")).get());
-        }
-        if (properties.keySet().contains("itemArray")) {
-            CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemArray")).get());
-        }
-        if (properties.keySet().contains("itemList")) {
-            CONTROL.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemList")).get());
-        }
+    public final ComparisonRingChart build() {
+        final ComparisonRingChart CONTROL = new ComparisonRingChart(series1, series2);
 
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {
@@ -212,7 +186,7 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
             } else if ("padding".equals(key)) {
                 CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
             } // Control specific properties
-            else if ("barBackgroundFill".equals(key)) {
+            else if ("barBackgroundColor".equals(key)) {
                 CONTROL.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("sorted".equals(key)) {
                 CONTROL.setSorted(((BooleanProperty) properties.get(key)).get());
@@ -220,8 +194,6 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("numberFormat".equals(key)) {
                 CONTROL.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
-            } else if ("itemLabelFill".equals(key)) {
-                CONTROL.setItemLabelFill(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
         return CONTROL;

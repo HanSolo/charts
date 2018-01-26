@@ -22,9 +22,11 @@ import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
+import eu.hansolo.fx.charts.tools.NumberFormat;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -54,11 +56,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 
-/**
- * User: hansolo
- * Date: 25.01.18
- * Time: 11:23
- */
 @DefaultProperty("children")
 public class ComparisonRingChart extends Region {
     private static final double                                       PREFERRED_WIDTH  = 250;
@@ -73,14 +70,16 @@ public class ComparisonRingChart extends Region {
     private              Canvas                                       canvas;
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
-    private              Series<ChartItem>                            series1;
-    private              Series<ChartItem>                            series2;
-    private              Color                                        _barBackgroundColor;
-    private              ObjectProperty<Color>                        barBackgroundColor;
+    private              ChartItemSeries<ChartItem>                   series1;
+    private              ChartItemSeries<ChartItem>                   series2;
+    private              Color                                        _barBackgroundFill;
+    private              ObjectProperty<Color>                        barBackgroundFill;
     private              boolean                                      _sorted;
     private              BooleanProperty                              sorted;
     private              Order                                        _order;
     private              ObjectProperty<Order>                        order;
+    private              NumberFormat                                 _numberFormat;
+    private              ObjectProperty<NumberFormat>                 numberFormat;
     private              ListChangeListener<ChartItem>                chartItemListener;
     private              ItemEventListener                            itemEventListener;
     private              EventHandler<MouseEvent>                     mouseHandler;
@@ -89,12 +88,13 @@ public class ComparisonRingChart extends Region {
 
 
     // ******************** Constructors **************************************
-    public ComparisonRingChart(final Series<ChartItem> SERIES_1, final Series<ChartItem> SERIES_2) {
+    public ComparisonRingChart(final ChartItemSeries SERIES_1, final ChartItemSeries SERIES_2) {
         series1             = SERIES_1;
         series2             = SERIES_2;
-        _barBackgroundColor = Color.rgb(230, 230, 230);
+        _barBackgroundFill = Color.rgb(230, 230, 230);
         _sorted             = true;
         _order              = Order.DESCENDING;
+        _numberFormat       = NumberFormat.NUMBER;
         listeners           = new CopyOnWriteArrayList<>();
         popup               = new InfoPopup();
         itemEventListener   = e -> {
@@ -147,8 +147,8 @@ public class ComparisonRingChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
 
-        series1.getItems().forEach(chartitem -> chartitem.addItemEventListener(itemEventListener));
-        series2.getItems().forEach(chartitem -> chartitem.addItemEventListener(itemEventListener));
+        series1.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+        series2.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
 
         series1.getItems().addListener(chartItemListener);
         series2.getItems().addListener(chartItemListener);
@@ -175,25 +175,25 @@ public class ComparisonRingChart extends Region {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public Color getBarBackgroundColor() { return null == barBackgroundColor ? _barBackgroundColor : barBackgroundColor.get(); }
-    public void setBarBackgroundColor(final Color COLOR) {
-        if (null == barBackgroundColor) {
-            _barBackgroundColor = COLOR;
+    public Color getBarBackgroundFill() { return null == barBackgroundFill ? _barBackgroundFill : barBackgroundFill.get(); }
+    public void setBarBackgroundFill(final Color FILL) {
+        if (null == barBackgroundFill) {
+            _barBackgroundFill = FILL;
             redraw();
         } else {
-            barBackgroundColor.set(COLOR);
+            barBackgroundFill.set(FILL);
         }
     }
-    public ObjectProperty<Color> barBackgroundColorProperty() {
-        if (null == barBackgroundColor) {
-            barBackgroundColor = new ObjectPropertyBase<Color>(_barBackgroundColor) {
+    public ObjectProperty<Color> barBackgroundFillProperty() {
+        if (null == barBackgroundFill) {
+            barBackgroundFill = new ObjectPropertyBase<Color>(_barBackgroundFill) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return ComparisonRingChart.this; }
-                @Override public String getName() { return "barBackgroundColor"; }
+                @Override public String getName() { return "barBackgroundFill"; }
             };
-            _barBackgroundColor = null;
+            _barBackgroundFill = null;
         }
-        return barBackgroundColor;
+        return barBackgroundFill;
     }
 
     public boolean isSorted() { return null == sorted ? _sorted : sorted.get(); }
@@ -237,6 +237,30 @@ public class ComparisonRingChart extends Region {
         return order;
     }
 
+    public NumberFormat getNumberFormat() { return null == numberFormat ? _numberFormat : numberFormat.get(); }
+    public void setNumberFormat(final NumberFormat FORMAT) {
+        if (null == numberFormat) {
+            _numberFormat = FORMAT;
+            updatePopup();
+            redraw();
+        } else {
+            numberFormat.set(FORMAT);
+        }
+    }
+    public ObjectProperty<NumberFormat> numberFormatProperty() {
+        if (null == numberFormat) {
+            numberFormat = new ObjectPropertyBase<NumberFormat>(_numberFormat) {
+                @Override protected void invalidated() {
+                    updatePopup();
+                    redraw();
+                }
+                @Override public Object getBean() { return ComparisonRingChart.this; }
+                @Override public String getName() { return "numberFormat"; }
+            };
+            _numberFormat = null;
+        }
+        return numberFormat;
+    }
 
     private void handleMouseEvents(final MouseEvent EVT) {
         double x           = EVT.getX();
@@ -279,7 +303,7 @@ public class ComparisonRingChart extends Region {
             if (hitLeft || hitRight) {
                 popup.setX(EVT.getScreenX());
                 popup.setY(EVT.getScreenY() - popup.getHeight());
-                fireSelectionEvent(new SelectionEvent(item));
+                fireSelectionEvent(new SelectionEvent(series1, item));
                 break;
             }
         }
@@ -295,9 +319,32 @@ public class ComparisonRingChart extends Region {
             if (hit) {
                 popup.setX(EVT.getScreenX());
                 popup.setY(EVT.getScreenY() - popup.getHeight());
-                fireSelectionEvent(new SelectionEvent(item));
+                fireSelectionEvent(new SelectionEvent(series2, item));
                 break;
             }
+        }
+    }
+
+    private void updatePopup() {
+        switch(getNumberFormat()) {
+            case NUMBER:
+                popup.setDecimals(0);
+                break;
+            case FLOAT_1_DECIMAL:
+                popup.setDecimals(1);
+                break;
+            case FLOAT_2_DECIMALS:
+                popup.setDecimals(2);
+                break;
+            case FLOAT:
+                popup.setDecimals(8);
+                break;
+            case PERCENTAGE          :
+                popup.setDecimals(0);
+                break;
+            case PERCENTAGE_1_DECIMAL:
+                popup.setDecimals(1);
+                break;
         }
     }
 
@@ -330,21 +377,19 @@ public class ComparisonRingChart extends Region {
     }
 
     private void drawChart() {
-        double          centerX            = size * 0.5;
-        double          centerY            = centerX;
-        double          radius             = size * 0.5;
-        double          innerSpacer        = radius * 0.18;
-        double          barSpacer          = (radius - innerSpacer) * 0.005;
-        int             noOfItems1         = series1.getItems().size();
-        int             noOfItems2         = series2.getItems().size();
-        double          barWidth1          = (radius - innerSpacer - (noOfItems1 - 1) * barSpacer) / noOfItems1;
-        double          barWidth2          = (radius - innerSpacer - (noOfItems2 - 1) * barSpacer) / noOfItems2;
-        double          maxValue1          = noOfItems1 == 0 ? 0 : series1.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
-        double          maxValue2          = noOfItems1 == 0 ? 0 : series2.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
-        double          valueY             = radius * 0.94;
-        double          valueWidth1        = barWidth1 * 0.9;
-        double          valueWidth2        = barWidth2 * 0.9;
-        Color           barBackgroundColor = getBarBackgroundColor();
+        double          centerX           = size * 0.5;
+        double          centerY           = centerX;
+        double          radius            = size * 0.5;
+        double          innerSpacer       = radius * 0.18;
+        double          barSpacer         = (radius - innerSpacer) * 0.005;
+        int             noOfItems1        = series1.getItems().size();
+        int             noOfItems2        = series2.getItems().size();
+        double          barWidth1         = (radius - innerSpacer - (noOfItems1 - 1) * barSpacer) / noOfItems1;
+        double          barWidth2         = (radius - innerSpacer - (noOfItems2 - 1) * barSpacer) / noOfItems2;
+        double          maxValue1         = noOfItems1 == 0 ? 0 : series1.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
+        double          maxValue2         = noOfItems1 == 0 ? 0 : series2.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
+        Color           barBackgroundFill = getBarBackgroundFill();
+        NumberFormat    numberFormat      = getNumberFormat();
         List<ChartItem> sortedItems1;
         List<ChartItem> sortedItems2;
         if (isSorted()) {
@@ -370,13 +415,13 @@ public class ComparisonRingChart extends Region {
         for (int i = 0 ; i < noOfItems1 ; i++) {
             ChartItem item  = sortedItems1.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
-            double    barXY = (barWidth1 * 0.5) + (i * barWidth1) + (i * barSpacer);
-            double    barWH = size - barWidth1 - (2 * i * barWidth1 - barSpacer) - (2 * i * barSpacer);
+            double    barXY = (barWidth1 * 0.5) + (i * barWidth1) + (i * barSpacer) + 1;
+            double    barWH = size - barWidth1 - (2 * i * barWidth1 - barSpacer) - (2 * i * barSpacer) - 2;
             double    angle = value / maxValue1 * 180.0;
 
             // BarBackground 1
             ctx.setLineWidth(barWidth1);
-            ctx.setStroke(barBackgroundColor);
+            ctx.setStroke(barBackgroundFill);
             ctx.strokeArc(barXY, barXY, barWH, barWH, 180, -180, ArcType.OPEN);
 
             // Bar 1
@@ -384,16 +429,12 @@ public class ComparisonRingChart extends Region {
             ctx.strokeArc(barXY, barXY, barWH, barWH, 180, -angle, ArcType.OPEN);
 
             // Value 1
-            if (angle > 13) {
-                ctx.save();
-                Helper.rotateCtx(ctx, centerX, centerY, angle);
-                ctx.setFill(item.getTextFill());
-                ctx.setTextAlign(TextAlignment.CENTER);
-                ctx.save();
-                Helper.rotateCtx(ctx, barXY, valueY + barWidth1, 180);
-                ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth1, valueWidth1);
-                ctx.restore();
-                ctx.restore();
+            ctx.setTextAlign(TextAlignment.LEFT);
+            ctx.setFill(item.getTextFill());
+            if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
+                drawTextAlongArc(true, ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue1 * 100), centerX, centerY, barWH * 0.5, angle - 90);
+            } else {
+                drawTextAlongArc(true, ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle - 90);
             }
         }
 
@@ -401,13 +442,13 @@ public class ComparisonRingChart extends Region {
         for (int i = 0 ; i < noOfItems2 ; i++) {
             ChartItem item  = sortedItems2.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
-            double    barXY = (barWidth2 * 0.5) + (i * barWidth2) + (i * barSpacer);
-            double    barWH = size - barWidth2 - (2 * i * barWidth2 - barSpacer) - (2 * i * barSpacer);
+            double    barXY = (barWidth2 * 0.5) + (i * barWidth2) + (i * barSpacer) + 1;
+            double    barWH = size - barWidth2 - (2 * i * barWidth2 - barSpacer) - (2 * i * barSpacer) - 2;
             double    angle = value / maxValue2 * 180.0;
 
             // BarBackground 2
             ctx.setLineWidth(barWidth2);
-            ctx.setStroke(barBackgroundColor);
+            ctx.setStroke(barBackgroundFill);
             ctx.strokeArc(barXY, barXY, barWH, barWH, 0, -180, ArcType.OPEN);
 
             // Bar 2
@@ -415,17 +456,34 @@ public class ComparisonRingChart extends Region {
             ctx.strokeArc(barXY, barXY, barWH, barWH, 0, -angle, ArcType.OPEN);
 
             // Value 2
-            if (angle > 13) {
-                ctx.save();
-                Helper.rotateCtx(ctx, centerX, centerY, 180 + angle);
-                ctx.setFill(item.getTextFill());
-                ctx.setTextAlign(TextAlignment.CENTER);
-                ctx.save();
-                Helper.rotateCtx(ctx, barXY, valueY + barWidth2, 0);
-                ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth2, valueWidth2);
-                ctx.restore();
-                ctx.restore();
+            ctx.setTextAlign(TextAlignment.LEFT);
+            ctx.setFill(item.getTextFill());
+            if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
+                drawTextAlongArc(false, ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue2 * 100), centerX, centerY, barWH * 0.5, angle + 90);
+            } else {
+                drawTextAlongArc(false, ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle + 90);
             }
+        }
+    }
+
+    private void drawTextAlongArc(final boolean UPPER, final GraphicsContext CTX, final String TEXT, final double CENTER_X, final double CENTER_Y, final double RADIUS, final double ANGLE){
+        int    length     = TEXT.length();
+        double charSpacer = (7 / RADIUS) * size * 0.13;
+        double textAngle  = (charSpacer * (length + 0.5));
+        double offset     = UPPER ? 90 : -90;
+        if (ANGLE + offset > textAngle) {
+            CTX.save();
+            CTX.translate(CENTER_X, CENTER_Y);
+            CTX.rotate(ANGLE - (charSpacer * (length + 0.5)));
+            for (int i = 0; i < length; i++) {
+                CTX.save();
+                CTX.translate(0, -1 * RADIUS);
+                char c = TEXT.charAt(i);
+                CTX.fillText(Character.toString(c), 0, 0);
+                CTX.restore();
+                CTX.rotate(charSpacer);
+            }
+            CTX.restore();
         }
     }
 

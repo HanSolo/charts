@@ -25,6 +25,7 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
+import eu.hansolo.fx.charts.tools.NumberFormat;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -57,11 +58,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 
-/**
- * User: hansolo
- * Date: 25.01.18
- * Time: 11:23
- */
 @DefaultProperty("children")
 public class ConcentricRingChart extends Region {
     private static final double                                       PREFERRED_WIDTH  = 250;
@@ -77,12 +73,16 @@ public class ConcentricRingChart extends Region {
     private              GraphicsContext                              ctx;
     private              Pane                                         pane;
     private              ObservableList<ChartItem>                    items;
-    private              Color                                        _barBackgroundColor;
-    private              ObjectProperty<Color>                        barBackgroundColor;
+    private              Color                                        _barBackgroundFill;
+    private              ObjectProperty<Color>                        barBackgroundFill;
     private              boolean                                      _sorted;
     private              BooleanProperty                              sorted;
     private              Order                                        _order;
     private              ObjectProperty<Order>                        order;
+    private              NumberFormat                                 _numberFormat;
+    private              ObjectProperty<NumberFormat>                 numberFormat;
+    private              Color                                        _itemLabelFill;
+    private              ObjectProperty<Color>                        itemLabelFill;
     private              ListChangeListener<ChartItem>                chartItemListener;
     private              ItemEventListener                            itemEventListener;
     private              EventHandler<MouseEvent>                     mouseHandler;
@@ -100,12 +100,14 @@ public class ConcentricRingChart extends Region {
     public ConcentricRingChart(final List<ChartItem> ITEMS) {
         items = FXCollections.observableArrayList();
         items.setAll(ITEMS);
-        _barBackgroundColor = Color.rgb(230, 230, 230);
-        _sorted             = false;
-        _order              = Order.ASCENDING;
-        listeners           = new CopyOnWriteArrayList<>();
-        popup               = new InfoPopup();
-        itemEventListener   = e -> {
+        _barBackgroundFill = Color.rgb(230, 230, 230);
+        _sorted            = false;
+        _order             = Order.ASCENDING;
+        _numberFormat      = NumberFormat.NUMBER;
+        _itemLabelFill     = Color.BLACK;
+        listeners          = new CopyOnWriteArrayList<>();
+        popup              = new InfoPopup();
+        itemEventListener  = e -> {
             final EventType TYPE = e.getEventType();
             switch(TYPE) {
                 case UPDATE  : drawChart(); break;
@@ -223,25 +225,25 @@ public class ConcentricRingChart extends Region {
         ITEMS.forEach(item -> removeItem(item));
     }
 
-    public Color getBarBackgroundColor() { return null == barBackgroundColor ? _barBackgroundColor : barBackgroundColor.get(); }
-    public void setBarBackgroundColor(final Color COLOR) {
-        if (null == barBackgroundColor) {
-            _barBackgroundColor = COLOR;
+    public Color getBarBackgroundFill() { return null == barBackgroundFill ? _barBackgroundFill : barBackgroundFill.get(); }
+    public void setBarBackgroundFill(final Color FILL) {
+        if (null == barBackgroundFill) {
+            _barBackgroundFill = FILL;
             redraw();
         } else {
-            barBackgroundColor.set(COLOR);
+            barBackgroundFill.set(FILL);
         }
     }
-    public ObjectProperty<Color> barBackgroundColorProperty() {
-        if (null == barBackgroundColor) {
-            barBackgroundColor = new ObjectPropertyBase<Color>(_barBackgroundColor) {
+    public ObjectProperty<Color> barBackgroundFillProperty() {
+        if (null == barBackgroundFill) {
+            barBackgroundFill = new ObjectPropertyBase<Color>(_barBackgroundFill) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return ConcentricRingChart.this; }
-                @Override public String getName() { return "barBackgroundColor"; }
+                @Override public String getName() { return "barBackgroundFill"; }
             };
-            _barBackgroundColor = null;
+            _barBackgroundFill = null;
         }
-        return barBackgroundColor;
+        return barBackgroundFill;
     }
 
     public boolean isSorted() { return null == sorted ? _sorted : sorted.get(); }
@@ -285,6 +287,52 @@ public class ConcentricRingChart extends Region {
         return order;
     }
 
+    public NumberFormat getNumberFormat() { return null == numberFormat ? _numberFormat : numberFormat.get(); }
+    public void setNumberFormat(final NumberFormat FORMAT) {
+        if (null == numberFormat) {
+            _numberFormat = FORMAT;
+            updatePopup();
+            redraw();
+        } else {
+            numberFormat.set(FORMAT);
+        }
+    }
+    public ObjectProperty<NumberFormat> numberFormatProperty() {
+        if (null == numberFormat) {
+            numberFormat = new ObjectPropertyBase<NumberFormat>(_numberFormat) {
+                @Override protected void invalidated() {
+                    updatePopup();
+                    redraw();
+                }
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "numberFormat"; }
+            };
+            _numberFormat = null;
+        }
+        return numberFormat;
+    }
+
+    public Color getItemLabelFill() { return null == itemLabelFill ? _itemLabelFill : itemLabelFill.get(); }
+    public void setItemLabelFill(final Color FILL) {
+        if (null == itemLabelFill) {
+            _itemLabelFill = FILL;
+            redraw();
+        } else {
+            itemLabelFill.set(FILL);
+        }
+    }
+    public ObjectProperty<Color> itemLabelFillProperty() {
+        if (null == itemLabelFill) {
+            itemLabelFill = new ObjectPropertyBase<Color>(_itemLabelFill) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "itemLabelFill"; }
+            };
+            _itemLabelFill = null;
+        }
+        return itemLabelFill;
+    }
+    
     private void handleMouseEvents(final MouseEvent EVT) {
         double x           = EVT.getX();
         double y           = EVT.getY();
@@ -323,6 +371,29 @@ public class ConcentricRingChart extends Region {
         }
     }
 
+    private void updatePopup() {
+        switch(getNumberFormat()) {
+            case NUMBER:
+                popup.setDecimals(0);
+                break;
+            case FLOAT_1_DECIMAL:
+                popup.setDecimals(1);
+                break;
+            case FLOAT_2_DECIMALS:
+                popup.setDecimals(2);
+                break;
+            case FLOAT:
+                popup.setDecimals(8);
+                break;
+            case PERCENTAGE          :
+                popup.setDecimals(0);
+                break;
+            case PERCENTAGE_1_DECIMAL:
+                popup.setDecimals(1);
+                break;
+        }
+    }
+
 
     // ******************** Event Handling ************************************
     public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
@@ -347,9 +418,9 @@ public class ConcentricRingChart extends Region {
         double          maxValue           = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
         double          nameX              = radius * 0.975;
         double          nameWidth          = radius * 0.95;
-        double          valueY             = radius * 0.94;
-        double          valueWidth         = barWidth * 0.9;
-        Color           barBackgroundColor = getBarBackgroundColor();
+        NumberFormat    numberFormat       = getNumberFormat();
+        Color           barBackgroundFill = getBarBackgroundFill();
+        Color           itemLabelFill      = getItemLabelFill();
         List<ChartItem> sortedItems;
         if (isSorted()) {
             if (Order.ASCENDING == getOrder()) {
@@ -371,13 +442,13 @@ public class ConcentricRingChart extends Region {
         for (int i = 0 ; i < noOfItems ; i++) {
             ChartItem item  = sortedItems.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
-            double    barXY = (barWidth * 0.5) + (i * barWidth) + (i * barSpacer);
-            double    barWH = size - barWidth - (2 * i * barWidth - barSpacer) - (2 * i * barSpacer);
+            double    barXY = (barWidth * 0.5) + (i * barWidth) + (i * barSpacer) + 1;
+            double    barWH = size - barWidth - (2 * i * barWidth - barSpacer) - (2 * i * barSpacer) - 2;
             double    angle = value / maxValue * 270.0;
 
             // BarBackground
             ctx.setLineWidth(barWidth);
-            ctx.setStroke(barBackgroundColor);
+            ctx.setStroke(barBackgroundFill);
             ctx.strokeArc(barXY, barXY, barWH, barWH, 90, -270, ArcType.OPEN);
 
             // Bar
@@ -385,21 +456,38 @@ public class ConcentricRingChart extends Region {
             ctx.strokeArc(barXY, barXY, barWH, barWH, 90, -angle, ArcType.OPEN);
 
             // Name
+            ctx.setFill(itemLabelFill);
             ctx.setTextAlign(TextAlignment.RIGHT);
             ctx.fillText(item.getName(), nameX, barXY, nameWidth);
 
             // Value
-            if (angle > 13) {
-                ctx.save();
-                Helper.rotateCtx(ctx, centerX, centerY, 90 + angle);
-                ctx.setFill(item.getTextFill());
-                ctx.setTextAlign(TextAlignment.CENTER);
-                ctx.save();
-                Helper.rotateCtx(ctx, barXY, valueY + barWidth, 90);
-                ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth, valueWidth);
-                ctx.restore();
-                ctx.restore();
+            ctx.setTextAlign(TextAlignment.LEFT);
+            ctx.setFill(item.getTextFill());
+            if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
+                drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue * 100), centerX, centerY, barWH * 0.5, angle);
+            } else {
+                drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle);
             }
+        }
+    }
+
+    private void drawTextAlongArc(final GraphicsContext CTX, final String TEXT, final double CENTER_X, final double CENTER_Y, final double RADIUS, final double ANGLE){
+        int    length     = TEXT.length();
+        double charSpacer = (7 / RADIUS) * size * 0.13;
+        double textAngle  = (charSpacer * (length + 0.5));
+        if (ANGLE > textAngle) {
+            CTX.save();
+            CTX.translate(CENTER_X, CENTER_Y);
+            CTX.rotate(ANGLE - (charSpacer * (length + 0.5)));
+            for (int i = 0; i < length; i++) {
+                CTX.save();
+                CTX.translate(0, -1 * RADIUS);
+                char c = TEXT.charAt(i);
+                CTX.fillText(Character.toString(c), 0, 0);
+                CTX.restore();
+                CTX.rotate(charSpacer);
+            }
+            CTX.restore();
         }
     }
 
