@@ -48,6 +48,7 @@ public class ConcentricRingChartTest extends Application {
     private ChartItem           chartData7;
     private ChartItem           chartData8;
     private ConcentricRingChart chart;
+    private ComparisonRingChart chart1;
     private long                lastTimerCall;
     private AnimationTimer      timer;
 
@@ -78,6 +79,8 @@ public class ConcentricRingChartTest extends Application {
                                           //.barBackgroundColor(Color.BLACK)
                                           .build();
 
+        chart1 = new ComparisonRingChart(series, series);
+
 
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
@@ -99,7 +102,7 @@ public class ConcentricRingChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(chart);
+        StackPane pane = new StackPane(chart1);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);
