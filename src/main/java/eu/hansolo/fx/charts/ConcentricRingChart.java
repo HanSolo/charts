@@ -152,8 +152,10 @@ public class ConcentricRingChart extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
+
         items.forEach(chartitem -> chartitem.addItemEventListener(itemEventListener));
         items.addListener(chartItemListener);
+
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         setOnSelectionEvent(e -> {
             popup.update(e);
@@ -308,7 +310,6 @@ public class ConcentricRingChart extends Region {
         for (int i = 0 ; i < noOfItems ; i++) {
             ChartItem item    = sortedItems.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
-            double    barXY = (barWidth * 0.5) + (i * barWidth) + (i * barSpacer);
             double    barWH = size - barWidth - (2 * i * barWidth - barSpacer) - (2 * i * barSpacer);
             double    angle = value / maxValue * 270.0;
 
