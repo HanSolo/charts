@@ -102,7 +102,7 @@ public class ConcentricRingChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(chart1);
+        StackPane pane = new StackPane(chart);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);

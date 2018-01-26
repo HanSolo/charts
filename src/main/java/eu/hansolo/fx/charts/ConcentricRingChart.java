@@ -19,9 +19,12 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.event.SelectionEvent;
+import eu.hansolo.fx.charts.event.SelectionEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -31,10 +34,12 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -48,6 +53,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 
@@ -58,27 +64,30 @@ import java.util.stream.Collectors;
  */
 @DefaultProperty("children")
 public class ConcentricRingChart extends Region {
-    private static final double                        PREFERRED_WIDTH  = 250;
-    private static final double                        PREFERRED_HEIGHT = 250;
-    private static final double                        MINIMUM_WIDTH    = 50;
-    private static final double                        MINIMUM_HEIGHT   = 50;
-    private static final double                        MAXIMUM_WIDTH    = 1024;
-    private static final double                        MAXIMUM_HEIGHT   = 1024;
-    private              double                        size;
-    private              double                        width;
-    private              double                        height;
-    private              Canvas                        canvas;
-    private              GraphicsContext               ctx;
-    private              Pane                          pane;
-    private              ObservableList<ChartItem>     items;
-    private              Color                         _barBackgroundColor;
-    private              ObjectProperty<Color>         barBackgroundColor;
-    private              boolean                       _sorted;
-    private              BooleanProperty               sorted;
-    private              Order                         _order;
-    private              ObjectProperty<Order>         order;
-    private              ListChangeListener<ChartItem> chartItemListener;
-    private              ItemEventListener             itemEventListener;
+    private static final double                                       PREFERRED_WIDTH  = 250;
+    private static final double                                       PREFERRED_HEIGHT = 250;
+    private static final double                                       MINIMUM_WIDTH    = 50;
+    private static final double                                       MINIMUM_HEIGHT   = 50;
+    private static final double                                       MAXIMUM_WIDTH    = 1024;
+    private static final double                                       MAXIMUM_HEIGHT   = 1024;
+    private              double                                       size;
+    private              double                                       width;
+    private              double                                       height;
+    private              Canvas                                       canvas;
+    private              GraphicsContext                              ctx;
+    private              Pane                                         pane;
+    private              ObservableList<ChartItem>                    items;
+    private              Color                                        _barBackgroundColor;
+    private              ObjectProperty<Color>                        barBackgroundColor;
+    private              boolean                                      _sorted;
+    private              BooleanProperty                              sorted;
+    private              Order                                        _order;
+    private              ObjectProperty<Order>                        order;
+    private              ListChangeListener<ChartItem>                chartItemListener;
+    private              ItemEventListener                            itemEventListener;
+    private              EventHandler<MouseEvent>                     mouseHandler;
+    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private              InfoPopup                                    popup;
 
 
     // ******************** Constructors **************************************
@@ -94,6 +103,26 @@ public class ConcentricRingChart extends Region {
         _barBackgroundColor = Color.rgb(230, 230, 230);
         _sorted             = false;
         _order              = Order.ASCENDING;
+        listeners           = new CopyOnWriteArrayList<>();
+        popup               = new InfoPopup();
+        itemEventListener   = e -> {
+            final EventType TYPE = e.getEventType();
+            switch(TYPE) {
+                case UPDATE  : drawChart(); break;
+                case FINISHED: drawChart(); break;
+            }
+        };
+        chartItemListener   = c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addItemEventListener(itemEventListener));
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemEventListener));
+                }
+            }
+            drawChart();
+        };
+        mouseHandler        = e -> handleMouseEvents(e);
         initGraphics();
         registerListeners();
     }
@@ -123,25 +152,13 @@ public class ConcentricRingChart extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        itemEventListener = e -> {
-            final EventType TYPE = e.getEventType();
-            switch(TYPE) {
-                case UPDATE  : drawChart(); break;
-                case FINISHED: drawChart(); break;
-            }
-        };
         items.forEach(chartitem -> chartitem.addItemEventListener(itemEventListener));
-        chartItemListener = c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.addItemEventListener(itemEventListener));
-                } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemEventListener));
-                }
-            }
-            drawChart();
-        };
         items.addListener(chartItemListener);
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        setOnSelectionEvent(e -> {
+            popup.update(e);
+            popup.animatedShow(getScene().getWindow());
+        });
     }
 
 
@@ -266,6 +283,58 @@ public class ConcentricRingChart extends Region {
         return order;
     }
 
+    private void handleMouseEvents(final MouseEvent EVT) {
+        double x           = EVT.getX();
+        double y           = EVT.getY();
+        double centerX     = size * 0.5;
+        double centerY     = centerX;
+        double radius      = size * 0.5;
+        double innerSpacer = radius * 0.18;
+        double barSpacer   = (radius - innerSpacer) * 0.005;
+        int    noOfItems   = items.size();
+        double barWidth    = (radius - innerSpacer - (noOfItems - 1) * barSpacer) / noOfItems;
+        double startAngle  = 0;
+        double maxValue    = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
+        List<ChartItem> sortedItems;
+        if (isSorted()) {
+            if (Order.ASCENDING == getOrder()) {
+                sortedItems = items.stream().sorted(Comparator.comparingDouble(ChartItem::getValue)).collect(Collectors.toList());
+            } else {
+                sortedItems = items.stream().sorted(Comparator.comparingDouble(ChartItem::getValue).reversed()).collect(Collectors.toList());
+            }
+        } else {
+            sortedItems = items;
+        }
+        for (int i = 0 ; i < noOfItems ; i++) {
+            ChartItem item    = sortedItems.get(i);
+            double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
+            double    barXY = (barWidth * 0.5) + (i * barWidth) + (i * barSpacer);
+            double    barWH = size - barWidth - (2 * i * barWidth - barSpacer) - (2 * i * barSpacer);
+            double    angle = value / maxValue * 270.0;
+
+            boolean hit = Helper.isInRingSegment(x, y, centerX, centerY, (barWH + barWidth) * 0.5, (barWH - barWidth) * 0.5, startAngle, angle);
+            if (hit) {
+                popup.setX(EVT.getScreenX());
+                popup.setY(EVT.getScreenY() - popup.getHeight());
+                fireSelectionEvent(new SelectionEvent(item));
+                break;
+            }
+        }
+    }
+
+
+    // ******************** Event Handling ************************************
+    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
+    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
+    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void removeAllSelectionEventListeners() { listeners.clear(); }
+
+    public void fireSelectionEvent(final SelectionEvent EVENT) {
+        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    }
+
+
+    // ******************** Drawing *******************************************
     private void drawChart() {
         double          centerX            = size * 0.5;
         double          centerY            = centerX;
@@ -321,18 +390,18 @@ public class ConcentricRingChart extends Region {
             // Value
             if (angle > 13) {
                 ctx.save();
-                    Helper.rotateCtx(ctx, centerX, centerY, 90 + angle);
-                    ctx.setFill(item.getTextFill());
-                    ctx.setTextAlign(TextAlignment.CENTER);
-                    ctx.save();
-                        Helper.rotateCtx(ctx, barXY, valueY + barWidth, 90);
-                        ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth, valueWidth);
-                        ctx.restore();
+                Helper.rotateCtx(ctx, centerX, centerY, 90 + angle);
+                ctx.setFill(item.getTextFill());
+                ctx.setTextAlign(TextAlignment.CENTER);
+                ctx.save();
+                Helper.rotateCtx(ctx, barXY, valueY + barWidth, 90);
+                ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth, valueWidth);
+                ctx.restore();
                 ctx.restore();
             }
         }
     }
-    
+
 
     // ******************** Resizing ******************************************
     private void resize() {
