@@ -31,7 +31,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -48,8 +47,6 @@ import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -255,9 +252,6 @@ public class ComparisonRingChart extends Region {
         double barWidth2   = (radius - innerSpacer - (noOfItems2 - 1) * barSpacer) / noOfItems2;
         double maxValue1   = noOfItems1 == 0 ? 0 : series1.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
         double maxValue2   = noOfItems1 == 0 ? 0 : series2.getItems().stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
-        double valueY      = radius * 0.94;
-        double valueWidth1 = barWidth1 * 0.9;
-        double valueWidth2 = barWidth2 * 0.9;
 
         List<ChartItem> sortedItems1;
         List<ChartItem> sortedItems2;
