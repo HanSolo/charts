@@ -18,6 +18,8 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
+import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -51,19 +53,29 @@ public class ConcentricRingChartTest extends Application {
 
 
     @Override public void init() {
-        chartData1 = ChartItemBuilder.create().name("Item 1").fill(Color.LIME).animated(true).animationDuration(1000).build();
-        chartData2 = ChartItemBuilder.create().name("Item 2").fill(Color.RED).animated(true).animationDuration(1000).build();
-        chartData3 = ChartItemBuilder.create().name("Item 3").fill(Color.CYAN).animated(true).animationDuration(1000).build();
-        chartData4 = ChartItemBuilder.create().name("Item 4").fill(Color.YELLOW).animated(true).animationDuration(1000).build();
-        chartData5 = ChartItemBuilder.create().name("Item 5").fill(Color.MAGENTA).animated(true).animationDuration(1000).build();
-        chartData6 = ChartItemBuilder.create().name("Item 6").fill(Color.BLUE).animated(true).animationDuration(1000).build();
-        chartData7 = ChartItemBuilder.create().name("Item 7").fill(Color.GREEN).animated(true).animationDuration(1000).build();
-        chartData8 = ChartItemBuilder.create().name("Item 8").fill(Color.ORANGE).animated(true).animationDuration(1000).build();
+        chartData1 = new ChartItem("Item 1");
+        chartData2 = new ChartItem("Item 2");
+        chartData3 = new ChartItem("Item 3");
+        chartData4 = new ChartItem("Item 4");
+        chartData5 = new ChartItem("Item 5");
+        chartData6 = new ChartItem("Item 6");
+        chartData7 = new ChartItem("Item 7");
+        chartData8 = new ChartItem("Item 8");
+
+        Series<ChartItem> series = ChartItemSeriesBuilder.create()
+                                                         .items(chartData1, chartData2, chartData3, chartData4,
+                                                                chartData5, chartData6, chartData7, chartData8)
+                                                         .fill(Color.web("#2EDDAE"))
+                                                         .textFill(Color.WHITE)
+                                                         .animated(true)
+                                                         .animationDuration(1000)
+                                                         .build();
 
         chart = ConcentricRingChartBuilder.create()
-                                          .items(chartData1, chartData2, chartData3, chartData4, chartData5, chartData6, chartData7, chartData8)
-                                          .sorted(true)
+                                          .series(series)
+                                          .sorted(false)
                                           .order(Order.DESCENDING)
+                                          //.barBackgroundColor(Color.BLACK)
                                           .build();
 
 

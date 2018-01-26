@@ -584,9 +584,9 @@ public class SunburstChart<T extends ChartItem> extends Region {
         root.stream().forEach(node -> {
             T       item          = node.getItem();
             boolean darkFillColor = Helper.isDark(item.getFill());
-            boolean darkTextColor = Helper.isDark(item.getTextColor());
-            if (darkFillColor && darkTextColor) { item.setTextColor(brightColor); }
-            if (!darkFillColor && !darkTextColor) { item.setTextColor(darkColor); }
+            boolean darkTextColor = Helper.isDark(item.getTextFill());
+            if (darkFillColor && darkTextColor) { item.setTextFill(brightColor); }
+            if (!darkFillColor && !darkTextColor) { item.setTextFill(darkColor); }
         });
     }
 
@@ -685,7 +685,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         double textX      = centerX + textRadius * cosText;
                         double textY      = centerY - textRadius * sinText;
 
-                        chartCtx.setFill(getUseChartItemTextColor() ? segmentData.getTextColor() : textColor);
+                        chartCtx.setFill(getUseChartItemTextColor() ? segmentData.getTextFill() : textColor);
 
                         chartCtx.save();
                         chartCtx.translate(textX, textY);

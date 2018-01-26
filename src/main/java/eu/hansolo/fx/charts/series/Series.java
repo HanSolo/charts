@@ -27,6 +27,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.LongPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -53,6 +55,8 @@ public abstract class Series<T extends Item> {
     protected       ObjectProperty<Paint>                     fill;
     protected       Paint                                     _stroke;
     protected       ObjectProperty<Paint>                     stroke;
+    protected       Color                                     _textFill;
+    protected       ObjectProperty<Color>                     textFill;
     protected       Color                                     _symbolFill;
     protected       ObjectProperty<Color>                     symbolFill;
     protected       Color                                     _symbolStroke;
@@ -65,6 +69,10 @@ public abstract class Series<T extends Item> {
     protected       DoubleProperty                            symbolSize;
     protected       double                                    _strokeWidth;
     protected       DoubleProperty                            strokeWidth;
+    protected       boolean                                   _animated;
+    protected       BooleanProperty                           animated;
+    protected       long                                      _animationDuration;
+    protected       LongProperty                              animationDuration;
     protected       ChartType                                 chartType;
     protected       ObservableList<T>                         items;
     private         CopyOnWriteArrayList<SeriesEventListener> listeners;
@@ -100,18 +108,21 @@ public abstract class Series<T extends Item> {
         this(ITEMS, TYPE, NAME, FILL, STROKE, Color.BLACK, Color.BLACK, SYMBOL);
     }
     public Series(final List<T> ITEMS, final ChartType TYPE, final String NAME, final Paint FILL, final Paint STROKE, final Color SYMBOL_FILL, final Color SYMBOL_STROKE, final Symbol SYMBOL) {
-        _name           = NAME;
-        _fill           = FILL;
-        _stroke         = STROKE;
-        _symbolFill     = SYMBOL_FILL;
-        _symbolStroke   = SYMBOL_STROKE;
-        _symbol         = SYMBOL;
-        _symbolsVisible = true;
-        _symbolSize     = -1;
-        _strokeWidth    = -1;
-        chartType       = TYPE;
-        items           = FXCollections.observableArrayList();
-        listeners       = new CopyOnWriteArrayList<>();
+        _name              = NAME;
+        _fill              = FILL;
+        _stroke            = STROKE;
+        _textFill          = Color.BLACK;
+        _symbolFill        = SYMBOL_FILL;
+        _symbolStroke      = SYMBOL_STROKE;
+        _symbol            = SYMBOL;
+        _symbolsVisible    = true;
+        _symbolSize        = -1;
+        _strokeWidth       = -1;
+        _animated          = false;
+        _animationDuration = 800;
+        chartType          = TYPE;
+        items              = FXCollections.observableArrayList();
+        listeners          = new CopyOnWriteArrayList<>();
 
         if (null != ITEMS) { items.setAll(ITEMS); }
     }
@@ -195,6 +206,27 @@ public abstract class Series<T extends Item> {
         return stroke;
     }
 
+    public Color getTextFill() { return null == textFill ? _textFill : textFill.get(); }
+    public void setTextFill(final Color COLOR) {
+        if (null == textFill) {
+            _textFill = COLOR;
+            refresh();
+        } else {
+            textFill.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> textFillProperty() {
+        if (null == textFill) {
+            textFill = new ObjectPropertyBase<Color>(_textFill) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "textFill"; }
+            };
+            _textFill = null;
+        }
+        return textFill;
+    }
+    
     public Color getSymbolFill() { return null == symbolFill ? _symbolFill : symbolFill.get(); }
     public void setSymbolFill(final Color COLOR) {
         if (null == symbolFill) {
@@ -328,6 +360,42 @@ public abstract class Series<T extends Item> {
             };
         }
         return strokeWidth;
+    }
+
+    public boolean isAnimated() { return null == animated ? _animated : animated.get(); }
+    public void setAnimated(final boolean ANIMATED) {
+        if (null == animated) {
+            _animated = ANIMATED;
+        }  else {
+            animated.set(ANIMATED);
+        }
+    }
+    public BooleanProperty animatedProperty() {
+        if (null == animated) {
+            animated = new BooleanPropertyBase(_animated) {
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "animated"; }
+            };
+        }
+        return animated;
+    }
+
+    public long getAnimationDuration() { return null == animationDuration ? _animationDuration : animationDuration.get(); }
+    public void setAnimationDuration(final long DURATION) {
+        if (null == animationDuration) {
+            _animationDuration = Helper.clamp(10, 10000, DURATION);
+        } else {
+            animationDuration.set(Helper.clamp(10, 10000, DURATION));
+        }
+    }
+    public LongProperty animationDurationProperty() {
+        if (null == animationDuration) {
+            animationDuration = new LongPropertyBase(_animationDuration) {
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "animationDuration"; }
+            };
+        }
+        return animationDuration;
     }
 
     public int getNoOfItems() { return items.size(); }

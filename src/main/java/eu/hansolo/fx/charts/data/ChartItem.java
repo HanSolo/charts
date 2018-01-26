@@ -34,14 +34,11 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -60,8 +57,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       ObjectProperty<Color>   fill;
     private       Color                   _stroke;
     private       ObjectProperty<Color>   stroke;
-    private       Color                   _textColor;
-    private       ObjectProperty<Color>   textColor;
+    private       Color                   _textFill;
+    private       ObjectProperty<Color>   textFill;
     private       Instant                 _timestamp;
     private       ObjectProperty<Instant> timestamp;
     private       Symbol                  _symbol;
@@ -101,28 +98,28 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ChartItem(final String NAME, final double VALUE, final Color FILL) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, Instant.now(), false, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, Instant.now(), false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR, final Instant TIMESTAMP) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, false, 800);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, false, 800);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
-        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_COLOR, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
-    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_COLOR, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         _name             = NAME;
         _value            = VALUE;
         oldValue          = 0;
         _fill             = FILL;
         _stroke           = STROKE;
-        _textColor        = TEXT_COLOR;
+        _textFill         = TEXT_FILL;
         _timestamp        = TIMESTAMP;
         _symbol           = Symbol.NONE;
         _animated         = ANIMATED;
@@ -267,25 +264,25 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         return stroke;
     }
 
-    public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
-    public void setTextColor(final Color COLOR) {
-        if (null == textColor) {
-            _textColor = COLOR;
+    public Color getTextFill() { return null == textFill ? _textFill : textFill.get(); }
+    public void setTextFill(final Color COLOR) {
+        if (null == textFill) {
+            _textFill = COLOR;
             fireItemEvent(UPDATE_EVENT);
         } else {
-            textColor.set(COLOR);
+            textFill.set(COLOR);
         }
     }
-    public ObjectProperty<Color> textColorProperty() {
-        if (null == textColor) {
-            textColor = new ObjectPropertyBase<Color>(_textColor) {
+    public ObjectProperty<Color> textFillProperty() {
+        if (null == textFill) {
+            textFill = new ObjectPropertyBase<Color>(_textFill) {
                 @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
-                @Override public String getName() { return "textColor"; }
+                @Override public String getName() { return "textFill"; }
             };
-            _textColor = null;
+            _textFill = null;
         }
-        return textColor;
+        return textFill;
     }
 
     @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }

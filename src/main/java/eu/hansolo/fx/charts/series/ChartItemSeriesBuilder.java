@@ -19,11 +19,14 @@ package eu.hansolo.fx.charts.series;
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.ChartItem;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -72,6 +75,11 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
         return (B)this;
     }
 
+    public final B textFill(final Color FILL) {
+        properties.put("textFill", new SimpleObjectProperty<>(FILL));
+        return (B)this;
+    }
+
     public final B symbolFill(final Color FILL) {
         properties.put("symbolFill", new SimpleObjectProperty<>(FILL));
         return (B)this;
@@ -107,6 +115,16 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
         return (B)this;
     }
 
+    public final B animated(final boolean AUTO) {
+        properties.put("animated", new SimpleBooleanProperty(AUTO));
+        return (B)this;
+    }
+
+    public final B animationDuration(final long DURATION) {
+        properties.put("animationDuration", new SimpleLongProperty(DURATION));
+        return (B)this;
+    }
+
 
     public final ChartItemSeries build() {
         final ChartItemSeries SERIES = new ChartItemSeries();
@@ -125,6 +143,8 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
                 SERIES.setFill(((ObjectProperty<Paint>) properties.get(key)).get());
             } else if ("stroke".equals(key)) {
                 SERIES.setStroke(((ObjectProperty<Paint>) properties.get(key)).get());
+            } else if ("textFill".equals(key)) {
+                SERIES.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("symbolFill".equals(key)) {
                 SERIES.setSymbolFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("symbolStroke".equals(key)) {
@@ -137,6 +157,10 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
                 SERIES.setSymbolSize(((DoubleProperty) properties.get(key)).get());
             } else if ("strokeWidth".equals(key)) {
                 SERIES.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
+            } else if("animated".equals(key)) {
+                SERIES.setAnimated(((BooleanProperty) properties.get(key)).get());
+            } else if("animationDuration".equals(key)) {
+                SERIES.setAnimationDuration(((LongProperty) properties.get(key)).get());
             }
         }
         return SERIES;

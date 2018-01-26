@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
@@ -32,16 +33,8 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -98,7 +91,7 @@ public class ConcentricRingChart extends Region {
     public ConcentricRingChart(final List<ChartItem> ITEMS) {
         items = FXCollections.observableArrayList();
         items.setAll(ITEMS);
-        _barBackgroundColor = Color.rgb(200, 200, 200);
+        _barBackgroundColor = Color.rgb(230, 230, 230);
         _sorted             = false;
         _order              = Order.ASCENDING;
         initGraphics();
@@ -167,6 +160,23 @@ public class ConcentricRingChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public List<ChartItem> getItems() { return items; }
+    public void setItems(final Series<ChartItem> SERIES) {
+        List<ChartItem> seriesItems       = SERIES.getItems();
+        boolean         animated          = SERIES.isAnimated();
+        long            animationDuration = SERIES.getAnimationDuration();
+        Paint           fill              = SERIES.getFill();
+        boolean         isColor           = fill instanceof Color;
+        Color           barColor          = isColor ? (Color) fill : null;
+        Color           textFill          = SERIES.getTextFill();
+        seriesItems.forEach(item -> {
+            if (animated) { item.setAnimated(animated); }
+            item.setAnimationDuration(animationDuration);
+            if (isColor) { item.setFill(barColor); }
+            item.setTextFill(textFill);
+        });
+
+        setItems(seriesItems);
+    }
     public void setItems(final ChartItem... ITEMS) {
         setItems(Arrays.asList(ITEMS));
     }
@@ -257,11 +267,19 @@ public class ConcentricRingChart extends Region {
     }
 
     private void drawChart() {
-        double          canvasSize         = canvas.getWidth();
-        double          radius             = canvasSize * 0.5;
+        double          centerX            = size * 0.5;
+        double          centerY            = centerX;
+        double          radius             = size * 0.5;
         double          innerSpacer        = radius * 0.18;
+        double          barSpacer          = (radius - innerSpacer) * 0.005;
         int             noOfItems          = items.size();
-        double          barWidth           = (radius - innerSpacer) / noOfItems;
+        double          barWidth           = (radius - innerSpacer - (noOfItems - 1) * barSpacer) / noOfItems;
+        double          maxValue           = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
+        double          nameX              = radius * 0.975;
+        double          nameWidth          = radius * 0.95;
+        double          valueY             = radius * 0.94;
+        double          valueWidth         = barWidth * 0.9;
+        Color           barBackgroundColor = getBarBackgroundColor();
         List<ChartItem> sortedItems;
         if (isSorted()) {
             if (Order.ASCENDING == getOrder()) {
@@ -272,43 +290,27 @@ public class ConcentricRingChart extends Region {
         } else {
             sortedItems = items;
         }
-        //double          minValue           = noOfItems == 0 ? 0 : items.stream().min(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
-        double          maxValue           = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
 
-        double          nameX              = radius * 0.975;
-        double          nameWidth          = radius * 0.95;
-        double          valueY             = radius * 0.94;
-        double          valueWidth         = barWidth * 0.9;
-        Color           barBackgroundColor = getBarBackgroundColor();
-
-        ctx.clearRect(0, 0, canvasSize, canvasSize);
+        ctx.clearRect(0, 0, size, size);
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.RIGHT);
         ctx.setTextBaseline(VPos.CENTER);
         ctx.setFont(Fonts.latoRegular(barWidth * 0.5));
 
-        ctx.setStroke(barBackgroundColor);
-        ctx.setLineWidth(1);
-        ctx.strokeLine(radius, 0, radius, radius - 2 * barWidth * 0.875);
-        ctx.strokeLine(0, radius, radius - 2 * barWidth * 0.875, radius);
-        ctx.strokeArc(noOfItems * barWidth, noOfItems * barWidth, canvasSize - (2 * noOfItems * barWidth), canvasSize - (2 * noOfItems * barWidth), 90, -270, ArcType.OPEN);
-
+        // Draw bars
         for (int i = 0 ; i < noOfItems ; i++) {
             ChartItem item  = sortedItems.get(i);
             double    value = Helper.clamp(0, Double.MAX_VALUE, item.getValue());
-            double    bkgXY = i * barWidth;
-            double    bkgWH = canvasSize - (2 * i * barWidth);
-            double    barXY = barWidth * 0.5 + i * barWidth;
-            double    barWH = canvasSize - barWidth - (2 * i * barWidth);
+            double    barXY = (barWidth * 0.5) + (i * barWidth) + (i * barSpacer);
+            double    barWH = size - barWidth - (2 * i * barWidth - barSpacer) - (2 * i * barSpacer);
             double    angle = value / maxValue * 270.0;
 
-            // Background
-            ctx.setLineWidth(1);
-            ctx.setStroke(barBackgroundColor);
-            ctx.strokeArc(bkgXY, bkgXY, bkgWH, bkgWH, 90, -270, ArcType.OPEN);
-
-            // DataBar
+            // BarBackground
             ctx.setLineWidth(barWidth);
+            ctx.setStroke(barBackgroundColor);
+            ctx.strokeArc(barXY, barXY, barWH, barWH, 90, -270, ArcType.OPEN);
+
+            // Bar
             ctx.setStroke(item.getFill());
             ctx.strokeArc(barXY, barXY, barWH, barWH, 90, -angle, ArcType.OPEN);
 
@@ -317,9 +319,17 @@ public class ConcentricRingChart extends Region {
             ctx.fillText(item.getName(), nameX, barXY, nameWidth);
 
             // Value
-            ctx.setFill(item.getTextColor());
-            ctx.setTextAlign(TextAlignment.CENTER);
-            ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY, valueWidth);
+            if (angle > 13) {
+                ctx.save();
+                    Helper.rotateCtx(ctx, centerX, centerY, 90 + angle);
+                    ctx.setFill(item.getTextFill());
+                    ctx.setTextAlign(TextAlignment.CENTER);
+                    ctx.save();
+                        Helper.rotateCtx(ctx, barXY, valueY + barWidth, 90);
+                        ctx.fillText(String.format(Locale.US, "%.0f", value), barXY, valueY + barWidth, valueWidth);
+                        ctx.restore();
+                ctx.restore();
+            }
         }
     }
     

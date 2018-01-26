@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -53,6 +54,11 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
         return new ConcentricRingChartBuilder();
     }
 
+    public final B series(final Series<ChartItem> SERIES) {
+        properties.put("series", new SimpleObjectProperty(SERIES));
+        return (B) this;
+    }
+
     public final B items(final ChartItem... ITEMS) {
         properties.put("itemArray", new SimpleObjectProperty<>(ITEMS));
         return (B) this;
@@ -64,7 +70,7 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
     }
 
     public final B barBackgroundColor(final Color COLOR) {
-        properties.put("barBackground", new SimpleObjectProperty<>(COLOR));
+        properties.put("barBackgroundColor", new SimpleObjectProperty<>(COLOR));
         return (B) this;
     }
 
@@ -155,6 +161,9 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
     public final ConcentricRingChart build() {
         final ConcentricRingChart CONTROL = new ConcentricRingChart();
 
+        if (properties.keySet().contains("series")) {
+            CONTROL.setItems(((ObjectProperty<Series<ChartItem>>) properties.get("series")).get());
+        }
         if (properties.keySet().contains("itemArray")) {
             CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemArray")).get());
         }

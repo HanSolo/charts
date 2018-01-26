@@ -194,6 +194,12 @@ public class Helper {
         return niceFraction * Math.pow(10, exponent);
     }
 
+    public static final void rotateCtx(final GraphicsContext CTX, final double X, final double Y, final double ANGLE) {
+        CTX.translate(X, Y);
+        CTX.rotate(ANGLE);
+        CTX.translate(-X, -Y);
+    }
+
     public static final void rotateContextForText(final GraphicsContext CTX, final double START_ANGLE, final double ANGLE, final TickLabelOrientation ORIENTATION) {
         switch (ORIENTATION) {
             case ORTHOGONAL:
@@ -370,12 +376,6 @@ public class Helper {
         double value = VALUE;
         while(value > 9 && value % 10 == 0) { value /= 10; }
         return value == 1;
-    }
-
-    public static final void rotateCtx(final GraphicsContext CTX, final double X, final double Y, final double ANGLE) {
-        CTX.translate(X, Y);
-        CTX.rotate(ANGLE);
-        CTX.translate(-X, -Y);
     }
 
     public static final List<Color> createColorPalette(final Color FROM_COLOR, final Color TO_COLOR, final int NO_OF_COLORS) {
