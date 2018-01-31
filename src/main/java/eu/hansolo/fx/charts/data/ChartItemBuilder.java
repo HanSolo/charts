@@ -93,6 +93,16 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
         return (B)this;
     }
 
+    public final B x(final double X) {
+        properties.put("x", new SimpleDoubleProperty(X));
+        return (B)this;
+    }
+
+    public final B y(final double Y) {
+        properties.put("y", new SimpleDoubleProperty(Y));
+        return (B)this;
+    }
+
     public final B animationDuration(final long DURATION) {
         properties.put("animationDuration", new SimpleLongProperty(DURATION));
         return (B)this;
@@ -121,6 +131,10 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setAnimated(((BooleanProperty) properties.get(key)).get());
             } else if("animationDuration".equals(key)) {
                 ITEM.setAnimationDuration(((LongProperty) properties.get(key)).get());
+            } else if ("x".equals(key)) {
+                ITEM.setX(((DoubleProperty) properties.get(key)).get());
+            } else if ("y".equals(key)) {
+                ITEM.setY(((DoubleProperty) properties.get(key)).get());
             }
         }
         return ITEM;

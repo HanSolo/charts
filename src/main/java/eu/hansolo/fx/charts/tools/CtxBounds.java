@@ -107,6 +107,13 @@ public class CtxBounds {
         setHeight(HEIGHT);
     }
 
+    public boolean contains(final double X, final double Y) {
+        return (Double.compare(X, getMinX()) >= 0 &&
+                Double.compare(X, getMaxX()) <= 0 &&
+                Double.compare(Y, getMinY()) >= 0 &&
+                Double.compare(Y, getMaxY()) <= 0);
+    }
+
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"minX\"  : ").append(getMinX()).append(",\n")

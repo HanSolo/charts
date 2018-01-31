@@ -65,6 +65,10 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       ObjectProperty<Symbol>  symbol;
     private       boolean                 _animated;
     private       BooleanProperty         animated;
+    private       double                  _x;
+    private       DoubleProperty          x;
+    private       double                  _y;
+    private       DoubleProperty          y;
     private       long                    animationDuration;
     private       DoubleProperty          currentValue;
     private       Timeline                timeline;
@@ -123,6 +127,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _timestamp        = TIMESTAMP;
         _symbol           = Symbol.NONE;
         _animated         = ANIMATED;
+        _x                = 0;
+        _y                = 0;
         currentValue      = new DoublePropertyBase(_value) {
             @Override protected void invalidated() {
                 oldValue = ChartItem.this.getValue();
@@ -352,6 +358,44 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         return animated;
     }
 
+    public double getX() { return null == x ? _x : x.get(); }
+    public void setX(final double X) {
+        if (null == x) {
+            _x = X;
+        } else {
+            x.set(X);
+        }
+    }
+    public DoubleProperty xProperty() {
+        if (null == x) {
+            x = new DoublePropertyBase(_x) {
+                @Override protected void invalidated() { }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "x"; }
+            };
+        }
+        return x;
+    }
+
+    public double getY() { return null == y ? _y : y.get(); }
+    public void setY(final double Y) {
+        if (null == y) {
+            _y = Y;
+        } else {
+            y.set(Y);
+        }
+    }
+    public DoubleProperty yProperty() {
+        if (null == y) {
+            y = new DoublePropertyBase(_y) {
+                @Override protected void invalidated() { }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "y"; }
+            };
+        }
+        return y;
+    }
+    
     public long getAnimationDuration() { return animationDuration; }
     public void setAnimationDuration(final long DURATION) { animationDuration = Helper.clamp(10, 10000, DURATION); }
 
