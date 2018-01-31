@@ -26,6 +26,8 @@ import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -76,6 +78,11 @@ public class ParallelCoordinatesChart extends Region {
     private              ObjectProperty<Color>          unitColor;
     private              Color                          _tickLabelColor;
     private              ObjectProperty<Color>          tickLabelColor;
+    private              Locale                         _locale;
+    private              ObjectProperty<Locale>         locale;
+    private              int                            _decimals;
+    private              IntegerProperty                decimals;
+    private              String                         formatString;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
     private              Map<String,List<DataObject>>   categoryMap;
@@ -89,6 +96,9 @@ public class ParallelCoordinatesChart extends Region {
         _headerColor       = Color.BLACK;
         _unitColor         = Color.BLACK;
         _tickLabelColor    = Color.BLACK;
+        _locale            = Locale.US;
+        _decimals          = 0;
+        formatString       = new StringBuilder("%.").append(_decimals).append("f").toString();
         items              = FXCollections.observableArrayList();
         itemListener       = e -> redraw();
         objectListListener = c -> {
@@ -236,7 +246,53 @@ public class ParallelCoordinatesChart extends Region {
         }
         return tickLabelColor;
     }
-    
+
+    public Locale getLocale() { return null == locale ? _locale : locale.get(); }
+    public void setLocale(final Locale LOCALE) {
+        if (null == locale) {
+            _locale = LOCALE;
+            redraw();
+        } else {
+            locale.set(LOCALE);
+        }
+    }
+    public ObjectProperty<Locale> localeProperty() {
+        if (null == locale) {
+            locale = new ObjectPropertyBase<Locale>(_locale) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "locale"; }
+            };
+            _locale = null;
+        }
+        return locale;
+    }
+
+    public int getDecimals() { return null == decimals ? _decimals : decimals.get(); }
+    public void setDecimals(final int DECIMALS) {
+        if (null == decimals) {
+            _decimals    = Helper.clamp(0, 6, DECIMALS);
+            formatString = new StringBuilder("%.").append(_decimals).append("f").toString();
+            redraw();
+        } else {
+            decimals.set(DECIMALS);
+        }
+    }
+    public IntegerProperty decimalsProperty() {
+        if (null == decimals) {
+            decimals = new IntegerPropertyBase(_decimals) {
+                @Override protected void invalidated() {
+                    set(Helper.clamp(0, 6, get()));
+                    formatString = new StringBuilder("%.").append(get()).append("f").toString();
+                    redraw();
+                }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "decimals"; }
+            };
+        }
+        return decimals;
+    }
+
     public List<DataObject> getItems() { return items; }
     public void setItems(final DataObject... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<DataObject> ITEMS) {
@@ -330,6 +386,7 @@ public class ParallelCoordinatesChart extends Region {
 
         // Go through all categories
         for (int i = 0 ; i < noOfCategories ; i++) {
+            Locale   locale           = getLocale();
             String   category         = categories.get(i);
             String   unit             = categoryMap.get(category).get(0).getProperties().get(category).getUnit();
             double   axisX            = i * spacer + axisWidth * 0.5;
@@ -406,10 +463,10 @@ public class ParallelCoordinatesChart extends Region {
 
                     if (i == (noOfCategories - 1)) {
                         ctx.setTextAlign(TextAlignment.RIGHT);
-                        ctx.fillText(String.format(Locale.US, "%.0f", axisValue), axisX - 5, outerPointY + offsetY);
+                        ctx.fillText(String.format(locale, formatString, axisValue), axisX - 5, outerPointY + offsetY);
                     } else {
                         ctx.setTextAlign(TextAlignment.LEFT);
-                        ctx.fillText(String.format(Locale.US, "%.0f", axisValue), axisX + 5, outerPointY + offsetY);
+                        ctx.fillText(String.format(locale, formatString, axisValue), axisX + 5, outerPointY + offsetY);
                     }
                 } else if (Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                            Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {

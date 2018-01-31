@@ -43,12 +43,12 @@ public class ParallelCoordinatesChartTest extends Application {
     private ParallelCoordinatesChart chart;
 
     @Override public void init() {
-        Car smartRoadster = new Car("Smart Roadster","Smart", "Roadster");
-        Car golf          = new Car("VW Golf", "VW", "Golf");
+        Car smartRoadster = new Car("Smart Roadster Coupé","Smart", "Roadster");
+        Car golf          = new Car("Golf GTI", "VW", "Golf");
         Car passat        = new Car("VW Passat", "VW", "Passat");
-        Car mclass        = new Car("Mercedes M", "Mercedes", "M Klasse");
+        Car mclass        = new Car("Mercedes M 320", "Mercedes", "M");
         Car sls           = new Car("Mercedes SLS", "Mercedes", "SLS");
-        Car nine11        = new Car("Porsche 911", "Porsche", "911");
+        Car nine11        = new Car("Porsche 911 Carrera 4", "Porsche", "911");
         Car veyron        = new Car("Bugatti Veyron", "Bugatti", "Veyron");
 
         setParameters(smartRoadster, 3, 82, 11, 880, 4.0, Color.BLUE);
@@ -59,8 +59,9 @@ public class ParallelCoordinatesChartTest extends Application {
         setParameters(nine11, 6, 346, 3.8, 1100, 13.0, Color.MAGENTA);
         setParameters(veyron, 16, 1001, 2.5, 1500, 23.0, Color.PURPLE);
 
-        chart = new ParallelCoordinatesChart();
-        chart.setItems(smartRoadster, golf, passat, mclass, sls, nine11, veyron);
+        chart = ParallelCoordinatesChartBuilder.create()
+                                               .items(smartRoadster, golf, passat, mclass, sls, nine11, veyron)
+                                               .build();
     }
 
     @Override public void start(Stage stage) {

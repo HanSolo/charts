@@ -18,9 +18,11 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.DataObject;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -28,6 +30,7 @@ import javafx.scene.paint.Color;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -76,6 +79,16 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
     public final B tickLabelColor(final Color COLOR) {
         properties.put("tickLabelColor", new SimpleObjectProperty<>(COLOR));
         return (B) this;
+    }
+
+    public final B locale(final Locale LOCALE) {
+        properties.put("locale", new SimpleObjectProperty<>(LOCALE));
+        return (B)this;
+    }
+
+    public final B decimals(final int DECIMALS) {
+        properties.put("decimals", new SimpleIntegerProperty(DECIMALS));
+        return (B)this;
     }
 
     // General properties
@@ -207,6 +220,10 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
                 CONTROL.setUnitColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("tickLabelColor".equals(key)) {
                 CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("locale".equals(key)) {
+                CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+            } else if ("decimals".equals(key)) {
+                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
