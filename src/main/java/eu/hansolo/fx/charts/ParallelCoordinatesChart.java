@@ -602,7 +602,7 @@ public class ParallelCoordinatesChart extends Region {
             }
         });
     }
-    
+
 
     // ******************** Resizing ******************************************
     private void resize() {
