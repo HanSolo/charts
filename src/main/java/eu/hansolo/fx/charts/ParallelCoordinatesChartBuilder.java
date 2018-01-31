@@ -17,10 +17,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.DataObject;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -88,6 +90,11 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
 
     public final B decimals(final int DECIMALS) {
         properties.put("decimals", new SimpleIntegerProperty(DECIMALS));
+        return (B)this;
+    }
+
+    public final B tickMarksVisible(final boolean VISIBLE) {
+        properties.put("tickMarksVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -224,6 +231,8 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
                 CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
             } else if ("decimals".equals(key)) {
                 CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
+            } else if ("tickMarksVisible".equals(key)) {
+                CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

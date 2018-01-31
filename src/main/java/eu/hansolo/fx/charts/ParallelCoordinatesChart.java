@@ -23,6 +23,8 @@ import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -52,7 +54,6 @@ import java.util.Map;
 
 @DefaultProperty("children")
 public class ParallelCoordinatesChart extends Region {
-    public enum StreamFillMode { COLOR, GRADIENT }
     private static final double                         PREFERRED_WIDTH  = 600;
     private static final double                         PREFERRED_HEIGHT = 400;
     private static final double                         MINIMUM_WIDTH    = 50;
@@ -76,6 +77,8 @@ public class ParallelCoordinatesChart extends Region {
     private              ObjectProperty<Locale>         locale;
     private              int                            _decimals;
     private              IntegerProperty                decimals;
+    private              boolean                        _tickMarksVisible;
+    private              BooleanProperty                tickMarksVisible;
     private              String                         formatString;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
@@ -92,6 +95,7 @@ public class ParallelCoordinatesChart extends Region {
         _tickLabelColor    = Color.BLACK;
         _locale            = Locale.US;
         _decimals          = 0;
+        _tickMarksVisible  = true;
         formatString       = new StringBuilder("%.").append(_decimals).append("f").toString();
         items              = FXCollections.observableArrayList();
         itemListener       = e -> redraw();
@@ -287,6 +291,26 @@ public class ParallelCoordinatesChart extends Region {
         return decimals;
     }
 
+    public boolean isTickMarksVisible() { return null == tickMarksVisible ? _tickMarksVisible : tickMarksVisible.get(); }
+    public void setTickMarksVisible(final boolean VISIBLE) {
+        if (null == tickMarksVisible) {
+            _tickMarksVisible = VISIBLE;
+            redraw();
+        } else {
+            tickMarksVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty tickMarksVisibleProperty() {
+        if (null == tickMarksVisible) {
+            tickMarksVisible = new BooleanPropertyBase(_tickMarksVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "tickMarksVisible"; }
+            };
+        }
+        return tickMarksVisible;
+    }
+
     public List<DataObject> getItems() { return items; }
     public void setItems(final DataObject... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<DataObject> ITEMS) {
@@ -367,16 +391,17 @@ public class ParallelCoordinatesChart extends Region {
         ctx.clearRect(0, 0, width, height);
         ctx.setTextBaseline(VPos.CENTER);
 
-        int    noOfCategories  = categories.size();
-        double headerHeight    = 30;
-        double axisWidth       = 10;
-        double axisHeight      = height - headerHeight - 0.5;
-        double availableWidth  = width - axisWidth;
-        double availableHeight = height - headerHeight;
-        double spacer          = availableWidth / (noOfCategories - 1);
-        double headerFontSize  = size * 0.025;
-        double unitFontSize    = size * 0.015;
-        double axisFontSize    = size * 0.0125;
+        int     noOfCategories   = categories.size();
+        double  headerHeight     = 30;
+        double  axisWidth        = 10;
+        double  axisHeight       = height - headerHeight - 0.5;
+        double  availableWidth   = width - axisWidth;
+        double  availableHeight  = height - headerHeight;
+        double  spacer           = availableWidth / (noOfCategories - 1);
+        double  headerFontSize   = size * 0.025;
+        double  unitFontSize     = size * 0.015;
+        double  axisFontSize     = size * 0.0125;
+        boolean tickMarksVisible = isTickMarksVisible();
 
         // Go through all categories
         for (int i = 0 ; i < noOfCategories ; i++) {
@@ -429,51 +454,72 @@ public class ParallelCoordinatesChart extends Region {
             double     counter          = minValue;
 
             // Main Loop for tick marks and labels
-            BigDecimal tmpStepBD = new BigDecimal(tmpStep);
-            tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
-            tmpStep   = tmpStepBD.doubleValue();
-            for (double j = 0; Double.compare(-range - tmpStep, j) <= 0; j -= tmpStep) {
-                double fixedPosition = (counter - minValue) * stepSize + headerHeight;
-                double innerPointX   = axisX - 3;
-                double innerPointY   = fixedPosition;
-                double outerPointX   = axisX + 3;
-                double outerPointY   = fixedPosition;
+            if (tickMarksVisible) {
+                BigDecimal tmpStepBD = new BigDecimal(tmpStep);
+                tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
+                tmpStep = tmpStepBD.doubleValue();
+                for (double j = 0; Double.compare(-range - tmpStep, j) <= 0; j -= tmpStep) {
+                    double fixedPosition = (counter - minValue) * stepSize + headerHeight;
+                    double innerPointX   = axisX - 3;
+                    double innerPointY   = fixedPosition;
+                    double outerPointX   = axisX + 3;
+                    double outerPointY   = fixedPosition;
 
-                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                    // Draw major tick mark
-                    ctx.setStroke(Color.BLACK);
-                    ctx.setLineWidth(1);
-                    ctx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
+                    if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                        // Draw major tick mark
+                        ctx.setStroke(Color.BLACK);
+                        ctx.setLineWidth(1);
+                        ctx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
 
-                    double  axisValue  = maxValue - counter + minValue;
-                    boolean isMinValue = Double.compare(minValue, axisValue) == 0;
-                    boolean isMaxValue = Double.compare(maxValue, axisValue) == 0;
-                    double  offsetY    = 0;
-                    if (isMinValue) {
-                        offsetY = -axisFontSize;
-                    } else if (isMaxValue) {
-                        offsetY = axisFontSize;
-                    }
+                        double  axisValue  = maxValue - counter + minValue;
+                        boolean isMinValue = Double.compare(minValue, axisValue) == 0;
+                        boolean isMaxValue = Double.compare(maxValue, axisValue) == 0;
+                        double  offsetY    = 0;
+                        if (isMinValue) {
+                            offsetY = -axisFontSize;
+                        } else if (isMaxValue) {
+                            offsetY = axisFontSize;
+                        }
 
-                    if (i == (noOfCategories - 1)) {
-                        ctx.setTextAlign(TextAlignment.RIGHT);
-                        ctx.fillText(String.format(locale, formatString, axisValue), axisX - 5, outerPointY + offsetY);
-                    } else {
-                        ctx.setTextAlign(TextAlignment.LEFT);
-                        ctx.fillText(String.format(locale, formatString, axisValue), axisX + 5, outerPointY + offsetY);
-                    }
-                } else if (Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
-                    // Draw medium tick mark
-                    ctx.strokeLine(innerPointX + 1, innerPointY, outerPointX - 1, outerPointY);
-                } /*else if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                        if (i == (noOfCategories - 1)) {
+                            ctx.setTextAlign(TextAlignment.RIGHT);
+                            ctx.fillText(String.format(locale, formatString, axisValue), axisX - 5, outerPointY + offsetY);
+                        } else {
+                            ctx.setTextAlign(TextAlignment.LEFT);
+                            ctx.fillText(String.format(locale, formatString, axisValue), axisX + 5, outerPointY + offsetY);
+                        }
+                    } else if (Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                               Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                        // Draw medium tick mark
+                        ctx.strokeLine(innerPointX + 1, innerPointY, outerPointX - 1, outerPointY);
+                    } /*else if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick mark
                     ctx.strokeLine(innerPointX + 2, innerPointY, outerPointX - 2, outerPointY);
                 }*/
 
-                counterBD = counterBD.add(minorTickSpaceBD);
-                counter   = counterBD.doubleValue();
-                if (counter > maxValue) break;
+                    counterBD = counterBD.add(minorTickSpaceBD);
+                    counter = counterBD.doubleValue();
+                    if (counter > maxValue) break;
+                }
+            } else {
+                // Min
+                ctx.strokeLine(axisX - 3, maxY, axisX + 3, maxY);
+
+                // Max
+                ctx.strokeLine(axisX - 3, axisY, axisX + 3, axisY);
+
+                ctx.setFont(Font.font(Helper.clamp(8, 24, axisFontSize)));
+                ctx.setFill(Color.BLACK);
+                if (i == (noOfCategories - 1)) {
+                    ctx.setTextAlign(TextAlignment.RIGHT);
+                    ctx.fillText(String.format(locale, formatString, minValue), axisX - 5, maxY - axisFontSize);  // Min
+                    ctx.fillText(String.format(locale, formatString, maxValue), axisX - 5, axisY + axisFontSize); // Max
+                } else {
+                    ctx.setTextAlign(TextAlignment.LEFT);
+                    ctx.fillText(String.format(locale, formatString, minValue), axisX + 5, maxY - axisFontSize);  // Min
+                    ctx.fillText(String.format(locale, formatString, maxValue), axisX + 5, axisY + axisFontSize); // Max
+                }
+
             }
 
             categoryMap.get(category).forEach(obj -> {
