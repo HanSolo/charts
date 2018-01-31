@@ -98,6 +98,16 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
         return (B)this;
     }
 
+    public final B selectedColor(final Color COLOR) {
+        properties.put("selectedColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B unselectedColor(final Color COLOR) {
+        properties.put("unselectedColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
     // General properties
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
@@ -233,6 +243,10 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
                 CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
             } else if ("tickMarksVisible".equals(key)) {
                 CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("selectedColor".equals(key)) {
+                CONTROL.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("unselectedColor".equals(key)) {
+                CONTROL.setUnselectedColor(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
         return CONTROL;
