@@ -27,6 +27,7 @@ import javafx.beans.DefaultProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -67,6 +68,14 @@ public class ParallelCoordinatesChart extends Region {
     private              double                         height;
     private              Canvas                         canvas;
     private              GraphicsContext                ctx;
+    private              Color                          _axisColor;
+    private              ObjectProperty<Color>          axisColor;
+    private              Color                          _headerColor;
+    private              ObjectProperty<Color>          headerColor;
+    private              Color                          _unitColor;
+    private              ObjectProperty<Color>          unitColor;
+    private              Color                          _tickLabelColor;
+    private              ObjectProperty<Color>          tickLabelColor;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
     private              Map<String,List<DataObject>>   categoryMap;
@@ -76,6 +85,10 @@ public class ParallelCoordinatesChart extends Region {
 
     // ******************** Constructors **************************************
     public ParallelCoordinatesChart() {
+        _axisColor         = Color.BLACK;
+        _headerColor       = Color.BLACK;
+        _unitColor         = Color.BLACK;
+        _tickLabelColor    = Color.BLACK;
         items              = FXCollections.observableArrayList();
         itemListener       = e -> redraw();
         objectListListener = c -> {
@@ -89,8 +102,8 @@ public class ParallelCoordinatesChart extends Region {
             prepareData();
             redraw();
         };
-        categories  = new ArrayList<>();
-        categoryMap = new HashMap<>();
+        categories         = new ArrayList<>();
+        categoryMap        = new HashMap<>();
 
         initGraphics();
         registerListeners();
@@ -140,6 +153,90 @@ public class ParallelCoordinatesChart extends Region {
 
     public void dispose() { items.forEach(object -> object.getProperties().values().forEach(item -> item.removeItemEventListener(itemListener))); }
 
+    public Color getAxisColor() { return null == axisColor ? _axisColor : axisColor.get(); }
+    public void setAxisColor(final Color COLOR) {
+        if (null == axisColor) {
+            _axisColor = COLOR;
+            redraw();
+        } else {
+            axisColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> axisColorProperty() {
+        if (null == axisColor) {
+            axisColor = new ObjectPropertyBase<Color>(_axisColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "axisColor"; }
+            };
+            _axisColor = null;
+        }
+        return axisColor;
+    }
+
+    public Color getHeaderColor() { return null == headerColor ? _headerColor : headerColor.get(); }
+    public void setHeaderColor(final Color COLOR) {
+        if (null == headerColor) {
+            _headerColor = COLOR;
+            redraw();
+        } else {
+            headerColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> headerColorProperty() {
+        if (null == headerColor) {
+            headerColor = new ObjectPropertyBase<Color>(_headerColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "headerColor"; }
+            };
+            _headerColor = null;
+        }
+        return headerColor;
+    }
+
+    public Color getUnitColor() { return null == unitColor ? _unitColor : unitColor.get(); }
+    public void setUnitColor(final Color COLOR) {
+        if (null == unitColor) {
+            _unitColor = COLOR;
+            redraw();
+        } else {
+            unitColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> unitColorProperty() {
+        if (null == unitColor) {
+            unitColor = new ObjectPropertyBase<Color>(_unitColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "unitColor"; }
+            };
+            _unitColor = null;
+        }
+        return unitColor;
+    }
+
+    public Color getTickLabelColor() { return null == tickLabelColor ? _tickLabelColor : tickLabelColor.get(); }
+    public void setTickLabelColor(final Color COLOR) {
+        if (null == tickLabelColor) {
+            _tickLabelColor = COLOR;
+            redraw();
+        } else {
+            tickLabelColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> tickLabelColorProperty() {
+        if (null == tickLabelColor) {
+            tickLabelColor = new ObjectPropertyBase<Color>(_tickLabelColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "tickLabelColor"; }
+            };
+            _tickLabelColor = null;
+        }
+        return tickLabelColor;
+    }
+    
     public List<DataObject> getItems() { return items; }
     public void setItems(final DataObject... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<DataObject> ITEMS) {
@@ -217,7 +314,6 @@ public class ParallelCoordinatesChart extends Region {
     }
 
     private void redraw() {
-        shiftCategory("consumption", 0);
         ctx.clearRect(0, 0, width, height);
         ctx.setTextBaseline(VPos.CENTER);
 
@@ -250,7 +346,6 @@ public class ParallelCoordinatesChart extends Region {
             double   maxY             = axisY + axisHeight;
 
             // Draw header and unit
-            ctx.setFill(Color.BLACK);
             if (i == 0) {
                 ctx.setTextAlign(TextAlignment.LEFT);
             } else if (i == (noOfCategories - 1)) {
@@ -258,18 +353,22 @@ public class ParallelCoordinatesChart extends Region {
             } else {
                 ctx.setTextAlign(TextAlignment.CENTER);
             }
+            ctx.setFill(getHeaderColor());
             ctx.setFont(Font.font(Helper.clamp(8, 24, headerFontSize)));
             ctx.fillText(category, axisX, 5);
-            ctx.setFont(Font.font(Helper.clamp(8, 24, unitFontSize)));
-            ctx.fillText(String.join("", "[", unit, "]"), axisX, 18);
+            if (!unit.isEmpty()) {
+                ctx.setFill(getUnitColor());
+                ctx.setFont(Font.font(Helper.clamp(8, 24, unitFontSize)));
+                ctx.fillText(String.join("", "[", unit, "]"), axisX, 18);
+            }
 
             // Draw axis
-            ctx.setStroke(Color.BLACK);
+            ctx.setStroke(getAxisColor());
             ctx.strokeLine(axisX, axisY, axisX, maxY);
 
             // TickMarks
             ctx.setFont(Font.font(Helper.clamp(8, 24, axisFontSize)));
-            ctx.setFill(Color.BLACK);
+            ctx.setFill(getTickLabelColor());
             double     tmpStep          = minorTickSpace;
             BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpace);
             BigDecimal majorTickSpaceBD = BigDecimal.valueOf(majorTickSpace);
