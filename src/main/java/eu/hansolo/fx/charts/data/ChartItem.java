@@ -50,6 +50,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       List<ItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
     private       String                  _name;
     private       StringProperty          name;
+    private       String                  _unit;
+    private       StringProperty          unit;
     private       double                  _value;
     private       DoubleProperty          value;
     private       double                  oldValue;
@@ -119,6 +121,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         _name             = NAME;
+        _unit             = "";
         _value            = VALUE;
         oldValue          = 0;
         _fill             = FILL;
@@ -165,6 +168,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             _name = null;
         }
         return name;
+    }
+
+    public String getUnit() { return null == unit ? _unit : unit.get(); }
+    public void setUnit(final String UNIT) {
+        if (null == unit) {
+            _unit = UNIT;
+            fireItemEvent(UPDATE_EVENT);
+        } else {
+            unit.set(UNIT);
+        }
+    }
+    public StringProperty unitProperty() {
+        if (null == unit) {
+            unit = new StringPropertyBase(_unit) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "unit"; }
+            };
+            _unit = null;
+        }
+        return unit;
     }
 
     public double getValue() { return null == value ? _value : value.get(); }

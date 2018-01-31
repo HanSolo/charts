@@ -53,6 +53,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
         return (B)this;
     }
 
+    public final B unit(final String UNIT) {
+        properties.put("unit", new SimpleStringProperty(UNIT));
+        return (B)this;
+    }
+
     public final B value(final double VALUE) {
         properties.put("value", new SimpleDoubleProperty(VALUE));
         return (B)this;
@@ -115,6 +120,8 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setName(((StringProperty) properties.get(key)).get());
             } else if ("value".equals(key)) {
                 ITEM.setValue(((DoubleProperty) properties.get(key)).get());
+            } else if ("unit".equals(key)) {
+                ITEM.setUnit(((StringProperty) properties.get(key)).get());
             } else if("fill".equals(key)) {
                 ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("stroke".equals(key)) {

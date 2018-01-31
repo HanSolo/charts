@@ -81,6 +81,11 @@ public class ParallelCoordinatesChartTest extends Application {
         CAR.setWeight(WEIGHT);
         CAR.setConsumption(CONSUMPTION);
         CAR.setStroke(STROKE);
+
+        CAR.getProperties().get("Power").setUnit("hp");
+        CAR.getProperties().get("Weight").setUnit("kg");
+        CAR.getProperties().get("Acceleration").setUnit("sec");
+        CAR.getProperties().get("Consumption").setUnit("l/100km");
     }
 
 
@@ -103,11 +108,11 @@ public class ParallelCoordinatesChartTest extends Application {
             this.NAME    = NAME;
             this.VENDOR  = VENDOR;
             this.MODEL   = MODEL;
-            cylinder     = new ChartItem("cylinder");
-            power        = new ChartItem("power");
-            acceleration = new ChartItem("acceleration");
-            weight       = new ChartItem("weight");
-            consumption  = new ChartItem("consumption");
+            cylinder     = new ChartItem("Cylinder");
+            power        = new ChartItem("Power");
+            acceleration = new ChartItem("Acceleration");
+            weight       = new ChartItem("Weight");
+            consumption  = new ChartItem("Consumption");
 
             properties = new HashMap<>();
             properties.put(cylinder.getName(), cylinder);

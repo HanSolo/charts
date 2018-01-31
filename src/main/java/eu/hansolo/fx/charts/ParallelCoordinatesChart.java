@@ -229,11 +229,13 @@ public class ParallelCoordinatesChart extends Region {
         double availableHeight = height - headerHeight;
         double spacer          = availableWidth / (noOfCategories - 1);
         double headerFontSize  = size * 0.025;
+        double unitFontSize    = size * 0.015;
         double axisFontSize    = size * 0.0125;
 
         // Go through all categories
         for (int i = 0 ; i < noOfCategories ; i++) {
             String   category         = categories.get(i);
+            String   unit             = categoryMap.get(category).get(0).getProperties().get(category).getUnit();
             double   axisX            = i * spacer + axisWidth * 0.5;
             double   axisY            = headerHeight;
             double[] minMax           = getMinMax(category);
@@ -247,8 +249,7 @@ public class ParallelCoordinatesChart extends Region {
             double   stepSize         = Math.abs(axisHeight / range);
             double   maxY             = axisY + axisHeight;
 
-            // Draw header
-            ctx.setFont(Font.font(Helper.clamp(8, 24, headerFontSize)));
+            // Draw header and unit
             ctx.setFill(Color.BLACK);
             if (i == 0) {
                 ctx.setTextAlign(TextAlignment.LEFT);
@@ -257,17 +258,14 @@ public class ParallelCoordinatesChart extends Region {
             } else {
                 ctx.setTextAlign(TextAlignment.CENTER);
             }
-            ctx.fillText(category, axisX, 10);
+            ctx.setFont(Font.font(Helper.clamp(8, 24, headerFontSize)));
+            ctx.fillText(category, axisX, 5);
+            ctx.setFont(Font.font(Helper.clamp(8, 24, unitFontSize)));
+            ctx.fillText(String.join("", "[", unit, "]"), axisX, 18);
 
             // Draw axis
             ctx.setStroke(Color.BLACK);
             ctx.strokeLine(axisX, axisY, axisX, maxY);
-
-            // Min
-            //ctx.strokeLine(axisX - 2, maxY, axisX + 2, maxY);
-
-            // Max
-            //ctx.strokeLine(axisX - 2, axisY, axisX + 2, axisY);
 
             // TickMarks
             ctx.setFont(Font.font(Helper.clamp(8, 24, axisFontSize)));
@@ -297,18 +295,15 @@ public class ParallelCoordinatesChart extends Region {
                     ctx.setLineWidth(1);
                     ctx.strokeLine(innerPointX, innerPointY, outerPointX, outerPointY);
 
-                    double axisValue   = maxValue - counter + minValue;
+                    double  axisValue  = maxValue - counter + minValue;
                     boolean isMinValue = Double.compare(minValue, axisValue) == 0;
                     boolean isMaxValue = Double.compare(maxValue, axisValue) == 0;
-                    double  offsetY;
+                    double  offsetY    = 0;
                     if (isMinValue) {
                         offsetY = -axisFontSize;
                     } else if (isMaxValue) {
                         offsetY = axisFontSize;
-                    } else {
-                        offsetY = 0;
                     }
-
 
                     if (i == (noOfCategories - 1)) {
                         ctx.setTextAlign(TextAlignment.RIGHT);
