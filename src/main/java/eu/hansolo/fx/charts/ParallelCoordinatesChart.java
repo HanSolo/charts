@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @DefaultProperty("children")
@@ -87,8 +86,10 @@ public class ParallelCoordinatesChart extends Region {
     private              Color                          _unselectedColor;
     private              ObjectProperty<Color>          unselectedColor;
     private              String                         formatString;
-    private              boolean                        selectionStarted;
-    private              List<ChartItem>                selectedItems;
+    private              String                         selectedCategory;
+    private              double                         selectionStartY;
+    private              double                         selectionEndY;
+    private              Map<String, ChartItem>         selectedItems;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
     private              Map<String, List<DataObject>>  categoryObjectMap;
@@ -109,8 +110,7 @@ public class ParallelCoordinatesChart extends Region {
         _selectedColor        = Color.BLUE;
         _unselectedColor      = Color.LIGHTGRAY;
         formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
-        selectionStarted      = false;
-        selectedItems         = new ArrayList<>();
+        selectedItems         = new HashMap<>();
         items                 = FXCollections.observableArrayList();
         itemListener          = e -> redraw();
         objectListListener    = c -> {
@@ -161,8 +161,22 @@ public class ParallelCoordinatesChart extends Region {
         axisCanvas.setOnMousePressed(e -> {
             final double X = e.getX();
             final double Y = e.getY();
-            String selectedCategory = selectCategory(X, Y);
-            if (null != selectedCategory) { System.out.println(selectedCategory); }
+            selectedCategory = selectCategory(X, Y);
+            selectionStartY  = null == selectedCategory ? -1 : Y;
+        });
+        axisCanvas.setOnMouseReleased(e -> {
+            if (selectionStartY == -1) {
+                selectedItems.clear();
+                drawConnections();
+            } else {
+                final double Y = e.getY();
+                selectionEndY = null == selectedCategory ? -1 : Y;
+                if (selectionStartY != -1 && selectionEndY != -1) {
+                    selectObjectsAtCategory(selectedCategory, selectionStartY, selectionEndY);
+                } else {
+                    selectedItems.clear();
+                }
+            }
         });
     }
 
@@ -430,10 +444,23 @@ public class ParallelCoordinatesChart extends Region {
         categoryObjectItemMap.entrySet()
                              .stream()
                              .filter(entry -> entry.getKey().getCategory().equals(CATEGORY))
-                             .filter(entry -> entry.getValue().getY() > MIN_Y)
+                             .filter(entry -> entry.getValue().getY() > MIN_Y && entry.getValue().getY() < MAX_Y)
                              .filter(entry -> entry.getValue().getY() < MAX_Y)
-                             .forEach(entry -> selectedItems.add(entry.getValue()));
+                             .forEach(entry -> selectedItems.put(entry.getKey().getDataObject().getName(), entry.getValue()));
         drawConnections();
+    }
+
+    private String selectCategory(final double X, final double Y) {
+        int     noOfCategories = categories.size();
+        double  axisWidth      = 10;
+        double  availableWidth = width - axisWidth;
+        double  spacer         = availableWidth / (noOfCategories - 1);
+        double  thirdSpacer    = spacer / 3;
+        for (int i = 0 ; i < noOfCategories ; i++) {
+            double axisX = i * spacer + axisWidth * 0.5;
+            if (X > axisX - thirdSpacer && X < axisX + thirdSpacer) { return categories.get(i); }
+        }
+        return null;
     }
 
     private double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
@@ -445,18 +472,6 @@ public class ParallelCoordinatesChart extends Region {
         double niceMinValue      = (Math.floor(MIN_VALUE / majorTickSpace) * majorTickSpace);
         double niceMaxValue      = (Math.ceil(MAX_VALUE / majorTickSpace) * majorTickSpace);
         return new double[] { niceMinValue, niceMaxValue, minorTickSpace, majorTickSpace };
-    }
-
-    private String selectCategory(final double X, final double Y) {
-        int     noOfCategories = categories.size();
-        double  axisWidth      = 10;
-        double  availableWidth = width - axisWidth;
-        double  spacer         = availableWidth / (noOfCategories - 1);
-        for (int i = 0 ; i < noOfCategories ; i++) {
-            double axisX = i * spacer + axisWidth * 0.5;
-            if (X > axisX - 10 && X < axisX + 10) { return categories.get(i); }
-        }
-        return null;
     }
 
     
@@ -623,7 +638,7 @@ public class ParallelCoordinatesChart extends Region {
                 Key       key  = new Key(category, obj);
                 ChartItem item = categoryObjectItemMap.get(key);
                 if (selectedItems.size() > 0) {
-                    connectionCtx.setStroke(selectedItems.contains(item) ? selectedColor : unselectedColor);
+                    connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
                 } else {
                     connectionCtx.setStroke(objStroke);
                 }
