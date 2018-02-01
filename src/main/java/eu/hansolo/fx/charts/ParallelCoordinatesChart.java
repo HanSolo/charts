@@ -39,6 +39,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
@@ -101,6 +102,8 @@ public class ParallelCoordinatesChart extends Region {
     private              ItemEventListener              itemListener;
     private              ListChangeListener<DataObject> objectListListener;
 
+    private              Rectangle                      rect;
+
 
     // ******************** Constructors **************************************
     public ParallelCoordinatesChart() {
@@ -153,11 +156,18 @@ public class ParallelCoordinatesChart extends Region {
         axisCanvas       = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         axisCtx          = axisCanvas.getGraphicsContext2D();
 
+        Color selectionRectColor = getSelectionRectColor();
+        rect = new Rectangle();
+        rect.setMouseTransparent(true);
+        rect.setVisible(false);
+        rect.setStroke(Helper.getColorWithOpacity(selectionRectColor, 0.5));
+        rect.setFill(Helper.getColorWithOpacity(selectionRectColor, 0.25));
+
         connectionCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         connectionCanvas.setMouseTransparent(true);
         connectionCtx    = connectionCanvas.getGraphicsContext2D();
 
-        getChildren().setAll(axisCanvas, connectionCanvas);
+        getChildren().setAll(axisCanvas, rect, connectionCanvas);
     }
 
     private void registerListeners() {
@@ -402,6 +412,8 @@ public class ParallelCoordinatesChart extends Region {
     public void setSelectionRectColor(final Color COLOR) {
         if (null == selectionRectColor) {
             _selectionRectColor = COLOR;
+            rect.setStroke(Helper.getColorWithOpacity(_selectionRectColor, 0.5));
+            rect.setFill(Helper.getColorWithOpacity(_selectionRectColor, 0.25));
             redraw();
         } else {
             selectionRectColor.set(COLOR);
@@ -410,7 +422,11 @@ public class ParallelCoordinatesChart extends Region {
     public ObjectProperty<Color> selectionRectColorProperty() {
         if (null == selectionRectColor) {
             selectionRectColor = new ObjectPropertyBase<Color>(_selectionRectColor) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() {
+                    rect.setStroke(Helper.getColorWithOpacity(get(), 0.5));
+                    rect.setFill(Helper.getColorWithOpacity(get(), 0.25));
+                    redraw();
+                }
                 @Override public Object getBean() { return ParallelCoordinatesChart.this; }
                 @Override public String getName() { return "selectionRectColor"; }
             };
@@ -683,12 +699,13 @@ public class ParallelCoordinatesChart extends Region {
             connectionCtx.stroke();
         });
         if (selectedItems.size() > 0) {
-            Color selectionRectColor = getSelectionRectColor();
-            connectionCtx.setStroke(Helper.getColorWithOpacity(selectionRectColor, 0.5));
-            connectionCtx.setFill(Helper.getColorWithOpacity(selectionRectColor, 0.25));
-            connectionCtx.fillRect(selectionRect.getX(), selectionRect.getY(), selectionRect.getWidth(), selectionRect.getHeight());
-            connectionCtx.strokeRect(selectionRect.getX(), selectionRect.getY(), selectionRect.getWidth(), selectionRect.getHeight());
-
+            rect.setWidth(10);
+            rect.setHeight(selectionRect.getHeight());
+            rect.setX(selectionRect.getX());
+            rect.setY(selectionRect.getY());
+            rect.setVisible(true);
+        } else {
+            rect.setVisible(false);
         }
     }
 
@@ -700,6 +717,11 @@ public class ParallelCoordinatesChart extends Region {
         size   = width < height ? width : height;
 
         if (width > 0 && height > 0) {
+            double rectXFactor = selectionRect.getX() / connectionCanvas.getWidth();
+            double rectYFactor = selectionRect.getY() / connectionCanvas.getHeight();
+            double rectWFactor = selectionRect.getWidth() / connectionCanvas.getWidth();
+            double rectHFactor = selectionRect.getHeight() / connectionCanvas.getHeight();
+
             axisCanvas.setWidth(width);
             axisCanvas.setHeight(height);
             axisCanvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
@@ -708,8 +730,10 @@ public class ParallelCoordinatesChart extends Region {
             connectionCanvas.setHeight(height);
             connectionCanvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
-            // This is just a workaround to avoid resizing the selectionRect
-            selectedItems.clear();
+            selectionRect.setX(width * rectXFactor);
+            selectionRect.setY(height * rectYFactor);
+            selectionRect.setWidth(width * rectWFactor);
+            selectionRect.setHeight(height * rectHFactor);
 
             redraw();
         }
