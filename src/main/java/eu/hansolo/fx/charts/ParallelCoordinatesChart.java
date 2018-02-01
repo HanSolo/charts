@@ -179,6 +179,7 @@ public class ParallelCoordinatesChart extends Region {
         connectionCtx = connectionCanvas.getGraphicsContext2D();
 
         dragText = new Text("");
+        dragText.setVisible(false);
         dragText.setTextOrigin(VPos.CENTER);
         dragText.setFill(Helper.getColorWithOpacity(getHeaderColor(), 0.5));
 
