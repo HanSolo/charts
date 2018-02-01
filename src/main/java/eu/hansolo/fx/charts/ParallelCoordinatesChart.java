@@ -33,10 +33,13 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -56,12 +59,16 @@ import java.util.Map;
 
 @DefaultProperty("children")
 public class ParallelCoordinatesChart extends Region {
-    private static final double                         PREFERRED_WIDTH  = 600;
-    private static final double                         PREFERRED_HEIGHT = 400;
-    private static final double                         MINIMUM_WIDTH    = 50;
-    private static final double                         MINIMUM_HEIGHT   = 50;
-    private static final double                         MAXIMUM_WIDTH    = 2048;
-    private static final double                         MAXIMUM_HEIGHT   = 2048;
+    private static final double                         PREFERRED_WIDTH    = 600;
+    private static final double                         PREFERRED_HEIGHT   = 400;
+    private static final double                         MINIMUM_WIDTH      = 50;
+    private static final double                         MINIMUM_HEIGHT     = 50;
+    private static final double                         MAXIMUM_WIDTH      = 2048;
+    private static final double                         MAXIMUM_HEIGHT     = 2048;
+    private static final double                         HEADER_HEIGHT      = 30;
+    private static final double                         AXIS_WIDTH         = 10;
+    private static final double                         MAJOR_TICK_LENGTH  = 6;
+    private static final double                         MEDIUM_TICK_LENGTH = 4;
     private              double                         size;
     private              double                         width;
     private              double                         height;
@@ -102,7 +109,7 @@ public class ParallelCoordinatesChart extends Region {
     private              Map<Key, ChartItem>            categoryObjectItemMap;
     private              ItemEventListener              itemListener;
     private              ListChangeListener<DataObject> objectListListener;
-
+    private              EventHandler<MouseEvent>       mouseHandler;
     private              Rectangle                      rect;
 
 
@@ -137,6 +144,7 @@ public class ParallelCoordinatesChart extends Region {
         categories            = new ArrayList<>();
         categoryObjectMap     = new HashMap<>();
         categoryObjectItemMap = new HashMap<>();
+        mouseHandler          = e -> handleMouseEvent(e);
 
         initGraphics();
         registerListeners();
@@ -175,45 +183,9 @@ public class ParallelCoordinatesChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(objectListListener);
-        axisCanvas.setOnMousePressed(e -> {
-            final double X = e.getX();
-            final double Y = e.getY();
-            selectedCategory = selectCategory(X, Y);
-            selectionStartY  = null == selectedCategory ? -1 : Y;
-            if (selectionStartY > -1) {
-                selectionRect.setX(selectionStartX);
-                selectionRect.setY(Y);
-                selectionRect.setWidth(0);
-                selectionRect.setHeight(0);
-                rect.setVisible(true);
-                resizeSelectionRect();
-            } else {
-                rect.setVisible(false);
-            }
-        });
-        axisCanvas.setOnMouseDragged(e -> {
-            final double Y = e.getY();
-            selectionRect.setHeight(Y - selectionRect.getY());
-            selectionRect.setWidth(10);
-            resizeSelectionRect();
-        });
-        axisCanvas.setOnMouseReleased(e -> {
-            if (selectionStartY == -1) {
-                selectedItems.clear();
-                drawConnections();
-            } else {
-                final double Y = e.getY();
-                selectionEndY = null == selectedCategory ? -1 : Y;
-                if (selectionStartY != -1 && selectionEndY != -1) {
-                    selectionRect.setWidth(10);
-                    selectionRect.setY(selectionStartY);
-                    selectionRect.setHeight(selectionEndY - selectionStartY);
-                    selectObjectsAtCategory(selectedCategory, selectionStartY, selectionEndY);
-                } else {
-                    selectedItems.clear();
-                }
-            }
-        });
+        axisCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        axisCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, mouseHandler);
+        axisCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, mouseHandler);
     }
 
 
@@ -231,7 +203,12 @@ public class ParallelCoordinatesChart extends Region {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public void dispose() { items.forEach(object -> object.getProperties().values().forEach(item -> item.removeItemEventListener(itemListener))); }
+    public void dispose() {
+        items.forEach(object -> object.getProperties().values().forEach(item -> item.removeItemEventListener(itemListener)));
+        axisCanvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        axisCanvas.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseHandler);
+        axisCanvas.removeEventHandler(MouseEvent.MOUSE_RELEASED, mouseHandler);
+    }
 
     public Color getAxisColor() { return null == axisColor ? _axisColor : axisColor.get(); }
     public void setAxisColor(final Color COLOR) {
@@ -550,6 +527,46 @@ public class ParallelCoordinatesChart extends Region {
         return new double[] { niceMinValue, niceMaxValue, minorTickSpace, majorTickSpace };
     }
 
+    private void handleMouseEvent(final MouseEvent EVT) {
+        final EventType<? extends MouseEvent> TYPE = EVT.getEventType();
+        final double X = EVT.getX();
+        final double Y = EVT.getY();
+
+        if (MouseEvent.MOUSE_PRESSED.equals(TYPE)) {
+            selectedCategory = selectCategory(X, Y);
+            selectionStartY  = null == selectedCategory ? -1 : Y;
+            if (selectionStartY > -1) {
+                selectionRect.setX(selectionStartX);
+                selectionRect.setY(Y);
+                selectionRect.setWidth(0);
+                selectionRect.setHeight(0);
+                rect.setVisible(true);
+                resizeSelectionRect();
+            } else {
+                rect.setVisible(false);
+            }
+        } else if (MouseEvent.MOUSE_DRAGGED.equals(TYPE)) {
+            selectionRect.setHeight(Y - selectionRect.getY());
+            selectionRect.setWidth(10);
+            resizeSelectionRect();
+        } else if (MouseEvent.MOUSE_RELEASED.equals(TYPE)) {
+            if (selectionStartY == -1) {
+                selectedItems.clear();
+                drawConnections();
+            } else {
+                selectionEndY = null == selectedCategory ? -1 : Y;
+                if (selectionStartY != -1 && selectionEndY != -1) {
+                    selectionRect.setWidth(10);
+                    selectionRect.setY(selectionStartY);
+                    selectionRect.setHeight(selectionEndY - selectionStartY);
+                    selectObjectsAtCategory(selectedCategory, selectionStartY, selectionEndY);
+                } else {
+                    selectedItems.clear();
+                }
+            }
+        }
+    }
+
     
     // ******************** Drawing *******************************************
     private void redraw() {
@@ -562,11 +579,10 @@ public class ParallelCoordinatesChart extends Region {
         axisCtx.setTextBaseline(VPos.CENTER);
 
         int     noOfCategories   = categories.size();
-        double  headerHeight     = 30;
-        double  axisWidth        = 10;
-        double  axisHeight       = height - headerHeight - 0.5;
-        double  availableWidth   = width - axisWidth;
-        double  availableHeight  = height - headerHeight;
+        double  axisHeight       = height - HEADER_HEIGHT - 0.5;
+        double  availableWidth   = width - AXIS_WIDTH;
+        double  halfAxisWidth    = AXIS_WIDTH * 0.5;
+        double  availableHeight  = height - HEADER_HEIGHT;
         double  spacer           = availableWidth / (noOfCategories - 1);
         double  headerFontSize   = size * 0.025;
         double  unitFontSize     = size * 0.015;
@@ -575,21 +591,23 @@ public class ParallelCoordinatesChart extends Region {
 
         // Go through all categories
         for (int i = 0 ; i < noOfCategories ; i++) {
-            Locale   locale           = getLocale();
-            String   category         = categories.get(i);
-            String   unit             = categoryObjectMap.get(category).get(0).getProperties().get(category).getUnit();
-            double   axisX            = i * spacer + axisWidth * 0.5;
-            double   axisY            = headerHeight;
-            double[] minMax           = getMinMax(category);
-            double[] axisParam        = calcAutoScale(minMax[0], minMax[1]);
-            double   minValue         = axisParam[0];
-            double   maxValue         = axisParam[1];
-            double   range            = maxValue - minValue;
-            double   minorTickSpace   = axisParam[2];
-            double   majorTickSpace   = axisParam[3];
+            Locale   locale               = getLocale();
+            String   category             = categories.get(i);
+            String   unit                 = categoryObjectMap.get(category).get(0).getProperties().get(category).getUnit();
+            double   axisX                = i * spacer + AXIS_WIDTH * 0.5;
+            double   axisY                = HEADER_HEIGHT;
+            double   halfMajorTickLength  = MAJOR_TICK_LENGTH * 0.5;
+            double   halfMediumTickLength = MEDIUM_TICK_LENGTH * 0.5;
+            double[] minMax               = getMinMax(category);
+            double[] axisParam            = calcAutoScale(minMax[0], minMax[1]);
+            double   minValue             = axisParam[0];
+            double   maxValue             = axisParam[1];
+            double   range                = maxValue - minValue;
+            double   minorTickSpace       = axisParam[2];
+            double   majorTickSpace       = axisParam[3];
 
-            double   stepSize         = Math.abs(axisHeight / range);
-            double   maxY             = axisY + axisHeight;
+            double   stepSize             = Math.abs(axisHeight / range);
+            double   maxY                 = axisY + axisHeight;
 
             // Draw header and unit
             if (i == 0) {
@@ -629,10 +647,10 @@ public class ParallelCoordinatesChart extends Region {
                 tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
                 tmpStep = tmpStepBD.doubleValue();
                 for (double j = 0; Double.compare(-range - tmpStep, j) <= 0; j -= tmpStep) {
-                    double fixedPosition = (counter - minValue) * stepSize + headerHeight;
-                    double innerPointX   = axisX - 3;
+                    double fixedPosition = (counter - minValue) * stepSize + HEADER_HEIGHT;
+                    double innerPointX   = axisX - halfMajorTickLength;
                     double innerPointY   = fixedPosition;
-                    double outerPointX   = axisX + 3;
+                    double outerPointX   = axisX + halfMajorTickLength;
                     double outerPointY   = fixedPosition;
 
                     if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
@@ -653,15 +671,15 @@ public class ParallelCoordinatesChart extends Region {
 
                         if (i == (noOfCategories - 1)) {
                             axisCtx.setTextAlign(TextAlignment.RIGHT);
-                            axisCtx.fillText(String.format(locale, formatString, axisValue), axisX - 5, outerPointY + offsetY);
+                            axisCtx.fillText(String.format(locale, formatString, axisValue), axisX - halfAxisWidth, outerPointY + offsetY);
                         } else {
                             axisCtx.setTextAlign(TextAlignment.LEFT);
-                            axisCtx.fillText(String.format(locale, formatString, axisValue), axisX + 5, outerPointY + offsetY);
+                            axisCtx.fillText(String.format(locale, formatString, axisValue), axisX + halfAxisWidth, outerPointY + offsetY);
                         }
                     } else if (Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
                                Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                         // Draw medium tick mark
-                        axisCtx.strokeLine(innerPointX + 1, innerPointY, outerPointX - 1, outerPointY);
+                        axisCtx.strokeLine(axisX - halfMediumTickLength, innerPointY, axisX + halfMediumTickLength, outerPointY);
                     } /*else if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick mark
                     axisCtx.strokeLine(innerPointX + 2, innerPointY, outerPointX - 2, outerPointY);
@@ -682,12 +700,12 @@ public class ParallelCoordinatesChart extends Region {
                 axisCtx.setFill(Color.BLACK);
                 if (i == (noOfCategories - 1)) {
                     axisCtx.setTextAlign(TextAlignment.RIGHT);
-                    axisCtx.fillText(String.format(locale, formatString, minValue), axisX - 5, maxY - axisFontSize);  // Min
-                    axisCtx.fillText(String.format(locale, formatString, maxValue), axisX - 5, axisY + axisFontSize); // Max
+                    axisCtx.fillText(String.format(locale, formatString, minValue), axisX - halfAxisWidth, maxY - axisFontSize);  // Min
+                    axisCtx.fillText(String.format(locale, formatString, maxValue), axisX - halfAxisWidth, axisY + axisFontSize); // Max
                 } else {
                     axisCtx.setTextAlign(TextAlignment.LEFT);
-                    axisCtx.fillText(String.format(locale, formatString, minValue), axisX + 5, maxY - axisFontSize);  // Min
-                    axisCtx.fillText(String.format(locale, formatString, maxValue), axisX + 5, axisY + axisFontSize); // Max
+                    axisCtx.fillText(String.format(locale, formatString, minValue), axisX + halfAxisWidth, maxY - axisFontSize);  // Min
+                    axisCtx.fillText(String.format(locale, formatString, maxValue), axisX + halfAxisWidth, axisY + axisFontSize); // Max
                 }
 
             }
