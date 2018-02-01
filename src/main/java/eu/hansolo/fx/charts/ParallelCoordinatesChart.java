@@ -91,6 +91,7 @@ public class ParallelCoordinatesChart extends Region {
     private              ObjectProperty<Color>          selectionRectColor;
     private              String                         formatString;
     private              String                         selectedCategory;
+    private              double                         selectionStartX;
     private              double                         selectionStartY;
     private              double                         selectionEndY;
     private              CtxBounds                      selectionRect;
@@ -179,6 +180,22 @@ public class ParallelCoordinatesChart extends Region {
             final double Y = e.getY();
             selectedCategory = selectCategory(X, Y);
             selectionStartY  = null == selectedCategory ? -1 : Y;
+            if (selectionStartY > -1) {
+                selectionRect.setX(selectionStartX);
+                selectionRect.setY(Y);
+                selectionRect.setWidth(0);
+                selectionRect.setHeight(0);
+                rect.setVisible(true);
+                resizeSelectionRect();
+            } else {
+                rect.setVisible(false);
+            }
+        });
+        axisCanvas.setOnMouseDragged(e -> {
+            final double Y = e.getY();
+            selectionRect.setHeight(Y - selectionRect.getY());
+            selectionRect.setWidth(10);
+            resizeSelectionRect();
         });
         axisCanvas.setOnMouseReleased(e -> {
             if (selectionStartY == -1) {
@@ -505,14 +522,21 @@ public class ParallelCoordinatesChart extends Region {
         for (int i = 0 ; i < noOfCategories ; i++) {
             double axisX = i * spacer + axisWidth * 0.5;
             if (i == 0 && X < axisX + thirdSpacer) {
-                selectionRect.setX(axisX - 5);
+                selectionStartX = axisX - 5;
                 return categories.get(i);
             } else if (X > axisX - thirdSpacer && X < axisX + thirdSpacer) {
-                selectionRect.setX(axisX - 5);
+                selectionStartX = axisX - 5;
                 return categories.get(i);
             }
         }
         return null;
+    }
+
+    private void resizeSelectionRect() {
+        rect.setX(selectionRect.getX());
+        rect.setY(selectionRect.getY());
+        rect.setWidth(selectionRect.getWidth());
+        rect.setHeight(selectionRect.getHeight());
     }
 
     private double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
@@ -699,10 +723,7 @@ public class ParallelCoordinatesChart extends Region {
             connectionCtx.stroke();
         });
         if (selectedItems.size() > 0) {
-            rect.setWidth(10);
-            rect.setHeight(selectionRect.getHeight());
-            rect.setX(selectionRect.getX());
-            rect.setY(selectionRect.getY());
+            resizeSelectionRect();
             rect.setVisible(true);
         } else {
             rect.setVisible(false);
