@@ -90,28 +90,29 @@ public class ParallelCoordinatesChart extends Region {
     private              List<ChartItem>                selectedItems;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
-    private              Map<String,List<DataObject>>   categoryMap;
+    private              Map<String, List<DataObject>>  categoryObjectMap;
+    private              Map<Key, ChartItem>            categoryObjectItemMap;
     private              ItemEventListener              itemListener;
     private              ListChangeListener<DataObject> objectListListener;
 
 
     // ******************** Constructors **************************************
     public ParallelCoordinatesChart() {
-        _axisColor         = Color.BLACK;
-        _headerColor       = Color.BLACK;
-        _unitColor         = Color.BLACK;
-        _tickLabelColor    = Color.BLACK;
-        _locale            = Locale.US;
-        _decimals          = 0;
-        _tickMarksVisible  = true;
-        _selectedColor     = Color.BLUE;
-        _unselectedColor   = Color.LIGHTGRAY;
-        formatString       = new StringBuilder("%.").append(_decimals).append("f").toString();
-        selectionStarted   = false;
-        selectedItems      = new ArrayList<>();
-        items              = FXCollections.observableArrayList();
-        itemListener       = e -> redraw();
-        objectListListener = c -> {
+        _axisColor            = Color.BLACK;
+        _headerColor          = Color.BLACK;
+        _unitColor            = Color.BLACK;
+        _tickLabelColor       = Color.BLACK;
+        _locale               = Locale.US;
+        _decimals             = 0;
+        _tickMarksVisible     = true;
+        _selectedColor        = Color.BLUE;
+        _unselectedColor      = Color.LIGHTGRAY;
+        formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
+        selectionStarted      = false;
+        selectedItems         = new ArrayList<>();
+        items                 = FXCollections.observableArrayList();
+        itemListener          = e -> redraw();
+        objectListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedObject -> addedObject.getProperties().values().forEach(item -> item.setOnItemEvent(itemListener)));
@@ -122,8 +123,9 @@ public class ParallelCoordinatesChart extends Region {
             prepareData();
             redraw();
         };
-        categories         = new ArrayList<>();
-        categoryMap        = new HashMap<>();
+        categories            = new ArrayList<>();
+        categoryObjectMap     = new HashMap<>();
+        categoryObjectItemMap = new HashMap<>();
 
         initGraphics();
         registerListeners();
@@ -388,30 +390,33 @@ public class ParallelCoordinatesChart extends Region {
 
     public List<String> getCategories() { return categories; }
 
-    public Map<String, List<DataObject>> getCategoryMap() { return categoryMap; }
+    public Map<String, List<DataObject>> getCategoryObjectMap() { return categoryObjectMap; }
 
     private double[] getMinMax(final String CATEGORY) {
-        double min = categoryMap.get(CATEGORY).stream().mapToDouble(obj -> obj.getProperties().get(CATEGORY).getValue()).min().getAsDouble();
-        double max = categoryMap.get(CATEGORY).stream().mapToDouble(obj -> obj.getProperties().get(CATEGORY).getValue()).max().getAsDouble();
+        double min = categoryObjectMap.get(CATEGORY).stream().mapToDouble(obj -> obj.getProperties().get(CATEGORY).getValue()).min().getAsDouble();
+        double max = categoryObjectMap.get(CATEGORY).stream().mapToDouble(obj -> obj.getProperties().get(CATEGORY).getValue()).max().getAsDouble();
         return new double[]{ min, max };
     }
 
     private void prepareData() {
         if (items.isEmpty()) { return; }
-        categoryMap.clear();
+        categoryObjectMap.clear();
         List<String> keys = new ArrayList<>(items.get(0).getProperties().keySet());
         if (keys.size() <= 1) { throw new RuntimeException("You need at least 2 categories in your DataObject"); }
 
-        keys.forEach(key -> categoryMap.put(key, new ArrayList<>()));
-        keys.forEach(key -> items.forEach(dataObject -> categoryMap.get(key).add(dataObject)));
-        keys.forEach(key -> sortCategory(key, categoryMap.get(key), Order.DESCENDING));
+        keys.forEach(key -> categoryObjectMap.put(key, new ArrayList<>()));
+        keys.forEach(key -> items.forEach(dataObject -> categoryObjectMap.get(key).add(dataObject)));
+        keys.forEach(key -> sortCategory(key, categoryObjectMap.get(key), Order.DESCENDING));
 
         categories.clear();
-        categories.addAll(categoryMap.keySet());
+        categories.addAll(categoryObjectMap.keySet());
     }
 
     private void shiftCategory(final String CATEGORY, final int INDEX) {
-        if (!categories.contains(CATEGORY) || INDEX == categories.indexOf(CATEGORY)) { return; }
+        if (!categories.contains(CATEGORY) ||
+            INDEX == categories.indexOf(CATEGORY) ||
+            INDEX < 0 ||
+            INDEX >= categories.size()) { return; }
         categories.remove(CATEGORY);
         categories.add(INDEX, CATEGORY);
     }
@@ -429,6 +434,11 @@ public class ParallelCoordinatesChart extends Region {
 
     
     // ******************** Drawing *******************************************
+    private void redraw() {
+        drawAxis();
+        drawConnections();
+    }
+
     private void drawAxis() {
         axisCtx.clearRect(0, 0, width, height);
         axisCtx.setTextBaseline(VPos.CENTER);
@@ -449,7 +459,7 @@ public class ParallelCoordinatesChart extends Region {
         for (int i = 0 ; i < noOfCategories ; i++) {
             Locale   locale           = getLocale();
             String   category         = categories.get(i);
-            String   unit             = categoryMap.get(category).get(0).getProperties().get(category).getUnit();
+            String   unit             = categoryObjectMap.get(category).get(0).getProperties().get(category).getUnit();
             double   axisX            = i * spacer + axisWidth * 0.5;
             double   axisY            = headerHeight;
             double[] minMax           = getMinMax(category);
@@ -564,42 +574,35 @@ public class ParallelCoordinatesChart extends Region {
 
             }
 
-            categoryMap.get(category).forEach(obj -> {
+            categoryObjectMap.get(category).forEach(obj -> {
                 ChartItem item  = obj.getProperties().get(category);
                 double    itemY = (item.getValue() - minValue) * stepSize;
                 item.setX(axisX);
                 item.setY(maxY - itemY);
+                Key key = new Key(category, obj);
+                categoryObjectItemMap.put(key, item);
             });
         }
     }
     
     private void drawConnections() {
         connectionCtx.clearRect(0, 0, width, height);
-
-        Map<DataObject, List<Double[]>> lines = new HashMap<>();
-        categories.forEach(category -> {
-            for (DataObject obj : categoryMap.get(category)) {
-                if (lines.keySet().contains(obj)) {
-                    lines.get(obj).add(new Double[] { obj.getProperties().get(category).getX(), obj.getProperties().get(category).getY() });
+        Color selectedColor   = getSelectedColor();
+        Color unselectedColor = getUnselectedColor();
+        items.forEach(obj -> {
+            Color objStroke = obj.getStroke();
+            connectionCtx.beginPath();
+            categories.forEach(category -> {
+                Key       key  = new Key(category, obj);
+                ChartItem item = categoryObjectItemMap.get(key);
+                if (selectedItems.size() > 0) {
+                    connectionCtx.setStroke(selectedItems.contains(item) ? selectedColor : unselectedColor);
                 } else {
-                    lines.put(obj, new ArrayList<>());
-                    lines.get(obj).add(new Double[] { obj.getProperties().get(category).getX(), obj.getProperties().get(category).getY() });
+                    connectionCtx.setStroke(objStroke);
                 }
-                lines.entrySet().forEach(e -> {
-                    if (selectedItems.size() > 0) {
-                        if (selectedItems.contains(e.getKey())) {
-                            connectionCtx.setStroke(getSelectedColor());
-                        } else {
-                            connectionCtx.setStroke(getUnselectedColor());
-                        }
-                    } else {
-                        connectionCtx.setStroke(e.getKey().getStroke());
-                    }
-                    connectionCtx.beginPath();
-                    for (Double[] xy : e.getValue()) { connectionCtx.lineTo(xy[0], xy[1]); }
-                    connectionCtx.stroke();
-                });
-            }
+                connectionCtx.lineTo(item.getX(), item.getY());
+            });
+            connectionCtx.stroke();
         });
     }
 
@@ -624,8 +627,31 @@ public class ParallelCoordinatesChart extends Region {
         }
     }
 
-    private void redraw() {
-        drawAxis();
-        drawConnections();
+
+    // ******************** InnerClasses **************************************
+    private class Key {
+        private String     category;
+        private DataObject dataObject;
+
+
+        // ******************** Constructors **********************************
+        public Key(final String CATEGORY, final DataObject DATA_OBJECT) {
+            category   = CATEGORY;
+            dataObject = DATA_OBJECT;
+        }
+
+
+        // ******************** Methods ***************************************
+        public String getCategory() { return category; }
+
+        public DataObject getDataObject() { return dataObject; }
+
+        @Override public boolean equals(final Object OBJ) {
+            if (!(OBJ instanceof Key)) { return false; }
+            Key ref = (Key) OBJ;
+            return category.equals(ref.getCategory()) && dataObject.equals(ref.getDataObject());
+        }
+
+        @Override public int hashCode() { return category.hashCode() ^ dataObject.hashCode(); }
     }
 }
