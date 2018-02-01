@@ -458,7 +458,11 @@ public class ParallelCoordinatesChart extends Region {
         double  thirdSpacer    = spacer / 3;
         for (int i = 0 ; i < noOfCategories ; i++) {
             double axisX = i * spacer + axisWidth * 0.5;
-            if (X > axisX - thirdSpacer && X < axisX + thirdSpacer) { return categories.get(i); }
+            if (i == 0 && X < axisX + thirdSpacer) {
+                return categories.get(i);
+            } else if (X > axisX - thirdSpacer && X < axisX + thirdSpacer) {
+                return categories.get(i);
+            }
         }
         return null;
     }
