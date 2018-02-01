@@ -113,6 +113,7 @@ public class ParallelCoordinatesChart extends Region {
     private              EventHandler<MouseEvent>       mouseHandler;
     private              Rectangle                      rect;
     private              Text                           dragText;
+    private              boolean                        wasDragged;
 
 
     // ******************** Constructors **************************************
@@ -146,6 +147,7 @@ public class ParallelCoordinatesChart extends Region {
         categories            = new ArrayList<>();
         categoryObjectMap     = new HashMap<>();
         categoryObjectItemMap = new HashMap<>();
+        wasDragged            = false;
         mouseHandler          = e -> handleMouseEvent(e);
 
         initGraphics();
@@ -558,16 +560,19 @@ public class ParallelCoordinatesChart extends Region {
                 resizeSelectionRect();
             } else {
                 rect.setVisible(false);
+                /*
                 selectionRect.setX(0);
                 selectionRect.setY(0);
                 selectionRect.setWidth(0);
                 selectionRect.setHeight(0);
                 resizeSelectionRect();
+                */
                 dragText.setVisible(true);
                 dragText.setText(selectedCategory);
                 dragText.setX(X - dragText.getLayoutBounds().getWidth() * 0.5);
                 dragText.setY(Y);
             }
+            wasDragged = false;
         } else if (MouseEvent.MOUSE_DRAGGED.equals(TYPE)) {
             if (rect.isVisible()) {
                 selectionRect.setHeight(Helper.clamp(selectionStartY, height - 0.5, Y) - selectionRect.getY());
@@ -577,17 +582,19 @@ public class ParallelCoordinatesChart extends Region {
                 dragText.setX(X - dragText.getLayoutBounds().getWidth() * 0.5);
                 dragText.setY(Y);
             }
+            wasDragged = true;
         } else if (MouseEvent.MOUSE_RELEASED.equals(TYPE)) {
-            if (dragText.isVisible()) {
+            if (dragText.isVisible() && wasDragged) {
                 dragText.setVisible(false);
                 String targetCategory = selectCategory(X, Y);
                 if (null != targetCategory) {
                     shiftCategory(dragText.getText(), categories.indexOf(targetCategory));
+                    selectionRect.setX(selectionStartX);
                     redraw();
                 }
-            } else if (rect.isVisible()) {
+            } else if (rect.isVisible() && wasDragged) {
                 selectionEndY = null == selectedCategory ? -1 : Helper.clamp(selectionStartY, height - 0.5, Y);
-                if (selectionStartY > HEADER_HEIGHT && selectionEndY != -1) {
+                if (selectionStartY > HEADER_HEIGHT && selectionEndY > -1) {
                     selectionRect.setWidth(10);
                     selectionRect.setY(selectionStartY);
                     selectionRect.setHeight(selectionEndY - selectionStartY);
@@ -599,7 +606,7 @@ public class ParallelCoordinatesChart extends Region {
                 selectedItems.clear();
                 drawConnections();
             }
-
+            wasDragged = false;
         }
     }
 
@@ -771,11 +778,9 @@ public class ParallelCoordinatesChart extends Region {
                 ChartItem item = categoryObjectItemMap.get(key);
                 if (selectedItems.size() > 0) {
                     connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
-
                     if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(0))) {
                         connectionCtx.fillText(obj.getName(), 10, item.getY());
                     }
-
                 } else {
                     connectionCtx.setStroke(objStroke);
                 }
