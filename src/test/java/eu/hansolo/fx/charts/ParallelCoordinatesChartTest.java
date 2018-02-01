@@ -62,6 +62,7 @@ public class ParallelCoordinatesChartTest extends Application {
         chart = ParallelCoordinatesChartBuilder.create()
                                                .items(smartRoadster, golf, passat, mclass, sls, nine11, veyron)
                                                .tickMarksVisible(false)
+                                               .selectionRectColor(Color.CRIMSON)
                                                .build();
     }
 

@@ -108,6 +108,11 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
         return (B)this;
     }
 
+    public final B selectionRectColor(final Color COLOR) {
+        properties.put("selectionRectColor", new SimpleObjectProperty<>(COLOR));
+        return (B) this;
+    }
+
     // General properties
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
@@ -247,6 +252,8 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
                 CONTROL.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("unselectedColor".equals(key)) {
                 CONTROL.setUnselectedColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("selectionRectColor".equals(key)) {
+                CONTROL.setSelectionRectColor(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
         return CONTROL;

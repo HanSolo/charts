@@ -20,6 +20,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataObject;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
@@ -85,10 +86,13 @@ public class ParallelCoordinatesChart extends Region {
     private              ObjectProperty<Color>          selectedColor;
     private              Color                          _unselectedColor;
     private              ObjectProperty<Color>          unselectedColor;
+    private              Color                          _selectionRectColor;
+    private              ObjectProperty<Color>          selectionRectColor;
     private              String                         formatString;
     private              String                         selectedCategory;
     private              double                         selectionStartY;
     private              double                         selectionEndY;
+    private              CtxBounds                      selectionRect;
     private              Map<String, ChartItem>         selectedItems;
     private              ObservableList<DataObject>     items;
     private              ArrayList<String>              categories;
@@ -109,8 +113,10 @@ public class ParallelCoordinatesChart extends Region {
         _tickMarksVisible     = true;
         _selectedColor        = Color.BLUE;
         _unselectedColor      = Color.LIGHTGRAY;
+        _selectionRectColor   = Color.BLUE;
         formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
         selectedItems         = new HashMap<>();
+        selectionRect         = new CtxBounds();
         items                 = FXCollections.observableArrayList();
         itemListener          = e -> redraw();
         objectListListener    = c -> {
@@ -172,6 +178,9 @@ public class ParallelCoordinatesChart extends Region {
                 final double Y = e.getY();
                 selectionEndY = null == selectedCategory ? -1 : Y;
                 if (selectionStartY != -1 && selectionEndY != -1) {
+                    selectionRect.setWidth(10);
+                    selectionRect.setY(selectionStartY);
+                    selectionRect.setHeight(selectionEndY - selectionStartY);
                     selectObjectsAtCategory(selectedCategory, selectionStartY, selectionEndY);
                 } else {
                     selectedItems.clear();
@@ -388,6 +397,27 @@ public class ParallelCoordinatesChart extends Region {
         }
         return unselectedColor;
     }
+
+    public Color getSelectionRectColor() { return null == selectionRectColor ? _selectionRectColor : selectionRectColor.get(); }
+    public void setSelectionRectColor(final Color COLOR) {
+        if (null == selectionRectColor) {
+            _selectionRectColor = COLOR;
+            redraw();
+        } else {
+            selectionRectColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> selectionRectColorProperty() {
+        if (null == selectionRectColor) {
+            selectionRectColor = new ObjectPropertyBase<Color>(_selectionRectColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "selectionRectColor"; }
+            };
+            _selectionRectColor = null;
+        }
+        return selectionRectColor;
+    }
     
     public List<DataObject> getItems() { return items; }
     public void setItems(final DataObject... ITEMS) { setItems(Arrays.asList(ITEMS)); }
@@ -459,8 +489,10 @@ public class ParallelCoordinatesChart extends Region {
         for (int i = 0 ; i < noOfCategories ; i++) {
             double axisX = i * spacer + axisWidth * 0.5;
             if (i == 0 && X < axisX + thirdSpacer) {
+                selectionRect.setX(axisX - 5);
                 return categories.get(i);
             } else if (X > axisX - thirdSpacer && X < axisX + thirdSpacer) {
+                selectionRect.setX(axisX - 5);
                 return categories.get(i);
             }
         }
@@ -650,6 +682,14 @@ public class ParallelCoordinatesChart extends Region {
             });
             connectionCtx.stroke();
         });
+        if (selectedItems.size() > 0) {
+            Color selectionRectColor = getSelectionRectColor();
+            connectionCtx.setStroke(Helper.getColorWithOpacity(selectionRectColor, 0.5));
+            connectionCtx.setFill(Helper.getColorWithOpacity(selectionRectColor, 0.25));
+            connectionCtx.fillRect(selectionRect.getX(), selectionRect.getY(), selectionRect.getWidth(), selectionRect.getHeight());
+            connectionCtx.strokeRect(selectionRect.getX(), selectionRect.getY(), selectionRect.getWidth(), selectionRect.getHeight());
+
+        }
     }
 
 
@@ -667,7 +707,9 @@ public class ParallelCoordinatesChart extends Region {
             connectionCanvas.setWidth(width);
             connectionCanvas.setHeight(height);
             connectionCanvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
-            
+
+            // This is just a workaround to avoid resizing the selectionRect
+            selectedItems.clear();
 
             redraw();
         }
