@@ -46,21 +46,21 @@ public class ParallelCoordinatesChartTest extends Application {
         Car smartRoadster = new Car("Smart Roadster Coupé","Smart", "Roadster");
         Car golf          = new Car("Golf GTI", "VW", "Golf");
         Car passat        = new Car("VW Passat", "VW", "Passat");
-        Car mclass        = new Car("Mercedes M 320", "Mercedes", "M");
-        Car sls           = new Car("Mercedes SLS", "Mercedes", "SLS");
-        Car nine11        = new Car("Porsche 911 Carrera 4", "Porsche", "911");
+        Car cls           = new Car("Mercedes CLS 6.3 AMG", "Mercedes", "CLS");
+        Car amggtr        = new Car("Mercedes AMG GTR", "Mercedes", "GTR");
+        Car gt2rs         = new Car("Porsche 911 Carrera 4", "Porsche", "911");
         Car veyron        = new Car("Bugatti Veyron", "Bugatti", "Veyron");
 
-        setParameters(smartRoadster, 3, 82, 11, 880, 4.0, Color.BLUE);
-        setParameters(golf, 4, 120, 9, 1200, 6.0, Color.RED);
-        setParameters(passat, 4, 140, 8, 1300, 6.5, Color.GREEN);
-        setParameters(mclass, 6, 185, 6.5, 1350, 9.5, Color.CYAN);
-        setParameters(sls, 8, 560, 2.9, 1150, 17, Color.LIME);
-        setParameters(nine11, 6, 346, 3.8, 1100, 13.0, Color.MAGENTA);
-        setParameters(veyron, 16, 1001, 2.5, 1500, 23.0, Color.PURPLE);
+        setParameters(smartRoadster, 3, 82, 10.9, 880, 5.1, Color.BLUE);
+        setParameters(golf, 4, 245, 6.3, 1382, 6.4, Color.RED);
+        setParameters(passat, 4, 240, 8, 1776, 6.5, Color.GREEN);
+        setParameters(cls, 8, 557, 4.3, 1865, 10.1, Color.CYAN);
+        setParameters(amggtr, 8, 585, 3.6, 1620, 11.4, Color.LIME);
+        setParameters(gt2rs, 6, 700, 2.87, 1470, 11.8, Color.MAGENTA);
+        setParameters(veyron, 16, 1001, 2.46, 1888, 23.1, Color.PURPLE);
 
         chart = ParallelCoordinatesChartBuilder.create()
-                                               .items(smartRoadster, golf, passat, mclass, sls, nine11, veyron)
+                                               .items(smartRoadster, golf, passat, cls, amggtr, gt2rs, veyron)
                                                .tickMarksVisible(false)
                                                .selectionRectColor(Color.CRIMSON)
                                                .build();

@@ -177,6 +177,8 @@ public class ParallelCoordinatesChart extends Region {
         connectionCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         connectionCanvas.setMouseTransparent(true);
         connectionCtx = connectionCanvas.getGraphicsContext2D();
+        connectionCtx.setTextAlign(TextAlignment.LEFT);
+        connectionCtx.setTextBaseline(VPos.CENTER);
 
         dragText = new Text("");
         dragText.setVisible(false);
@@ -757,6 +759,8 @@ public class ParallelCoordinatesChart extends Region {
     
     private void drawConnections() {
         connectionCtx.clearRect(0, 0, width, height);
+        connectionCtx.setFont(Font.font(Helper.clamp(8, 24, size * 0.015)));
+
         Color selectedColor   = getSelectedColor();
         Color unselectedColor = getUnselectedColor();
         items.forEach(obj -> {
@@ -767,6 +771,11 @@ public class ParallelCoordinatesChart extends Region {
                 ChartItem item = categoryObjectItemMap.get(key);
                 if (selectedItems.size() > 0) {
                     connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
+
+                    if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(0))) {
+                        connectionCtx.fillText(obj.getName(), 10, item.getY());
+                    }
+
                 } else {
                     connectionCtx.setStroke(objStroke);
                 }
