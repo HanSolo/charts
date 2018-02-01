@@ -44,6 +44,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
@@ -111,6 +112,7 @@ public class ParallelCoordinatesChart extends Region {
     private              ListChangeListener<DataObject> objectListListener;
     private              EventHandler<MouseEvent>       mouseHandler;
     private              Rectangle                      rect;
+    private              Text                           dragText;
 
 
     // ******************** Constructors **************************************
@@ -176,7 +178,11 @@ public class ParallelCoordinatesChart extends Region {
         connectionCanvas.setMouseTransparent(true);
         connectionCtx    = connectionCanvas.getGraphicsContext2D();
 
-        getChildren().setAll(axisCanvas, rect, connectionCanvas);
+        dragText = new Text("");
+        dragText.setFill(Helper.getColorWithOpacity(getHeaderColor(), 0.25));
+
+
+        getChildren().setAll(axisCanvas, rect, connectionCanvas, dragText);
     }
 
     private void registerListeners() {
@@ -535,7 +541,7 @@ public class ParallelCoordinatesChart extends Region {
         if (MouseEvent.MOUSE_PRESSED.equals(TYPE)) {
             selectedCategory = selectCategory(X, Y);
             selectionStartY  = null == selectedCategory ? -1 : Y;
-            if (selectionStartY > -1) {
+            if (selectionStartY >= HEADER_HEIGHT) {
                 selectionRect.setX(selectionStartX);
                 selectionRect.setY(Y);
                 selectionRect.setWidth(0);
@@ -544,18 +550,25 @@ public class ParallelCoordinatesChart extends Region {
                 resizeSelectionRect();
             } else {
                 rect.setVisible(false);
+                selectionRect.setX(0);
+                selectionRect.setY(0);
+                selectionRect.setWidth(0);
+                selectionRect.setHeight(0);
+                resizeSelectionRect();
             }
         } else if (MouseEvent.MOUSE_DRAGGED.equals(TYPE)) {
-            selectionRect.setHeight(Y - selectionRect.getY());
-            selectionRect.setWidth(10);
-            resizeSelectionRect();
+            if (rect.isVisible()) {
+                selectionRect.setHeight(Helper.clamp(selectionStartY, height - 0.5, Y) - selectionRect.getY());
+                selectionRect.setWidth(10);
+                resizeSelectionRect();
+            }
         } else if (MouseEvent.MOUSE_RELEASED.equals(TYPE)) {
             if (selectionStartY == -1) {
                 selectedItems.clear();
                 drawConnections();
             } else {
-                selectionEndY = null == selectedCategory ? -1 : Y;
-                if (selectionStartY != -1 && selectionEndY != -1) {
+                selectionEndY = null == selectedCategory ? -1 : Helper.clamp(selectionStartY, height - 0.5, Y);
+                if (selectionStartY > HEADER_HEIGHT && selectionEndY != -1) {
                     selectionRect.setWidth(10);
                     selectionRect.setY(selectionStartY);
                     selectionRect.setHeight(selectionEndY - selectionStartY);
@@ -579,10 +592,10 @@ public class ParallelCoordinatesChart extends Region {
         axisCtx.setTextBaseline(VPos.CENTER);
 
         int     noOfCategories   = categories.size();
-        double  axisHeight       = height - HEADER_HEIGHT - 0.5;
         double  availableWidth   = width - AXIS_WIDTH;
+        double  availableHeight  = height - HEADER_HEIGHT - 0.5;
+        double  axisHeight       = height - HEADER_HEIGHT - 0.5;
         double  halfAxisWidth    = AXIS_WIDTH * 0.5;
-        double  availableHeight  = height - HEADER_HEIGHT;
         double  spacer           = availableWidth / (noOfCategories - 1);
         double  headerFontSize   = size * 0.025;
         double  unitFontSize     = size * 0.015;
@@ -680,10 +693,7 @@ public class ParallelCoordinatesChart extends Region {
                                Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                         // Draw medium tick mark
                         axisCtx.strokeLine(axisX - halfMediumTickLength, innerPointY, axisX + halfMediumTickLength, outerPointY);
-                    } /*else if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
-                    // Draw minor tick mark
-                    axisCtx.strokeLine(innerPointX + 2, innerPointY, outerPointX - 2, outerPointY);
-                }*/
+                    }
 
                     counterBD = counterBD.add(minorTickSpaceBD);
                     counter = counterBD.doubleValue();
