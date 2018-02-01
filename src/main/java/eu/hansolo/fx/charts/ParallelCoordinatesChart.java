@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @DefaultProperty("children")
@@ -157,8 +158,11 @@ public class ParallelCoordinatesChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(objectListListener);
-        axisCanvas.setOnMouseClicked(e -> {
-
+        axisCanvas.setOnMousePressed(e -> {
+            final double X = e.getX();
+            final double Y = e.getY();
+            String selectedCategory = selectCategory(X, Y);
+            if (null != selectedCategory) { System.out.println(selectedCategory); }
         });
     }
 
@@ -421,6 +425,17 @@ public class ParallelCoordinatesChart extends Region {
         categories.add(INDEX, CATEGORY);
     }
 
+    private void selectObjectsAtCategory(final String CATEGORY, final double MIN_Y, final double MAX_Y) {
+        selectedItems.clear();
+        categoryObjectItemMap.entrySet()
+                             .stream()
+                             .filter(entry -> entry.getKey().getCategory().equals(CATEGORY))
+                             .filter(entry -> entry.getValue().getY() > MIN_Y)
+                             .filter(entry -> entry.getValue().getY() < MAX_Y)
+                             .forEach(entry -> selectedItems.add(entry.getValue()));
+        drawConnections();
+    }
+
     private double[] calcAutoScale(final double MIN_VALUE, final double MAX_VALUE) {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;
@@ -430,6 +445,18 @@ public class ParallelCoordinatesChart extends Region {
         double niceMinValue      = (Math.floor(MIN_VALUE / majorTickSpace) * majorTickSpace);
         double niceMaxValue      = (Math.ceil(MAX_VALUE / majorTickSpace) * majorTickSpace);
         return new double[] { niceMinValue, niceMaxValue, minorTickSpace, majorTickSpace };
+    }
+
+    private String selectCategory(final double X, final double Y) {
+        int     noOfCategories = categories.size();
+        double  axisWidth      = 10;
+        double  availableWidth = width - axisWidth;
+        double  spacer         = availableWidth / (noOfCategories - 1);
+        for (int i = 0 ; i < noOfCategories ; i++) {
+            double axisX = i * spacer + axisWidth * 0.5;
+            if (X > axisX - 10 && X < axisX + 10) { return categories.get(i); }
+        }
+        return null;
     }
 
     
