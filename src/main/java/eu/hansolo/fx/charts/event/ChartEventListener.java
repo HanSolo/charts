@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * Copyright (c) 2018 by Gerrit Grunwald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts;
+package eu.hansolo.fx.charts.event;
 
-public enum ChartType {
-    SCATTER, LINE, SMOOTH_LINE, AREA, SMOOTH_AREA, BAR, BUBBLE, DONUT, RADAR_POLYGON, SMOOTH_RADAR_POLYGON, RADAR_SECTOR,
-    POLAR, SMOOTH_POLAR, HORIZON, SMOOTHED_HORIZON, MATRIX_HEATMAP, LINE_DELTA, SMOOTH_LINE_DELTA, NESTED_BAR, PARALLEL_COORDINATES
+@FunctionalInterface
+public interface ChartEventListener {
+    void onChartEvent(final ChartEvent EVENT);
 }

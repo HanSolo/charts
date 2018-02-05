@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * Copyright (c) 2018 by Gerrit Grunwald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,16 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.data.Item;
-
-
-public class ItemEvent<T extends Item> {
+public class ChartEvent {
     private final EventType TYPE;
-    private final T         ITEM;
 
 
     // ******************** Constructors **************************************
-    public ItemEvent(final EventType TYPE) {
-        this(null, TYPE);
-    }
-    public ItemEvent(final T ITEM) {
-        this(ITEM, EventType.UPDATE);
-    }
-    public ItemEvent(final T ITEM, final EventType TYPE) {
-        this.ITEM = ITEM;
+    public ChartEvent(final EventType TYPE) {
         this.TYPE = TYPE;
     }
 
 
     // ******************** Methods *******************************************
-    public T getItem() { return ITEM; }
-
-    public EventType getEventType() { return TYPE; }
+    public EventType getTYPE() { return TYPE; }
 }

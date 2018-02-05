@@ -64,6 +64,8 @@ public class ParallelCoordinatesChartTest extends Application {
                                                .tickMarksVisible(true)
                                                .selectionRectColor(Color.CRIMSON)
                                                .build();
+
+        chart.setOnChartEvent(e -> chart.getSelectedObjects().forEach(item -> System.out.println(item.getName())));
     }
 
     @Override public void start(Stage stage) {

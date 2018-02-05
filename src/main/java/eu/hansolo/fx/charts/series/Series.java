@@ -40,6 +40,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -140,6 +141,7 @@ public abstract class Series<T extends Item> {
 
     // ******************** Methods *******************************************
     public ObservableList<T> getItems() { return items; }
+    public void setItems(final Collection<T> ITEMS) { items.setAll(ITEMS); }
     public void setItems(final T... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<T> ITEMS) { items.setAll(ITEMS); }
 
