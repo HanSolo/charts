@@ -21,7 +21,6 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataObject;
 import eu.hansolo.fx.charts.event.ChartEvent;
 import eu.hansolo.fx.charts.event.ChartEventListener;
-import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -104,6 +103,8 @@ public class ParallelCoordinatesChart extends Region {
     private              ObjectProperty<Color>                    unselectedColor;
     private              Color                                    _selectionRectColor;
     private              ObjectProperty<Color>                    selectionRectColor;
+    private              boolean                                  _smoothConnections;
+    private              BooleanProperty                          smoothConnections;
     private              String                                   formatString;
     private              String                                   selectedCategory;
     private              String                                   selectionRectCategory;
@@ -138,6 +139,7 @@ public class ParallelCoordinatesChart extends Region {
         _selectedColor        = Color.BLUE;
         _unselectedColor      = Color.LIGHTGRAY;
         _selectionRectColor   = Color.BLUE;
+        _smoothConnections    = false;
         selectionRectCategory = "";
         formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
         selectedItems         = new HashMap<>();
@@ -457,7 +459,26 @@ public class ParallelCoordinatesChart extends Region {
         }
         return selectionRectColor;
     }
-    
+
+    public boolean getSmoothConnections() { return null == smoothConnections ? _smoothConnections : smoothConnections.get(); }
+    public void setSmoothConnections(final boolean SMOOTH) {
+        if (null == smoothConnections) {
+            _smoothConnections = SMOOTH;
+            redraw();
+        } else {
+            smoothConnections.set(SMOOTH);
+        }
+    }
+    public BooleanProperty smoothConnectionsProperty() {
+        if (null == smoothConnections) {
+            smoothConnections = new BooleanPropertyBase(_smoothConnections) {
+                @Override public Object getBean() { return ParallelCoordinatesChart.this; }
+                @Override public String getName() { return "smoothConnections"; }
+            };
+        }
+        return smoothConnections;
+    }
+
     public List<DataObject> getItems() { return items; }
     public void setItems(final DataObject... ITEMS) { setItems(Arrays.asList(ITEMS)); }
     public void setItems(final List<DataObject> ITEMS) {
@@ -527,7 +548,11 @@ public class ParallelCoordinatesChart extends Region {
         }));
         if (!selectedObjects.isEmpty()) { fireChartEvent(SELECTION_EVENT); }
 
-        drawConnections();
+        if (getSmoothConnections()) {
+            drawSmoothConnections();
+        } else {
+            drawConnections();
+        }
     }
 
     private String selectCategory(final double X, final double Y) {
@@ -640,7 +665,11 @@ public class ParallelCoordinatesChart extends Region {
                 }
             } else {
                 selectedItems.clear();
-                drawConnections();
+                if (getSmoothConnections()) {
+                    drawSmoothConnections();
+                } else {
+                    drawConnections();
+                }
             }
             wasDragged = false;
         }
@@ -662,7 +691,11 @@ public class ParallelCoordinatesChart extends Region {
     // ******************** Drawing *******************************************
     private void redraw() {
         drawAxis();
-        drawConnections();
+        if (getSmoothConnections()) {
+            drawSmoothConnections();
+        } else {
+            drawConnections();
+        }
     }
 
     private void drawAxis() {
@@ -836,6 +869,50 @@ public class ParallelCoordinatesChart extends Region {
             });
             connectionCtx.stroke();
         });
+        if (selectedItems.size() > 0) {
+            resizeSelectionRect();
+            rect.setVisible(true);
+        } else {
+            rect.setVisible(false);
+        }
+    }
+
+    private void drawSmoothConnections() {
+        int     noOfCategories = categories.size();
+        double  availableWidth = width - AXIS_WIDTH;
+        double  spacer         = availableWidth / (noOfCategories - 1);
+
+        connectionCtx.clearRect(0, 0, width, height);
+        connectionCtx.setFont(Font.font(Helper.clamp(8, 24, size * 0.015)));
+
+        Color selectedColor   = getSelectedColor();
+        Color unselectedColor = getUnselectedColor();
+        for (DataObject obj : items) {
+            Color     objStroke     = obj.getStroke();
+            String    firstCategory = categories.get(0);
+            Key       firstKey      = new Key(firstCategory, obj);
+            ChartItem firstItem     = categoryObjectItemMap.get(firstKey);
+            connectionCtx.beginPath();
+            connectionCtx.moveTo(firstItem.getX(), firstItem.getY());
+            for (int i = 1 ; i < noOfCategories ; i++) {
+                String    lastCategory = categories.get(i - 1);
+                String    category     = categories.get(i);
+                Key       key          = new Key(category, obj);
+                Key       lastKey      = new Key(lastCategory, obj);
+                ChartItem item         = categoryObjectItemMap.get(key);
+                ChartItem lastItem     = categoryObjectItemMap.get(lastKey);
+                if (selectedItems.size() > 0) {
+                    connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
+                    if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(1))) {
+                        connectionCtx.fillText(obj.getName(), 10, lastItem.getY());
+                    }
+                } else {
+                    connectionCtx.setStroke(objStroke);
+                }
+                connectionCtx.bezierCurveTo(lastItem.getX() + spacer * 0.25, lastItem.getY(),item.getX() - spacer * 0.25, item.getY(), item.getX(), item.getY());
+            }
+            connectionCtx.stroke();
+        }
         if (selectedItems.size() > 0) {
             resizeSelectionRect();
             rect.setVisible(true);

@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import eu.hansolo.fx.charts.data.DataObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -111,6 +112,11 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
     public final B selectionRectColor(final Color COLOR) {
         properties.put("selectionRectColor", new SimpleObjectProperty<>(COLOR));
         return (B) this;
+    }
+
+    public final B smoothConnections(final boolean SMOOTH) {
+        properties.put("smoothConnections", new SimpleBooleanProperty(SMOOTH));
+        return (B)this;
     }
 
     // General properties
@@ -254,6 +260,8 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
                 CONTROL.setUnselectedColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("selectionRectColor".equals(key)) {
                 CONTROL.setSelectionRectColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("smoothConnections".equals(key)) {
+                CONTROL.setSmoothConnections(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
