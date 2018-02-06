@@ -866,8 +866,8 @@ public class ParallelCoordinatesChart extends Region {
 
                 if (selectedItems.size() > 0) {
                     connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
-                    if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(0))) {
-                        connectionCtx.fillText(obj.getName(), 10, item.getY());
+                    if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(1))) {
+                        connectionCtx.fillText(obj.getName(), 10, lastY);
                     } } else {
                     connectionCtx.setStroke(objStroke);
                 }
