@@ -820,21 +820,29 @@ public class ParallelCoordinatesChart extends Region {
         Color unselectedColor = getUnselectedColor();
         items.forEach(obj -> {
             Color objStroke = obj.getStroke();
-            connectionCtx.beginPath();
-            categories.forEach(category -> {
-                Key       key  = new Key(category, obj);
-                ChartItem item = categoryObjectItemMap.get(key);
+            // Grab the first point
+            int nCat = categories.size();
+            Key       key  = new Key(categories.get(0), obj);
+            ChartItem item = categoryObjectItemMap.get(key);
+            double xPrev = item.getX();
+            double yPrev = item.getY();
+            // Loop through the remaining points
+            for (int iCat = 1; iCat<nCat; iCat++) {
+                String category = categories.get(iCat);
+                key = new Key(category, obj);
+                item = categoryObjectItemMap.get(key);
+
                 if (selectedItems.size() > 0) {
                     connectionCtx.setStroke(selectedItems.keySet().contains(obj.getName()) ? selectedColor : unselectedColor);
                     if (selectedItems.keySet().contains(obj.getName()) && category.equals(categories.get(0))) {
                         connectionCtx.fillText(obj.getName(), 10, item.getY());
-                    }
-                } else {
+                    } } else {
                     connectionCtx.setStroke(objStroke);
                 }
-                connectionCtx.lineTo(item.getX(), item.getY());
-            });
-            connectionCtx.stroke();
+                connectionCtx.strokeLine(xPrev, yPrev, item.getX(), item.getY());
+                xPrev = item.getX();
+                yPrev = item.getY();
+            }
         });
         if (selectedItems.size() > 0) {
             resizeSelectionRect();
