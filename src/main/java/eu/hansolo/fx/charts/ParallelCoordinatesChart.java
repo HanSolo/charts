@@ -849,20 +849,19 @@ public class ParallelCoordinatesChart extends Region {
         connectionCtx.clearRect(0, 0, width, height);
         connectionCtx.setFont(Font.font(Helper.clamp(8, 24, size * 0.015)));
 
+        int   noOfCategories  = categories.size();
         Color selectedColor   = getSelectedColor();
         Color unselectedColor = getUnselectedColor();
         items.forEach(obj -> {
             Color objStroke = obj.getStroke();
-            // Grab the first point
-            int nCat = categories.size();
-            Key       key  = new Key(categories.get(0), obj);
-            ChartItem item = categoryObjectItemMap.get(key);
-            double xPrev = item.getX();
-            double yPrev = item.getY();
+            Key       key   = new Key(categories.get(0), obj);
+            ChartItem item  = categoryObjectItemMap.get(key); // Grab the first point
+            double    lastX = item.getX();
+            double    lastY = item.getY();
             // Loop through the remaining points
-            for (int iCat = 1; iCat<nCat; iCat++) {
-                String category = categories.get(iCat);
-                key = new Key(category, obj);
+            for (int i = 1 ; i < noOfCategories ; i++) {
+                String category = categories.get(i);
+                key  = new Key(category, obj);
                 item = categoryObjectItemMap.get(key);
 
                 if (selectedItems.size() > 0) {
@@ -872,9 +871,9 @@ public class ParallelCoordinatesChart extends Region {
                     } } else {
                     connectionCtx.setStroke(objStroke);
                 }
-                connectionCtx.strokeLine(xPrev, yPrev, item.getX(), item.getY());
-                xPrev = item.getX();
-                yPrev = item.getY();
+                connectionCtx.strokeLine(lastX, lastY, item.getX(), item.getY());
+                lastX = item.getX();
+                lastY = item.getY();
             }
         });
         if (selectedItems.size() > 0) {
