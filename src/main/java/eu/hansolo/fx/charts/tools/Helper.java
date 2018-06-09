@@ -16,18 +16,22 @@
 
 package eu.hansolo.fx.charts.tools;
 
+import eu.hansolo.fx.charts.Axis;
+import eu.hansolo.fx.charts.AxisBuilder;
+import eu.hansolo.fx.charts.Position;
 import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.XYItem;
 import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -930,5 +934,90 @@ public class Helper {
         CTX.setFill(TEXT_FILL);
         CTX.fillText(TEXT, X, Y);
         CTX.restore();
+    }
+
+    public static final Axis createLeftAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+    }
+    public static final Axis createLeftAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+    }
+
+    public static final Axis createCenterYAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+    }
+    public static final Axis createCenterYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+    }
+
+    public static final Axis createRightAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+    }
+    public static final Axis createRightAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+    }
+
+    public static final Axis createTopAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+    }
+    public static final Axis createTopAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+    }
+
+    public static final Axis createCenterXAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+    }
+    public static final Axis createCenterXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+    }
+
+    public static final Axis createBottomAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+    }
+    public static final Axis createBottomAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+    }
+
+    public static final Axis createAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH, final Orientation ORIENTATION, final Position POSITION) {
+        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, ORIENTATION, POSITION);
+    }
+    public static final Axis createAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH, final double ANCHOR, final Orientation ORIENTATION, final Position POSITION) {
+        Axis axis = AxisBuilder.create(ORIENTATION, POSITION)
+                               .minValue(MIN)
+                               .maxValue(MAX)
+                               .autoScale(AUTO_SCALE)
+                               .build();
+
+        if (Orientation.HORIZONTAL == ORIENTATION) {
+            axis.setPrefHeight(AXIS_WIDTH);
+        } else {
+            axis.setPrefWidth(AXIS_WIDTH);
+        }
+
+        switch(POSITION) {
+            case LEFT:
+                AnchorPane.setTopAnchor(axis, 0d);
+                AnchorPane.setBottomAnchor(axis, ANCHOR);
+                AnchorPane.setLeftAnchor(axis, 0d);
+                break;
+            case CENTER:
+                break;
+            case RIGHT:
+                AnchorPane.setRightAnchor(axis, 0d);
+                AnchorPane.setTopAnchor(axis, 0d);
+                AnchorPane.setBottomAnchor(axis, ANCHOR);
+                break;
+            case TOP:
+                AnchorPane.setTopAnchor(axis, ANCHOR);
+                AnchorPane.setLeftAnchor(axis, ANCHOR);
+                AnchorPane.setRightAnchor(axis, ANCHOR);
+                break;
+            case BOTTOM:
+                AnchorPane.setBottomAnchor(axis, 0d);
+                AnchorPane.setLeftAnchor(axis, ANCHOR);
+                AnchorPane.setRightAnchor(axis, ANCHOR);
+                break;
+        }
+        return axis;
     }
 }
