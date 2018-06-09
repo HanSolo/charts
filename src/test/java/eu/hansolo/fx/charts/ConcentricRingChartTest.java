@@ -70,7 +70,7 @@ public class ConcentricRingChartTest extends Application {
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
-                if (now > lastTimerCall + 10_000_000_000l) {
+                if (now > lastTimerCall + 1_000_000_000l) {
                     chart1Data1.setValue(RND.nextDouble() * 20);
                     chart1Data2.setValue(RND.nextDouble() * 20);
                     chart1Data3.setValue(RND.nextDouble() * 20);
