@@ -18,6 +18,8 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYItem;
 import javafx.beans.DefaultProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.collections.ObservableList;
@@ -69,6 +71,7 @@ public class XYChart<T extends XYItem> extends Region {
     private              String         _subTitle;
     private              StringProperty subTitle;
     private              AnchorPane     pane;
+    private              BooleanBinding showing;
 
 
     // ******************** Constructors **************************************
@@ -115,6 +118,21 @@ public class XYChart<T extends XYItem> extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
+        if (null != getScene()) {
+            setupBinding();
+        } else {
+            sceneProperty().addListener((o1, ov1, nv1) -> {
+                if (null == nv1) { return; }
+                if (null != getScene().getWindow()) {
+                    setupBinding();
+                } else {
+                    sceneProperty().get().windowProperty().addListener((o2, ov2, nv2) -> {
+                        if (null == nv2) { return; }
+                        setupBinding();
+                    });
+                }
+            });
+        }
     }
 
 
@@ -246,6 +264,9 @@ public class XYChart<T extends XYItem> extends Region {
         } else if (hasTopXAxis) {
             xyPane.setLowerBoundX(xAxisT.getMinValue());
             xyPane.setUpperBoundX(xAxisT.getMaxValue());
+        } else if (hasCenterXAxis) {
+            xyPane.setLowerBoundX(xAxisC.getMinValue());
+            xyPane.setUpperBoundX(xAxisC.getMaxValue());
         }
 
         if (hasLeftYAxis) {
@@ -254,6 +275,9 @@ public class XYChart<T extends XYItem> extends Region {
         } else if (hasRightYAxis) {
             xyPane.setLowerBoundY(yAxisR.getMinValue());
             xyPane.setUpperBoundY(yAxisR.getMaxValue());
+        } else if (hasCenterYAxis) {
+            xyPane.setLowerBoundY(yAxisC.getMinValue());
+            xyPane.setUpperBoundY(yAxisC.getMaxValue());
         }
     }
 
@@ -273,8 +297,47 @@ public class XYChart<T extends XYItem> extends Region {
                 AnchorPane.setBottomAnchor(xyPane, hasBottomXAxis ? bottomAxisHeight : 0d);
             }
         });
-        if (hasCenterYAxis) { AnchorPane.setLeftAnchor(yAxisC, yAxisC.getZeroPosition()); }
-        if (hasCenterXAxis) { AnchorPane.setTopAnchor(xAxisC, xAxisC.getZeroPosition()); }
+    }
+
+    private void adjustCenterAxisAnchors() {
+        if (hasCenterYAxis) {
+            if (hasBottomXAxis) {
+                if (hasLeftYAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisB.getZeroPosition() + yAxisL.getWidth());
+                } else if (hasRightYAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisB.getZeroPosition());
+                } else if (hasCenterXAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisC.getZeroPosition());
+                }
+            } else {
+                if (hasLeftYAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisT.getZeroPosition() + yAxisL.getWidth());
+                } else if (hasRightYAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisT.getZeroPosition());
+                }  else if (hasCenterXAxis) {
+                    AnchorPane.setLeftAnchor(yAxisC, xAxisC.getZeroPosition());
+                }
+            }
+        }
+        if (hasCenterXAxis) {
+            if (hasLeftYAxis) {
+                if (hasTopXAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisL.getZeroPosition() + xAxisT.getHeight());
+                } else if (hasBottomXAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisL.getZeroPosition());
+                } else if (hasCenterYAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisC.getZeroPosition());
+                }
+            } else {
+                if (hasTopXAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisR.getZeroPosition() + xAxisT.getHeight());
+                } else if (hasBottomXAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisR.getZeroPosition());
+                } else if (hasCenterYAxis) {
+                    AnchorPane.setTopAnchor(xAxisC, yAxisC.getZeroPosition());
+                }
+            }
+        }
     }
 
     private void adjustGridAnchors() {
@@ -283,6 +346,11 @@ public class XYChart<T extends XYItem> extends Region {
         AnchorPane.setRightAnchor(grid, hasRightYAxis ? rightAxisWidth : 0d);
         AnchorPane.setTopAnchor(grid, hasTopXAxis ? topAxisHeight : 0d);
         AnchorPane.setBottomAnchor(grid, hasBottomXAxis ? bottomAxisHeight : 0d);
+    }
+
+    private void setupBinding() {
+        showing = Bindings.selectBoolean(sceneProperty(), "window", "showing");
+        showing.addListener((o, ov, nv) -> { if (nv) { adjustCenterAxisAnchors(); } });
     }
 
 
@@ -295,6 +363,8 @@ public class XYChart<T extends XYItem> extends Region {
             pane.setMaxSize(width, height);
             pane.setPrefSize(width, height);
             pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
+
+            adjustCenterAxisAnchors();
         }
     }
 }

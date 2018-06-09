@@ -24,13 +24,13 @@ import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.XYSeriesBuilder;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -60,11 +60,11 @@ public class ChartTest extends Application {
     private XYSeries<XYChartItem> xySeries2;
     private XYSeries<XYChartItem> xySeries3;
     private XYSeries<XYChartItem> xySeries4;
+    private XYSeries<XYChartItem> xySeries5;
 
     private XYChart<XYChartItem> lineChart;
     private Axis                 lineChartXAxisBottom;
     private Axis                 lineChartYAxisLeft;
-    private Axis                 lineChartYAxisCenter;
     private Axis                 lineChartYAxisRight;
 
     private XYChart<XYChartItem> areaChart;
@@ -81,7 +81,9 @@ public class ChartTest extends Application {
 
     private XYChart<XYChartItem> scatterChart;
     private Axis                 scatterChartXAxisBottom;
+    private Axis                 scatterChartXAxisCenter;
     private Axis                 scatterChartYAxisLeft;
+    private Axis                 scatterChartYAxisCenter;
 
     private YSeries<YChartItem> ySeries;
     private YPane<YChartItem>   donutChart;
@@ -99,6 +101,7 @@ public class ChartTest extends Application {
         List<XYChartItem>  xyItems1 = new ArrayList<>(20);
         List<XYChartItem>  xyItems2 = new ArrayList<>(20);
         List<XYChartItem>  xyItems3 = new ArrayList<>(20);
+        List<XYChartItem>  xyItems4 = new ArrayList<>(40);
         List<YChartItem>   yItem   = new ArrayList<>(20);
         List<XYZChartItem> xyzItem = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
@@ -109,6 +112,9 @@ public class ChartTest extends Application {
         for (int i = 0 ; i < 20 ; i++) {
             yItem.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
             xyzItem.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
+        }
+        for (int i = -20 ; i < 20 ; i++) {
+            xyItems4.add(new XYChartItem(i, RND.nextDouble() * 40 - 20, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         xySeries1 = XYSeriesBuilder.create()
@@ -140,6 +146,16 @@ public class ChartTest extends Application {
         xySeries3.setSymbolStroke(Color.TRANSPARENT);
         xySeries4.setSymbolStroke(Color.TRANSPARENT);
 
+        xySeries5 = XYSeriesBuilder.create()
+                                   .items(xyItems4)
+                                   .chartType(ChartType.SCATTER)
+                                   .fill(Color.TRANSPARENT)
+                                   .stroke(Color.MAGENTA)
+                                   .symbolFill(Color.RED)
+                                   .symbolStroke(Color.TRANSPARENT)
+                                   .symbolsVisible(true)
+                                   .build();
+
 
         ySeries    = new YSeries(yItem, ChartType.DONUT);
         donutChart = new YPane(ySeries);
@@ -152,24 +168,22 @@ public class ChartTest extends Application {
         double    tempFahrenheitMin = tempConverter.convert(-10, FAHRENHEIT);
         double    tempFahrenheitMax = tempConverter.convert(20, FAHRENHEIT);
 
-        lineChartXAxisBottom = createBottomXAxis(-10, NO_OF_X_VALUES, true);
-        lineChartYAxisLeft   = createLeftYAxis(-10, 20, true);
-        lineChartYAxisCenter = createCenterYAxis(-10, 20, true);
-        lineChartYAxisRight  = createRightYAxis(tempFahrenheitMin, tempFahrenheitMax, false);
+        lineChartXAxisBottom = Helper.createBottomAxis(-10, NO_OF_X_VALUES, true, AXIS_WIDTH);
+        lineChartYAxisLeft   = Helper.createLeftAxis(-10, 20, true, AXIS_WIDTH);
+        lineChartYAxisRight  = Helper.createRightAxis(tempFahrenheitMin, tempFahrenheitMax, false, AXIS_WIDTH);
 
         lineChartXAxisBottom.setZeroColor(Color.BLACK);
         lineChartYAxisLeft.setZeroColor(Color.BLACK);
-        lineChartYAxisCenter.setAxisColor(Color.MAGENTA);
 
-        lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1), lineChartYAxisLeft, lineChartYAxisCenter, lineChartYAxisRight, lineChartXAxisBottom);
+        lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1), lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
 
         Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
         lineChart.setGrid(grid1);
 
 
         // AreaChart
-        areaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
-        areaChartYAxisLeft   = createLeftYAxis(0, 20, true);
+        areaChartXAxisBottom = Helper.createBottomAxis(0, NO_OF_X_VALUES, true, AXIS_WIDTH);
+        areaChartYAxisLeft   = Helper.createLeftAxis(0, 20, true, AXIS_WIDTH);
         areaChart            = new XYChart<>(new XYPane(xySeries2), areaChartXAxisBottom, areaChartYAxisLeft);
 
         xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 0.75)), new Stop(1.0, Color.rgb(0, 255, 255, 0.25))));
@@ -177,16 +191,16 @@ public class ChartTest extends Application {
         areaChart.getXYPane().setChartBackground(Color.rgb(50, 50, 50, 0.5));
 
         // SmoothLineChart
-        smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
-        smoothLineChartYAxisLeft   = createLeftYAxis(0, 20, true);
+        smoothLineChartXAxisBottom = Helper.createBottomAxis(0, NO_OF_X_VALUES, true, AXIS_WIDTH);
+        smoothLineChartYAxisLeft   = Helper.createLeftAxis(0, 20, true, AXIS_WIDTH);
         smoothLineChart            = new XYChart<>(new XYPane(xySeries3), smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
 
         Grid grid2 = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
         smoothLineChart.setGrid(grid2);
 
         // SmoothAreaChart
-        smoothAreaChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
-        smoothAreaChartYAxisLeft   = createLeftYAxis(0, 20, true);
+        smoothAreaChartXAxisBottom = Helper.createBottomAxis(0, NO_OF_X_VALUES, true, AXIS_WIDTH);
+        smoothAreaChartYAxisLeft   = Helper.createLeftAxis(0, 20, true, AXIS_WIDTH);
         smoothAreaChart            = new XYChart<>(new XYPane(xySeries4), smoothAreaChartYAxisLeft, smoothAreaChartXAxisBottom);
 
         xySeries4.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
@@ -195,10 +209,14 @@ public class ChartTest extends Application {
 
 
         // ScatterChart
-        scatterChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
-        scatterChartYAxisLeft   = createLeftYAxis(0, 20, true);
-        scatterChart            = new XYChart<>(new XYPane(xySeries1),
-                                                scatterChartXAxisBottom, scatterChartYAxisLeft);
+        scatterChartXAxisBottom = Helper.createAxis(-20, 20, true, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+        scatterChartXAxisCenter = Helper.createCenterXAxis(-20, 20, true, AXIS_WIDTH);
+        scatterChartYAxisLeft   = Helper.createAxis(-20, 20, true, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+        scatterChartYAxisCenter = Helper.createCenterYAxis(-20, 20, true, AXIS_WIDTH);
+        scatterChart            = new XYChart<>(new XYPane(xySeries5), scatterChartYAxisCenter, scatterChartXAxisCenter);
+
+        scatterChartXAxisCenter.setAxisColor(Color.CRIMSON);
+        scatterChartYAxisCenter.setAxisColor(Color.CRIMSON);
 
         modificationThread = new Thread(() -> {
             while(true) {
@@ -266,95 +284,14 @@ public class ChartTest extends Application {
         stage.setScene(scene);
         stage.show();
 
-        timer.start();
+        //timer.start();
 
-        modificationThread.start();
+        //modificationThread.start();
     }
 
     @Override public void stop() {
         System.exit(0);
     }
-
-    private Axis createLeftYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.VERTICAL, Position.LEFT);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefWidth(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setTopAnchor(axis, 0d);
-        AnchorPane.setBottomAnchor(axis, 25d);
-        AnchorPane.setLeftAnchor(axis, 0d);
-
-        return axis;
-    }
-    private Axis createCenterYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.VERTICAL, Position.CENTER);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefWidth(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setTopAnchor(axis, 0d);
-        AnchorPane.setBottomAnchor(axis, 25d);
-        AnchorPane.setLeftAnchor(axis, axis.getZeroPosition());
-
-        return axis;
-    }
-    private Axis createRightYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.VERTICAL, Position.RIGHT);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefWidth(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setRightAnchor(axis, 0d);
-        AnchorPane.setTopAnchor(axis, 0d);
-        AnchorPane.setBottomAnchor(axis, 25d);
-
-        return axis;
-    }
-
-    private Axis createBottomXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.HORIZONTAL, Position.BOTTOM);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefHeight(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setBottomAnchor(axis, 0d);
-        AnchorPane.setLeftAnchor(axis, 25d);
-        AnchorPane.setRightAnchor(axis, 25d);
-
-        return axis;
-    }
-    private Axis createCenterXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.HORIZONTAL, Position.CENTER);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefHeight(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setBottomAnchor(axis, axis.getZeroPosition());
-        AnchorPane.setLeftAnchor(axis, 25d);
-        AnchorPane.setRightAnchor(axis, 25d);
-
-        return axis;
-    }
-    private Axis createTopXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE) {
-        Axis axis = new Axis(Orientation.HORIZONTAL, Position.TOP);
-        axis.setMinValue(MIN);
-        axis.setMaxValue(MAX);
-        axis.setPrefHeight(AXIS_WIDTH);
-        axis.setAutoScale(AUTO_SCALE);
-
-        AnchorPane.setTopAnchor(axis, 25d);
-        AnchorPane.setLeftAnchor(axis, 25d);
-        AnchorPane.setRightAnchor(axis, 25d);
-
-        return axis;
-    }
-
 
     public static void main(String[] args) {
         launch(args);

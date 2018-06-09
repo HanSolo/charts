@@ -1314,9 +1314,9 @@ public class Axis extends Region {
         Locale      locale            = getLocale();
         Orientation orientation       = getOrientation();
         Position    position          = getPosition();
-        double      anchorX           = Position.LEFT == position ? 0 : getZeroPosition();
+        double      anchorX           = (Position.LEFT == position || Position.CENTER == position) ? 0 : getZeroPosition();
         double      anchorXPlusOffset = anchorX + width;
-        double      anchorY           = Position.BOTTOM == position ? 0 : getZeroPosition();
+        double      anchorY           = (Position.BOTTOM == position || Position.CENTER == position) ? 0 : getZeroPosition();
         double      anchorYPlusOffset = anchorY + height;
         boolean     isMinValue;
         boolean     isZero;
@@ -1402,11 +1402,11 @@ public class Axis extends Region {
                         textPointY   = fixedPosition;
                         maxTextWidth = textPosition;
                     } else {
-                        innerPointX  = anchorX - 0.25 * width;
+                        innerPointX  = anchorX + maxMajorTickMarkLength;
                         innerPointY  = fixedPosition;
-                        mediumPointX = anchorX - 0.2 * width;
+                        mediumPointX = anchorX + maxMediumTickMarkLength;
                         mediumPointY = fixedPosition;
-                        minorPointX  = anchorX - 0.15 * width;
+                        minorPointX  = anchorX + maxMinorTickMarkLength;
                         minorPointY  = fixedPosition;
                         outerPointX  = anchorX;
                         outerPointY  = fixedPosition;
@@ -1441,15 +1441,15 @@ public class Axis extends Region {
                         maxTextWidth = majorTickSpace * stepSize;
                     } else {
                         innerPointX  = fixedPosition;
-                        innerPointY  = anchorY - 0.25 * height;
+                        innerPointY  = anchorY + maxMajorTickMarkLength;
                         mediumPointX = fixedPosition;
-                        mediumPointY = anchorY - 0.2 * height;
+                        mediumPointY = anchorY + maxMediumTickMarkLength;
                         minorPointX  = fixedPosition;
-                        minorPointY  = anchorY - 0.15 * height;
+                        minorPointY  = anchorY + maxMinorTickMarkLength;
                         outerPointX  = fixedPosition;
                         outerPointY  = anchorY;
                         textPointX   = fixedPosition;
-                        textPointY   = anchorY + 0.2 * height;
+                        textPointY   = innerPointY + textPosition - tickLabelFontSize * 0.8;
                         maxTextWidth = majorTickSpace * stepSize;
                     }
                 }

@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.converter.Converter;
+import eu.hansolo.fx.charts.tools.Helper;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -34,6 +35,7 @@ import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.*;
  * Time: 14:12
  */
 public class AxisTest extends Application {
+    private static final double AXIS_WIDTH = 20;
     private Axis xAxisBottom;
     private Axis xAxisTop;
     private Axis yAxisLeft;
@@ -41,34 +43,14 @@ public class AxisTest extends Application {
 
 
     @Override public void init() {
-        xAxisBottom = new Axis(-20, 20, Orientation.HORIZONTAL, Position.BOTTOM);
-        xAxisBottom.setPrefHeight(20);
-        AnchorPane.setLeftAnchor(xAxisBottom, 20d);
-        AnchorPane.setRightAnchor(xAxisBottom, 20d);
-        AnchorPane.setBottomAnchor(xAxisBottom, 0d);
-
-        xAxisTop = new Axis(0, 100, Orientation.HORIZONTAL, Position.TOP);
-        xAxisTop.setPrefHeight(20);
-        AnchorPane.setLeftAnchor(xAxisTop, 20d);
-        AnchorPane.setRightAnchor(xAxisTop, 20d);
-        AnchorPane.setTopAnchor(xAxisTop, 0d);
-
-        yAxisLeft = new Axis(-20, 20, Orientation.VERTICAL, Position.LEFT);
-        yAxisLeft.setPrefWidth(20);
-        AnchorPane.setLeftAnchor(yAxisLeft, 0d);
-        AnchorPane.setTopAnchor(yAxisLeft, 20d);
-        AnchorPane.setBottomAnchor(yAxisLeft, 20d);
+        xAxisBottom = Helper.createBottomAxis(-20, 20, AXIS_WIDTH);
+        xAxisTop = Helper.createTopAxis(0, 100, AXIS_WIDTH);
+        yAxisLeft = Helper.createLeftAxis(-20, 20, AXIS_WIDTH);
 
         Converter tempConverter     = new Converter(TEMPERATURE, CELSIUS); // Type Temperature with BaseUnit Celsius
         double    tempFahrenheitMin = tempConverter.convert(-20, FAHRENHEIT);
         double    tempFahrenheitMax = tempConverter.convert(20, FAHRENHEIT);
-
-        yAxisRight = new Axis(tempFahrenheitMin, tempFahrenheitMax, Orientation.VERTICAL, Position.RIGHT);
-        yAxisRight.setPrefWidth(20);
-        yAxisRight.setAutoScale(false);
-        AnchorPane.setRightAnchor(yAxisRight, 0d);
-        AnchorPane.setTopAnchor(yAxisRight, 20d);
-        AnchorPane.setBottomAnchor(yAxisRight, 20d);
+        yAxisRight = Helper.createRightAxis(tempFahrenheitMin, tempFahrenheitMax, false, AXIS_WIDTH);
     }
 
     @Override public void start(Stage stage) {
