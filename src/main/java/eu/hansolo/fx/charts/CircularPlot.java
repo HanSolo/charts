@@ -521,7 +521,7 @@ public class CircularPlot extends Region {
             double itemNamePointX = centerX + chartSize * 0.56 * sinValue;
             double itemNamePointY = centerY + chartSize * 0.56 * cosValue;
             ctx.translate(itemNamePointX, itemNamePointY);
-            rotateContextForText(ctx, -itemStartAngle, -itemAngleRange * 0.5 + ANGLE_OFFSET, TickLabelOrientation.TANGENT);
+            rotateContextForText(ctx, -itemStartAngle, -itemAngleRange * 0.5 + ANGLE_OFFSET, getTickLabelOrientation());
             ctx.fillText(item.getName(), 0, 0);
             ctx.restore();
 
