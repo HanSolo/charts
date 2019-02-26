@@ -209,10 +209,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setLowerBoundX(final double VALUE) {
         if (null == lowerBoundX) {
             _lowerBoundX = VALUE;
-            redraw();
         } else {
             lowerBoundX.set(VALUE);
         }
+        resize();
     }
     public DoubleProperty lowerBoundXProperty() {
         if (null == lowerBoundX) {
@@ -229,10 +229,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setUpperBoundX(final double VALUE) {
         if (null == upperBoundX) {
             _upperBoundX = VALUE;
-            redraw();
         } else {
             upperBoundX.set(VALUE);
         }
+        resize();
     }
     public DoubleProperty upperBoundXProperty() {
         if (null == upperBoundX) {
@@ -249,10 +249,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setLowerBoundY(final double VALUE) {
         if (null == lowerBoundY) {
             _lowerBoundY = VALUE;
-            redraw();
         } else {
             lowerBoundY.set(VALUE);
         }
+        resize();
     }
     public DoubleProperty lowerBoundYProperty() {
         if (null == lowerBoundY) {
@@ -269,10 +269,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setUpperBoundY(final double VALUE) {
         if (null == upperBoundY) {
             _upperBoundY = VALUE;
-            redraw();
         } else {
             upperBoundY.set(VALUE);
         }
+        resize();
     }
     public DoubleProperty upperBoundYProperty() {
         if (null == upperBoundY) {
