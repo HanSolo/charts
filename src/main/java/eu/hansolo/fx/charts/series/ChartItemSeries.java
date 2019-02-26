@@ -22,7 +22,6 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import sun.security.timestamp.TSRequest;
 
 import java.util.Arrays;
 import java.util.List;

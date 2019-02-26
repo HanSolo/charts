@@ -16,7 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import eu.hansolo.fx.charts.data.DataObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;

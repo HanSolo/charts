@@ -26,3 +26,5 @@ hs_err_pid*
 /out
 /build
 .DS_Store
+
+.classpath
