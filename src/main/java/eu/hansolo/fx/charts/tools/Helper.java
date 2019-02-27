@@ -649,36 +649,32 @@ public class Helper {
     }
 
     public static final Color hslToRGB(double hue, double saturation, double luminance) {
-        double r, g, b;
-        if (Double.compare(saturation, 0) == 0) {
-            r = 1;
-            b = 1;
-            g = 1;
-        } else {
-            double q = luminance < 0.5 ? luminance * (1 + saturation) : luminance + saturation - luminance * saturation;
-            double p = 2 * luminance - q;
-            r = clamp(0, 1, hue2RGB(p, q, hue + 0.33));
-            g = clamp(0, 1, hue2RGB(p, q, hue));
-            b = clamp(0, 1, hue2RGB(p, q, hue - 0.33));
-        }
-        return Color.color(r, g, b);
+        return hslToRGB(hue, saturation, luminance, 1);
     }
-    private static final double hue2RGB(double p, double q, double t) {
-        if (t < 0) {
-            t += 1;
-        } else if (t > 1) {
-            t -= 1;
-        }
+    public static Color hslToRGB(double hue, double saturation, double luminance, double opacity) {
+        saturation = clamp(0, 1, saturation);
+        luminance  = clamp(0, 1, luminance);
+        opacity    = clamp(0, 1, opacity);
 
-        if (t >= 0.66) {
-            return p;
-        } else if (t >= 0.5) {
-            return p + (q - p) * (0.66 - t) * 6;
-        } else if (t >= 0.33) {
-            return q;
-        } else {
-            return p + (q - p) * 6 * t;
-        }
+        hue = hue % 360.0;
+        hue /= 360;
+
+        double q = luminance < 0.5 ? luminance * (1 + saturation) : (luminance + saturation) - (saturation * luminance);
+        double p = 2 * luminance - q;
+
+        double r = clamp(0, 1, hueToRGB(p, q, hue + (1.0/3.0)));
+        double g = clamp(0, 1, hueToRGB(p, q, hue));
+        double b = clamp(0, 1, hueToRGB(p, q, hue - (1.0/3.0)));
+
+        return Color.color(r, g, b, opacity);
+    }
+    private static final double hueToRGB(double p, double q, double t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (6 * t < 1) { return p + ((q - p) * 6 * t); }
+        if (2 * t < 1) { return q; }
+        if (3 * t < 2) { return p + ((q - p) * 6 * ((2.0/3.0) - t)); }
+        return p;
     }
 
     public static final String colorToRGB(final Color COLOR) {
