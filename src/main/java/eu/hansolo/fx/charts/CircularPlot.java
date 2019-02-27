@@ -44,6 +44,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
@@ -458,6 +459,19 @@ public class CircularPlot extends Region {
     private void drawChart() {
         paths.clear();
 
+        TickLabelOrientation tickLabelOrientation = getTickLabelOrientation();
+        if (TickLabelOrientation.ORTHOGONAL == tickLabelOrientation) {
+            chartSize         = size * 0.75;
+            mainLineWidth     = chartSize * 0.045;
+            outgoingLineWidth = chartSize * 0.015;
+            tickMarkWidth     = chartSize * TICK_MARK_WIDTH;
+            chartOffset       = (size - chartSize) * 0.5;
+            innerChartOffset  = chartOffset + chartSize * 0.032;
+            innerChartSize    = chartSize - chartSize * 0.064;
+            centerX           = size * 0.5;
+            centerY           = size * 0.5;
+        }
+
         ctx.clearRect(0, 0, size, size);
 
         double sum       = items.stream().mapToDouble(PlotItem::getValue).sum();
@@ -520,8 +534,18 @@ public class CircularPlot extends Region {
             cosValue = Math.cos(Math.toRadians(-itemStartAngle - itemAngleRange * 0.5 - 180));
             double itemNamePointX = centerX + chartSize * 0.56 * sinValue;
             double itemNamePointY = centerY + chartSize * 0.56 * cosValue;
+
+            if (TickLabelOrientation.ORTHOGONAL == tickLabelOrientation) {
+                Font font = Fonts.latoRegular(size * 0.02);
+                Text measureText = new Text(item.getName());
+                measureText.setFont(font);
+                double textWidth = measureText.getLayoutBounds().getWidth();
+                itemNamePointX += textWidth * 0.33 * sinValue;
+                itemNamePointY += textWidth * 0.33 * cosValue;
+            }
+
             ctx.translate(itemNamePointX, itemNamePointY);
-            rotateContextForText(ctx, -itemStartAngle, -itemAngleRange * 0.5 + ANGLE_OFFSET, TickLabelOrientation.TANGENT);
+            rotateContextForText(ctx, -itemStartAngle, -itemAngleRange * 0.5 + ANGLE_OFFSET, tickLabelOrientation);
             ctx.fillText(item.getName(), 0, 0);
             ctx.restore();
 
