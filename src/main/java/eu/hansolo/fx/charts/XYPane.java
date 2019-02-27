@@ -209,7 +209,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setLowerBoundX(final double VALUE) {
         if (null == lowerBoundX) {
             _lowerBoundX = VALUE;
-            redraw();
+            resize();
         } else {
             lowerBoundX.set(VALUE);
         }
@@ -217,7 +217,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public DoubleProperty lowerBoundXProperty() {
         if (null == lowerBoundX) {
             lowerBoundX = new DoublePropertyBase(_lowerBoundX) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { resize(); }
                 @Override public Object getBean() { return XYPane.this; }
                 @Override public String getName() { return "lowerBoundX"; }
             };
@@ -229,7 +229,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setUpperBoundX(final double VALUE) {
         if (null == upperBoundX) {
             _upperBoundX = VALUE;
-            redraw();
+            resize();
         } else {
             upperBoundX.set(VALUE);
         }
@@ -237,7 +237,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public DoubleProperty upperBoundXProperty() {
         if (null == upperBoundX) {
             upperBoundX = new DoublePropertyBase(_upperBoundX) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { resize(); }
                 @Override public Object getBean() { return XYPane.this; }
                 @Override public String getName() { return "upperBoundX"; }
             };
@@ -249,7 +249,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setLowerBoundY(final double VALUE) {
         if (null == lowerBoundY) {
             _lowerBoundY = VALUE;
-            redraw();
+            resize();
         } else {
             lowerBoundY.set(VALUE);
         }
@@ -257,7 +257,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public DoubleProperty lowerBoundYProperty() {
         if (null == lowerBoundY) {
             lowerBoundY = new DoublePropertyBase(_lowerBoundY) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { resize(); }
                 @Override public Object getBean() { return XYPane.this; }
                 @Override public String getName() { return "lowerBoundY"; }
             };
@@ -269,7 +269,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void setUpperBoundY(final double VALUE) {
         if (null == upperBoundY) {
             _upperBoundY = VALUE;
-            redraw();
+            resize();
         } else {
             upperBoundY.set(VALUE);
         }
@@ -277,7 +277,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public DoubleProperty upperBoundYProperty() {
         if (null == upperBoundY) {
             upperBoundY = new DoublePropertyBase(_upperBoundY) {
-                @Override protected void invalidated() { redraw(); }
+                @Override protected void invalidated() { resize(); }
                 @Override public Object getBean() { return XYPane.this; }
                 @Override public String getName() { return "upperBoundY"; }
             };
