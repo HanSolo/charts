@@ -56,6 +56,10 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 
+/**
+ * authors: Michael Läuchli, MLaeuchli (github)
+ *          Stefan Mettler, orizion (github)
+ */
 public class ParetoPanel extends Region {
     private static final double                           PREFERRED_WIDTH         = 600;
     private static final double                           PREFERRED_HEIGHT        = 600;

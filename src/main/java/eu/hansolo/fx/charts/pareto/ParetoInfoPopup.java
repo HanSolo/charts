@@ -46,6 +46,10 @@ import javafx.stage.Window;
 import javafx.util.Duration;
 
 
+/**
+ * authors: Michael Läuchli, MLaeuchli (github)
+ *          Stefan Mettler, orizion (github)
+ */
 public class ParetoInfoPopup extends Popup {
     public  static long                  MAX_TIMEOUT              = 10_000;
     public  static int                   MAX_DECIMALS             = 6;

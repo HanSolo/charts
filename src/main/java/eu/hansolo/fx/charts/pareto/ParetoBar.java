@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * authors: Michael Läuchli, MLaeuchli (github)
+ *          Stefan Mettler, orizion (github)
+ */
 public class ParetoBar {
     private Double                value;
     private String                name;
