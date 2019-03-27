@@ -28,6 +28,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +48,9 @@ public class WorldHeatMapTest extends Application {
     private List<Point> cities;
 
     @Override public void init() {
-        try { cities = readCitiesFromFile(); } catch (IOException e) { cities = new ArrayList<>(); }
+        try { cities = readCitiesFromFile(); } catch (IOException e) { cities = new ArrayList<>(); } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
 
         worldMap = WorldBuilder.create()
                                .resolution(Resolution.HI_RES)
@@ -87,9 +91,9 @@ public class WorldHeatMapTest extends Application {
         worldMap.getHeatMap().addSpots(cities);
     }
 
-    private List<Point> readCitiesFromFile() throws IOException {
+    private List<Point> readCitiesFromFile() throws IOException, URISyntaxException {
         List<Point>  cities     = new ArrayList<>(8092);
-        String         citiesFile = (WorldHeatMapTest.class.getResource("cities.txt").toExternalForm()).replace("file:", "");
+        URI citiesFile = (WorldHeatMapTest.class.getResource("cities.txt")).toURI();
         Stream<String> lines      = Files.lines(Paths.get(citiesFile));
         lines.forEach(line -> {
             String city[] = line.split(",");
