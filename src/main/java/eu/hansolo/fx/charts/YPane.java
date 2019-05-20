@@ -382,7 +382,8 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                     ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r1 * RANGE);
                     Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
-                double r2 = ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE);
+                //ADDED resuse first point if wrapping required
+                double r2 = SERIES.isWithWrapping()?((SERIES.getItems().get(0).getY() - LOWER_BOUND_Y) / DATA_RANGE) :((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE);
                 ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r2 * RANGE);
                 ctx.closePath();
                 ctx.fill();
@@ -396,7 +397,9 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
                 double x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (0.36239 * size)));
                 double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.36239 * size)));
-                points.add(new Point(x, y));
+                if(!SERIES.isWithWrapping()){
+                    points.add(new Point(x, y));
+                }
 
                 for (T item : SERIES.getItems()) {
                     double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
@@ -405,12 +408,12 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                     points.add(new Point(x, y));
                     radAngle += radAngleStep;
                 }
-                double r3 = (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                double r3 = (SERIES.isWithWrapping())?(CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(0).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE)) :(CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
                 x = CENTER_X + (-Math.sin(radAngle) * r3);
                 y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
 
-                Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), 16);
+                Point[] interpolatedPoints = (SERIES.isWithWrapping())?Helper.subdividePointsRadial(points.toArray(new Point[0]), 16):Helper.subdividePoints(points.toArray(new Point[0]), 16);
 
                 ctx.beginPath();
                 ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());

@@ -74,6 +74,9 @@ public abstract class Series<T extends Item> {
     protected       BooleanProperty                           animated;
     protected       long                                      _animationDuration;
     protected       LongProperty                              animationDuration;
+    //ADDED property to see if wrapping should be used or not by default false. Keeps the previous functionality the same.
+    protected       boolean                                   _withWrapping;
+    protected       BooleanProperty                           withWrapping;
     protected       ChartType                                 chartType;
     protected       ObservableList<T>                         items;
     private         CopyOnWriteArrayList<SeriesEventListener> listeners;
@@ -121,6 +124,7 @@ public abstract class Series<T extends Item> {
         _strokeWidth       = -1;
         _animated          = false;
         _animationDuration = 800;
+        _withWrapping      = false;
         chartType          = TYPE;
         items              = FXCollections.observableArrayList();
         listeners          = new CopyOnWriteArrayList<>();
@@ -398,6 +402,28 @@ public abstract class Series<T extends Item> {
             };
         }
         return animationDuration;
+    }
+
+    // ADDED accessors for the withWrapping boolean value and associated property.
+
+    public boolean isWithWrapping() { return null == withWrapping ? _withWrapping : withWrapping.get(); }
+    public void setWithWrapping(final boolean WITH_WRAPPING) {
+        if (null == withWrapping) {
+            _withWrapping = WITH_WRAPPING;
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            withWrapping.set(WITH_WRAPPING);
+        }
+    }
+    public BooleanProperty withWrappingProperty() {
+        if (null == withWrapping) {
+            withWrapping = new BooleanPropertyBase(_withWrapping) {
+                @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "withWrapping"; }
+            };
+        }
+        return symbolsVisible;
     }
 
     public int getNoOfItems() { return items.size(); }
