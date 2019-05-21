@@ -242,6 +242,32 @@ public class Helper {
         Point[] points = POINTS.toArray(new Point[0]);
         return Arrays.asList(subdividePoints(points, SUB_DIVISIONS));
     }
+
+    public static final Point[] subdividePointsRadial(final Point[] POINTS, final int SUB_DIVISIONS){
+        assert POINTS != null;
+        assert POINTS.length >= 3;
+        int    noOfPoints = POINTS.length;
+
+        Point[] subdividedPoints = new Point[((noOfPoints - 1) * SUB_DIVISIONS) + 1];
+
+        double increments = 1.0 / (double) SUB_DIVISIONS;
+
+        for (int i = 0 ; i < noOfPoints - 1 ; i++) {
+            Point p0 = i == 0 ? POINTS[noOfPoints - 2] : POINTS[i - 1];
+            Point p1 = POINTS[i];
+            Point p2 = POINTS[i + 1];
+            Point p3 = (i == (noOfPoints - 2)) ? POINTS[1] : POINTS[i + 2];
+
+            CatmullRom<Point> crs = new CatmullRom<>(p0, p1, p2, p3);
+
+            for (int j = 0 ; j <= SUB_DIVISIONS ; j++) {
+                subdividedPoints[(i * SUB_DIVISIONS) + j] = crs.q(j * increments);
+            }
+        }
+
+        return subdividedPoints;
+    }
+
     public static final Point[] subdividePoints(final Point[] POINTS, final int SUB_DIVISIONS) {
         assert POINTS != null;
         assert POINTS.length >= 3;

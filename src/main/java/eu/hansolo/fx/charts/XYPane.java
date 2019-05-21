@@ -940,7 +940,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         points[points.length - 1] = points[0]; // last point == first point
 
         if (SMOOTH_POLAR == SERIES.getChartType()) {
-            Point[] interpolatedPoints = Helper.subdividePoints(points, 16);
+            //Use the subdividePointsRadial method if wrapping required.
+            Point[] interpolatedPoints = SERIES.isWithWrapping()? Helper.subdividePointsRadial(points, 16):Helper.subdividePoints(points, 16);
             ctx.beginPath();
             ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());
             for (int i = 0 ; i < interpolatedPoints.length - 1 ; i++) {
