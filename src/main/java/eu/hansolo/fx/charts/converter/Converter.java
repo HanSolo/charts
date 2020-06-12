@@ -81,7 +81,7 @@ public class Converter {
         KILOGRAM(new Unit(Category.MASS, "kg", "Kilogram", new BigDecimal("1.0"))),
         GRAM(new Unit(Category.MASS, "g", "Gram", new BigDecimal("1.0E-3"))),
         MILLIGRAM(new Unit(Category.MASS, "mg", "Milligram", new BigDecimal("1.0E-6"))),
-        MICROGRAM(new Unit(Category.MASS, "µg", "Mikrogram", new BigDecimal("1.0E-6"))),
+        MICROGRAM(new Unit(Category.MASS, "\u03bcg", "Mikrogram", new BigDecimal("1.0E-6"))),
         NANOGRAM(new Unit(Category.MASS, "ng", "Nanogram", new BigDecimal("1.0E-9"))),
         PICOGRAM(new Unit(Category.MASS, "pg", "Picogram", new BigDecimal("1.0E-12"))),
         FEMTOGRAM(new Unit(Category.MASS, "fg", "Femtogram", new BigDecimal("1.0E-15"))),
@@ -95,31 +95,31 @@ public class Converter {
         MINUTE(new Unit(Category.TIME, "m", "Minute", new BigDecimal("60"))),
         SECOND(new Unit(Category.TIME, "s", "Second", new BigDecimal("1.0"))),
         MILLISECOND(new Unit(Category.TIME, "ms", "Millisecond", new BigDecimal("1E-3"))),
-        MICROSECOND(new Unit(Category.TIME, "µs", "Microsecond", new BigDecimal("1E-6"))),
+        MICROSECOND(new Unit(Category.TIME, "\u03bcs", "Microsecond", new BigDecimal("1E-6"))),
         NANOSECOND(new Unit(Category.TIME, "ns", "Nanosecond", new BigDecimal("1E-9"))),
         PICOSECOND(new Unit(Category.TIME, "ps", "Picosecond", new BigDecimal("1E-12"))),
         FEMTOSECOND(new Unit(Category.TIME, "fs", "Femtosecond", new BigDecimal("1E-15"))),
 
         // Area
-        SQUARE_KILOMETER(new Unit(Category.AREA, "km²", "Square Kilometer", new BigDecimal("1.0E6"))),
-        SQUARE_METER(new Unit(Category.AREA, "m²", "Meter", new BigDecimal("1.0"))),
-        SQUARE_CENTIMETER(new Unit(Category.AREA, "cm²", "Square Centimeter", new BigDecimal("1.0E-4"))),
-        SQUARE_MILLIMETER(new Unit(Category.AREA, "mm²", "Square Millimeter", new BigDecimal("1.0E-6"))),
-        SQUARE_MICROMETER(new Unit(Category.AREA, "µm²", "Square Mikrometer", new BigDecimal("1.0E-12"))),
-        SQUARE_NANOMETER(new Unit(Category.AREA, "nm²", "Square Nanometer", new BigDecimal("1.0E-18"))),
-        SQUARE_ANGSTROM(new Unit(Category.AREA, "Å²", "Square Ångstrom", new BigDecimal("1.0E-20"))),
-        SQUARE_PICOMETER(new Unit(Category.AREA, "pm²", "Square Picometer", new BigDecimal("1.0E-24"))),
-        SQUARE_FEMTOMETER(new Unit(Category.AREA, "fm²", "Square Femtometer", new BigDecimal("1.0E-30"))),
+        SQUARE_KILOMETER(new Unit(Category.AREA, "km\u00B2", "Square Kilometer", new BigDecimal("1.0E6"))),
+        SQUARE_METER(new Unit(Category.AREA, "m\u00B2", "Meter", new BigDecimal("1.0"))),
+        SQUARE_CENTIMETER(new Unit(Category.AREA, "cm\u00B2", "Square Centimeter", new BigDecimal("1.0E-4"))),
+        SQUARE_MILLIMETER(new Unit(Category.AREA, "mm\u00B2", "Square Millimeter", new BigDecimal("1.0E-6"))),
+        SQUARE_MICROMETER(new Unit(Category.AREA, "\u03bcm\u00B2", "Square Mikrometer", new BigDecimal("1.0E-12"))),
+        SQUARE_NANOMETER(new Unit(Category.AREA, "nm\u00B2", "Square Nanometer", new BigDecimal("1.0E-18"))),
+        SQUARE_ANGSTROM(new Unit(Category.AREA, "\u00C5\u00B2", "Square \u00C5ngstrom", new BigDecimal("1.0E-20"))),
+        SQUARE_PICOMETER(new Unit(Category.AREA, "pm\u00B2", "Square Picometer", new BigDecimal("1.0E-24"))),
+        SQUARE_FEMTOMETER(new Unit(Category.AREA, "fm\u00B2", "Square Femtometer", new BigDecimal("1.0E-30"))),
         HECTARE(new Unit(Category.AREA, "ha", "Hectare", new BigDecimal("1.0E5"))),
         ACRE(new Unit(Category.AREA, "ac", "Acre", new BigDecimal("4046.8564224"))),
         ARES(new Unit(Category.AREA, "a", "Ares", new BigDecimal("100"))),
-        SQUARE_INCH(new Unit(Category.AREA, "in²", "Square Inch", new BigDecimal("0.00064516"))),
-        SQUARE_FOOT(new Unit(Category.AREA, "ft²", "Square Foot", new BigDecimal("0.09290304"))),
+        SQUARE_INCH(new Unit(Category.AREA, "in\u00B2", "Square Inch", new BigDecimal("0.00064516"))),
+        SQUARE_FOOT(new Unit(Category.AREA, "ft\u00B2", "Square Foot", new BigDecimal("0.09290304"))),
 
         // Temperature
         KELVIN(new Unit(Category.TEMPERATURE, "K", "Kelvin", new BigDecimal("1.0"))),
-        CELSIUS(new Unit(Category.TEMPERATURE, "°C", "Celsius", new BigDecimal("1.0"), new BigDecimal("273.15"))),
-        FAHRENHEIT(new Unit(Category.TEMPERATURE, "°F", "Fahrenheit", new BigDecimal("0.555555555555555"), new BigDecimal("459.67"))),
+        CELSIUS(new Unit(Category.TEMPERATURE, "\u00B0C", "Celsius", new BigDecimal("1.0"), new BigDecimal("273.15"))),
+        FAHRENHEIT(new Unit(Category.TEMPERATURE, "\u00B0F", "Fahrenheit", new BigDecimal("0.555555555555555"), new BigDecimal("459.67"))),
 
         // Angle
         DEGREE(new Unit(Category.ANGLE, "deg", "Degree", (Math.PI / 180.0))),
@@ -127,13 +127,13 @@ public class Converter {
         GRAD(new Unit(Category.ANGLE, "grad", "Gradian", new BigDecimal("0.9"))),
 
         // Volume
-        CUBIC_MILLIMETER(new Unit(Category.VOLUME, "mm³", "Cubic Millimeter", new BigDecimal("1.0E-9"))),
+        CUBIC_MILLIMETER(new Unit(Category.VOLUME, "mm\u00B3", "Cubic Millimeter", new BigDecimal("1.0E-9"))),
         MILLILITER(new Unit(Category.VOLUME, "ml", "Milliliter", new BigDecimal("1.0E-6"))),
         LITER(new Unit(Category.VOLUME, "l", "Liter", new BigDecimal("1.0E-3"))),
-        CUBIC_METER(new Unit(Category.VOLUME, "m³", "Cubic Meter", new BigDecimal("1.0E0"))),
+        CUBIC_METER(new Unit(Category.VOLUME, "m\u00B3", "Cubic Meter", new BigDecimal("1.0E0"))),
         GALLON(new Unit(Category.VOLUME, "gal", "US Gallon", new BigDecimal("0.0037854118"))),
-        CUBIC_FEET(new Unit(Category.VOLUME, "ft³", "Cubic Foot", new BigDecimal("0.0283168466"))),
-        CUBIC_INCH(new Unit(Category.VOLUME, "in³", "Cubic Inch", new BigDecimal("0.0000163871"))),
+        CUBIC_FEET(new Unit(Category.VOLUME, "ft\u00B3", "Cubic Foot", new BigDecimal("0.0283168466"))),
+        CUBIC_INCH(new Unit(Category.VOLUME, "in\u00B3", "Cubic Inch", new BigDecimal("0.0000163871"))),
 
         // Voltage
         MILLIVOLT(new Unit(Category.VOLTAGE, "mV", "Millivolt", new BigDecimal("1.0E-3"))),
@@ -144,7 +144,7 @@ public class Converter {
         // Current
         PICOAMPERE(new Unit(Category.CURRENT, "pA", "Picoampere", new BigDecimal("1.0E-12"))),
         NANOAMPERE(new Unit(Category.CURRENT, "nA", "Nanoampere", new BigDecimal("1.0E-9"))),
-        MICROAMPERE(new Unit(Category.CURRENT, "µA", "Microampere", new BigDecimal("1.0E-6"))),
+        MICROAMPERE(new Unit(Category.CURRENT, "\u03bcA", "Microampere", new BigDecimal("1.0E-6"))),
         MILLIAMPERE(new Unit(Category.CURRENT, "mA", "Milliampere", new BigDecimal("1.0E-3"))),
         AMPERE(new Unit(Category.CURRENT, "A", "Ampere", new BigDecimal("1.0"))),
         KILOAMPERE(new Unit(Category.CURRENT, "kA", "Kiloampere", new BigDecimal("1.0E3"))),
@@ -167,7 +167,7 @@ public class Converter {
         ELEMENTARY_CHARGE(new Unit(Category.ELECTRIC_CHARGE, "e-", "Elementary charge", new BigDecimal("1.6022E-19"))),
         PICOCOULOMB(new Unit(Category.ELECTRIC_CHARGE, "pC", "Picocoulomb", new BigDecimal("1.0E-12"))),
         NANOCOULOMB(new Unit(Category.ELECTRIC_CHARGE, "nC", "Nanocoulomb", new BigDecimal("1.0E-9"))),
-        MICROCOULOMB(new Unit(Category.ELECTRIC_CHARGE, "µC", "Microcoulomb", new BigDecimal("1.0E-6"))),
+        MICROCOULOMB(new Unit(Category.ELECTRIC_CHARGE, "\u03bcC", "Microcoulomb", new BigDecimal("1.0E-6"))),
         MILLICOULOMB(new Unit(Category.ELECTRIC_CHARGE, "mC", "Millicoulomb", new BigDecimal("1.0E-3"))),
         COULOMB(new Unit(Category.ELECTRIC_CHARGE, "C", "Coulomb", new BigDecimal("1.0E0"))),
 
@@ -192,8 +192,8 @@ public class Converter {
         PERCENTAGE(new Unit(Category.HUMIDITY, "%", "Percentage", new BigDecimal(1.0))),
 
         // Acceleration
-        METER_PER_SQUARE_SECOND(new Unit(Category.ACCELERATION, "m/s²", "Meter per squaresecond", new BigDecimal("1.0E0"))),
-        INCH_PER_SQUARE_SECOND(new Unit(Category.ACCELERATION, "in/s²", "Inch per squaresecond", new BigDecimal("0.0254"))),
+        METER_PER_SQUARE_SECOND(new Unit(Category.ACCELERATION, "m/s\u00B2", "Meter per squaresecond", new BigDecimal("1.0E0"))),
+        INCH_PER_SQUARE_SECOND(new Unit(Category.ACCELERATION, "in/s\u00B2", "Inch per squaresecond", new BigDecimal("0.0254"))),
         GRAVITY(new Unit(Category.ACCELERATION, "g", "Gravity", new BigDecimal("9.80665"))),
 
         // Pressure
@@ -226,18 +226,18 @@ public class Converter {
         TERABYTE(new Unit(Category.DATA, "TB", "Terabyte", new BigDecimal("8.796093E12"))),
 
         // Luminance
-        CANDELA_SQUARE_METER(new Unit(Category.LUMINANCE, "cd/m²", "Candela per Square Meter", new BigDecimal("1.0"))),
-        CANDELA_SQUARE_CENTIMETER(new Unit(Category.LUMINANCE, "cd/cm²", "Candela per Square CentiMeter", new BigDecimal("10000.0"))),
-        CANDELA_SQUARE_INCH(new Unit(Category.LUMINANCE, "cd/in²", "Candela per Square Inch", new BigDecimal("1550.0031"))),
-        CANDELA_SQAURE_FOOT(new Unit(Category.LUMINANCE, "cd/ft²", "Candela per Square Foot", new BigDecimal("10.7639104167"))),
+        CANDELA_SQUARE_METER(new Unit(Category.LUMINANCE, "cd/m\u00B2", "Candela per Square Meter", new BigDecimal("1.0"))),
+        CANDELA_SQUARE_CENTIMETER(new Unit(Category.LUMINANCE, "cd/cm\u00B2", "Candela per Square CentiMeter", new BigDecimal("10000.0"))),
+        CANDELA_SQUARE_INCH(new Unit(Category.LUMINANCE, "cd/in\u00B2", "Candela per Square Inch", new BigDecimal("1550.0031"))),
+        CANDELA_SQAURE_FOOT(new Unit(Category.LUMINANCE, "cd/ft\u00B2", "Candela per Square Foot", new BigDecimal("10.7639104167"))),
         LAMBERT(new Unit(Category.LUMINANCE, "L", "Lambert", new BigDecimal("3183.09886183"))),
         FOOT_LAMBERT(new Unit(Category.LUMINANCE, "fL", "Footlambert", new BigDecimal("3.4262590996"))),
 
         // Luminous flux
-        LUX(new Unit(Category.LUMINOUS_FLUX, "lm/m²", "Lux", new BigDecimal("1.0"))),
-        PHOT(new Unit(Category.LUMINOUS_FLUX, "lm/cm²", "Phot", new BigDecimal("10000.0"))),
-        FOOT_CANDLE(new Unit(Category.LUMINOUS_FLUX, "lm/ft²", "Footcandle", new BigDecimal("10.7639104167"))),
-        LUMEN_SQUARE_INCH(new Unit(Category.LUMINOUS_FLUX, "lm/in²", "Lumen per Square Inch", new BigDecimal("1550.0031"))),
+        LUX(new Unit(Category.LUMINOUS_FLUX, "lm/m\u00B2", "Lux", new BigDecimal("1.0"))),
+        PHOT(new Unit(Category.LUMINOUS_FLUX, "lm/cm\u00B2", "Phot", new BigDecimal("10000.0"))),
+        FOOT_CANDLE(new Unit(Category.LUMINOUS_FLUX, "lm/ft\u00B2", "Footcandle", new BigDecimal("10.7639104167"))),
+        LUMEN_SQUARE_INCH(new Unit(Category.LUMINOUS_FLUX, "lm/in\u00B2", "Lumen per Square Inch", new BigDecimal("1550.0031"))),
 
         // Work
         MILLIWATT(new Unit(Category.WORK, "mW", "Milliwatt", new BigDecimal("1.0E-3"))),

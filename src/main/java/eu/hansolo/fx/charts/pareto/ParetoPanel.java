@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * authors: Michael Läuchli, MLaeuchli (github)
+ * authors: Michael L\u00E4uchli, MLaeuchli (github)
  *          Stefan Mettler, orizion (github)
  */
 public class ParetoPanel extends Region {

@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 
 
 /**
- * authors: Michael Läuchli, MLaeuchli (github)
+ * authors: Michael L\u00E4uchli, MLaeuchli (github)
  *          Stefan Mettler, orizion (github)
  */
 @DefaultProperty("children")

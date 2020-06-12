@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * Represents a Node in a Force Directed Graph, containing double and string values
- * authors: Michael Läuchli, MLaeuchli (github)
+ * authors: Michael L\u00E4uchli, MLaeuchli (github)
  *          Stefan Mettler, orizion (github)
  *
  */

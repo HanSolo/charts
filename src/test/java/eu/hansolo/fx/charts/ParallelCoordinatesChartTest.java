@@ -43,7 +43,7 @@ public class ParallelCoordinatesChartTest extends Application {
     private ParallelCoordinatesChart chart;
 
     @Override public void init() {
-        Car smartRoadster = new Car("Smart Roadster Coupé","Smart", "Roadster");
+        Car smartRoadster = new Car("Smart Roadster Coupe","Smart", "Roadster");
         Car golf          = new Car("Golf GTI", "VW", "Golf");
         Car passat        = new Car("VW Passat", "VW", "Passat");
         Car cls           = new Car("Mercedes CLS 6.3 AMG", "Mercedes", "CLS");
