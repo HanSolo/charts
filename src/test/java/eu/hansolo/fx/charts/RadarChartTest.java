@@ -77,7 +77,13 @@ public class RadarChartTest extends Application {
         series2 = new YSeries(item1, CHART_TYPE, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.25)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.75))), Color.TRANSPARENT);
         series3 = new YSeries(item2, CHART_TYPE, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.25)), new Stop(0.5, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.75))), Color.TRANSPARENT);
         series2.setWithWrapping(true);
-        chart   = new YChart(new YPane(series1, series2, series3));
+
+        List<Category> categories = new ArrayList<>();
+        for (int i = 0 ; i < ELEMENTS ; i++) {
+            categories.add(new Category("P" + i));
+        }
+
+        chart = new YChart(new YPane(categories, series1, series2, series3));
         chart.setPrefSize(600, 600);
 
         timeline      = new Timeline();

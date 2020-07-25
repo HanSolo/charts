@@ -28,6 +28,7 @@ import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -51,40 +52,47 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
 public class YPane<T extends YItem> extends Region implements ChartArea {
-    private static final double                PREFERRED_WIDTH  = 250;
-    private static final double                PREFERRED_HEIGHT = 250;
-    private static final double                MINIMUM_WIDTH    = 0;
-    private static final double                MINIMUM_HEIGHT   = 0;
-    private static final double                MAXIMUM_WIDTH    = 4096;
-    private static final double                MAXIMUM_HEIGHT   = 4096;
-    private static       double                aspectRatio;
-    private              boolean               keepAspect;
-    private              double                size;
-    private              double                width;
-    private              double                height;
-    private              Paint                 _chartBackground;
-    private              ObjectProperty<Paint> chartBackground;
-    private              List<YSeries<T>>      listOfSeries;
-    private              Canvas                canvas;
-    private              GraphicsContext       ctx;
-    private              double                _thresholdY;
-    private              DoubleProperty        thresholdY;
-    private              boolean               _thresholdYVisible;
-    private              BooleanProperty       thresholdYVisible;
-    private              Color                 _thresholdYColor;
-    private              ObjectProperty<Color> thresholdYColor;
-    private              boolean               valid;
-    private              double                _lowerBoundY;
-    private              DoubleProperty        lowerBoundY;
-    private              double                _upperBoundY;
-    private              DoubleProperty        upperBoundY;
+    private static final double                   PREFERRED_WIDTH  = 250;
+    private static final double                   PREFERRED_HEIGHT = 250;
+    private static final double                   MINIMUM_WIDTH    = 0;
+    private static final double                   MINIMUM_HEIGHT   = 0;
+    private static final double                   MAXIMUM_WIDTH    = 4096;
+    private static final double                   MAXIMUM_HEIGHT   = 4096;
+    private static       double                   aspectRatio;
+    private              boolean                  keepAspect;
+    private              double                   size;
+    private              double                   width;
+    private              double                   height;
+    private              Paint                    _chartBackground;
+    private              ObjectProperty<Paint>    chartBackground;
+    private              List<YSeries<T>>         listOfSeries;
+    private              Canvas                   canvas;
+    private              GraphicsContext          ctx;
+    private              double                   _thresholdY;
+    private              DoubleProperty           thresholdY;
+    private              boolean                  _thresholdYVisible;
+    private              BooleanProperty          thresholdYVisible;
+    private              Color                    _thresholdYColor;
+    private              ObjectProperty<Color>    thresholdYColor;
+    private              boolean                  valid;
+    private              double                   _lowerBoundY;
+    private              DoubleProperty           lowerBoundY;
+    private              double                   _upperBoundY;
+    private              DoubleProperty           upperBoundY;
+    private              ObservableList<Category> categories;
 
 
     // ******************** Constructors **************************************
     public YPane(final YSeries<T>... SERIES) {
-        this(Color.TRANSPARENT, SERIES);
+        this(Color.TRANSPARENT, new ArrayList<>(), SERIES);
+    }
+    public YPane(final List<Category> CATEGORIES, final YSeries<T>... SERIES) {
+        this(Color.TRANSPARENT, CATEGORIES, SERIES);
     }
     public YPane(final Paint BACKGROUND, final YSeries<T>... SERIES) {
+        this(BACKGROUND, new ArrayList<>(), SERIES);
+    }
+    public YPane(final Paint BACKGROUND, final List<Category> CATEGORIES, final YSeries<T>... SERIES) {
         getStylesheets().add(YPane.class.getResource("chart.css").toExternalForm());
         aspectRatio        = PREFERRED_HEIGHT / PREFERRED_WIDTH;
         keepAspect         = false;
@@ -95,6 +103,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         _thresholdYColor   = Color.RED;
         _lowerBoundY       = 0;
         _upperBoundY       = 100;
+        categories         = FXCollections.observableArrayList(CATEGORIES);
         valid              = isChartTypeValid();
         initGraphics();
         registerListeners();
@@ -125,6 +134,18 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         heightProperty().addListener(o -> resize());
 
         listOfSeries.forEach(series -> series.setOnSeriesEvent(seriesEvent -> redraw()));
+        categories.addListener(new ListChangeListener<Category>() {
+            @Override public void onChanged(final Change<? extends Category> c) {
+                while (c.next()) {
+                    if (c.wasAdded()) {
+
+                    } else if (c.wasRemoved()) {
+
+                    }
+                }
+                redraw();
+            }
+        });
     }
 
 
@@ -259,6 +280,9 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         }
         return upperBoundY;
     }
+
+    public ObservableList<Category> getCategories() { return categories; }
+    public void setCategories(final List<Category> categories) { this.categories.setAll(categories); }
 
     public double getRangeY() { return getUpperBoundY() - getLowerBoundY(); }
 
@@ -493,12 +517,18 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
         // draw text
         ctx.save();
-        ctx.setFont(Fonts.latoRegular(0.04 * size));
+        ctx.setFont(Fonts.latoRegular(0.025 * size));
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
         ctx.setFill(Color.BLACK);
-        for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
-            //ctx.fillText(data.get(i).ID, CENTER_X, size * 0.02);
+
+        int index = categories.size();
+        if (index > NO_OF_SECTORS) {
+            index = NO_OF_SECTORS;
+        }
+
+        for (int i = 0 ; i < index ; i++) {
+            ctx.fillText(categories.get(i).getName(), CENTER_X, size * 0.03);
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
         ctx.restore();

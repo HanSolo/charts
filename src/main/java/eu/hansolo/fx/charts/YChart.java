@@ -25,6 +25,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -49,7 +50,7 @@ public class YChart<T extends YItem> extends Region {
     // ******************** Constructors **************************************
     public YChart(final YPane<T> Y_PANE) {
         if (null == Y_PANE) { throw new IllegalArgumentException("YPane has not to be null"); }
-        yPane = Y_PANE;
+        yPane      = Y_PANE;
         initGraphics();
         registerListeners();
     }
