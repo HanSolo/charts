@@ -16,8 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.TickLabelFormat;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
