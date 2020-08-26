@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
@@ -118,6 +119,7 @@ public class CircularPlot extends Region {
     private              Map<Path, String>            paths;
     private              Tooltip                      tooltip;
     private              String                       formatString;
+    private              ObservableList<Connection>   connections;
 
 
     // ******************** Constructors **************************************
@@ -150,6 +152,8 @@ public class CircularPlot extends Region {
         };
 
         formatString                      = "%." + _decimals + "f";
+
+        connections                       = FXCollections.observableArrayList();
 
         paths                             = new LinkedHashMap<>();
 
@@ -435,14 +439,23 @@ public class CircularPlot extends Region {
         Collections.sort(getItems(), (item1, item2) -> Double.compare(item2.getValue(), item1.getValue()));
     }
 
+    public ObservableList<Connection> getConnections() { return connections; }
+
+    public Connection getConnection(final PlotItem FROM, final PlotItem TO) {
+        return connections.stream().filter(connection -> connection.getOutgoingItem().equals(FROM) && connection.getIncomingItem().equals(TO)).findFirst().orElse(null);
+    }
+
     private void validateData() {
+        connections.clear();
         Map<PlotItem, Double> incoming = new HashMap<>(getItems().size());
         for (PlotItem item : getItems()) {
             item.getOutgoing().forEach((outgoingItem, value) -> {
                 if (incoming.containsKey(outgoingItem)) {
                     incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
+                    connections.add(new Connection(item, outgoingItem, Color.TRANSPARENT));
                 } else {
                     incoming.put(outgoingItem, value);
+                    connections.add(new Connection(outgoingItem, item, Color.TRANSPARENT));
                 }
             });
         }
@@ -610,9 +623,18 @@ public class CircularPlot extends Region {
                 // Store next outgoing start angle
                 itemParameter.setNextOutgoingStartAngle(itemParameter.getNextOutgoingStartAngle() + outgoingAngleRange);
 
+                Color      connectionFill;
+                Connection connection = getConnection(item, outgoingItem);
+                if (null != connection && !connection.getFill().equals(Color.TRANSPARENT)) {
+                    connectionFill = Helper.getColorWithOpacity(connection.getFill(), getConnectionOpacity());
+                } else {
+                    connectionFill = Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity());
+                }
+
                 // Draw flow
                 Path path = new Path();
-                path.setFill(Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity()));
+                //path.setFill(Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity()));
+                path.setFill(connectionFill);
                 path.moveTo(p0.getX(), p0.getY());
                 path.quadraticCurveTo(p4.getX(), p4.getY(), p2.getX(), p2.getY());             // curve from p4 -> p4 -> p2
                 if (getShowFlowDirection()) {
@@ -624,7 +646,6 @@ public class CircularPlot extends Region {
                 path.quadraticCurveTo(p5.getX(), p5.getY(), p1.getX(), p1.getY());             // curve from p3 -> p5 -> p1
                 path.quadraticCurveTo(p01.getX(), p01.getY(), p0.getX(), p0.getY());           // curve from p1 -> p01 -> p0
                 path.closePath();
-
                 path.draw(ctx, true, false);
 
                 String tooltipText = new StringBuilder().append(item.getName())

@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -45,6 +46,8 @@ public class CircularPlotTest extends Application {
         australia.addToOutgoing(thailand, 15_000);
         australia.addToOutgoing(singapore, 10_000);
 
+
+        /*
         india.addToOutgoing(australia, 35_000);
         india.addToOutgoing(china, 10_000);
         india.addToOutgoing(japan, 40_000);
@@ -74,7 +77,7 @@ public class CircularPlotTest extends Application {
         singapore.addToOutgoing(china, 110_000);
         singapore.addToOutgoing(japan, 14_000);
         singapore.addToOutgoing(thailand, 30_000);
-
+        */
 
         // Setup Chart
         circluarPlot = CircularPlotBuilder.create()
@@ -84,6 +87,13 @@ public class CircularPlotTest extends Application {
                                           .decimals(0)
                                           .minorTickMarksVisible(false)
                                           .build();
+
+        if (null != circluarPlot.getConnection(australia, japan)) {
+            circluarPlot.getConnection(australia, japan).setFill(Color.BLUE);
+        }
+        circluarPlot.getConnections().forEach(connection -> {
+            System.out.println(connection.getOutgoingItem().getName() + " -> " + connection.getIncomingItem().getName() + " : " + connection.getFill());
+        });
     }
 
     @Override public void start(Stage stage) {

@@ -25,9 +25,9 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -50,7 +50,9 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     private       Color                   _fill;
     private       ObjectProperty<Color>   fill;
     private       Color                   _stroke;
-    private       ObjectProperty<Color>   stroke;
+    private       ObjectProperty<Color> stroke;
+    private       Color                 _connectionFill;
+    private       ObjectProperty<Color> connectionFill;
     private       Symbol                  _symbol;
     private       ObjectProperty<Symbol>  symbol;
     private       Map<PlotItem, Double>   outgoing;
@@ -73,16 +75,17 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         this(NAME, VALUE, "", COLOR);
     }
     public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL) {
-        _name        = NAME;
-        _value       = VALUE;
-        _description = DESCRIPTION;
-        _fill        = FILL;
-        _stroke      = Color.TRANSPARENT;
-        _symbol      = Symbol.NONE;
-        level        = -1;
-        outgoing     = new LinkedHashMap<>();
-        incoming     = new LinkedHashMap<>();
-        listeners    = new CopyOnWriteArrayList<>();
+        _name           = NAME;
+        _value          = VALUE;
+        _description    = DESCRIPTION;
+        _fill           = FILL;
+        _stroke         = Color.TRANSPARENT;
+        _connectionFill = Color.TRANSPARENT;
+        _symbol         = Symbol.NONE;
+        level           = -1;
+        outgoing        = new LinkedHashMap<>();
+        incoming        = new LinkedHashMap<>();
+        listeners       = new CopyOnWriteArrayList<>();
     }
 
 
@@ -187,6 +190,27 @@ public class PlotItem implements Item, Comparable<PlotItem>{
                 @Override public String getName() { return "stroke"; }
             };
             _stroke = null;
+        }
+        return stroke;
+    }
+
+    public Color getConnectionFill() { return null == connectionFill ? _connectionFill : connectionFill.get(); }
+    private void setConnectionFill(final Color FILL) {
+        if (null == connectionFill) {
+            _connectionFill = FILL;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            connectionFill.set(FILL);
+        }
+    }
+    public ReadOnlyObjectProperty<Color> connectionFillProperty() {
+        if (null == connectionFill) {
+            connectionFill = new ObjectPropertyBase<>(_connectionFill) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "connectionFill"; }
+            };
+            _connectionFill = null;
         }
         return stroke;
     }
