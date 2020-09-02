@@ -11,8 +11,8 @@ buildscript {
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1'
         classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.2'
-        classpath 'org.javamodularity:moduleplugin:1.6.0'
-        classpath 'org.beryx:badass-jlink-plugin:2.16.4'
+        classpath 'org.javamodularity:moduleplugin:1.7.0'
+        classpath 'org.beryx:badass-jlink-plugin:2.21.3'
     }
 }
 
@@ -20,10 +20,10 @@ plugins {
     id 'idea'
     id 'java-library'
     id 'com.google.osdetector' version '1.6.2'
-    id 'org.javamodularity.moduleplugin' version '1.6.0'
-    id 'org.beryx.jlink' version '2.17.2'
+    id 'org.javamodularity.moduleplugin' version '1.7.0'
+    id 'org.beryx.jlink' version '2.21.3'
     id 'maven-publish'
-    id 'net.nemerosa.versioning' version '2.10.0'
+    id 'net.nemerosa.versioning' version '2.14.0'
     id 'com.jfrog.bintray' version '1.8.5'
 }
 
