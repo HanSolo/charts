@@ -17,6 +17,6 @@
 package eu.hansolo.fx.charts.event;
 
 public enum EventType {
-    UPDATE, FINISHED, SELECTED,
+    UPDATE, FINISHED, SELECTED, SELECTED_FROM, SELECTED_TO,
     PARENT_CHANGED, CHILDREN_CHANGED, NODE_SELECTED // Only used in TreeNode
 }

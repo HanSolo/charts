@@ -226,6 +226,15 @@ public class Helper {
         }
     }
 
+    public static final double[] rotatePointAroundRotationCenter(final double X, final double Y, final double RX, final double RY, final double ANGLE) {
+        final double rad = Math.toRadians(ANGLE);
+        final double sin = Math.sin(rad);
+        final double cos = Math.cos(rad);
+        final double nX  = RX + (X - RX) * cos - (Y - RY) * sin;
+        final double nY  = RY + (X - RX) * sin + (Y - RY) * cos;
+        return new double[] { nX, nY };
+    }
+
     public static final void saveAsPng(final Node NODE, final String FILE_NAME) {
         final WritableImage SNAPSHOT = NODE.snapshot(new SnapshotParameters(), null);
         final String        NAME     = FILE_NAME.replace("\\.[a-zA-Z]{3,4}", "");

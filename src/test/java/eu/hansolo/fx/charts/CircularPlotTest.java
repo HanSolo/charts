@@ -18,12 +18,16 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.EventType;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class CircularPlotTest extends Application {
@@ -46,6 +50,18 @@ public class CircularPlotTest extends Application {
         australia.addToOutgoing(thailand, 15_000);
         australia.addToOutgoing(singapore, 10_000);
 
+        List<PlotItem> items = List.of(australia, india, china, japan, thailand, singapore );
+
+        // Register listeners to click on connections and items
+        items.forEach(item -> {
+            item.addItemEventListener(e -> {
+                switch (e.getEventType()) {
+                    case SELECTED_FROM: System.out.println("From    : " + e.getItem().getName()); break;
+                    case SELECTED_TO  : System.out.println("To      : " + e.getItem().getName()); break;
+                    case SELECTED     : System.out.println("Selected: " + e.getItem().getName()); break;
+                }
+            });
+        });
 
         /*
         india.addToOutgoing(australia, 35_000);
@@ -82,7 +98,7 @@ public class CircularPlotTest extends Application {
         // Setup Chart
         circluarPlot = CircularPlotBuilder.create()
                                           .prefSize(500, 500)
-                                          .items(australia, india, china, japan, thailand, singapore)
+                                          .items(items)
                                           .connectionOpacity(0.75)
                                           .decimals(0)
                                           .minorTickMarksVisible(false)

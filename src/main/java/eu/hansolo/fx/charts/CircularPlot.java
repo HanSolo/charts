@@ -18,11 +18,15 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.geometry.Path;
+import eu.hansolo.fx.geometry.Shape;
+import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -42,6 +46,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
@@ -116,7 +121,9 @@ public class CircularPlot extends Region {
     private              ObservableList<PlotItem>     items;
     private              ItemEventListener            itemListener;
     private              ListChangeListener<PlotItem> itemListListener;
+    private              Map<Path, PlotItem>          itemPaths;
     private              Map<Path, String>            paths;
+    private              Map<Path, PlotItem[]>        connectionMap;
     private              Tooltip                      tooltip;
     private              String                       formatString;
     private              ObservableList<Connection>   connections;
@@ -155,7 +162,9 @@ public class CircularPlot extends Region {
 
         connections                       = FXCollections.observableArrayList();
 
+        itemPaths                         = new LinkedHashMap<>();
         paths                             = new LinkedHashMap<>();
+        connectionMap                     = new LinkedHashMap<>();
 
         initGraphics();
         registerListeners();
@@ -199,6 +208,24 @@ public class CircularPlot extends Region {
                     tooltip.setX(tooltipX);
                     tooltip.setY(tooltipY);
                     tooltip.show(getScene().getWindow());
+
+                    if (connectionMap.get(path).length > 1) {
+                        PlotItem item0 = connectionMap.get(path)[0];
+                        PlotItem item1 = connectionMap.get(path)[1];
+                        Platform.runLater(() -> {
+                            item0.fireItemEvent(new ItemEvent(item0, EventType.SELECTED_FROM));
+                            item1.fireItemEvent(new ItemEvent(item1, EventType.SELECTED_TO));
+                        });
+                    }
+                }
+            });
+            itemPaths.forEach((itemPath, plotItem) -> {
+                double eventX = e.getX();
+                double eventY = e.getY();
+                if (itemPath.contains(eventX, eventY)) {
+                    Platform.runLater(() -> {
+                        plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED));
+                    });
                 }
             });
         });
@@ -470,7 +497,9 @@ public class CircularPlot extends Region {
     }
 
     private void drawChart() {
+        itemPaths.clear();
         paths.clear();
+        connectionMap.clear();
 
         TickLabelOrientation tickLabelOrientation = getTickLabelOrientation();
         if (TickLabelOrientation.ORTHOGONAL == tickLabelOrientation) {
@@ -487,8 +516,10 @@ public class CircularPlot extends Region {
 
         ctx.clearRect(0, 0, size, size);
 
-        double sum       = items.stream().mapToDouble(PlotItem::getValue).sum();
-        int    noOfItems = items.size();
+        double sum         = items.stream().mapToDouble(PlotItem::getValue).sum();
+        int    noOfItems   = items.size();
+        double innerRadius = chartSize * 0.5 - mainLineWidth * 0.5;
+        double outerRadius = chartSize * 0.5 + mainLineWidth * 0.5;
 
         Map<PlotItem, ChartItemParameter> parameterMap = new HashMap<>(items.size());
 
@@ -507,6 +538,24 @@ public class CircularPlot extends Region {
             ctx.setLineWidth(mainLineWidth);
             ctx.setStroke(item.getFill());
             ctx.strokeArc(chartOffset, chartOffset, chartSize, chartSize, -angle, -angleRange, ArcType.OPEN);
+
+            // Create paths for click detection
+            double[] xy1 = Helper.rotatePointAroundRotationCenter(centerX - outerRadius, centerY, centerX, centerY, angle - 180);
+            double[] xy2 = Helper.rotatePointAroundRotationCenter(centerX - outerRadius, centerY, centerX, centerY, angle + angleRange - 180);
+            double[] xy3 = Helper.rotatePointAroundRotationCenter(centerX - innerRadius, centerY, centerX, centerY, angle + angleRange - 180);
+            double[] xy4 = Helper.rotatePointAroundRotationCenter(centerX - innerRadius, centerY, centerX, centerY, angle - 180);
+
+            Path itemPath = new Path();
+            itemPath.setFill(Color.TRANSPARENT);
+            itemPath.moveTo(xy1[0], xy1[1]);
+            itemPath.arcTo(outerRadius, outerRadius, angle + angleRange - 180, false, true, xy2[0], xy2[1]);
+            itemPath.lineTo(xy3[0], xy3[1]);
+            itemPath.arcTo(innerRadius, innerRadius, -angle - angleRange - 180, false, false, xy4[0], xy4[1]);
+            itemPath.lineTo(xy1[0], xy1[1]);
+            itemPath.closePath();
+            itemPath.draw(ctx, true, false);
+
+            itemPaths.put(itemPath, item);
 
             // Draw sum of outgoing at the end of the segment
             double outgoingAngleRange = sumOfOutgoing * angleStep;
@@ -655,6 +704,7 @@ public class CircularPlot extends Region {
                                                         .append(String.format(getLocale(), formatString, outgoingValue))
                                                         .toString();
                 paths.put(path, tooltipText);
+                connectionMap.put(path, new PlotItem[]{ item, outgoingItem });
 
                 /*
                 ctx.setFill(Helper.getColorWithOpacity(item.getFillColor(), getConnectionOpacity()));
