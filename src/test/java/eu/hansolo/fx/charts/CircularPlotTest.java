@@ -16,9 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.EventType;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -26,7 +24,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,8 +53,8 @@ public class CircularPlotTest extends Application {
         items.forEach(item -> {
             item.addItemEventListener(e -> {
                 switch (e.getEventType()) {
-                    case SELECTED_FROM: System.out.println("From    : " + e.getItem().getName()); break;
-                    case SELECTED_TO  : System.out.println("To      : " + e.getItem().getName()); break;
+                    case CONNECTION_SELECTED_FROM: System.out.println("From    : " + e.getItem().getName()); break;
+                    case CONNECTION_SELECTED_TO: System.out.println("To      : " + e.getItem().getName()); break;
                     case SELECTED     : System.out.println("Selected: " + e.getItem().getName()); break;
                 }
             });

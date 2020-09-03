@@ -25,7 +25,6 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.geometry.Path;
-import eu.hansolo.fx.geometry.Shape;
 import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -46,7 +45,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
@@ -213,8 +211,8 @@ public class CircularPlot extends Region {
                         PlotItem item0 = connectionMap.get(path)[0];
                         PlotItem item1 = connectionMap.get(path)[1];
                         Platform.runLater(() -> {
-                            item0.fireItemEvent(new ItemEvent(item0, EventType.SELECTED_FROM));
-                            item1.fireItemEvent(new ItemEvent(item1, EventType.SELECTED_TO));
+                            item0.fireItemEvent(new ItemEvent(item0, EventType.CONNECTION_SELECTED_FROM));
+                            item1.fireItemEvent(new ItemEvent(item1, EventType.CONNECTION_SELECTED_TO));
                         });
                     }
                 }
