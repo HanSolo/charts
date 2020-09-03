@@ -221,9 +221,7 @@ public class CircularPlot extends Region {
                 double eventX = e.getX();
                 double eventY = e.getY();
                 if (itemPath.contains(eventX, eventY)) {
-                    Platform.runLater(() -> {
-                        plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED));
-                    });
+                    Platform.runLater(() -> plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED)));
                 }
             });
         });
