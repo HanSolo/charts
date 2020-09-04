@@ -85,7 +85,7 @@ public class TimeAxisTest extends Application {
 
         Scene scene = new Scene(new StackPane(pane));
 
-        stage.setTitle("Charts");
+        stage.setTitle("TimeAxis Test");
         stage.setScene(scene);
         stage.show();
     }

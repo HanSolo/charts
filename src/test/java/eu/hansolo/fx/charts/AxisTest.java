@@ -35,7 +35,8 @@ import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.*;
  * Time: 14:12
  */
 public class AxisTest extends Application {
-    private static final double AXIS_WIDTH = 20;
+    private static final double AXIS_WIDTH  = 20;
+    private static final double AXIS_HEIGHT = 20;
     private Axis xAxisBottom;
     private Axis xAxisTop;
     private Axis yAxisLeft;
@@ -43,14 +44,18 @@ public class AxisTest extends Application {
 
 
     @Override public void init() {
-        xAxisBottom = Helper.createBottomAxis(-20, 20, AXIS_WIDTH);
-        xAxisTop = Helper.createTopAxis(0, 100, AXIS_WIDTH);
-        yAxisLeft = Helper.createLeftAxis(-20, 20, AXIS_WIDTH);
+        xAxisBottom = Helper.createBottomAxis(-20, 20, AXIS_HEIGHT);
+        xAxisTop    = Helper.createTopAxis(0, 100, AXIS_HEIGHT);
+        yAxisLeft   = Helper.createLeftAxis(-20, 20, AXIS_WIDTH);
 
         Converter tempConverter     = new Converter(TEMPERATURE, CELSIUS); // Type Temperature with BaseUnit Celsius
         double    tempFahrenheitMin = tempConverter.convert(-20, FAHRENHEIT);
         double    tempFahrenheitMax = tempConverter.convert(20, FAHRENHEIT);
         yAxisRight = Helper.createRightAxis(tempFahrenheitMin, tempFahrenheitMax, false, AXIS_WIDTH);
+
+        AnchorPane.setTopAnchor(yAxisLeft, AXIS_HEIGHT);
+        AnchorPane.setTopAnchor(xAxisTop, 0d);
+        AnchorPane.setTopAnchor(yAxisRight, AXIS_HEIGHT);
     }
 
     @Override public void start(Stage stage) {
@@ -60,7 +65,7 @@ public class AxisTest extends Application {
 
         Scene scene = new Scene(pane);
 
-        stage.setTitle("Title");
+        stage.setTitle("Axis Test");
         stage.setScene(scene);
         stage.show();
     }

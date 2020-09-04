@@ -56,6 +56,7 @@ public class ParetoTest extends Application {
         PresentationPareto pres = new PresentationPareto();
         init();
         StackPane pane  = new StackPane(pres);
+        pane.setPadding(new Insets(10));
         Scene     scene = new Scene(pane);
 
 
