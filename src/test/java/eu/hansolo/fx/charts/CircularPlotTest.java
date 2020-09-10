@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.ConnectionEventListener;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -47,15 +48,15 @@ public class CircularPlotTest extends Application {
         australia.addToOutgoing(thailand, 15_000);
         australia.addToOutgoing(singapore, 10_000);
 
+        japan.addToOutgoing(australia, 70_000);
+
         List<PlotItem> items = List.of(australia, india, china, japan, thailand, singapore );
 
         // Register listeners to click on connections and items
         items.forEach(item -> {
             item.addItemEventListener(e -> {
                 switch (e.getEventType()) {
-                    case CONNECTION_SELECTED_FROM: System.out.println("From    : " + e.getItem().getName()); break;
-                    case CONNECTION_SELECTED_TO: System.out.println("To      : " + e.getItem().getName()); break;
-                    case SELECTED     : System.out.println("Selected: " + e.getItem().getName()); break;
+                    case SELECTED: System.out.println("Selected: " + e.getItem().getName()); break;
                 }
             });
         });
@@ -101,11 +102,16 @@ public class CircularPlotTest extends Application {
                                           .minorTickMarksVisible(false)
                                           .build();
 
+        ConnectionEventListener connectionListener = e -> System.out.println("From: " + e.getConnection().getOutgoingItem().getName() + " -> to: " + e.getConnection().getIncomingItem().getName() + " -> Value: " + e.getConnection().getValue());
+        circluarPlot.getConnections().forEach(connection -> connection.addConnectionEventListener(connectionListener));
+
         if (null != circluarPlot.getConnection(australia, japan)) {
             circluarPlot.getConnection(australia, japan).setFill(Color.BLUE);
+            circluarPlot.getConnection(australia, india).setFill(Color.CHOCOLATE);
+            circluarPlot.getConnection(japan, australia).setFill(Color.POWDERBLUE);
         }
         circluarPlot.getConnections().forEach(connection -> {
-            System.out.println(connection.getOutgoingItem().getName() + " -> " + connection.getIncomingItem().getName() + " : " + connection.getFill());
+            System.out.println(connection.getOutgoingItem().getName() + " -> " + connection.getIncomingItem().getName() + " -> Value: " + connection.getValue() + " -> Color: " + connection.getFill());
         });
     }
 

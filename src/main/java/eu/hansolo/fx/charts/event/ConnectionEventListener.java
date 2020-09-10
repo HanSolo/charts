@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by Gerrit Grunwald
+ * Copyright (c) 2020 by Gerrit Grunwald
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts.event;
 
-public enum EventType {
-    UPDATE, FINISHED, SELECTED, CONNECTION_SELECTED_FROM, CONNECTION_SELECTED_TO, CONNECTION_SELECTED,
-    PARENT_CHANGED, CHILDREN_CHANGED, NODE_SELECTED // Only used in TreeNode
+@FunctionalInterface
+public interface ConnectionEventListener {
+    void onConnectionEvent(final ConnectionEvent EVENT);
 }

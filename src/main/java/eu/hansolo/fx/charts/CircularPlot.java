@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.ConnectionEvent;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
@@ -120,7 +121,7 @@ public class CircularPlot extends Region {
     private              ItemEventListener            itemListener;
     private              ListChangeListener<PlotItem> itemListListener;
     private              Map<Path, PlotItem>          itemPaths;
-    private              Map<Path, String>            paths;
+    private              Map<Path, Connection>        paths;
     private              Map<Path, PlotItem[]>        connectionMap;
     private              Tooltip                      tooltip;
     private              String                       formatString;
@@ -196,23 +197,24 @@ public class CircularPlot extends Region {
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
         canvas.setOnMouseClicked(e -> {
-            paths.forEach((path, tooltipText) -> {
+            paths.forEach((path, connection) -> {
                 double eventX = e.getX();
                 double eventY = e.getY();
                 if (path.contains(eventX, eventY)) {
                     double tooltipX = eventX + canvas.getScene().getX() + canvas.getScene().getWindow().getX();
                     double tooltipY = eventY + canvas.getScene().getY() + canvas.getScene().getWindow().getY() - 25;
-                    tooltip.setText(tooltipText);
+                    tooltip.setText(connection.getTooltipText());
                     tooltip.setX(tooltipX);
                     tooltip.setY(tooltipY);
                     tooltip.show(getScene().getWindow());
 
                     if (connectionMap.get(path).length > 1) {
-                        PlotItem item0 = connectionMap.get(path)[0];
-                        PlotItem item1 = connectionMap.get(path)[1];
+                        //PlotItem item0 = connectionMap.get(path)[0];
+                        //PlotItem item1 = connectionMap.get(path)[1];
                         Platform.runLater(() -> {
-                            item0.fireItemEvent(new ItemEvent(item0, EventType.CONNECTION_SELECTED_FROM));
-                            item1.fireItemEvent(new ItemEvent(item1, EventType.CONNECTION_SELECTED_TO));
+                            //item0.fireItemEvent(new ItemEvent(item0, EventType.CONNECTION_SELECTED_FROM));
+                            //item1.fireItemEvent(new ItemEvent(item1, EventType.CONNECTION_SELECTED_TO));
+                            connection.fireConnectionEvent(new ConnectionEvent(connection, EventType.CONNECTION_SELECTED));
                         });
                     }
                 }
@@ -475,10 +477,10 @@ public class CircularPlot extends Region {
             item.getOutgoing().forEach((outgoingItem, value) -> {
                 if (incoming.containsKey(outgoingItem)) {
                     incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
-                    connections.add(new Connection(item, outgoingItem, Color.TRANSPARENT));
+                    connections.add(new Connection(item, outgoingItem, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 } else {
                     incoming.put(outgoingItem, value);
-                    connections.add(new Connection(outgoingItem, item, Color.TRANSPARENT));
+                    connections.add(new Connection(outgoingItem, item, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 }
             });
         }
@@ -699,7 +701,8 @@ public class CircularPlot extends Region {
                                                         .append(" ")
                                                         .append(String.format(getLocale(), formatString, outgoingValue))
                                                         .toString();
-                paths.put(path, tooltipText);
+                connection.setTooltipText(tooltipText);
+                paths.put(path, connection);
                 connectionMap.put(path, new PlotItem[]{ item, outgoingItem });
 
                 /*
