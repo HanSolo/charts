@@ -701,9 +701,11 @@ public class CircularPlot extends Region {
                                                         .append(" ")
                                                         .append(String.format(getLocale(), formatString, outgoingValue))
                                                         .toString();
-                connection.setTooltipText(tooltipText);
-                paths.put(path, connection);
-                connectionMap.put(path, new PlotItem[]{ item, outgoingItem });
+                if (null != connection) {
+                    connection.setTooltipText(tooltipText);
+                    paths.put(path, connection);
+                    connectionMap.put(path, new PlotItem[] { item, outgoingItem });
+                }
 
                 /*
                 ctx.setFill(Helper.getColorWithOpacity(item.getFillColor(), getConnectionOpacity()));

@@ -50,18 +50,6 @@ public class CircularPlotTest extends Application {
 
         japan.addToOutgoing(australia, 70_000);
 
-        List<PlotItem> items = List.of(australia, india, china, japan, thailand, singapore );
-
-        // Register listeners to click on connections and items
-        items.forEach(item -> {
-            item.addItemEventListener(e -> {
-                switch (e.getEventType()) {
-                    case SELECTED: System.out.println("Selected: " + e.getItem().getName()); break;
-                }
-            });
-        });
-
-        /*
         india.addToOutgoing(australia, 35_000);
         india.addToOutgoing(china, 10_000);
         india.addToOutgoing(japan, 40_000);
@@ -91,7 +79,18 @@ public class CircularPlotTest extends Application {
         singapore.addToOutgoing(china, 110_000);
         singapore.addToOutgoing(japan, 14_000);
         singapore.addToOutgoing(thailand, 30_000);
-        */
+
+
+        List<PlotItem> items = List.of(australia, india, china, japan, thailand, singapore );
+
+        // Register listeners to click on connections and items
+        items.forEach(item -> {
+            item.addItemEventListener(e -> {
+                switch (e.getEventType()) {
+                    case SELECTED: System.out.println("Selected: " + e.getItem().getName()); break;
+                }
+            });
+        });
 
         // Setup Chart
         circluarPlot = CircularPlotBuilder.create()
@@ -107,7 +106,11 @@ public class CircularPlotTest extends Application {
 
         if (null != circluarPlot.getConnection(australia, japan)) {
             circluarPlot.getConnection(australia, japan).setFill(Color.BLUE);
+        }
+        if (null != circluarPlot.getConnection(australia, india)) {
             circluarPlot.getConnection(australia, india).setFill(Color.CHOCOLATE);
+        }
+        if (null != circluarPlot.getConnection(japan, australia)) {
             circluarPlot.getConnection(japan, australia).setFill(Color.POWDERBLUE);
         }
         circluarPlot.getConnections().forEach(connection -> {
