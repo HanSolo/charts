@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.event.ConnectionEventListener;
 import javafx.application.Application;
@@ -113,9 +114,14 @@ public class CircularPlotTest extends Application {
         if (null != circluarPlot.getConnection(japan, australia)) {
             circluarPlot.getConnection(japan, australia).setFill(Color.POWDERBLUE);
         }
+
         circluarPlot.getConnections().forEach(connection -> {
+            //connection.setFill(Color.CRIMSON);
             System.out.println(connection.getOutgoingItem().getName() + " -> " + connection.getIncomingItem().getName() + " -> Value: " + connection.getValue() + " -> Color: " + connection.getFill());
         });
+
+        Connection connection = circluarPlot.getConnection(thailand, china);
+        System.out.println(null == connection ? "Connection is null!!!" : "Connection from Thailand -> China: " + connection.getValue());
     }
 
     @Override public void start(Stage stage) {
