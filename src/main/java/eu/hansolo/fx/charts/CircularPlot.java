@@ -476,10 +476,10 @@ public class CircularPlot extends Region {
         for (PlotItem item : getItems()) {
             item.getOutgoing().forEach((outgoingItem, value) -> {
                 if (incoming.containsKey(outgoingItem)) {
-                    incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
+                    //incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
                     connections.add(new Connection(item, outgoingItem, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 } else {
-                    incoming.put(outgoingItem, value);
+                    //incoming.put(outgoingItem, value);
                     connections.add(new Connection(outgoingItem, item, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 }
             });
