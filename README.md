@@ -1,3 +1,5 @@
+[ ![Download](https://api.bintray.com/packages/hansolo/charts/charts/images/download.svg?version=11.3) ](https://bintray.com/hansolo/charts/charts/11.3/link)
+
 # Charts
 
 A library for scientific charts in JavaFX. 
