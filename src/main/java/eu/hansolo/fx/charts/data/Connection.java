@@ -19,8 +19,6 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.event.ConnectionEvent;
 import eu.hansolo.fx.charts.event.ConnectionEventListener;
 import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
