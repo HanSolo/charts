@@ -599,12 +599,6 @@ public class SunburstChart<T extends ChartItem> extends Region {
         for (int i = 0 ; i <= maxLevel ; i++) { levelMap.put(i, new ArrayList<>()); }
         root.stream().forEach(node -> levelMap.get(node.getDepth()).add(node));
 
-        for (int level = 1 ; level < maxLevel ; level++) {
-            List<TreeNode<T>> treeNodeList = levelMap.get(level);
-            treeNodeList.stream()
-                        .filter(node -> node.getChildren().isEmpty())
-                        .forEach(node ->node.addNode(new TreeNode(new ChartItem("", 0, Color.TRANSPARENT, Color.TRANSPARENT), node)));
-        }
     }
 
     private void drawChart() {
@@ -633,6 +627,12 @@ public class SunburstChart<T extends ChartItem> extends Region {
 
         segments.clear();
 
+        Map<TreeNode<T>, Double> startAngles = new HashMap<>();
+        Map<TreeNode<T>, Double> angles      = new HashMap<>();
+        double                   levelOneSum = Double.NaN;
+        if(maxLevel >= 1){
+            levelOneSum = levelMap.get(1).stream().map(TreeNode::getItem).mapToDouble(T::getValue).sum();
+        }
         for (int level = 1 ; level <= maxLevel ; level++) {
             List<TreeNode<T>> nodesAtLevel = levelMap.get(level);
             double            xy           = centerX - ringStepSize * level * 0.5;
@@ -640,15 +640,43 @@ public class SunburstChart<T extends ChartItem> extends Region {
             double            outerRadius  = ringRadiusStep * level + barWidth * 0.5;
             double            innerRadius  = outerRadius - barWidth;
 
-            double segmentStartAngle;
-            double segmentEndAngle = 0;
-            for (TreeNode node : nodesAtLevel) {
+            double   segmentStartAngle;
+            double   segmentEndAngle = 0;
+            TreeNode currentParent   = null;
+
+            for (TreeNode<T> node : nodesAtLevel) {
                 ChartItem segmentData  = node.getItem();
-                double    segmentAngle = node.getParentAngle() * node.getPercentage();
+                double    segmentPercentage;
+                double    segmentAngle;
                 Paint     segmentColor = getUseColorFromParent() ? node.getMyRoot().getItem().getFill() : segmentData.getFill();
 
-                segmentStartAngle = 90 + segmentEndAngle;
-                segmentEndAngle  -= segmentAngle;
+                // Assuming level 0 is a pseudo-root with no data and level one is the first level with relevant data
+                if(level == 1){
+                    // The percentage is relevant to all siblings
+                    segmentPercentage = segmentData.getValue() / levelOneSum;
+                    segmentAngle =  segmentPercentage * 360;
+                    segmentStartAngle = 90 + segmentEndAngle;
+                }else {
+                    assert node.getParent() != null;
+                    if (!node.getParent().equals(currentParent)) {
+                        currentParent = node.getParent();
+                        // Start each segment from the same point as the parent
+                        segmentStartAngle = startAngles.get(currentParent);
+                        segmentEndAngle = segmentStartAngle - 90;
+                    } else {
+                        // Start the segment relative to the previous sibling
+                        segmentStartAngle = 90 + segmentEndAngle;
+                    }
+                    // The percentage is relative to the parent
+                    segmentPercentage= segmentData.getValue() / currentParent.getItem().getValue();
+                    segmentAngle =angles.get(currentParent) * segmentPercentage;
+                }
+                segmentEndAngle -= segmentAngle;
+                // Save the startAngle as entry-point for the children
+                assert !Double.isNaN(segmentStartAngle);
+                startAngles.put(node,segmentStartAngle);
+                // Store the angle of each segment separably from each node, because it is purely graphically
+                angles.put(node,segmentAngle);
 
                 // Only draw if segment fill color is not TRANSPARENT
                 if (!Color.TRANSPARENT.equals(segmentData.getFill())) {

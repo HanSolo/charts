@@ -197,32 +197,12 @@ public class TreeNode<T extends ChartItem> {
 
     public int getMaxLevel() { return getTreeRoot().stream().map(TreeNode<T>::getDepth).max(Comparator.naturalOrder()).orElse(0); }
 
-    public double getPercentage() {
-        List<TreeNode<T>> siblings = getSiblings();
-        double            sum      = siblings.stream().map(node -> node.getItem()).mapToDouble(T::getValue).sum();
-        return Double.compare(sum, 0) == 0 ? 1.0 : getItem().getValue() / sum;
-    }
-
     public List<TreeNode<T>> getSiblings() { return null == getParent() ? new ArrayList<>() : getParent().getChildren(); }
 
     public List<TreeNode<T>> nodesAtSameLevel() {
         final int LEVEL = getDepth();
         return getTreeRoot().stream().filter(node -> node.getDepth() == LEVEL).collect(Collectors.toList());
     }
-
-    public double getParentAngle() {
-        List<TreeNode> parentList = new ArrayList<>();
-        TreeNode node = TreeNode.this;
-        while (!node.getParent().isRoot()) {
-            node = node.getParent();
-            parentList.add(node);
-        }
-        Collections.reverse(parentList);
-        double parentAngle = 360.0;
-        for (TreeNode n : parentList) { parentAngle = parentAngle * n.getPercentage(); }
-        return parentAngle;
-    }
-
 
     // ******************** Event handling ************************************
     public void setOnTreeNodeEvent(final TreeNodeEventListener LISTENER) { addTreeNodeEventListener(LISTENER); }
