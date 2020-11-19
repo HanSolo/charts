@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts.data;
 
+import eu.hansolo.fx.charts.Cluster;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
@@ -39,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class PlotItem implements Item, Comparable<PlotItem>{
+public class PlotItem implements Item, Comparable<PlotItem> {
     private final ItemEvent               ITEM_EVENT = new ItemEvent(PlotItem.this, EventType.UPDATE);
     private       String                  _name;
     private       StringProperty          name;
@@ -50,15 +51,16 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     private       Color                   _fill;
     private       ObjectProperty<Color>   fill;
     private       Color                   _stroke;
-    private       ObjectProperty<Color> stroke;
-    private       Color                 _connectionFill;
-    private       ObjectProperty<Color> connectionFill;
+    private       ObjectProperty<Color>   stroke;
+    private       Color                   _connectionFill;
+    private       ObjectProperty<Color>   connectionFill;
     private       Symbol                  _symbol;
     private       ObjectProperty<Symbol>  symbol;
     private       Map<PlotItem, Double>   outgoing;
     private       Map<PlotItem, Double>   incoming;
     private       List<ItemEventListener> listeners;
     private       int                     level;
+    private       Cluster                 cluster;
 
 
     // ******************** Constructors **************************************
@@ -83,6 +85,7 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         _connectionFill = Color.TRANSPARENT;
         _symbol         = Symbol.NONE;
         level           = -1;
+        cluster         = null;
         outgoing        = new LinkedHashMap<>();
         incoming        = new LinkedHashMap<>();
         listeners       = new CopyOnWriteArrayList<>();
@@ -236,8 +239,8 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         return symbol;
     }
 
-    public double getSumOfIncoming() { return getIncoming().values().stream().mapToDouble(Double::doubleValue).sum(); }
-    public double getSumOfOutgoing() { return getOutgoing().values().stream().mapToDouble(Double::doubleValue).sum(); }
+    public double getSumOfIncoming() { return incoming.values().stream().mapToDouble(Double::doubleValue).sum(); }
+    public double getSumOfOutgoing() { return outgoing.values().stream().mapToDouble(Double::doubleValue).sum(); }
     public double getMaxSum() { return Math.max(getSumOfIncoming(), getSumOfOutgoing()); }
 
     public Map<PlotItem, Double> getOutgoing() { return outgoing; }
@@ -314,6 +317,9 @@ public class PlotItem implements Item, Comparable<PlotItem>{
         return level;
     }
 
+    public Cluster getCluster() { return cluster; }
+    public void setCluster(final Cluster CLUSTER) { cluster = CLUSTER; }
+
     public void sortOutgoingByGivenList(final List<PlotItem> LIST_WITH_SORTED_ITEMS) {
         List<PlotItem> outgoingKeys = new ArrayList(getOutgoing().keySet());
 
@@ -346,6 +352,31 @@ public class PlotItem implements Item, Comparable<PlotItem>{
     }
 
     @Override public int compareTo(final PlotItem ITEM) { return Double.compare(getValue(), ITEM.getValue()); }
+
+    @Override public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PlotItem item = (PlotItem) o;
+
+        if (Double.compare(item.getValue(), getValue()) != 0) return false;
+        if (getName() != null ? !getName().equals(item.getName()) : item.getName() != null) return false;
+        if (getFill() != null ? !getFill().equals(item.getFill()) : item.getFill() != null) return false;
+        if (getStroke() != null ? !getStroke().equals(item.getStroke()) : item.getStroke() != null) return false;
+        return getConnectionFill() != null ? getConnectionFill().equals(item.getConnectionFill()) : item.getConnectionFill() == null;
+    }
+
+    @Override public int hashCode() {
+        int  result;
+        long temp;
+        result = getName() != null ? getName().hashCode() : 0;
+        temp = Double.doubleToLongBits(getValue());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (getFill() != null ? getFill().hashCode() : 0);
+        result = 31 * result + (getStroke() != null ? getStroke().hashCode() : 0);
+        result = 31 * result + (getConnectionFill() != null ? getConnectionFill().hashCode() : 0);
+        return result;
+    }
 
 
     // ******************** Event Handling ************************************

@@ -47,7 +47,6 @@ public class Connection {
     private StringProperty                tooltipText;
 
 
-
     public Connection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL) {
         this(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL, "");
     }

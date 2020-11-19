@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 
@@ -415,6 +417,15 @@ public class Helper {
         double value = VALUE;
         while(value > 9 && value % 10 == 0) { value /= 10; }
         return value == 1;
+    }
+
+    public static <K, V extends Comparable<V>> V getMaxValueInMap(final Map<K, V> MAP) {
+        Entry<K, V> maxEntry = Collections.max(MAP.entrySet(), Comparator.comparing(Entry::getValue));
+        return maxEntry.getValue();
+    }
+    public static <K, V extends Comparable<V>> K getKeyWithMaxValueInMap(final Map<K, V> MAP) {
+        Entry<K, V> maxEntry = Collections.max(MAP.entrySet(), Comparator.comparing(Entry::getValue));
+        return maxEntry.getKey();
     }
 
     public static final List<Color> createColorPalette(final Color FROM_COLOR, final Color TO_COLOR, final int NO_OF_COLORS) {

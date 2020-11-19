@@ -242,12 +242,6 @@ public class CircularPlot extends Region {
     @Override protected double computeMaxWidth(final double HEIGHT) { return MAXIMUM_WIDTH; }
     @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
 
-    private void handleControlPropertyChanged(final String PROPERTY) {
-        if ("".equals(PROPERTY)) {
-
-        }
-    }
-
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
