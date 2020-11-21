@@ -19,10 +19,14 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.PlotItem;
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
@@ -47,17 +51,17 @@ public class Demo extends Application {
             new PlotItem("NUTE GUNRAY", 19, Color.web("#808080")),
             new PlotItem("PK-4", 3, Color.web("#808080")),
             new PlotItem("TC-14", 5, Color.web("#808080")),
-            new PlotItem("OBI-WAN", 34, Color.web("#48D1CC")),
+            new PlotItem("OBI-WAN", 34, Color.web("#6946BC")),
             new PlotItem("DOFINE", 4, Color.web("#808080")),
             new PlotItem("RUNE", 11, Color.web("#808080")),
             new PlotItem("TEY HOW", 5, Color.web("#808080")),
             new PlotItem("EMPEROR", 14, Color.web("#191970")),
             new PlotItem("CAPTAIN PANAKA", 20, Color.web("#808080")),
             new PlotItem("SIO BIBBLE", 8, Color.web("#808080")),
-            new PlotItem("JAR JAR", 36, Color.web("#9a9a00")),
+            new PlotItem("JAR JAR", 36, Color.web("#FA9600")),
             new PlotItem("TARPALS", 4, Color.web("#808080")),
             new PlotItem("BOSS NASS", 5, Color.web("#808080")),
-            new PlotItem("PADME", 31, Color.web("#DDA0DD")),
+            new PlotItem("PADME", 31, Color.web("#BC25BA")),
             new PlotItem("RIC OLIE", 12, Color.web("#808080")),
             new PlotItem("WATTO", 8, Color.web("#808080")),
             new PlotItem("ANAKIN", 41, Color.web("#ce3b59")),
@@ -226,16 +230,23 @@ public class Demo extends Application {
                                   .textColor(Color.rgb(90,90,90))
                                   .coloredConnections(false)
                                   .sortByCluster(false)
-                                  .useFullCircle(false)
+                                  .useFullCircle(true)
                                   .weightDots(false)
-                                  .weightConnections(false)
+                                  .weightConnections(true)
                                   .connectionOpacity(0.2)
                                   .build();
+        arcChart.setSelectedItem(plotItems.stream().filter(item -> item.getName().equals("PADME")).findFirst().get());
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(arcChart);
-
+        Label title = new Label("Star Wars Episode I - Interactions");
+        title.setAlignment(Pos.CENTER);
+        title.setFont(Font.font(24));
+        VBox vBox = new VBox(10, title, arcChart);
+        vBox.setFillWidth(true);
+        vBox.setAlignment(Pos.CENTER);
+        StackPane pane = new StackPane(vBox);
+        pane.setPadding(new Insets(10));
         Scene scene = new Scene(pane);
 
         stage.setTitle("Arc Chart");
