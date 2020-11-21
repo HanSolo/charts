@@ -628,19 +628,6 @@ public class ArcChart extends Region {
                 } else {
                     connectionStroke = getConnectionColor();
                 }
-                if (null != selectedItem) {
-                    if (connection.getIncomingItem().equals(selectedItem) || connection.getOutgoingItem().equals(selectedItem)) {
-                        if (getColoredConnections()) {
-                            connectionStroke = getSelectionColor();
-                        } else {
-                            if (getSortByCluster() && null != selectedItem.getCluster()) {
-                                connectionStroke = Helper.getColorWithOpacity(selectedItem.getCluster().getFill(), getConnectionOpacity());
-                            } else {
-                                connectionStroke = Helper.getColorWithOpacity(selectedItem.getFill(), getConnectionOpacity());
-                            }
-                        }
-                    }
-                }
 
                 ctx.setStroke(connectionStroke);
                 ctx.setLineWidth(connectionWidth);
@@ -674,6 +661,46 @@ public class ArcChart extends Region {
                 }
             });
         });
+
+        if (null != selectedItem) {
+            selectedItem.getOutgoing().forEach((outgoingItem, value) -> {
+                Point    itemPoint = itemPoints.get(selectedItem);
+                Point  outgoingItemPoint = itemPoints.get(outgoingItem);
+                double connectionWidth   = getWeightConnections() ? Helper.clamp(2, maxConnectionWidth, value * connectionWidthFactor) : 2;
+                double arcWidth          = outgoingItemPoint.getX() - itemPoint.getX();
+                Color  connectionStroke = getConnectionColor();
+                Connection connection = getConnection(selectedItem, outgoingItem);
+                if (connection.getIncomingItem().equals(selectedItem) || connection.getOutgoingItem().equals(selectedItem)) {
+                    if (getColoredConnections()) {
+                        connectionStroke = getSelectionColor();
+                    } else {
+                        if (getSortByCluster() && null != selectedItem.getCluster()) {
+                            connectionStroke = Helper.getColorWithOpacity(selectedItem.getCluster().getFill(), getConnectionOpacity());
+                        } else {
+                            connectionStroke = Helper.getColorWithOpacity(selectedItem.getFill(), getConnectionOpacity());
+                        }
+                    }
+                }
+
+                ctx.setStroke(connectionStroke);
+                ctx.setLineWidth(connectionWidth);
+
+                Path path = new Path();
+                path.setStroke(connectionStroke);
+                path.moveTo(itemPoint.getX(), itemPoint.getY());
+                if (getUseFullCircle()) {
+                    path.arcTo(arcWidth * 0.5, arcWidth * 0.5, 180, false, true, outgoingItemPoint.getX(), outgoingItemPoint.getY());
+                } else {
+                    if (arcWidth < 0) {
+                        path.setStroke(Helper.getColorWithOpacity(connectionStroke, getConnectionOpacity() * 0.5));
+                        path.arcTo(arcWidth * 0.5, arcWidth * 0.5, -180, false, false, outgoingItemPoint.getX(), outgoingItemPoint.getY());
+                    } else {
+                        path.arcTo(arcWidth * 0.5, arcWidth * 0.5, 180, false, true, outgoingItemPoint.getX(), outgoingItemPoint.getY());
+                    }
+                }
+                path.draw(ctx, false, true);
+            });
+        }
 
         // Draw item dots
         Collections.reverse(sortedItems);
