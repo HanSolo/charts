@@ -651,10 +651,24 @@ public class Helper {
         return isInPolygon(X, Y, noOfPointsInPolygon, pointsX, pointsY);
     }
 
+    public static final <T extends Point> double squareDistance(final T P1, final T P2) {
+        return squareDistance(P1.getX(), P1.getY(), P2.getX(), P2.getY());
+    }
     public static final double squareDistance(final double X1, final double Y1, final double X2, final double Y2) {
         double deltaX = (X1 - X2);
         double deltaY = (Y1 - Y2);
         return (deltaX * deltaX) + (deltaY * deltaY);
+    }
+
+    public static final double distance(final double X1, final double Y1, final double X2, final double Y2) {
+        return Math.sqrt((X2 - X1) * (X2 - X1) + (Y2 - Y1) * (Y2 - Y1));
+    }
+
+    public static final <T extends Point> Point getMidPoint(final T P1, final T P2) {
+        return new Point((P1.getX() + P2.getX()) / 2.0, (P1.getY() + P2.getY()) / 2.0);
+    }
+    public static final double[] getMidPoint(final double X1, final double Y1, final double X2, final double Y2) {
+        return new double[] { (X1 + X2) / 2.0, (Y1 + Y2) / 2.0 };
     }
 
     public static final double[] toHSL(final Color COLOR) {
@@ -961,6 +975,42 @@ public class Helper {
         text = null;
         CtxDimension dim = new CtxDimension(textWidth, textHeight);
         return dim;
+    }
+
+    public static final double bearing(final Point P1, final Point P2) {
+        return bearing(P1.getX(), P1.getY(), P2.getX(), P2.getY());
+    }
+    public static final double bearing(final double X1, final double Y1, final double X2, final double Y2) {
+        double bearing = Math.toDegrees(Math.atan2(Y2 - Y1, X2 - X1)) + 90;
+        if (bearing < 0) { bearing += 360.0; }
+        return bearing;
+    }
+
+    /**
+     * @param START_POINT
+     * @param CONTROL_POINT_1
+     * @param CONTROL_POINT_2
+     * @param END_POINT
+     * @param DISTANCE in % (0-1)
+     * @return
+     */
+    public static final Point getCubicBezierXYatT(final Point START_POINT, final Point CONTROL_POINT_1, final Point CONTROL_POINT_2, final Point END_POINT, final double DISTANCE) {
+        final double x = cubicN(DISTANCE, START_POINT.getX(), CONTROL_POINT_1.getX(), CONTROL_POINT_2.getX(), END_POINT.getX());
+        final double y = cubicN(DISTANCE, START_POINT.getY(), CONTROL_POINT_1.getY(), CONTROL_POINT_2.getY(), END_POINT.getY());
+        return new Point(x, y);
+    }
+    public static final double[] getCubicBezierXYatT(final double START_POINT_X, final double START_POINT_Y,
+                                                  final double CONTROL_POINT_1_X, final double CONTROL_POINT_1_Y,
+                                                  final double CONTROL_POINT_2_X, final double CONTROL_POINT_2_Y,
+                                                  final double END_POINT_X, final double END_POINT_Y, final double DISTANCE) {
+        final double x = cubicN(DISTANCE, START_POINT_X, CONTROL_POINT_1_X, CONTROL_POINT_2_X, END_POINT_X);
+        final double y = cubicN(DISTANCE, START_POINT_Y, CONTROL_POINT_1_Y, CONTROL_POINT_2_Y, END_POINT_Y);
+        return new double[] { x, y };
+    }
+    private static double cubicN(final double DISTANCE, final double A, final double B, final double C, final double D) {
+        final double t2 = DISTANCE * DISTANCE;
+        final double t3 = t2 * DISTANCE;
+        return A + (-A * 3 + DISTANCE * (3 * A - A * DISTANCE)) * DISTANCE + (3 * B + DISTANCE * (-6 * B + B * 3 * DISTANCE)) * DISTANCE + (C * 3 - C * 3 * DISTANCE) * t2 + D * t3;
     }
 
     public static final void drawTextWithBackground(final GraphicsContext CTX, final String TEXT, final Font FONT, final Color TEXT_BACKGROUND, final Color TEXT_FILL, final double X, final double Y) {

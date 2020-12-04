@@ -16,11 +16,15 @@
 
 package eu.hansolo.fx.charts.world;
 
+import eu.hansolo.fx.charts.data.MapConnection;
+import eu.hansolo.fx.charts.data.WeightedMapPoints;
 import eu.hansolo.fx.charts.heatmap.HeatMap;
 import eu.hansolo.fx.charts.heatmap.HeatMapBuilder;
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
 import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Location;
+import eu.hansolo.fx.charts.tools.MapPoint;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
@@ -31,6 +35,7 @@ import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -45,9 +50,12 @@ import javafx.event.WeakEventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -58,20 +66,32 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static javafx.scene.input.MouseEvent.MOUSE_ENTERED;
 import static javafx.scene.input.MouseEvent.MOUSE_EXITED;
@@ -97,6 +117,7 @@ public class World extends Region {
     private static       double                          MAP_OFFSET_X     = -PREFERRED_WIDTH * 0.0285;
     private static       double                          MAP_OFFSET_Y     = PREFERRED_HEIGHT * 0.195;
     private static final double                          ASPECT_RATIO     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+    private static final double                          MAX_DIAM         = 50;
     private static final CssMetaData<World, Color>       BACKGROUND_COLOR = FACTORY.createColorCssMetaData("-background-color", s -> s.backgroundColor, Color.web("#3f3f4f"), false);
     private        final StyleableProperty<Color>        backgroundColor;
     private static final CssMetaData<World, Color>       FILL_COLOR = FACTORY.createColorCssMetaData("-fill-color", s -> s.fillColor, Color.web("#d9d9dc"), false);
@@ -126,6 +147,8 @@ public class World extends Region {
     private              Pane                            pane;
     private              Group                           group;
     private              HeatMap                         heatMap;
+    private              Canvas                          canvas;
+    private              GraphicsContext                 ctx;
     private              Map<String, List<CountryPath>>  countryPaths;
     private              ObservableMap<Location, Shape>  locations;
     private              ColorMapping                    colorMapping;
@@ -134,6 +157,18 @@ public class World extends Region {
     private              OpacityDistribution             opacityDistribution;
     private              double                          heatMapOpacity;
     private              BooleanProperty                 heatMapVisible;
+    private              ObservableList<MapPoint>        mapPoints;
+    private              ObservableList<MapConnection>   mapConnections;
+    private              List<MapPoint>                  incomingItems;
+    private              List<MapPoint>                  outgoingItems;
+    private              List<MapPoint>                  allItems;
+    private              double                          connectionWidth;
+    private              WeightedMapPoints               weightedMapPoints;
+    private              boolean                         weightedMapConnections;
+    private              boolean                         arrowsVisible;
+    private              Optional<MapConnection>         connectionWithMaxValue;
+    private              boolean                         mapPointTextVisible;
+    private              Color                           textColor;
     // internal event handlers
     protected            EventHandler<MouseEvent>        _mouseEnterHandler;
     protected            EventHandler<MouseEvent>        _mousePressHandler;
@@ -155,44 +190,44 @@ public class World extends Region {
         this(RESOLUTION, ColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
     }
     public World(final Resolution RESOLUTION, final ColorMapping COLOR_MAPPING, final double EVENT_RADIUS, final boolean FADE_COLORS, final OpacityDistribution OPACITY_DISTRIBUTION, final double HEAT_MAP_OPACITY) {
-        resolutionProperties = readProperties(Resolution.HI_RES == RESOLUTION ? World.HIRES_PROPERTIES : World.LORES_PROPERTIES);
-        backgroundColor      = new StyleableObjectProperty<Color>(BACKGROUND_COLOR.getInitialValue(World.this)) {
+        resolutionProperties   = readProperties(Resolution.HI_RES == RESOLUTION ? World.HIRES_PROPERTIES : World.LORES_PROPERTIES);
+        backgroundColor        = new StyleableObjectProperty<Color>(BACKGROUND_COLOR.getInitialValue(World.this)) {
             @Override protected void invalidated() { setBackground(new Background(new BackgroundFill(get(), CornerRadii.EMPTY, Insets.EMPTY))); }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "backgroundColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return BACKGROUND_COLOR; }
         };
-        fillColor            = new StyleableObjectProperty<Color>(FILL_COLOR.getInitialValue(World.this)) {
+        fillColor              = new StyleableObjectProperty<Color>(FILL_COLOR.getInitialValue(World.this)) {
             @Override protected void invalidated() { setFillAndStroke(); }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "fillColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return FILL_COLOR; }
         };
-        strokeColor          = new StyleableObjectProperty<Color>(STROKE_COLOR.getInitialValue(World.this)) {
+        strokeColor            = new StyleableObjectProperty<Color>(STROKE_COLOR.getInitialValue(World.this)) {
             @Override protected void invalidated() { setFillAndStroke(); }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "strokeColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return STROKE_COLOR; }
         };
-        hoverColor           = new StyleableObjectProperty<Color>(HOVER_COLOR.getInitialValue(World.this)) {
+        hoverColor             = new StyleableObjectProperty<Color>(HOVER_COLOR.getInitialValue(World.this)) {
             @Override protected void invalidated() { }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "hoverColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return HOVER_COLOR; }
         };
-        pressedColor         = new StyleableObjectProperty<Color>(PRESSED_COLOR.getInitialValue(this)) {
+        pressedColor           = new StyleableObjectProperty<Color>(PRESSED_COLOR.getInitialValue(this)) {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "pressedColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return PRESSED_COLOR; }
         };
-        selectedColor        = new StyleableObjectProperty<Color>(SELECTED_COLOR.getInitialValue(this)) {
+        selectedColor          = new StyleableObjectProperty<Color>(SELECTED_COLOR.getInitialValue(this)) {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "selectedColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return SELECTED_COLOR; }
         };
-        locationColor        = new StyleableObjectProperty<Color>(LOCATION_COLOR.getInitialValue(this)) {
+        locationColor          = new StyleableObjectProperty<Color>(LOCATION_COLOR.getInitialValue(this)) {
             @Override protected void invalidated() {
                 locations.forEach((location, shape) -> shape.setFill(null == location.getColor() ? get() : location.getColor()));
             }
@@ -200,22 +235,22 @@ public class World extends Region {
             @Override public String getName() { return "locationColor"; }
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return LOCATION_COLOR; }
         };
-        hoverEnabled         = new BooleanPropertyBase(true) {
+        hoverEnabled           = new BooleanPropertyBase(true) {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "hoverEnabled"; }
         };
-        selectionEnabled     = new BooleanPropertyBase(false) {
+        selectionEnabled       = new BooleanPropertyBase(false) {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "selectionEnabled"; }
         };
-        selectedCountry      = new ObjectPropertyBase<Country>() {
+        selectedCountry        = new ObjectPropertyBase<Country>() {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "selectedCountry"; }
         };
-        zoomEnabled          = new BooleanPropertyBase(false) {
+        zoomEnabled            = new BooleanPropertyBase(false) {
             @Override protected void invalidated() {
                 if (null == getScene()) return;
                 if (get()) {
@@ -227,7 +262,7 @@ public class World extends Region {
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "zoomEnabled"; }
         };
-        scaleFactor          = new DoublePropertyBase(1.0) {
+        scaleFactor            = new DoublePropertyBase(1.0) {
             @Override protected void invalidated() {
                 if (isZoomEnabled()) {
                     setScaleX(get());
@@ -237,14 +272,14 @@ public class World extends Region {
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "scaleFactor"; }
         };
-        countryPaths         = createCountryPaths();
-        locations            = FXCollections.observableHashMap();
-        colorMapping         = COLOR_MAPPING;
-        spotRadius = EVENT_RADIUS;
-        fadeColors           = FADE_COLORS;
-        opacityDistribution  = OPACITY_DISTRIBUTION;
-        heatMapOpacity       = HEAT_MAP_OPACITY;
-        heatMapVisible       = new BooleanPropertyBase(true) {
+        countryPaths           = createCountryPaths();
+        locations              = FXCollections.observableHashMap();
+        colorMapping           = COLOR_MAPPING;
+        spotRadius             = EVENT_RADIUS;
+        fadeColors             = FADE_COLORS;
+        opacityDistribution    = OPACITY_DISTRIBUTION;
+        heatMapOpacity         = HEAT_MAP_OPACITY;
+        heatMapVisible         = new BooleanPropertyBase(true) {
             @Override protected void invalidated() {
                 heatMap.setVisible(get());
                 heatMap.setManaged(get());
@@ -252,15 +287,24 @@ public class World extends Region {
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "heatMapVisible"; }
         };
+        mapPoints              = FXCollections.observableArrayList();
+        mapConnections         = FXCollections.observableArrayList();
+        connectionWidth        = 1;
+        weightedMapPoints      = WeightedMapPoints.NONE;
+        weightedMapConnections = false;
+        arrowsVisible          = false;
+        connectionWithMaxValue = Optional.empty();
+        mapPointTextVisible    = false;
+        textColor              = Color.BLACK;
 
-        pane                 = new Pane();
-        group                = new Group();
+        pane                   = new Pane();
+        group                  = new Group();
 
-        _mouseEnterHandler   = evt -> handleMouseEvent(evt, mouseEnterHandler);
-        _mousePressHandler   = evt -> handleMouseEvent(evt, mousePressHandler);
-        _mouseReleaseHandler = evt -> handleMouseEvent(evt, mouseReleaseHandler);
-        _mouseExitHandler    = evt -> handleMouseEvent(evt, mouseExitHandler);
-        _scrollEventHandler  = evt -> {
+        _mouseEnterHandler     = evt -> handleMouseEvent(evt, mouseEnterHandler);
+        _mousePressHandler     = evt -> handleMouseEvent(evt, mousePressHandler);
+        _mouseReleaseHandler   = evt -> handleMouseEvent(evt, mouseReleaseHandler);
+        _mouseExitHandler      = evt -> handleMouseEvent(evt, mouseExitHandler);
+        _scrollEventHandler    = evt -> {
             if (group.getTranslateX() != 0 || group.getTranslateY() != 0) { resetZoom(); }
             double delta    = 1.2;
             double scale    = getScaleFactor();
@@ -327,7 +371,10 @@ public class World extends Region {
                                  .heatMapOpacity(heatMapOpacity)
                                  .build();
 
-        getChildren().setAll(group, heatMap);
+        canvas = new Canvas(1009, 665);
+        ctx    = canvas.getGraphicsContext2D();
+
+        getChildren().setAll(group, heatMap, canvas);
 
         setBackground(new Background(new BackgroundFill(getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
     }
@@ -346,6 +393,14 @@ public class World extends Region {
                     Platform.runLater(() -> pane.getChildren().remove(CHANGE.getValueRemoved()));
                 }
             });
+        });
+        mapPoints.addListener((ListChangeListener<MapPoint>) c -> redraw());
+        mapConnections.addListener((ListChangeListener<MapConnection>) c -> {
+            incomingItems          = mapConnections.stream().map(connection -> connection.getIncomingItem()).distinct().collect(Collectors.toList());
+            outgoingItems          = mapConnections.stream().map(connection -> connection.getOutgoingItem()).distinct().collect(Collectors.toList());
+            allItems               = Stream.concat(incomingItems.stream(), outgoingItems.stream()).distinct().collect(Collectors.toList());
+            connectionWithMaxValue = mapConnections.stream().max(Comparator.comparing(MapConnection::getValue));
+            redraw();
         });
     }
 
@@ -418,6 +473,56 @@ public class World extends Region {
     public boolean isHeatMapVisible() { return heatMapVisible.get(); }
     public void setHeatMapVisible(final boolean VISIBLE) { heatMapVisible.set(VISIBLE); }
     public BooleanProperty heatMapVisibleProperty() { return heatMapVisible; }
+
+    public List<MapPoint> getMapPoints() { return mapPoints; }
+    public void setMapPoints(final MapPoint... MAP_POINTS) { this.setMapPoints(Arrays.asList(MAP_POINTS)); }
+    public void setMapPoints(final List<MapPoint> MAP_POINTS) { mapPoints.setAll(MAP_POINTS); }
+    public void addMapPoints(final MapPoint... MAP_POINTS) { this.addMapPoints(Arrays.asList(MAP_POINTS)); }
+    public void addMapPoints(final List<MapPoint> MAP_POINTS) { mapPoints.addAll(MAP_POINTS); }
+    public void clearMapPoints() { mapPoints.clear(); }
+
+    public List<MapConnection> getMapConnections() { return mapConnections; }
+    public void setMapConnections(final MapConnection... MAP_CONNECTIONS) { this.setMapConnections(Arrays.asList(MAP_CONNECTIONS)); }
+    public void setMapConnections(final List<MapConnection> MAP_CONNECTIONS) { mapConnections.setAll(MAP_CONNECTIONS); }
+    public void addMapConnections(final MapConnection... MAP_CONNECTIONS) { this.addMapConnections(Arrays.asList(MAP_CONNECTIONS)); }
+    public void addMapConnections(final List<MapConnection> MAP_CONNECTIONS) { mapConnections.addAll(MAP_CONNECTIONS); }
+    public void clearMapConnections() { mapConnections.clear(); }
+
+    public double getConnectionWidth() { return connectionWidth; }
+    public void setConnectionWidth(final double WIDTH) {
+        connectionWidth = Helper.clamp(0.5, 10, WIDTH);
+        redraw();
+    }
+
+    public WeightedMapPoints getWeightedMapPoints() { return weightedMapPoints; }
+    public void setWeightedMapPoints(final WeightedMapPoints WEIGHTED) {
+        weightedMapPoints = WEIGHTED;
+        redraw();
+    }
+
+    public boolean getWeightedMapConnections() { return weightedMapConnections; }
+    public void setWeightedMapConnections(final boolean WEIGHTED) {
+        weightedMapConnections = WEIGHTED;
+        redraw();
+    }
+
+    public boolean getArrowsVisible() { return arrowsVisible; }
+    public void setArrowsVisible(final boolean VISIBLE) {
+        arrowsVisible = VISIBLE;
+        redraw();
+    }
+
+    public boolean getMapPointTextVisible() { return mapPointTextVisible; }
+    public void setMapPointTextVisible(final boolean VISIBLE) {
+        mapPointTextVisible = VISIBLE;
+        redraw();
+    }
+
+    public Color getTextColor() { return textColor; }
+    public void setTextColor(final Color COLOR) {
+        textColor = COLOR;
+        redraw();
+    }
 
     public void resetZoom() {
         setScaleFactor(1.0);
@@ -766,6 +871,223 @@ public class World extends Region {
     }
 
 
+    private void redraw() {
+        if (mapPoints.isEmpty() && mapConnections.isEmpty()) { return; }
+
+        double w = canvas.getWidth();
+        double h = canvas.getHeight();
+        ctx.clearRect(0, 0, w, h);
+
+        Map<MapPoint, Integer> weightedPoints = new HashMap<>();
+        double maxPointDia = 3;
+        double maxAmount   = 0;
+        switch(weightedMapPoints) {
+            case INCOMING:
+                mapConnections.forEach(connection -> {
+                    MapPoint incomingItem = connection.getIncomingItem();
+                    if (weightedPoints.containsKey(incomingItem)) {
+                        int count = weightedPoints.get(incomingItem);
+                        weightedPoints.put(incomingItem, count + 1);
+                    } else {
+                        weightedPoints.put(incomingItem, 1);
+                    }
+                });
+                Optional<Entry<MapPoint, Integer>> maxIncomingEntry = weightedPoints.entrySet().stream().max(Comparator.comparing(Map.Entry::getValue));
+                maxAmount = maxIncomingEntry.isPresent() ? maxIncomingEntry.get().getValue() : 0;
+                break;
+            case OUTGOING:
+                mapConnections.forEach(connection -> {
+                    MapPoint outgoingItem = connection.getOutgoingItem();
+                    if (weightedPoints.containsKey(outgoingItem)) {
+                        int count = weightedPoints.get(outgoingItem);
+                        weightedPoints.put(outgoingItem, count + 1);
+                    } else {
+                        weightedPoints.put(outgoingItem, 1);
+                    }
+                });
+                Optional<Entry<MapPoint, Integer>> maxOutgoingEntry = weightedPoints.entrySet().stream().max(Comparator.comparing(Map.Entry::getValue));
+                maxAmount = maxOutgoingEntry.isPresent() ? maxOutgoingEntry.get().getValue() : 0;
+                break;
+            case NONE:
+            default:
+                break;
+        }
+
+        double fontSize = size * 0.01;
+        ctx.setFont(Font.font(fontSize));
+        ctx.setTextBaseline(VPos.CENTER);
+        ctx.setTextAlign(TextAlignment.CENTER);
+        ctx.setLineWidth(1);
+        List<MapPoint> pointsDrawn = new ArrayList<>();
+        for (MapPoint point : mapPoints) {
+            pointsDrawn.add(point);
+            double[] xy = latLonToXY(point.getX(), point.getY());
+            ctx.setStroke(point.getFill());
+            ctx.strokeOval(xy[0] - 3, xy[1] - 3, 6, 6);
+            ctx.setFill(point.getFill());
+            ctx.fillOval(xy[0] - maxPointDia / 2.0, xy[1] - maxPointDia / 2.0, maxPointDia, maxPointDia);
+            if (mapPointTextVisible) {
+                ctx.save();
+                ctx.setFill(textColor);
+                ctx.fillText(point.getName(), xy[0], xy[1] + fontSize);
+                ctx.restore();
+            }
+        }
+        ctx.setLineWidth(connectionWidth);
+        double factor               = MAX_DIAM / maxAmount;
+        double cubicCurveDistFactor = 0.01;
+        double distFactor           = 1.0;
+        if (connectionWithMaxValue.isPresent()) {
+            if (connectionWithMaxValue.get().getValue() > 0) {
+                cubicCurveDistFactor = 0.04 / connectionWithMaxValue.get().getValue();
+                double[] p1 = new double[] { connectionWithMaxValue.get().getOutgoingItem().getX(), connectionWithMaxValue.get().getOutgoingItem().getY() };
+                double[] p2 = new double[] { connectionWithMaxValue.get().getIncomingItem().getX(), connectionWithMaxValue.get().getIncomingItem().getY() };
+                p1 = latLonToXY(p1[0], p1[1]);
+                p2 = latLonToXY(p2[0], p2[1]);
+                double dist = Helper.distance(p1[0], p1[1], p2[0], p2[1]);
+                distFactor = 1.0 / dist;
+            }
+        }
+        for (MapConnection connection : mapConnections) {
+            MapPoint p1 = connection.getIncomingItem();
+            MapPoint p2 = connection.getOutgoingItem();
+            ctx.save();
+            switch(weightedMapPoints) {
+                case INCOMING:
+                    ctx.setFill(p1.getFill());
+                    maxPointDia = weightedPoints.get(p1) * factor;
+                    double[] wp1 = latLonToXY(p1.getX(), p1.getY());
+                    ctx.fillOval(wp1[0] - maxPointDia / 2.0, wp1[1] - maxPointDia / 2.0, maxPointDia, maxPointDia);
+                    ctx.save();
+                    ctx.setFill(textColor);
+                    ctx.fillText(p1.getName(), wp1[0], wp1[1] + fontSize);
+                    ctx.restore();
+                    break;
+                case OUTGOING:
+                    ctx.setFill(p2.getFill());
+                    maxPointDia = weightedPoints.get(p2) * factor;
+                    double[] wp2 = latLonToXY(p2.getX(), p2.getY());
+                    ctx.fillOval(wp2[0] - maxPointDia / 2.0, wp2[1] - maxPointDia / 2.0, maxPointDia, maxPointDia);
+                    ctx.save();
+                    ctx.setFill(textColor);
+                    ctx.fillText(p2.getName(), wp2[0], wp2[1] + fontSize);
+                    ctx.restore();
+                    break;
+                case NONE:
+                default:
+                    break;
+            }
+            ctx.restore();
+            if (null == p1 || null == p2) { continue; }
+
+            double[] xy1       = latLonToXY(p1.getX(), p1.getY());
+            double[] xy2       = latLonToXY(p2.getX(), p2.getY());
+            double[] midPoint  = Helper.getMidPoint(xy1[0], xy1[1], xy2[0], xy2[1]);
+            double[] midPoint1 = Helper.getMidPoint(xy1[0], xy1[1], midPoint[0], midPoint[1]);
+            double[] midPoint2 = Helper.getMidPoint(xy2[0], xy2[1], midPoint[0], midPoint[1]);
+            double[] rotCp1    = Helper.getMidPoint(xy1[0], xy1[1], midPoint2[0], midPoint2[1]);
+            double[] rotCp2    = Helper.getMidPoint(midPoint1[0], midPoint1[1], xy2[0], xy2[1]);
+            double[] cp1;
+            double[] cp2;
+            if (xy2[0] > xy1[0]) {
+                cp1 = Helper.rotatePointAroundRotationCenter(rotCp1[0], rotCp1[1], xy1[0], xy1[1], -80);
+                cp2 = Helper.rotatePointAroundRotationCenter(rotCp2[0], rotCp2[1], xy2[0], xy2[1], 80);
+                ctx.beginPath();
+                ctx.moveTo(xy1[0], xy1[1]);
+                ctx.bezierCurveTo(cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1]);
+            } else {
+                cp1 = Helper.rotatePointAroundRotationCenter(rotCp1[0], rotCp1[1], xy1[0], xy1[1], 80);
+                cp2 = Helper.rotatePointAroundRotationCenter(rotCp2[0], rotCp2[1], xy2[0], xy2[1], -80);
+                ctx.beginPath();
+                ctx.moveTo(xy2[0], xy2[1]);
+                ctx.bezierCurveTo(cp2[0], cp2[1], cp1[0], cp1[1], xy1[0], xy1[1]);
+            }
+
+            if (weightedMapConnections) {
+                // Draw arrows
+                double distance = Helper.distance(xy1[0], xy1[1], xy2[0], xy2[1]);
+                double d        = (1.0 / (distance * distFactor)) * (connection.getValue() * cubicCurveDistFactor);
+
+                // Draw wider arcs
+                double[] arrowCenter = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], d);
+                double[] arrowPoint1 = Helper.rotatePointAroundRotationCenter(arrowCenter[0], arrowCenter[1], xy1[0], xy1[1], -45);
+                double[] arrowPoint2 = Helper.rotatePointAroundRotationCenter(arrowCenter[0], arrowCenter[1], xy1[0], xy1[1], +45);
+                if (connection.getGradientFill()) {
+                    LinearGradient gradient = new LinearGradient(xy1[0], xy1[1], xy2[0], xy2[1], false, CycleMethod.NO_CYCLE,
+                                                                 new Stop(0.0, connection.getEndColor()),
+                                                                 new Stop(0.5, connection.getStartColor()),
+                                                                 new Stop(1.0, connection.getStartColor()));
+                    ctx.setFill(gradient);
+                    ctx.setStroke(gradient);
+                } else {
+                    ctx.setFill(connection.getStroke());
+                    ctx.setStroke(connection.getStroke());
+                }
+                ctx.beginPath();
+                ctx.moveTo(xy1[0], xy1[1]);
+                ctx.lineTo(arrowPoint1[0], arrowPoint1[1]);
+                ctx.bezierCurveTo(cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1]);
+                ctx.bezierCurveTo(cp2[0], cp2[1], cp1[0], cp1[1], arrowPoint2[0], arrowPoint2[1]);
+                ctx.lineTo(xy1[0], xy1[1]);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.setLineWidth(connection.getLineWidth());
+                if (connection.getGradientFill()) {
+                    LinearGradient gradient = new LinearGradient(xy1[0], xy1[1], xy2[0], xy2[1], false, CycleMethod.NO_CYCLE,
+                                                                 new Stop(0.0, connection.getEndColor()),
+                                                                 new Stop(0.5, connection.getStartColor()),
+                                                                 new Stop(1.0, connection.getStartColor()));
+                    ctx.setStroke(gradient);
+                } else {
+                    ctx.setStroke(connection.getStroke());
+                }
+                ctx.stroke();
+
+                // Draw arrows
+                double[] pointNearStart = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], 0.01);
+                double   dx             = xy1[0] - pointNearStart[0];
+                double   dy             = xy1[1] - pointNearStart[1];
+                double   angleAtEnd     = Math.toDegrees(Math.atan2(dy, dx));
+
+                if (arrowsVisible) {
+                    double arrowSize = connectionWidth * 3;
+                    ctx.beginPath();
+                    ctx.save();
+                    if (connection.getGradientFill()) {
+                        ctx.setFill(connection.getEndColor());
+                    } else {
+                        ctx.setFill(connection.getStroke());
+                    }
+                    ctx.translate(xy1[0], xy1[1]);
+                    ctx.rotate(angleAtEnd);
+                    ctx.moveTo(-arrowSize * 3, 0);
+                    ctx.lineTo(-arrowSize * 3, -arrowSize * 2); // Point 1 of arrow
+                    ctx.lineTo(0, 0);
+                    ctx.lineTo(-arrowSize * 3, arrowSize * 2); // Point 2 of arrow
+                    ctx.lineTo(-arrowSize * 3, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // Draw text
+            if (mapPointTextVisible) {
+                ctx.save();
+                ctx.setFill(textColor);
+                for (MapPoint point : allItems) {
+                    if (pointsDrawn.contains(point)) { continue; }
+                    double[] xy = latLonToXY(point.getX(), point.getY());
+                    ctx.fillText(point.getName(), xy[0], xy[1] + fontSize);
+                }
+                ctx.restore();
+            }
+        }
+    }
+
+
     // ******************** Style related *************************************
     @Override public String getUserAgentStylesheet() {
         return World.class.getResource("world.css").toExternalForm();
@@ -807,6 +1129,13 @@ public class World extends Region {
             heatMap.setScaleY(pane.getScaleY());
             heatMap.setTranslateX(group.getBoundsInParent().getMinX() - group.getLayoutBounds().getMinX());
             heatMap.setTranslateY(group.getBoundsInParent().getMinY() - group.getLayoutBounds().getMinY());
+
+            canvas.setScaleX(pane.getScaleX());
+            canvas.setScaleY(pane.getScaleY());
+            canvas.setTranslateX(group.getBoundsInParent().getMinX() - group.getLayoutBounds().getMinX());
+            canvas.setTranslateY(group.getBoundsInParent().getMinY() - group.getLayoutBounds().getMinY());
+
+            redraw();
 
             pane.setCache(false);
         }

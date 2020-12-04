@@ -16,9 +16,12 @@
 
 package eu.hansolo.fx.charts.world;
 
+import eu.hansolo.fx.charts.data.MapConnection;
+import eu.hansolo.fx.charts.data.WeightedMapPoints;
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Location;
+import eu.hansolo.fx.charts.tools.MapPoint;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -34,6 +37,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -159,6 +163,46 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
     public final B opacityDistribution(final OpacityDistribution OPACITY_DISTRIBUTION) {
         properties.put("opacityDistribution", new SimpleObjectProperty<>(OPACITY_DISTRIBUTION));
         return (B) this;
+    }
+
+    public final B mapPoints(final List<MapPoint> MAP_POINTS) {
+        properties.put("mapPoints", new SimpleObjectProperty<>(MAP_POINTS));
+        return (B)this;
+    }
+
+    public final B mapConnections(final List<MapConnection> MAP_CONNECTIONS) {
+        properties.put("mapConnections", new SimpleObjectProperty<>(MAP_CONNECTIONS));
+        return (B)this;
+    }
+
+    public final B weightedMapPoints(final WeightedMapPoints WEIGHTED) {
+        properties.put("weightedMapPoints", new SimpleObjectProperty<>(WEIGHTED));
+        return (B)this;
+    }
+
+    public final B weightedMapConnections(final boolean WEIGHTED) {
+        properties.put("weightedMapConnections", new SimpleBooleanProperty(WEIGHTED));
+        return (B)this;
+    }
+
+    public final B mapPointTextVisible(final boolean VISIBLE) {
+        properties.put("mapPointTextVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B textColor(final Color COLOR) {
+        properties.put("textColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B connectionWidth(final double WIDTH) {
+        properties.put("connectionWidth", new SimpleDoubleProperty(WIDTH));
+        return (B)this;
+    }
+
+    public final B arrowsVisible(final boolean VISIBLE) {
+        properties.put("arrowsVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
     }
 
     public final B prefSize(final double WIDTH, final double HEIGHT) {
@@ -310,6 +354,22 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
                 CONTROL.addLocations(((ObjectProperty<Location[]>) properties.get(key)).get());
             } else if ("showLocations".equals(key)) {
                 CONTROL.showLocations(((BooleanProperty) properties.get(key)).get());
+            } else if ("mapPoints".equals(key)) {
+                CONTROL.setMapPoints(((ObjectProperty<List<MapPoint>>) properties.get(key)).get());
+            } else if ("mapConnections".equals(key)) {
+                CONTROL.setMapConnections(((ObjectProperty<List<MapConnection>>) properties.get(key)).get());
+            } else if ("weightedMapPoints".equals(key)) {
+                CONTROL.setWeightedMapPoints(((ObjectProperty<WeightedMapPoints>) properties.get(key)).get());
+            } else if ("weightedMapConnections".equals(key)) {
+                CONTROL.setWeightedMapConnections(((BooleanProperty) properties.get(key)).get());
+            } else if ("mapPointTextVisible".equals(key)) {
+                CONTROL.setMapPointTextVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("textColor".equals(key)) {
+                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("connectionWidth".equals(key)) {
+                CONTROL.setConnectionWidth(((DoubleProperty) properties.get(key)).get());
+            } else if ("arrowsVisible".equals(key)) {
+                CONTROL.setArrowsVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
