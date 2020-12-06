@@ -26,6 +26,10 @@ import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
 import eu.hansolo.fx.charts.tools.Point;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -34,6 +38,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
@@ -75,6 +80,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -149,6 +155,8 @@ public class World extends Region {
     private              HeatMap                         heatMap;
     private              Canvas                          canvas;
     private              GraphicsContext                 ctx;
+    private              Canvas                          overlayCanvas;
+    private              GraphicsContext                 overlayCtx;
     private              Map<String, List<CountryPath>>  countryPaths;
     private              ObservableMap<Location, Shape>  locations;
     private              ColorMapping                    colorMapping;
@@ -169,6 +177,11 @@ public class World extends Region {
     private              Optional<MapConnection>         connectionWithMaxValue;
     private              boolean                         mapPointTextVisible;
     private              Color                           textColor;
+    private              Image                           image;
+    private              double[]                        imagePos;
+    private              double[]                        oldImagePos;
+    private              DoubleProperty                  imageAlpha;
+    private              Timeline                        timeline;
     // internal event handlers
     protected            EventHandler<MouseEvent>        _mouseEnterHandler;
     protected            EventHandler<MouseEvent>        _mousePressHandler;
@@ -296,6 +309,11 @@ public class World extends Region {
         connectionWithMaxValue = Optional.empty();
         mapPointTextVisible    = false;
         textColor              = Color.BLACK;
+        image                  = null;
+        imagePos               = new double[] {};
+        oldImagePos            = new double[] {};
+        imageAlpha             = new SimpleDoubleProperty(0);
+        timeline               = new Timeline();
 
         pane                   = new Pane();
         group                  = new Group();
@@ -374,7 +392,10 @@ public class World extends Region {
         canvas = new Canvas(1009, 665);
         ctx    = canvas.getGraphicsContext2D();
 
-        getChildren().setAll(group, heatMap, canvas);
+        overlayCanvas = new Canvas(1009, 665);
+        overlayCtx    = overlayCanvas.getGraphicsContext2D();
+
+        getChildren().setAll(group, heatMap, canvas, overlayCanvas);
 
         setBackground(new Background(new BackgroundFill(getBackgroundColor(), CornerRadii.EMPTY, Insets.EMPTY)));
     }
@@ -522,6 +543,58 @@ public class World extends Region {
     public void setTextColor(final Color COLOR) {
         textColor = COLOR;
         redraw();
+    }
+
+    public void animateImageAlongConnection(final Image IMAGE, final MapConnection CONNECTION) {
+        if (null == IMAGE) { return; }
+        image              = IMAGE;
+        DoubleProperty pos = new SimpleDoubleProperty(0);
+        final MapPoint p1  = CONNECTION.getIncomingItem();
+        final MapPoint p2  = CONNECTION.getOutgoingItem();
+
+        double[] xy1       = latLonToXY(p1.getX(), p1.getY());
+        double[] xy2       = latLonToXY(p2.getX(), p2.getY());
+        double[] midPoint  = Helper.getMidPoint(xy1[0], xy1[1], xy2[0], xy2[1]);
+        double[] midPoint1 = Helper.getMidPoint(xy1[0], xy1[1], midPoint[0], midPoint[1]);
+        double[] midPoint2 = Helper.getMidPoint(xy2[0], xy2[1], midPoint[0], midPoint[1]);
+        double[] rotCp1    = Helper.getMidPoint(xy1[0], xy1[1], midPoint2[0], midPoint2[1]);
+        double[] rotCp2    = Helper.getMidPoint(midPoint1[0], midPoint1[1], xy2[0], xy2[1]);
+        double[] cp1;
+        double[] cp2;
+        if (xy2[0] > xy1[0]) {
+            cp1 = Helper.rotatePointAroundRotationCenter(rotCp1[0], rotCp1[1], xy1[0], xy1[1], -80);
+            cp2 = Helper.rotatePointAroundRotationCenter(rotCp2[0], rotCp2[1], xy2[0], xy2[1], 80);
+            ctx.beginPath();
+            ctx.moveTo(xy1[0], xy1[1]);
+            ctx.bezierCurveTo(cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1]);
+        } else {
+            cp1 = Helper.rotatePointAroundRotationCenter(rotCp1[0], rotCp1[1], xy1[0], xy1[1], 80);
+            cp2 = Helper.rotatePointAroundRotationCenter(rotCp2[0], rotCp2[1], xy2[0], xy2[1], -80);
+            ctx.beginPath();
+            ctx.moveTo(xy2[0], xy2[1]);
+            ctx.bezierCurveTo(cp2[0], cp2[1], cp1[0], cp1[1], xy1[0], xy1[1]);
+        }
+        imagePos    = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], 0.0);
+        oldImagePos = imagePos;
+        pos.addListener(o -> {
+            imagePos = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], pos.get());
+            redrawOverlay();
+            oldImagePos = imagePos;
+        });
+        timeline.stop();
+        KeyValue kvPos0   = new KeyValue(pos, 0, Interpolator.EASE_IN);
+        KeyValue kvAlpha0 = new KeyValue(imageAlpha, 0, Interpolator.EASE_IN);
+        KeyValue kvAlpha1 = new KeyValue(imageAlpha, 1, Interpolator.EASE_OUT);
+        KeyValue kvAlpha2 = new KeyValue(imageAlpha, 1, Interpolator.EASE_IN);
+        KeyValue kvAlpha3 = new KeyValue(imageAlpha, 0, Interpolator.EASE_OUT);
+        KeyValue kvPos1   = new KeyValue(pos, 1, Interpolator.EASE_OUT);
+        KeyFrame kf0      = new KeyFrame(Duration.ZERO, kvPos0, kvAlpha0);
+        KeyFrame kf1      = new KeyFrame(Duration.millis(100), kvAlpha1);
+        KeyFrame kf2      = new KeyFrame(Duration.millis(14900), kvAlpha2);
+        KeyFrame kf3      = new KeyFrame(Duration.millis(15000), kvPos1, kvAlpha3);
+        timeline.setDelay(Duration.millis(1000));
+        timeline.getKeyFrames().setAll(kf0, kf1, kf2, kf3);
+        timeline.play();
     }
 
     public void resetZoom() {
@@ -1087,6 +1160,21 @@ public class World extends Region {
         }
     }
 
+    private void redrawOverlay() {
+        if (null == image || imagePos.length == 0) { return; }
+        double w = overlayCanvas.getWidth();
+        double h = overlayCanvas.getHeight();
+        overlayCtx.clearRect(0, 0, w, h);
+
+        double bearing = Helper.bearing(oldImagePos[0], oldImagePos[1], imagePos[0], imagePos[1]);
+        overlayCtx.save();
+        overlayCtx.setGlobalAlpha(imageAlpha.get());
+        overlayCtx.translate(imagePos[0], imagePos[1]);
+        overlayCtx.rotate(bearing);
+        overlayCtx.drawImage(image, -image.getWidth() * 0.5, -image.getHeight() * 0.5);
+        overlayCtx.restore();
+    }
+
 
     // ******************** Style related *************************************
     @Override public String getUserAgentStylesheet() {
@@ -1135,7 +1223,13 @@ public class World extends Region {
             canvas.setTranslateX(group.getBoundsInParent().getMinX() - group.getLayoutBounds().getMinX());
             canvas.setTranslateY(group.getBoundsInParent().getMinY() - group.getLayoutBounds().getMinY());
 
+            overlayCanvas.setScaleX(pane.getScaleX());
+            overlayCanvas.setScaleY(pane.getScaleY());
+            overlayCanvas.setTranslateX(group.getBoundsInParent().getMinX() - group.getLayoutBounds().getMinX());
+            overlayCanvas.setTranslateY(group.getBoundsInParent().getMinY() - group.getLayoutBounds().getMinY());
+
             redraw();
+            redrawOverlay();
 
             pane.setCache(false);
         }

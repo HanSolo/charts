@@ -25,6 +25,7 @@ import eu.hansolo.fx.charts.world.World;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import eu.hansolo.fx.charts.world.WorldBuilder;
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
@@ -41,8 +42,9 @@ import java.util.Random;
  * Time: 13:21
  */
 public class WorldmapConnectionsTest extends Application {
-    private static final Random RND = new Random();
-    private World worldMap;
+    private static final  Random RND = new Random();
+    private World         worldMap;
+    private MapConnection animatedConnection;
 
     @Override public void init() {
         worldMap = WorldBuilder.create()
@@ -54,7 +56,7 @@ public class WorldmapConnectionsTest extends Application {
                                .fillColor(Color.LIGHTGRAY)
                                .connectionWidth(1)
                                .weightedMapPoints(WeightedMapPoints.NONE)
-                               .weightedMapConnections(true)
+                               .weightedMapConnections(false)
                                .arrowsVisible(false)
                                .mapPointTextVisible(true)
                                .textColor(Color.BLACK)
@@ -137,7 +139,11 @@ public class WorldmapConnectionsTest extends Application {
         MapConnection sanfrancisco_abudabi    = new MapConnection(san_francisco, abu_dabi, 60, Color.ORANGERED, Color.BLUE, true);
         MapConnection sanfrancisco_mexicocity = new MapConnection(san_francisco, mexico_city, 30, Color.ORANGERED, Color.BLUE, true);
         MapConnection sanfrancisco_santiago   = new MapConnection(san_francisco, santiago_de_chile, 70, Color.ORANGERED, Color.BLUE, true);
-        worldMap.addMapConnections(sanfrancisco_mumbai, sanfrancisco_abudabi, sanfrancisco_newyork, sanfrancisco_mexicocity, sanfrancisco_santiago);
+
+
+        animatedConnection = new MapConnection(berlin, christchurch, 1, Color.CRIMSON);
+
+        worldMap.addMapConnections(sanfrancisco_mumbai, sanfrancisco_abudabi, sanfrancisco_newyork, sanfrancisco_mexicocity, sanfrancisco_santiago, animatedConnection);
     }
 
     @Override public void start(Stage stage) {
@@ -148,6 +154,9 @@ public class WorldmapConnectionsTest extends Application {
         stage.setTitle("Worldmap Connections");
         stage.setScene(scene);
         stage.show();
+
+        Image plane = new Image(WorldmapConnectionsTest.class.getResourceAsStream("plane.png"));
+        pane.setOnMousePressed(e -> worldMap.animateImageAlongConnection(plane, animatedConnection));
     }
 
     @Override public void stop() {
