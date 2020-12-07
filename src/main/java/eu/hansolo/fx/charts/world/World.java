@@ -90,6 +90,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -181,6 +182,8 @@ public class World extends Region {
     private              double[]                        imagePos;
     private              double[]                        oldImagePos;
     private              DoubleProperty                  imageAlpha;
+    private              List<Point>                     imagePathPoints;
+    private              boolean                         drawImagePath;
     private              Timeline                        timeline;
     // internal event handlers
     protected            EventHandler<MouseEvent>        _mouseEnterHandler;
@@ -313,6 +316,8 @@ public class World extends Region {
         imagePos               = new double[] {};
         oldImagePos            = new double[] {};
         imageAlpha             = new SimpleDoubleProperty(0);
+        imagePathPoints        = new LinkedList<>();
+        drawImagePath          = false;
         timeline               = new Timeline();
 
         pane                   = new Pane();
@@ -547,7 +552,12 @@ public class World extends Region {
 
     public void animateImageAlongConnection(final Image IMAGE, final MapConnection CONNECTION) {
         if (null == IMAGE) { return; }
+        imagePathPoints.clear();
         image              = IMAGE;
+
+        overlayCtx.setStroke(CONNECTION.getStroke());
+        overlayCtx.setLineWidth(CONNECTION.getLineWidth());
+
         DoubleProperty pos = new SimpleDoubleProperty(0);
         final MapPoint p1  = CONNECTION.getIncomingItem();
         final MapPoint p2  = CONNECTION.getOutgoingItem();
@@ -576,8 +586,10 @@ public class World extends Region {
         }
         imagePos    = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], 0.0);
         oldImagePos = imagePos;
+        imagePathPoints.add(new Point(imagePos[0], imagePos[1]));
         pos.addListener(o -> {
             imagePos = Helper.getCubicBezierXYatT(xy1[0], xy1[1], cp1[0], cp1[1], cp2[0], cp2[1], xy2[0], xy2[1], pos.get());
+            imagePathPoints.add(new Point(imagePos[0], imagePos[1]));
             redrawOverlay();
             oldImagePos = imagePos;
         });
@@ -596,6 +608,14 @@ public class World extends Region {
         timeline.getKeyFrames().setAll(kf0, kf1, kf2, kf3);
         timeline.play();
     }
+
+    public boolean getDrawImagePath() { return drawImagePath; }
+    public void setDrawImagePath(final boolean DRAW_IMAGE_PATH) {
+        drawImagePath = DRAW_IMAGE_PATH;
+        redrawOverlay();
+    }
+
+    public Timeline getTimeline() { return timeline; }
 
     public void resetZoom() {
         setScaleFactor(1.0);
@@ -1165,6 +1185,13 @@ public class World extends Region {
         double w = overlayCanvas.getWidth();
         double h = overlayCanvas.getHeight();
         overlayCtx.clearRect(0, 0, w, h);
+
+        if (drawImagePath) {
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(imagePathPoints.get(0).getX(), imagePathPoints.get(0).getY());
+            imagePathPoints.forEach(p -> overlayCtx.lineTo(p.getX(), p.getY()));
+            overlayCtx.stroke();
+        }
 
         double bearing = Helper.bearing(oldImagePos[0], oldImagePos[1], imagePos[0], imagePos[1]);
         overlayCtx.save();

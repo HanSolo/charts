@@ -58,6 +58,7 @@ public class WorldmapConnectionsTest extends Application {
                                .weightedMapPoints(WeightedMapPoints.NONE)
                                .weightedMapConnections(false)
                                .arrowsVisible(false)
+                               .drawImagePath(true)
                                .mapPointTextVisible(true)
                                .textColor(Color.BLACK)
                                .build();
@@ -117,6 +118,7 @@ public class WorldmapConnectionsTest extends Application {
                               mumbai, beijing, hong_kong, sydney, christchurch, tokio, singapore, casablanca, tunis, alexandria, nairobi,
                               abidjan, hyderabad, chongqing, perth);
 
+        /*
         northAmerica.forEach(mapPoint -> {
             worldMap.addMapConnections(new MapConnection(berlin, mapPoint, RND.nextInt(130) + 10, berlin.getFill(), Color.ORANGERED, true));
         });
@@ -133,6 +135,7 @@ public class WorldmapConnectionsTest extends Application {
         southAmerica.forEach(mapPoint -> {
             worldMap.addMapConnections(new MapConnection(johannesburg, mapPoint, RND.nextInt(130) + 10, johannesburg.getFill(), Color.ORANGE, true));
         });
+        */
 
         MapConnection sanfrancisco_mumbai     = new MapConnection(san_francisco, mumbai, 90, Color.ORANGERED, Color.BLUE, true);
         MapConnection sanfrancisco_newyork    = new MapConnection(san_francisco, new_york, 100, Color.ORANGERED, Color.BLUE, true);
@@ -142,8 +145,9 @@ public class WorldmapConnectionsTest extends Application {
 
 
         animatedConnection = new MapConnection(berlin, christchurch, 1, Color.CRIMSON);
+        animatedConnection.setLineWidth(5);
 
-        worldMap.addMapConnections(sanfrancisco_mumbai, sanfrancisco_abudabi, sanfrancisco_newyork, sanfrancisco_mexicocity, sanfrancisco_santiago, animatedConnection);
+        //worldMap.addMapConnections(sanfrancisco_mumbai, sanfrancisco_abudabi, sanfrancisco_newyork, sanfrancisco_mexicocity, sanfrancisco_santiago);
     }
 
     @Override public void start(Stage stage) {

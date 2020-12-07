@@ -205,6 +205,11 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
         return (B)this;
     }
 
+    public final B drawImagePath(final boolean DRAW) {
+        properties.put("drawImagePath", new SimpleBooleanProperty(DRAW));
+        return (B)this;
+    }
+
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
         return (B)this;
@@ -370,6 +375,8 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
                 CONTROL.setConnectionWidth(((DoubleProperty) properties.get(key)).get());
             } else if ("arrowsVisible".equals(key)) {
                 CONTROL.setArrowsVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("drawImagePath".equals(key)) {
+                CONTROL.setDrawImagePath(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
