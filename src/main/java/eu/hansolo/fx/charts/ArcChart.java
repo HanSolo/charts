@@ -76,6 +76,7 @@ public class ArcChart extends Region {
     private static final double                       MAXIMUM_HEIGHT             = 4096;
     private static final double                       DEFAULT_SEGMENT_GAP        = 4;
     private static final double                       DEFAULT_CONNECTION_OPACITY = 0.65;
+    private static final Color                        DEFAULT_SELECTION_COLOR    = Color.rgb(128, 0, 0, 0.25);
     private              double                       size;
     private              double                       width;
     private              double                       height;
@@ -130,7 +131,7 @@ public class ArcChart extends Region {
         _locale               = Locale.getDefault();
         _coloredConnections   = false;
         _connectionColor      = Color.rgb(128, 128, 128, 0.25);
-        _selectionColor       = Color.rgb(128, 0, 0, 0.25);
+        _selectionColor       = DEFAULT_SELECTION_COLOR;
         _sortByCluster        = false;
         _useFullCircle        = false;
         _weightConnections    = false;

@@ -17,7 +17,9 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.SankeyPlot.StreamFillMode;
+import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -145,6 +147,14 @@ public class SankeyPlotTest extends Application {
                                       //.itemGap(10)
                                       //.showFlowDirection(true)
                                       .build();
+        sankeyPlot.getItems().forEach(item -> item.setOnItemEvent(e -> {
+            if (EventType.SELECTED == e.getEventType()) {
+                PlotItem sourceItem = (PlotItem) e.getItem();
+                PlotItem targetItem = (PlotItem) e.getTargetItem();
+                double   value      = sourceItem.getOutgoing().get(targetItem);
+                System.out.println(sourceItem.getName() + " -> " + targetItem.getName() + " : " + value);
+            }
+        }));
     }
 
     @Override public void start(Stage stage) {

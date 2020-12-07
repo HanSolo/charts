@@ -16,7 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -55,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -67,17 +71,18 @@ import java.util.stream.Collectors;
 @DefaultProperty("children")
 public class SankeyPlot extends Region {
     public enum StreamFillMode { COLOR, GRADIENT }
-    private static final double                           PREFERRED_WIDTH      = 600;
-    private static final double                           PREFERRED_HEIGHT     = 400;
-    private static final double                           MINIMUM_WIDTH        = 50;
-    private static final double                           MINIMUM_HEIGHT       = 50;
-    private static final double                           MAXIMUM_WIDTH        = 2048;
-    private static final double                           MAXIMUM_HEIGHT       = 2048;
-    private static final Color                            DEFAULT_STREAM_COLOR = Color.rgb(164, 164, 164, 0.55);
-    private static final Color                            DEFAULT_ITEM_COLOR   = Color.rgb(164, 164, 164);
-    private static final int                              DEFAULT_ITEM_WIDTH   = 20;
-    private static final int                              DEFAULT_NODE_GAP     = 20;
-    private static final double                           DEFAULT_OPACITY      = 0.55;
+    private static final double                           PREFERRED_WIDTH         = 600;
+    private static final double                           PREFERRED_HEIGHT        = 400;
+    private static final double                           MINIMUM_WIDTH           = 50;
+    private static final double                           MINIMUM_HEIGHT          = 50;
+    private static final double                           MAXIMUM_WIDTH           = 2048;
+    private static final double                           MAXIMUM_HEIGHT          = 2048;
+    private static final Color                            DEFAULT_STREAM_COLOR    = Color.rgb(164, 164, 164, 0.55);
+    private static final Color                            DEFAULT_ITEM_COLOR      = Color.rgb(164, 164, 164);
+    private static final Color                            DEFAULT_SELECTION_COLOR = Color.rgb(128, 0, 0, 0.25);
+    private static final int                              DEFAULT_ITEM_WIDTH      = 20;
+    private static final int                              DEFAULT_NODE_GAP        = 20;
+    private static final double                           DEFAULT_OPACITY         = 0.55;
     private              double                           size;
     private              double                           width;
     private              double                           height;
@@ -112,12 +117,16 @@ public class SankeyPlot extends Region {
     private              BooleanProperty                  useItemColor;
     private              Color                            _itemColor;
     private              ObjectProperty<Color>            itemColor;
+    private              Color                            _selectionColor;
+    private              ObjectProperty<Color>            selectionColor;
     private              double                           _connectionOpacity;
     private              DoubleProperty                   connectionOpacity;
     private              Locale                           _locale;
     private              ObjectProperty<Locale>           locale;
     private              String                           formatString;
     private              Map<Path, String>                paths;
+    private              Map<Path, PlotItem[]>            connectionMap;
+    private              Path                             selectedPath;
     private              Tooltip                          tooltip;
 
 
@@ -149,12 +158,15 @@ public class SankeyPlot extends Region {
         _showFlowDirection = false;
         _useItemColor      = true;
         _itemColor         = DEFAULT_ITEM_COLOR;
+        _selectionColor    = DEFAULT_SELECTION_COLOR;
         _connectionOpacity = DEFAULT_OPACITY;
         _locale            = Locale.getDefault();
 
         formatString       = "%." + _decimals + "f";
 
         paths              = new LinkedHashMap<>();
+        connectionMap      = new LinkedHashMap<>();
+        selectedPath       = null;
 
         initGraphics();
         registerListeners();
@@ -185,7 +197,8 @@ public class SankeyPlot extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
-        canvas.setOnMouseClicked(e -> {
+        /*
+        canvas.setOnMouseMoved(e -> {
             paths.forEach((path, tooltipText) -> {
                 double eventX = e.getX();
                 double eventY = e.getY();
@@ -199,14 +212,27 @@ public class SankeyPlot extends Region {
                 }
             });
         });
+        */
+        canvas.setOnMousePressed(e -> {
+            paths.forEach((path, tooltipText) -> {
+                double eventX = e.getX();
+                double eventY = e.getY();
+                if (path.contains(eventX, eventY)) {
+                    PlotItem[] items = connectionMap.get(path);
+                    items[0].fireItemEvent(new ItemEvent(items[0], items[1], EventType.SELECTED));
+                    selectedPath = path;
+                    redraw();
+                }
+            });
+        });
+        canvas.setOnMouseReleased(e -> {
+            selectedPath = null;
+            redraw();
+        });
     }
 
 
     // ******************** Methods *******************************************
-    @Override public void layoutChildren() {
-        super.layoutChildren();
-    }
-
     @Override protected double computeMinWidth(final double HEIGHT) { return MINIMUM_WIDTH; }
     @Override protected double computeMinHeight(final double WIDTH) { return MINIMUM_HEIGHT; }
     @Override protected double computePrefWidth(final double HEIGHT) { return super.computePrefWidth(HEIGHT); }
@@ -467,6 +493,27 @@ public class SankeyPlot extends Region {
         return itemColor;
     }
 
+    public Color getSelectionColor() { return null == selectionColor ? _selectionColor : selectionColor.get(); }
+    public void setSelectionColor(final Color COLOR) {
+        if (null == selectionColor) {
+            _selectionColor = COLOR;
+            redraw();
+        } else {
+            selectionColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> selectionColorProperty() {
+        if (null == selectionColor) {
+            selectionColor = new ObjectPropertyBase<>(_selectionColor) {
+                @Override protected void invalidated() { redraw();}
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "selectionColor"; }
+            };
+            _selectionColor = null;
+        }
+        return selectionColor;
+    }
+
     public double getConnectionOpacity() { return null == connectionOpacity ? _connectionOpacity : connectionOpacity.get(); }
     public void setConnectionOpacity(final double OPACITY) {
         if (null == connectionOpacity) {
@@ -643,6 +690,7 @@ public class SankeyPlot extends Region {
 
     private void createPaths() {
         paths.clear();
+        connectionMap.clear();
 
         boolean showFlowDirection    = getShowFlowDirection();
         double  showDirectionOffsetX = size * 0.01875;
@@ -726,6 +774,7 @@ public class SankeyPlot extends Region {
                                                                 .append(String.format(getLocale(), formatString, outgoingValue))
                                                                 .toString();
                         paths.put(path, tooltipText);
+                        connectionMap.put(path, new PlotItem[]{ item, targetItem });
                     }
                 }
             }
@@ -758,6 +807,12 @@ public class SankeyPlot extends Region {
                 ctx.setTextAlign(level == maxLevel ? TextAlignment.RIGHT : TextAlignment.LEFT);
                 ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
             }
+        }
+
+        if (null != selectedPath) {
+            Path path = new Path(selectedPath);
+            path.setFill(getSelectionColor());
+            path.draw(ctx, true, false);
         }
     }
 
