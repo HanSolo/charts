@@ -514,6 +514,22 @@ public class SankeyPlot extends Region {
         return selectionColor;
     }
 
+    public PlotItem[] getSelectedItem() {
+        if (null == selectedPath) { return new PlotItem[]{}; }
+        return connectionMap.get(selectedPath);
+    }
+    public void setSelectedConnection(final PlotItem SOURCE_ITEM, final PlotItem TARGET_ITEM) {
+        Optional<Entry<Path, PlotItem[]>> selected = connectionMap.entrySet().stream().filter(entry -> entry.getValue()[0].equals(SOURCE_ITEM) && entry.getValue()[1].equals(TARGET_ITEM)).findFirst();
+        if (selected.isPresent()) {
+            selectedPath = selected.get().getKey();
+            redraw();
+        }
+    }
+    public void resetSelectedItem() {
+        selectedPath = null;
+        redraw();
+    }
+
     public double getConnectionOpacity() { return null == connectionOpacity ? _connectionOpacity : connectionOpacity.get(); }
     public void setConnectionOpacity(final double OPACITY) {
         if (null == connectionOpacity) {
