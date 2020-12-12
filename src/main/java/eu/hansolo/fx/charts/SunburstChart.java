@@ -85,14 +85,14 @@ public class SunburstChart<T extends ChartItem> extends Region {
         NONE, NAME, VALUE, NAME_VALUE
     }
 
-    private static final double PREFERRED_WIDTH   = 250;
-    private static final double PREFERRED_HEIGHT  = 250;
-    private static final double MINIMUM_WIDTH     = 50;
-    private static final double MINIMUM_HEIGHT    = 50;
-    private static final double MAXIMUM_WIDTH     = 2048;
-    private static final double MAXIMUM_HEIGHT    = 2048;
-    private static final Color  BRIGHT_TEXT_COLOR = Color.WHITE;
-    private static final Color  DARK_TEXT_COLOR   = Color.BLACK;
+    private static final double                          PREFERRED_WIDTH   = 250;
+    private static final double                          PREFERRED_HEIGHT  = 250;
+    private static final double                          MINIMUM_WIDTH     = 50;
+    private static final double                          MINIMUM_HEIGHT    = 50;
+    private static final double                          MAXIMUM_WIDTH     = 2048;
+    private static final double                          MAXIMUM_HEIGHT    = 2048;
+    private static final Color                           BRIGHT_TEXT_COLOR = Color.WHITE;
+    private static final Color                           DARK_TEXT_COLOR   = Color.BLACK;
     private              double                          size;
     private              double                          width;
     private              double                          height;
@@ -654,7 +654,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
                 if(level == 1){
                     // The percentage is relevant to all siblings
                     segmentPercentage = segmentData.getValue() / levelOneSum;
-                    segmentAngle =  segmentPercentage * 360;
+                    segmentAngle      =  segmentPercentage * 360;
                     segmentStartAngle = 90 + segmentEndAngle;
                 }else {
                     assert node.getParent() != null;
@@ -662,14 +662,14 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         currentParent = node.getParent();
                         // Start each segment from the same point as the parent
                         segmentStartAngle = startAngles.get(currentParent);
-                        segmentEndAngle = segmentStartAngle - 90;
+                        segmentEndAngle   = segmentStartAngle - 90;
                     } else {
                         // Start the segment relative to the previous sibling
                         segmentStartAngle = 90 + segmentEndAngle;
                     }
                     // The percentage is relative to the parent
-                    segmentPercentage= segmentData.getValue() / currentParent.getItem().getValue();
-                    segmentAngle =angles.get(currentParent) * segmentPercentage;
+                    segmentPercentage = segmentData.getValue() / currentParent.getItem().getValue();
+                    segmentAngle      = angles.get(currentParent) * segmentPercentage;
                 }
                 segmentEndAngle -= segmentAngle;
                 // Save the startAngle as entry-point for the children
