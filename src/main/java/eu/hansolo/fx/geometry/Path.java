@@ -1122,6 +1122,9 @@ public class Path extends Shape {
         draw(CTX, false, false);
     }
     public void draw(final GraphicsContext CTX, final boolean FILL, final boolean STROKE) {
+        draw(CTX, FILL, fill, STROKE, stroke);
+    }
+    public void draw(final GraphicsContext CTX, final boolean FILL, final Paint FILL_PAINT, final boolean STROKE, final Paint STROKE_PAINT) {
         PathIterator pi = getPathIterator(new Affine());
 
         CTX.setFillRule(WindingRule.WIND_EVEN_ODD == pi.getWindingRule() ? FillRule.EVEN_ODD : FillRule.NON_ZERO);
@@ -1143,7 +1146,7 @@ public class Path extends Shape {
             pi.next();
         }
 
-        if (FILL)   { CTX.setFill(fill); CTX.fill(); }
-        if (STROKE) { CTX.setStroke(stroke); CTX.stroke(); }
+        if (FILL)   { CTX.setFill(FILL_PAINT); CTX.fill(); }
+        if (STROKE) { CTX.setStroke(STROKE_PAINT); CTX.stroke(); }
     }
 }
