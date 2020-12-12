@@ -296,6 +296,22 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     }
     public boolean hasIncoming() { return incoming.size() > 0 ; }
 
+    public double getIncomingValueFrom(final PlotItem INCOMING_ITEM) {
+        if (getIncoming().containsKey(INCOMING_ITEM)) {
+            return getIncoming().get(INCOMING_ITEM);
+        } else {
+            return 0;
+        }
+    }
+
+    public double getOutgoingValueTo(final PlotItem OUTGOING_ITEM) {
+        if (getOutgoing().containsKey(OUTGOING_ITEM)) {
+            return getOutgoing().get(OUTGOING_ITEM);
+        } else {
+            return 0;
+        }
+    }
+
     public boolean isRoot() { return hasOutgoing() && !hasIncoming(); }
 
     public int getLevel() {
