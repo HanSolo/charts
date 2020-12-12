@@ -126,7 +126,8 @@ public class SankeyPlot extends Region {
     private              String                           formatString;
     private              Map<Path, String>                paths;
     private              Map<Path, PlotItem[]>            connectionMap;
-    private              Path                             selectedPath;
+    private              SankeyPlotConnection             selectedConnection;
+    private              List<PlotItem>                   selectedItems;
     private              Tooltip                          tooltip;
 
 
@@ -166,7 +167,8 @@ public class SankeyPlot extends Region {
 
         paths              = new LinkedHashMap<>();
         connectionMap      = new LinkedHashMap<>();
-        selectedPath       = null;
+        selectedConnection = null;
+        selectedItems      = new ArrayList<>();
 
         initGraphics();
         registerListeners();
@@ -197,22 +199,6 @@ public class SankeyPlot extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
-        /*
-        canvas.setOnMouseMoved(e -> {
-            paths.forEach((path, tooltipText) -> {
-                double eventX = e.getX();
-                double eventY = e.getY();
-                if (path.contains(eventX, eventY)) {
-                    double tooltipX = eventX + canvas.getScene().getX() + canvas.getScene().getWindow().getX();
-                    double tooltipY = eventY + canvas.getScene().getY() + canvas.getScene().getWindow().getY() - 25;
-                    tooltip.setText(tooltipText);
-                    tooltip.setX(tooltipX);
-                    tooltip.setY(tooltipY);
-                    tooltip.show(getScene().getWindow());
-                }
-            });
-        });
-        */
         canvas.setOnMousePressed(e -> {
             paths.forEach((path, tooltipText) -> {
                 double eventX = e.getX();
@@ -220,13 +206,15 @@ public class SankeyPlot extends Region {
                 if (path.contains(eventX, eventY)) {
                     PlotItem[] items = connectionMap.get(path);
                     items[0].fireItemEvent(new ItemEvent(items[0], items[1], EventType.SELECTED));
-                    selectedPath = path;
+                    selectedConnection = new SankeyPlotConnection(items[0], items[1], items[0].getOutgoingValueTo(items[1]), getSelectionColor(), path);
+                    selectedItems.addAll(Arrays.asList(connectionMap.get(path)));
                     redraw();
                 }
             });
         });
         canvas.setOnMouseReleased(e -> {
-            selectedPath = null;
+            selectedConnection = null;
+            selectedItems.clear();
             redraw();
         });
     }
@@ -515,18 +503,18 @@ public class SankeyPlot extends Region {
     }
 
     public PlotItem[] getSelectedItem() {
-        if (null == selectedPath) { return new PlotItem[]{}; }
-        return connectionMap.get(selectedPath);
+        if (null == selectedConnection) { return new PlotItem[]{}; }
+        return connectionMap.get(selectedConnection);
     }
     public void setSelectedConnection(final PlotItem SOURCE_ITEM, final PlotItem TARGET_ITEM) {
         Optional<Entry<Path, PlotItem[]>> selected = connectionMap.entrySet().stream().filter(entry -> entry.getValue()[0].equals(SOURCE_ITEM) && entry.getValue()[1].equals(TARGET_ITEM)).findFirst();
         if (selected.isPresent()) {
-            selectedPath = selected.get().getKey();
+            selectedConnection = new SankeyPlotConnection(SOURCE_ITEM, TARGET_ITEM, SOURCE_ITEM.getOutgoingValueTo(TARGET_ITEM), getSelectionColor(), selected.get().getKey());
             redraw();
         }
     }
     public void resetSelectedItem() {
-        selectedPath = null;
+        selectedConnection = null;
         redraw();
     }
 
@@ -748,40 +736,40 @@ public class SankeyPlot extends Region {
                         double scaledValueY  = outgoingValue * scaleY;
 
                         // Create Path
-                        Path path = new Path();
+                        Path connection = new Path();
 
                         // Set Gradient from current item to outgoing items
                         if (StreamFillMode.COLOR == getStreamFillMode()) {
-                            path.setFill(getStreamColor());
+                            connection.setFill(getStreamColor());
                         } else {
-                            path.setFill(new LinearGradient(0, 0, 1, 0,
+                            connection.setFill(new LinearGradient(0, 0, 1, 0,
                                                             true, CycleMethod.NO_CYCLE,
                                                             new Stop(0, Helper.getColorWithOpacity(item.getFill(), connectionOpacity)),
                                                             new Stop(1, Helper.getColorWithOpacity(outgoingItem.getFill(), connectionOpacity))));
                         }
 
                         // Draw the bezier curve
-                        path.moveTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
+                        connection.moveTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
                         if (showFlowDirection) {
-                            path.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
+                            connection.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
                                                targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
                                                targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY);
-                            path.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY * 0.5);
-                            path.lineTo(targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
+                            connection.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY * 0.5);
+                            connection.lineTo(targetItemBounds.getMinX() - showDirectionOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
                         } else {
-                            path.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
+                            connection.bezierCurveTo(bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
                                                targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY,
                                                targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY);
-                            path.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
+                            connection.lineTo(targetItemBounds.getMinX(), targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY);
                         }
 
                         itemData.addToOutgoingOffset(scaledValueY);
                         targetItemData.addToIncomingOffset(scaledValueY);
-                        path.bezierCurveTo(targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY,
+                        connection.bezierCurveTo(targetItemBounds.getMinX() - ctrlPointOffsetX, targetItemBounds.getMinY() + targetIncomingOffsetY + scaledValueY,
                                            bounds.getMaxX() + ctrlPointOffsetX, bounds.getMinY() + itemData.getOutgoingOffsetY(),
                                            bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
-                        path.lineTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
-                        path.closePath();
+                        connection.lineTo(bounds.getMaxX(), bounds.getMinY() + itemData.getOutgoingOffsetY());
+                        connection.closePath();
 
                         String tooltipText = new StringBuilder().append(item.getName())
                                                                 .append(" -> ")
@@ -789,8 +777,8 @@ public class SankeyPlot extends Region {
                                                                 .append(" ")
                                                                 .append(String.format(getLocale(), formatString, outgoingValue))
                                                                 .toString();
-                        paths.put(path, tooltipText);
-                        connectionMap.put(path, new PlotItem[]{ item, targetItem });
+                        paths.put(connection, tooltipText);
+                        connectionMap.put(connection, new PlotItem[]{ item, targetItem });
                     }
                 }
             }
@@ -799,14 +787,22 @@ public class SankeyPlot extends Region {
 
     private void redraw() {
         ctx.clearRect(0, 0, width, height);
-        paths.forEach((path, plotItem) -> {
-            path.draw(ctx, true, false);
-        });
-        boolean useItemColor         = getUseItemColor();
-        Color   itemColor            = getItemColor();
-        Color   textColor            = getTextColor();
+        boolean useItemColor = getUseItemColor();
+        Color   itemColor    = null == selectedConnection ? getItemColor() : Color.rgb(128, 128, 128, 0.2);
+        Color   textColor    = getTextColor();
 
         // Draw bezier curves between items
+        if (null == selectedConnection) {
+            paths.forEach((path, plotItem) -> {
+                path.draw(ctx, true, false);
+            });
+        } else {
+            paths.forEach((path, plotItem) -> {
+                path.draw(ctx, true, itemColor, false, Color.TRANSPARENT);
+            });
+        }
+
+        // Draw items
         for (int level = minLevel ; level <= maxLevel ; level++) {
             List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
 
@@ -816,7 +812,15 @@ public class SankeyPlot extends Region {
                 CtxBounds bounds = itemData.getBounds();
 
                 // Draw item boxes with their labels
-                ctx.setFill(useItemColor ? item.getFill() : itemColor);
+                if (null == selectedConnection) {
+                    ctx.setFill(useItemColor ? item.getFill() : itemColor);
+                } else {
+                    ctx.setFill(itemColor);
+                }
+
+                if (selectedItems.contains(itemData.plotItem)) {
+                    ctx.setFill(getSelectionColor());
+                }
                 ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
                 ctx.setFill(textColor);
@@ -825,11 +829,42 @@ public class SankeyPlot extends Region {
             }
         }
 
-        if (null != selectedPath) {
-            Path path = new Path(selectedPath);
+        if (null != selectedConnection) {
+            Path path = new Path(selectedConnection.getConnectionPath());
             path.setFill(getSelectionColor());
             path.draw(ctx, true, false);
+
+            PlotItem startItem = selectedConnection.getIncomingItem();
+            drawToRight(startItem);
         }
+    }
+
+    private void drawToRight(final PlotItem startItem) {
+        List<PlotItem> nextItems = new ArrayList<>();
+        selectedItems.forEach(item -> {
+            if (item.getIncoming().containsKey(startItem)) {
+                connectionMap.entrySet()
+                             .stream()
+                             .filter(entry -> entry.getValue()[0].equals(item)).forEach(entry -> {
+                                 entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT);
+                                 nextItems.add(entry.getValue()[1]);
+                });
+            }
+        });
+
+        for (int level = minLevel ; level <= maxLevel ; level++) {
+            List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
+            ctx.setFill(getSelectionColor());
+            for (PlotItemData itemData : itemDataInLevel) {
+                PlotItem  item   = itemData.getPlotItem();
+                CtxBounds bounds = itemData.getBounds();
+                if (nextItems.contains(item)) {
+                    ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+                    connectionMap.entrySet().stream().filter(entry -> entry.getValue()[0].equals(item)).forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
+                }
+            }
+        }
+
     }
 
 
@@ -877,5 +912,20 @@ public class SankeyPlot extends Region {
 
         public double getValue() { return value; }
         public void setValue(final double VALUE) { value = VALUE; }
+    }
+
+    private class SankeyPlotConnection extends Connection {
+        private Path connectionPath;
+
+        public SankeyPlotConnection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL, final Path CONNECTION_PATH) {
+            this(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL, "", CONNECTION_PATH);
+        }
+        public SankeyPlotConnection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL, final String TOOLTIP_TEXT, final Path CONNECTION_PATH) {
+            super(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL, TOOLTIP_TEXT);
+            connectionPath = CONNECTION_PATH;
+        }
+
+
+        public Path getConnectionPath() { return connectionPath; }
     }
 }
