@@ -74,7 +74,6 @@ public class SunburstChartTest extends Application {
         TreeNode jun = new TreeNode(new ChartItem("Jun", 0.3, PINK_1), second);
         TreeNode jul = new TreeNode(new ChartItem("Jul", 0.7, YELLOW_1), third);
         TreeNode aug = new TreeNode(new ChartItem("Aug", 0.6, YELLOW_1), third);
-        TreeNode sep = new TreeNode(new ChartItem("Sep", 0.1, YELLOW_1), third);
         TreeNode oct = new TreeNode(new ChartItem("Oct", 0.5, GREEN_1), fourth);
         TreeNode nov = new TreeNode(new ChartItem("Nov", 0.4, GREEN_1), fourth);
         TreeNode dec = new TreeNode(new ChartItem("Dec", 0.3, GREEN_1), fourth);
@@ -84,15 +83,7 @@ public class SunburstChartTest extends Application {
         TreeNode week7 = new TreeNode(new ChartItem("Week 7", 0.6, PETROL_2), feb);
         TreeNode week8 = new TreeNode(new ChartItem("Week 8", 0.5, PETROL_2), feb);
 
-        TreeNode week17 = new TreeNode(new ChartItem("Week 17", 1.2, PINK_2), may);
-        TreeNode week18 = new TreeNode(new ChartItem("Week 18", 0.8, PINK_2), may);
-        TreeNode week19 = new TreeNode(new ChartItem("Week 19", 0.6, PINK_2), may);
-        TreeNode week20 = new TreeNode(new ChartItem("Week 20", 0.5, PINK_2), may);
-
-        TreeNode week21 = new TreeNode(new ChartItem("Week 21", 1.2, PINK_2), jun);
-        TreeNode week22 = new TreeNode(new ChartItem("Week 22", 0.8, PINK_2), jun);
-        TreeNode week23 = new TreeNode(new ChartItem("Week 23", 0.6, PINK_2), jun);
-        TreeNode week24 = new TreeNode(new ChartItem("Week 24", 0.5, PINK_2), jun);
+        TreeNode week19 = new TreeNode(new ChartItem("Week 19", 0.3, PINK_2), may);
 
         tree.setOnTreeNodeEvent(e -> {
             EventType type = e.getType();
