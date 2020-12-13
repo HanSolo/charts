@@ -89,7 +89,7 @@ public class SunburstChartTest extends Application {
             EventType type = e.getType();
             if (EventType.NODE_SELECTED == type) {
                 TreeNode segment = e.getSource();
-                System.out.println(segment.getItem().getName() + ": " + segment.getItem().getValue());
+                System.out.println(segment.getItem().getName() + ": " + ((ChartItem) segment.getItem()).getValue());
             }
         });
 

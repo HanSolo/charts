@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public class TreeNode<T extends ChartItem> {
+public class TreeNode<T extends Item> {
     private final TreeNodeEvent               PARENT_CHANGED   = new TreeNodeEvent(TreeNode.this, EventType.PARENT_CHANGED);
     private final TreeNodeEvent               CHILDREN_CHANGED = new TreeNodeEvent(TreeNode.this, EventType.CHILDREN_CHANGED);
     private       T                           item;

@@ -65,18 +65,28 @@ public class PlotItem implements Item, Comparable<PlotItem> {
 
     // ******************** Constructors **************************************
     public PlotItem() {
-            this("", 0,"", Color.RED);
+            this("", 0,"", Color.RED, -1);
     }
     public PlotItem(final String NAME, final double VALUE) {
-        this(NAME, VALUE, "", Color.RED);
+        this(NAME, VALUE, "", Color.RED, -1);
     }
     public PlotItem(final String NAME, final Color COLOR) {
-        this(NAME, 0, COLOR);
+        this(NAME, 0, "", COLOR, -1);
+    }
+    public PlotItem(final String NAME, final Color COLOR, final int LEVEL) {
+        this(NAME, 0, NAME, COLOR, LEVEL);
     }
     public PlotItem(final String NAME, final double VALUE, final Color COLOR) {
-        this(NAME, VALUE, "", COLOR);
+        this(NAME, VALUE, "", COLOR, -1);
+    }
+    public PlotItem(final String NAME, final double VALUE, final Color COLOR, final int LEVEL) {
+        this(NAME, VALUE, "", COLOR, LEVEL);
     }
     public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL) {
+        this(NAME, VALUE, DESCRIPTION, FILL, -1);
+    }
+
+    public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL, final int LEVEL) {
         _name           = NAME;
         _value          = VALUE;
         _description    = DESCRIPTION;
@@ -84,7 +94,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         _stroke         = Color.TRANSPARENT;
         _connectionFill = Color.TRANSPARENT;
         _symbol         = Symbol.NONE;
-        level           = -1;
+        level           = LEVEL;
         cluster         = null;
         outgoing        = new LinkedHashMap<>();
         incoming        = new LinkedHashMap<>();
@@ -314,23 +324,12 @@ public class PlotItem implements Item, Comparable<PlotItem> {
 
     public boolean isRoot() { return hasOutgoing() && !hasIncoming(); }
 
-    public int getLevel() {
-        if (level == -1) {
-            if (isRoot()) {
-                level = 0;
-            } else {
-                for (PlotItem item : getIncoming().keySet()) {
-                    level = getLevel(item, 0);
-                }
-            }
-        }
-        return level;
-    }
-    private int getLevel(final PlotItem ITEM, int level) {
-        level++;
-        if (ITEM.isRoot()) { return level; }
-        level = getLevel(ITEM.getIncoming().keySet().iterator().next(), level);
-        return level;
+    public boolean isLeaf() { return hasIncoming() && !hasOutgoing(); }
+
+    public int getLevel() { return level; }
+    public void setLevel(final int LEVEL) {
+        if (LEVEL < 0) { throw new IllegalArgumentException("Level cannot be smaller than 0"); }
+        level = LEVEL;
     }
 
     public Cluster getCluster() { return cluster; }

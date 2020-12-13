@@ -668,7 +668,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         segmentStartAngle = 90 + segmentEndAngle;
                     }
                     // The percentage is relative to the parent
-                    segmentPercentage = segmentData.getValue() / currentParent.getItem().getValue();
+                    segmentPercentage = segmentData.getValue() / ((ChartItem) currentParent.getItem()).getValue();
                     segmentAngle      = angles.get(currentParent) * segmentPercentage;
                 }
                 segmentEndAngle -= segmentAngle;
@@ -768,7 +768,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         path.setFill(FILL);
         path.setStroke(STROKE);
 
-        String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, NODE.getItem().getValue())).toString();
+        String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, ((ChartItem) NODE.getItem()).getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
         path.setOnMousePressed(new WeakEventHandler<>(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED))));

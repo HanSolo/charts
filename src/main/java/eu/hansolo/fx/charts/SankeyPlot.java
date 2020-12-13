@@ -55,11 +55,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -127,15 +129,16 @@ public class SankeyPlot extends Region {
     private              Map<Path, String>                paths;
     private              Map<Path, PlotItem[]>            connectionMap;
     private              SankeyPlotConnection             selectedConnection;
-    private              List<PlotItem>                   selectedItems;
+    private              PlotItemData                     selectedPlotItemData;
+    private              Set<PlotItem>                    selectedItems;
     private              Tooltip                          tooltip;
 
 
     // ******************** Constructors **************************************
     public SankeyPlot() {
-        items              = FXCollections.observableArrayList();
-        itemListener       = e -> redraw();
-        itemListListener   = c -> {
+        items                = FXCollections.observableArrayList();
+        itemListener         = e -> redraw();
+        itemListListener     = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
@@ -145,30 +148,27 @@ public class SankeyPlot extends Region {
             }
             prepareData();
         };
-
-        itemsPerLevel      = new LinkedHashMap<>();
-
-        _streamFillMode    = StreamFillMode.COLOR;
-        _streamColor       = DEFAULT_STREAM_COLOR;
-        _textColor         = Color.BLACK;
-        _itemWidth         = DEFAULT_ITEM_WIDTH;
-        _autoItemWidth     = true;
-        _itemGap           = DEFAULT_NODE_GAP;
-        _autoItemGap       = true;
-        _decimals          = 0;
-        _showFlowDirection = false;
-        _useItemColor      = true;
-        _itemColor         = DEFAULT_ITEM_COLOR;
-        _selectionColor    = DEFAULT_SELECTION_COLOR;
-        _connectionOpacity = DEFAULT_OPACITY;
-        _locale            = Locale.getDefault();
-
-        formatString       = "%." + _decimals + "f";
-
-        paths              = new LinkedHashMap<>();
-        connectionMap      = new LinkedHashMap<>();
-        selectedConnection = null;
-        selectedItems      = new ArrayList<>();
+        itemsPerLevel        = new LinkedHashMap<>();
+        _streamFillMode      = StreamFillMode.COLOR;
+        _streamColor         = DEFAULT_STREAM_COLOR;
+        _textColor           = Color.BLACK;
+        _itemWidth           = DEFAULT_ITEM_WIDTH;
+        _autoItemWidth       = true;
+        _itemGap             = DEFAULT_NODE_GAP;
+        _autoItemGap         = true;
+        _decimals            = 0;
+        _showFlowDirection   = false;
+        _useItemColor        = true;
+        _itemColor           = DEFAULT_ITEM_COLOR;
+        _selectionColor      = DEFAULT_SELECTION_COLOR;
+        _connectionOpacity   = DEFAULT_OPACITY;
+        _locale              = Locale.getDefault();
+        formatString         = "%." + _decimals + "f";
+        paths                = new LinkedHashMap<>();
+        connectionMap        = new LinkedHashMap<>();
+        selectedConnection   = null;
+        selectedPlotItemData = null;
+        selectedItems        = new LinkedHashSet<>();
 
         initGraphics();
         registerListeners();
@@ -200,20 +200,40 @@ public class SankeyPlot extends Region {
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
         canvas.setOnMousePressed(e -> {
+            double eventX = e.getX();
+            double eventY = e.getY();
             paths.forEach((path, tooltipText) -> {
-                double eventX = e.getX();
-                double eventY = e.getY();
                 if (path.contains(eventX, eventY)) {
                     PlotItem[] items = connectionMap.get(path);
                     items[0].fireItemEvent(new ItemEvent(items[0], items[1], EventType.SELECTED));
                     selectedConnection = new SankeyPlotConnection(items[0], items[1], items[0].getOutgoingValueTo(items[1]), getSelectionColor(), path);
-                    selectedItems.addAll(Arrays.asList(connectionMap.get(path)));
-                    redraw();
+                    selectedItems.add(items[1]);
+                    Integer  startLevel = items[1].getLevel() + 1;
+                    selectedItems.addAll(items[1].getOutgoing().keySet());
+                    for (int i = startLevel ; i < maxLevel ; i++) {
+                        List<PlotItem> plotItemsPerLevel = itemsPerLevel.get(i).stream().map(plotItemData -> plotItemData.plotItem).collect(Collectors.toList());
+                        List<PlotItem> itemsToAdd        = new ArrayList<>();
+                        selectedItems.forEach(selectedItem -> itemsToAdd.addAll(selectedItem.getOutgoing().keySet()));
+                        for (PlotItem plotItem : plotItemsPerLevel) {
+                            itemsToAdd.addAll(selectedItems.stream().filter(selectedItem -> plotItem.getIncoming().keySet().contains(selectedItem)).collect(Collectors.toList()));
+                        }
+                        selectedItems.addAll(itemsToAdd);
+                    }
                 }
             });
+            itemsPerLevel.values().forEach(items -> {
+                items.forEach(plotItemData -> {
+                    if (plotItemData.getBounds().contains(eventX, eventY)) {
+                        selectedPlotItemData = plotItemData;
+                        selectedPlotItemData.getPlotItem().fireItemEvent(new ItemEvent(selectedPlotItemData.getPlotItem(), EventType.SELECTED));
+                    }
+                });
+            });
+            redraw();
         });
         canvas.setOnMouseReleased(e -> {
-            selectedConnection = null;
+            selectedConnection   = null;
+            selectedPlotItemData = null;
             selectedItems.clear();
             redraw();
         });
@@ -574,6 +594,35 @@ public class SankeyPlot extends Region {
         return getItems().stream().filter(PlotItem::hasOutgoing).filter(PlotItem::hasIncoming).collect(Collectors.toList());
     }
 
+    public boolean isPlotItemValid(final PlotItem PLOT_ITEM) {
+        int checksum = 0;
+        if (PLOT_ITEM.getLevel() == 0) {
+            int outgoingCorrect = PLOT_ITEM.getOutgoing().size() == PLOT_ITEM.getOutgoing().keySet().stream().filter(outgoingItem -> outgoingItem.getLevel() == 1).count() ? 0 : 1;
+            int incomingCorrect = PLOT_ITEM.getIncoming().size() == 0 ? 0 : 1;
+            checksum += outgoingCorrect;
+            checksum += incomingCorrect;
+        } else if (PLOT_ITEM.getLevel() == maxLevel) {
+            int outgoingCorrect = PLOT_ITEM.getOutgoing().size() == 0 ? 0 : 1;
+            int incomingCorrect = PLOT_ITEM.getIncoming().size() == PLOT_ITEM.getIncoming().keySet().stream().filter(incomingItem -> incomingItem.getLevel() == maxLevel - 1).count() ? 0 : 1;
+            checksum += outgoingCorrect;
+            checksum += incomingCorrect;
+        } else {
+            int outgoingCorrect = PLOT_ITEM.getOutgoing().size() == PLOT_ITEM.getOutgoing().keySet().stream().filter(outgoingItem -> outgoingItem.getLevel() == PLOT_ITEM.getLevel() + 1).count() ? 0 : 1;
+            int incomingCorrect = PLOT_ITEM.getIncoming().size() == PLOT_ITEM.getIncoming().keySet().stream().filter(incomingItem -> incomingItem.getLevel() == PLOT_ITEM.getLevel() - 1).count() ? 0 : 1;
+            checksum += outgoingCorrect;
+            checksum += incomingCorrect;
+        }
+        return checksum == 0;
+    }
+    public boolean validateData(final List<PlotItem> ITEMS) {
+        if (ITEMS.isEmpty()) { return true; }
+        int checksum = 0;
+        for (PlotItem item : ITEMS) {
+            checksum += isPlotItemValid(item) ? 0 : 1;
+        }
+        return checksum == 0;
+    }
+
     private void sortIncomingByOutgoingOrder(final List<PlotItem> INCOMING, final List<PlotItem> OUTGOING) {
         Collections.sort(INCOMING, Comparator.comparing(item -> OUTGOING.indexOf(item)));
     }
@@ -586,15 +635,18 @@ public class SankeyPlot extends Region {
     }
 
     private void prepareData() {
+        if (!validateData(items)) { throw new IllegalArgumentException("Data not consistent. Please check the levels of the PlotItems"); }
+
         // Split all items to levels
         itemsPerLevel.clear();
-        items.forEach(item -> {
-            int level = item.getLevel();
+        items.stream().filter(item -> item.getLevel() > -1).forEach(item -> {
+            int          level        = item.getLevel();
+            PlotItemData plotItemData = new PlotItemData(item);
             if (itemsPerLevel.keySet().contains(level)) {
-                itemsPerLevel.get(level).add(new PlotItemData(item));
+                itemsPerLevel.get(level).add(plotItemData);
             } else {
                 itemsPerLevel.put(level, new ArrayList<>());
-                itemsPerLevel.get(level).add(new PlotItemData(item));
+                itemsPerLevel.get(level).add(plotItemData);
             }
         });
 
@@ -829,42 +881,41 @@ public class SankeyPlot extends Region {
             }
         }
 
+        // Draw selected connection
         if (null != selectedConnection) {
+            // Draw selected path element
             Path path = new Path(selectedConnection.getConnectionPath());
             path.setFill(getSelectionColor());
             path.draw(ctx, true, false);
 
-            PlotItem startItem = selectedConnection.getIncomingItem();
-            drawToRight(startItem);
+            // Draw all path elements connected to the selected path element
+            connectionMap.entrySet().stream()
+                         .filter(entry -> selectedItems.contains(entry.getValue()[0]) && selectedItems.contains(entry.getValue()[1]))
+                         .forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
         }
-    }
 
-    private void drawToRight(final PlotItem startItem) {
-        List<PlotItem> nextItems = new ArrayList<>();
-        selectedItems.forEach(item -> {
-            if (item.getIncoming().containsKey(startItem)) {
-                connectionMap.entrySet()
-                             .stream()
-                             .filter(entry -> entry.getValue()[0].equals(item)).forEach(entry -> {
-                                 entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT);
-                                 nextItems.add(entry.getValue()[1]);
+        // Draw selected item
+        if (null != selectedPlotItemData) {
+            CtxBounds bounds = selectedPlotItemData.getBounds();
+            ctx.setFill(getSelectionColor());
+            ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+            int startLevel = selectedPlotItemData.getPlotItem().getLevel();
+            if (startLevel < maxLevel) {
+                startLevel++;
+            }
+            List<PlotItem> sItems = new ArrayList<>();
+            sItems.add(selectedPlotItemData.getPlotItem());
+            for (int i = startLevel ; i <= maxLevel ; i++) {
+                itemsPerLevel.get(i).forEach(plotItemData -> {
+                    CtxBounds b = plotItemData.getBounds();
+                    ctx.fillRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+                    sItems.add(plotItemData.getPlotItem());
                 });
             }
-        });
-
-        for (int level = minLevel ; level <= maxLevel ; level++) {
-            List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
-            ctx.setFill(getSelectionColor());
-            for (PlotItemData itemData : itemDataInLevel) {
-                PlotItem  item   = itemData.getPlotItem();
-                CtxBounds bounds = itemData.getBounds();
-                if (nextItems.contains(item)) {
-                    ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
-                    connectionMap.entrySet().stream().filter(entry -> entry.getValue()[0].equals(item)).forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
-                }
-            }
+            connectionMap.entrySet().stream()
+                         .filter(entry -> sItems.contains(entry.getValue()[0]) && sItems.contains(entry.getValue()[1]))
+                         .forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
         }
-
     }
 
 

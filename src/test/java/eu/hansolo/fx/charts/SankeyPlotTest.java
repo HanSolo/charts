@@ -56,27 +56,29 @@ public class SankeyPlotTest extends Application {
 
     @Override public void init() {
         // Setup chart items
-        PlotItem brazil = new PlotItem("Brazil", Colors.LIGHT_BLUE.get());
-        PlotItem mexico = new PlotItem("Mexico", Colors.ORANGE.get());
-        PlotItem usa    = new PlotItem("USA", Colors.ORANGE.get());
-        PlotItem canada = new PlotItem("Canada", Colors.LIGHT_RED.get());
+        PlotItem brazil      = new PlotItem("Brazil", Colors.LIGHT_BLUE.get(), 0);
+        PlotItem mexico      = new PlotItem("Mexico", Colors.ORANGE.get(), 0);
+        PlotItem usa         = new PlotItem("USA", Colors.ORANGE.get(), 0);
+        PlotItem canada      = new PlotItem("Canada", Colors.LIGHT_RED.get(), 0);
 
-        PlotItem germany     = new PlotItem("Germany", Color.web("#FF48C6"));
+        PlotItem germany     = new PlotItem("Germany", Color.web("#FF48C6"), 1);
 
-        PlotItem portugal    = new PlotItem("Portugal", Colors.LIGHT_BLUE.get());
-        PlotItem spain       = new PlotItem("Spain", Colors.LIGHT_GREEN.get());
-        PlotItem england     = new PlotItem("England", Colors.LIGHT_RED.get());
-        PlotItem france      = new PlotItem("France", Colors.LIGHT_GREEN.get());
+        PlotItem portugal    = new PlotItem("Portugal", Colors.LIGHT_BLUE.get(), 1);
+        PlotItem spain       = new PlotItem("Spain", Colors.LIGHT_GREEN.get(), 1);
+        PlotItem england     = new PlotItem("England", Colors.LIGHT_RED.get(), 1);
+        PlotItem france      = new PlotItem("France", Colors.LIGHT_GREEN.get(), 1);
 
-        PlotItem southAfrica = new PlotItem("South Africa", Colors.YELLOW.get());
-        PlotItem angola      = new PlotItem("Angola", Colors.PURPLE.get());
-        PlotItem morocco     = new PlotItem("Morocco", Colors.YELLOW.get());
-        PlotItem senegal     = new PlotItem("Senegal", Colors.PURPLE.get());
-        PlotItem mali        = new PlotItem("Mali", Colors.BLUE.get());
+        PlotItem southAfrica = new PlotItem("South Africa", Colors.YELLOW.get(), 2);
+        PlotItem angola      = new PlotItem("Angola", Colors.PURPLE.get(), 2);
+        PlotItem morocco     = new PlotItem("Morocco", Colors.YELLOW.get(), 2);
+        PlotItem senegal     = new PlotItem("Senegal", Colors.PURPLE.get(), 2);
+        PlotItem mali        = new PlotItem("Mali", Colors.BLUE.get(), 2);
 
-        PlotItem china       = new PlotItem("China", Colors.BLUE.get());
-        PlotItem japan       = new PlotItem("Japan", Colors.GREEN.get());
-        PlotItem india       = new PlotItem("India", Colors.GREEN.get());
+        PlotItem china       = new PlotItem("China", Colors.BLUE.get(), 3);
+        PlotItem japan       = new PlotItem("Japan", Colors.GREEN.get(), 3);
+        PlotItem india       = new PlotItem("India", Colors.GREEN.get(), 3);
+
+        PlotItem australia   = new PlotItem("Australia", Colors.ORANGE.get(), 4);
 
         // Setup flows
         brazil.addToOutgoing(portugal, 5);
@@ -129,16 +131,25 @@ public class SankeyPlotTest extends Application {
         morocco.addToOutgoing(india, 1);
         morocco.addToOutgoing(japan, 3);
 
+        china.addToOutgoing(australia, 3);
+        //japan.addToOutgoing(australia, 1);
+        india.addToOutgoing(australia, 2);
+
+        //System.out.println("Level China    : " + china.getLevel());
+        //System.out.println("Level Australia: " + australia.getLevel());
+
         sankeyPlot = SankeyPlotBuilder.create()
                                       .prefSize(600, 400)
                                       .items(brazil, mexico, usa, canada,
                                              germany,
                                              portugal, spain, england, france,
                                              southAfrica, angola, morocco, senegal, mali,
-                                             china, japan, india)
+                                             china, japan, india,
+                                             australia)
                                       //.useItemColor(false)
                                       //.itemColor(Color.RED)
                                       .streamFillMode(StreamFillMode.GRADIENT)
+                                      .selectionColor(Color.rgb(0, 100, 240, 0.5))
                                       //.streamColor(Color.rgb(200, 0, 0, 0.25))
                                       //.textColor(Color.RED)
                                       //.autoItemWidth(false)
@@ -151,8 +162,13 @@ public class SankeyPlotTest extends Application {
             if (EventType.SELECTED == e.getEventType()) {
                 PlotItem sourceItem = (PlotItem) e.getItem();
                 PlotItem targetItem = (PlotItem) e.getTargetItem();
-                double   value      = sourceItem.getOutgoing().get(targetItem);
-                System.out.println(sourceItem.getName() + " -> " + targetItem.getName() + " : " + value);
+                if (null != sourceItem && null != targetItem) {
+                    double value = sourceItem.getOutgoing().get(targetItem);
+                    System.out.println(sourceItem.getName() + " -> " + targetItem.getName() + " => connection value: " + value);
+                } else if (null != sourceItem) {
+                    double value = sourceItem.getSumOfOutgoing();
+                    System.out.println(sourceItem.getName() + " => sum of outgoing values: " + value);
+                }
             }
         }));
     }

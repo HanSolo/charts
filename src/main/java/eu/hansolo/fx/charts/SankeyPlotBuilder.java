@@ -19,6 +19,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.SankeyPlot.StreamFillMode;
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.tools.Pair;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -72,6 +73,11 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
 
     public final B textColor(final Color COLOR) {
         properties.put("textColor", new SimpleObjectProperty(COLOR));
+        return (B)this;
+    }
+
+    public final B selectionColor(final Color COLOR) {
+        properties.put("selectionColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
     }
 
@@ -249,6 +255,8 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
                 CONTROL.setStreamColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("textColor".equals(key)) {
                 CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("selectionColor".equals(key)) {
+                CONTROL.setSelectionColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("decimals".equals(key)) {
                 CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
             } else if ("showFlowDirection".equals(key)) {
