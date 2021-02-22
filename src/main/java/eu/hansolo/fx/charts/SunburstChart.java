@@ -771,7 +771,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, ((ChartItem) NODE.getItem()).getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
-        path.setOnMousePressed(new WeakEventHandler<>(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED))));
+        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED)));
 
         return path;
     }
