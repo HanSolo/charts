@@ -17,23 +17,24 @@
 package eu.hansolo.fx.charts.event;
 
 
+import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.data.TreeNode;
 
 
-public class TreeNodeEvent {
-    private final TreeNode  SRC;
-    private final EventType TYPE;
+public class TreeNodeEvent <T extends Item> {
+    private final TreeNode<T>  SRC;
+    private final TreeNodeEventType TYPE;
 
 
     // ******************** Constructors **************************************
-    public TreeNodeEvent(final TreeNode SRC, final EventType TYPE) {
+    public TreeNodeEvent(final TreeNode<T> SRC, final TreeNodeEventType TYPE) {
         this.SRC  = SRC;
         this.TYPE = TYPE;
     }
 
 
     // ******************** Methods *******************************************
-    public TreeNode getSource() { return SRC; }
+    public TreeNode<T> getSource() { return SRC; }
 
-    public EventType getType() { return TYPE; }
+    public TreeNodeEventType getType() { return TYPE; }
 }

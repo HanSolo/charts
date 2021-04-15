@@ -18,9 +18,9 @@ package eu.hansolo.fx.charts;
 
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEventListener;
+import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.data.TreeNode;
@@ -133,7 +133,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              int                             maxLevel;
     private              Map<Integer, List<TreeNode<T>>> levelMap;
     private              InvalidationListener            sizeListener;
-    private              TreeNodeEventListener           treeNodeListener;
+    private        final TreeNodeEventListener<T>           treeNodeListener;
 
 
 
@@ -162,7 +162,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         levelMap               = new HashMap<>(8);
         sizeListener           = o -> resize();
         treeNodeListener       = EVENT -> {
-            if(EVENT.getType()!= EventType.NODE_SELECTED){
+            if(EVENT.getType()!= TreeNodeEventType.NODE_SELECTED){
                 redraw();
             }
         };
@@ -649,7 +649,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
 
             double   segmentStartAngle;
             double   segmentEndAngle = 0;
-            TreeNode currentParent   = null;
+            TreeNode<T> currentParent   = null;
 
             for (TreeNode<T> node : nodesAtLevel) {
                 ChartItem segmentData  = node.getItem();
@@ -674,7 +674,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         segmentStartAngle =segmentEndAngle;
                     }
                     // The percentage is relative to the parent
-                    segmentPercentage = segmentData.getValue() / ((ChartItem) currentParent.getItem()).getValue();
+                    segmentPercentage = segmentData.getValue() / currentParent.getItem().getValue();
                     segmentAngle      = angles.get(currentParent) * segmentPercentage;
                 }
                 segmentEndAngle = segmentStartAngle + segmentAngle;
@@ -748,7 +748,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         segmentPane.getChildren().setAll(segments);
     }
 
-    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Paint FILL, final Color STROKE, final TreeNode NODE) {
+    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Paint FILL, final Color STROKE, final TreeNode<T> NODE) {
         double  startAngleRad = Math.toRadians(START_ANGLE);
         double  endAngleRad   = Math.toRadians(END_ANGLE);
         boolean largeAngle    = Math.abs(END_ANGLE - START_ANGLE) > 180.0;
@@ -784,7 +784,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, ((ChartItem) NODE.getItem()).getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
-        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED)));
+        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, TreeNodeEventType.NODE_SELECTED)));
 
         return path;
     }
