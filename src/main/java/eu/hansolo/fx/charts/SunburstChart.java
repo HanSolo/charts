@@ -20,6 +20,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
+import eu.hansolo.fx.charts.event.TreeNodeEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.data.TreeNode;
@@ -32,7 +33,6 @@ import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.event.WeakEventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -96,8 +96,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              double                          size;
     private              double                          width;
     private              double                          height;
-    private              double                          centerX;
-    private              double                          centerY;
+    private              double                          center;
     private              Pane                            segmentPane;
     private              Canvas                          chartCanvas;
     private              GraphicsContext                 chartCtx;
@@ -134,6 +133,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              int                             maxLevel;
     private              Map<Integer, List<TreeNode<T>>> levelMap;
     private              InvalidationListener            sizeListener;
+    private              TreeNodeEventListener           treeNodeListener;
 
 
 
@@ -161,6 +161,11 @@ public class SunburstChart<T extends ChartItem> extends Region {
         tree                   = TREE;
         levelMap               = new HashMap<>(8);
         sizeListener           = o -> resize();
+        treeNodeListener       = EVENT -> {
+            if(EVENT.getType()!= EventType.NODE_SELECTED){
+                redraw();
+            }
+        };
         initGraphics();
         registerListeners();
     }
@@ -196,7 +201,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private void registerListeners() {
         widthProperty().addListener(sizeListener);
         heightProperty().addListener(sizeListener);
-        tree.setOnTreeNodeEvent(e -> redraw());
+        tree.setOnTreeNodeEvent(treeNodeListener);
     }
 
 
@@ -217,7 +222,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     public void dispose() {
         widthProperty().removeListener(sizeListener);
         heightProperty().removeListener(sizeListener);
-        tree.removeAllTreeNodeEventListeners();
+        tree.removeTreeNodeEventListener(treeNodeListener);
     }
 
     /**
@@ -378,7 +383,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
             _decimals    = clamp(0, 5, DECIMALS);
-            formatString = new StringBuilder("%.").append(_decimals).append("f").toString();
+            formatString = "%." + _decimals + "f";
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -570,9 +575,11 @@ public class SunburstChart<T extends ChartItem> extends Region {
      * @param TREE
      */
     public void setTree(final TreeNode<T> TREE) {
-        if (null != tree) { tree.flattened().forEach(node -> node.removeAllTreeNodeEventListeners()); }
+        if (null != tree) {
+            tree.removeTreeNodeEventListener(treeNodeListener);
+        }
         tree = TREE;
-        tree.flattened().forEach(node -> node.setOnTreeNodeEvent(e -> redraw()));
+        tree.setOnTreeNodeEvent(treeNodeListener);
         prepareData();
         if (isAutoTextColor()) { adjustTextColors(); }
         drawChart();
@@ -684,7 +691,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
                     if (isInteractive) {
                         segments.add(createSegment(segmentStartAngle, segmentEndAngle, innerRadius, outerRadius, segmentColor, bkgColor, node));
                     } else {
-                        double xy = centerX - ringRadiusStep * level;
+                        double xy = center - ringRadiusStep * level;
                         double wh = ringRadiusStep * level * 2;
                         // Segment Fill
                         chartCtx.setLineWidth(barWidth);
@@ -695,10 +702,10 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         double radStart = Math.toRadians(-segmentStartAngle+90);
                         double cosStart = Math.cos(radStart);
                         double sinStart = Math.sin(radStart);
-                        double x1       = centerX + innerRadius * cosStart;
-                        double y1       = centerY - innerRadius * sinStart;
-                        double x2       = centerX + outerRadius * cosStart;
-                        double y2       = centerY - outerRadius * sinStart;
+                        double x1       = center + innerRadius * cosStart;
+                        double y1       = center - innerRadius * sinStart;
+                        double x2       = center + outerRadius * cosStart;
+                        double y2       = center - outerRadius * sinStart;
 
                         chartCtx.setLineWidth(segmentStrokeWidth);
                         chartCtx.setStroke(bkgColor);
@@ -711,8 +718,8 @@ public class SunburstChart<T extends ChartItem> extends Region {
                         double cosText    = Math.cos(radText);
                         double sinText    = Math.sin(radText);
                         double textRadius = ringRadiusStep * level;
-                        double textX      = centerX + textRadius * sinText;
-                        double textY      = centerY - textRadius * cosText;
+                        double textX      = center + textRadius * sinText;
+                        double textY      = center - textRadius * cosText;
 
                         chartCtx.setFill(getUseChartItemTextColor() ? segmentData.getTextFill() : textColor);
 
@@ -746,17 +753,17 @@ public class SunburstChart<T extends ChartItem> extends Region {
         double  endAngleRad   = Math.toRadians(END_ANGLE);
         boolean largeAngle    = Math.abs(END_ANGLE - START_ANGLE) > 180.0;
 
-        double x1 = centerX + INNER_RADIUS * Math.sin(startAngleRad);
-        double y1 = centerY - INNER_RADIUS * Math.cos(startAngleRad);
+        double x1 = center + INNER_RADIUS * Math.sin(startAngleRad);
+        double y1 = center - INNER_RADIUS * Math.cos(startAngleRad);
 
-        double x2 = centerX + OUTER_RADIUS * Math.sin(startAngleRad);
-        double y2 = centerY - OUTER_RADIUS * Math.cos(startAngleRad);
+        double x2 = center + OUTER_RADIUS * Math.sin(startAngleRad);
+        double y2 = center - OUTER_RADIUS * Math.cos(startAngleRad);
 
-        double x3 = centerX + OUTER_RADIUS * Math.sin(endAngleRad);
-        double y3 = centerY - OUTER_RADIUS * Math.cos(endAngleRad);
+        double x3 = center + OUTER_RADIUS * Math.sin(endAngleRad);
+        double y3 = center - OUTER_RADIUS * Math.cos(endAngleRad);
 
-        double x4 = centerX + INNER_RADIUS * Math.sin(endAngleRad);
-        double y4 = centerY - INNER_RADIUS * Math.cos(endAngleRad);
+        double x4 = center + INNER_RADIUS * Math.sin(endAngleRad);
+        double y4 = center - INNER_RADIUS * Math.cos(endAngleRad);
 
         // Simulate full circles
         if(Math.abs(x2 - x3) <= 0.001 && Math.abs(y3 - y2) <= 0.001 && END_ANGLE > 0){
@@ -809,7 +816,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
-        size   = width < height ? width : height;
+        size   = Math.min(width, height);
 
         if (width > 0 && height > 0) {
             pane.setMaxSize(size, size);
@@ -821,8 +828,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
             chartCanvas.setWidth(size);
             chartCanvas.setHeight(size);
 
-            centerX = size * 0.5;
-            centerY = centerX;
+            center = size * 0.5;
 
             redraw();
         }
