@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.SunburstChart.VisibleData;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.TreeNode;
 import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -55,41 +56,41 @@ public class SunburstChartTest extends Application {
 
     private static       int           noOfNodes = 0;
 
-    private TreeNode      tree;
+    private TreeNode<ChartItem>      tree;
     private SunburstChart nonInteractiveSunburstChart;
     private SunburstChart interactiveSunburstChart;
 
     @Override public void init() {
-        tree            = new TreeNode(new ChartItem("ROOT"));
-        TreeNode first  = new TreeNode(new ChartItem("1st", 8.3, PETROL_0), tree);
-        TreeNode second = new TreeNode(new ChartItem("2nd", 2.2, PINK_0), tree);
-        TreeNode third  = new TreeNode(new ChartItem("3rd", 1.4, YELLOW_0), tree);
-        TreeNode fourth = new TreeNode(new ChartItem("4th", 1.2, GREEN_0), tree);
+        tree            = new TreeNode<>(new ChartItem("ROOT"));
+        TreeNode<ChartItem>first  = new TreeNode<>(new ChartItem("1st", 8.3, PETROL_0), tree);
+        TreeNode<ChartItem>second = new TreeNode<>(new ChartItem("2nd", 2.2, PINK_0), tree);
+        TreeNode<ChartItem>third  = new TreeNode<>(new ChartItem("3rd", 1.4, YELLOW_0), tree);
+        TreeNode<ChartItem>fourth = new TreeNode<>(new ChartItem("4th", 1.2, GREEN_0), tree);
 
-        TreeNode jan = new TreeNode(new ChartItem("Jan", 3.5, PETROL_1), first);
-        TreeNode feb = new TreeNode(new ChartItem("Feb", 3.1, PETROL_1), first);
-        TreeNode mar = new TreeNode(new ChartItem("Mar", 1.7, PETROL_1), first);
-        TreeNode apr = new TreeNode(new ChartItem("Apr", 1.1, PINK_1), second);
-        TreeNode may = new TreeNode(new ChartItem("May", 0.8, PINK_1), second);
-        TreeNode jun = new TreeNode(new ChartItem("Jun", 0.3, PINK_1), second);
-        TreeNode jul = new TreeNode(new ChartItem("Jul", 0.7, YELLOW_1), third);
-        TreeNode aug = new TreeNode(new ChartItem("Aug", 0.6, YELLOW_1), third);
-        TreeNode oct = new TreeNode(new ChartItem("Oct", 0.5, GREEN_1), fourth);
-        TreeNode nov = new TreeNode(new ChartItem("Nov", 0.4, GREEN_1), fourth);
-        TreeNode dec = new TreeNode(new ChartItem("Dec", 0.3, GREEN_1), fourth);
+        TreeNode<ChartItem>jan = new TreeNode<>(new ChartItem("Jan", 3.5, PETROL_1), first);
+        TreeNode<ChartItem>feb = new TreeNode<>(new ChartItem("Feb", 3.1, PETROL_1), first);
+        TreeNode<ChartItem>mar = new TreeNode<>(new ChartItem("Mar", 1.7, PETROL_1), first);
+        TreeNode<ChartItem>apr = new TreeNode<>(new ChartItem("Apr", 1.1, PINK_1), second);
+        TreeNode<ChartItem>may = new TreeNode<>(new ChartItem("May", 0.8, PINK_1), second);
+        TreeNode<ChartItem>jun = new TreeNode<>(new ChartItem("Jun", 0.3, PINK_1), second);
+        TreeNode<ChartItem>jul = new TreeNode<>(new ChartItem("Jul", 0.7, YELLOW_1), third);
+        TreeNode<ChartItem>aug = new TreeNode<>(new ChartItem("Aug", 0.6, YELLOW_1), third);
+        TreeNode<ChartItem>oct = new TreeNode<>(new ChartItem("Oct", 0.5, GREEN_1), fourth);
+        TreeNode<ChartItem>nov = new TreeNode<>(new ChartItem("Nov", 0.4, GREEN_1), fourth);
+        TreeNode<ChartItem>dec = new TreeNode<>(new ChartItem("Dec", 0.3, GREEN_1), fourth);
 
-        TreeNode week5 = new TreeNode(new ChartItem("Week 5", 1.2, PETROL_2), feb);
-        TreeNode week6 = new TreeNode(new ChartItem("Week 6", 0.8, PETROL_2), feb);
-        TreeNode week7 = new TreeNode(new ChartItem("Week 7", 0.6, PETROL_2), feb);
-        TreeNode week8 = new TreeNode(new ChartItem("Week 8", 0.5, PETROL_2), feb);
+        TreeNode<ChartItem>week5 = new TreeNode<>(new ChartItem("Week 5", 1.2, PETROL_2), feb);
+        TreeNode<ChartItem>week6 = new TreeNode<>(new ChartItem("Week 6", 0.8, PETROL_2), feb);
+        TreeNode<ChartItem>week7 = new TreeNode<>(new ChartItem("Week 7", 0.6, PETROL_2), feb);
+        TreeNode<ChartItem>week8 = new TreeNode<>(new ChartItem("Week 8", 0.5, PETROL_2), feb);
 
-        TreeNode week19 = new TreeNode(new ChartItem("Week 19", 0.3, PINK_2), may);
+        TreeNode<ChartItem>week19 = new TreeNode<>(new ChartItem("Week 19", 0.3, PINK_2), may);
 
         tree.setOnTreeNodeEvent(e -> {
-            EventType type = e.getType();
-            if (EventType.NODE_SELECTED == type) {
-                TreeNode segment = e.getSource();
-                System.out.println(segment.getItem().getName() + ": " + ((ChartItem) segment.getItem()).getValue());
+            TreeNodeEventType type = e.getType();
+            if (TreeNodeEventType.NODE_SELECTED == type) {
+                TreeNode<ChartItem> segment = e.getSource();
+                System.out.println(segment.getItem().getName() + ": " + segment.getItem().getValue());
             }
         });
 
@@ -145,7 +146,6 @@ public class SunburstChartTest extends Application {
 
         interactiveSunburstChart.setAutoTextColor(true);
 
-        //timer.start();
 
         // Calculate number of nodes
         calcNoOfNodes(nonInteractiveSunburstChart);

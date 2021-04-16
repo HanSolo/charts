@@ -16,7 +16,9 @@
 
 package eu.hansolo.fx.charts.event;
 
+import eu.hansolo.fx.charts.data.Item;
+
 @FunctionalInterface
-public interface TreeNodeEventListener {
-    void onTreeNodeEvent(final TreeNodeEvent EVENT);
+public interface TreeNodeEventListener <T extends Item> {
+    void onTreeNodeEvent(final TreeNodeEvent<T> EVENT);
 }

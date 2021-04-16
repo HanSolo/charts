@@ -18,8 +18,9 @@ package eu.hansolo.fx.charts;
 
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
+import eu.hansolo.fx.charts.event.TreeNodeEventListener;
+import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.data.TreeNode;
@@ -32,7 +33,6 @@ import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ObservableList;
-import javafx.event.WeakEventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -96,8 +96,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              double                          size;
     private              double                          width;
     private              double                          height;
-    private              double                          centerX;
-    private              double                          centerY;
+    private              double                          center;
     private              Pane                            segmentPane;
     private              Canvas                          chartCanvas;
     private              GraphicsContext                 chartCtx;
@@ -134,6 +133,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              int                             maxLevel;
     private              Map<Integer, List<TreeNode<T>>> levelMap;
     private              InvalidationListener            sizeListener;
+    private        final TreeNodeEventListener<T>           treeNodeListener;
 
 
 
@@ -161,6 +161,11 @@ public class SunburstChart<T extends ChartItem> extends Region {
         tree                   = TREE;
         levelMap               = new HashMap<>(8);
         sizeListener           = o -> resize();
+        treeNodeListener       = EVENT -> {
+            if(EVENT.getType()!= TreeNodeEventType.NODE_SELECTED){
+                redraw();
+            }
+        };
         initGraphics();
         registerListeners();
     }
@@ -196,7 +201,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private void registerListeners() {
         widthProperty().addListener(sizeListener);
         heightProperty().addListener(sizeListener);
-        tree.setOnTreeNodeEvent(e -> redraw());
+        tree.setOnTreeNodeEvent(treeNodeListener);
     }
 
 
@@ -217,7 +222,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     public void dispose() {
         widthProperty().removeListener(sizeListener);
         heightProperty().removeListener(sizeListener);
-        tree.removeAllTreeNodeEventListeners();
+        tree.removeTreeNodeEventListener(treeNodeListener);
     }
 
     /**
@@ -378,7 +383,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     public void setDecimals(final int DECIMALS) {
         if (null == decimals) {
             _decimals    = clamp(0, 5, DECIMALS);
-            formatString = new StringBuilder("%.").append(_decimals).append("f").toString();
+            formatString = "%." + _decimals + "f";
             redraw();
         } else {
             decimals.set(DECIMALS);
@@ -570,9 +575,11 @@ public class SunburstChart<T extends ChartItem> extends Region {
      * @param TREE
      */
     public void setTree(final TreeNode<T> TREE) {
-        if (null != tree) { tree.flattened().forEach(node -> node.removeAllTreeNodeEventListeners()); }
+        if (null != tree) {
+            tree.removeTreeNodeEventListener(treeNodeListener);
+        }
         tree = TREE;
-        tree.flattened().forEach(node -> node.setOnTreeNodeEvent(e -> redraw()));
+        tree.setOnTreeNodeEvent(treeNodeListener);
         prepareData();
         if (isAutoTextColor()) { adjustTextColors(); }
         drawChart();
@@ -606,11 +613,10 @@ public class SunburstChart<T extends ChartItem> extends Region {
         for (int i = 0 ; i <= maxLevel ; i++) { levelMap.put(i, new ArrayList<>()); }
         root.stream().forEach(node -> levelMap.get(node.getDepth()).add(node));
         boolean         isInteractive      = isInteractive();
-        double          ringStepSize       = size * 0.8 / maxLevel;
-        double          ringRadiusStep     = ringStepSize * 0.5;
-        double          barWidth           = isInteractive ? ringStepSize * 0.5 : ringStepSize * 0.49;
-        double          textRadiusStep     = size * 0.4 / maxLevel;
-        double          segmentStrokeWidth = ringStepSize * 0.01;
+        double          ringRadiusStep     = (size / 2) / (maxLevel + 0.5);
+        double          innerCircle        = ringRadiusStep * 0.5;
+        double          barWidth           = isInteractive ? ringRadiusStep : ringRadiusStep * 0.98;
+        double          segmentStrokeWidth = ringRadiusStep * 0.02;
         Color           bkgColor           = getBackgroundColor();
         Color           textColor          = getTextColor();
         TextOrientation textOrientation    = getTextOrientation();
@@ -633,16 +639,17 @@ public class SunburstChart<T extends ChartItem> extends Region {
         if(maxLevel >= 1){
             levelOneSum = levelMap.get(1).stream().map(TreeNode::getItem).mapToDouble(T::getValue).sum();
         }
+
+        double outerRadius = 0;
+        double innerRadius;
         for (int level = 1 ; level <= maxLevel ; level++) {
             List<TreeNode<T>> nodesAtLevel = levelMap.get(level);
-            double            xy           = centerX - ringStepSize * level * 0.5;
-            double            wh           = ringStepSize * level;
-            double            outerRadius  = ringRadiusStep * level + barWidth * 0.5;
-            double            innerRadius  = outerRadius - barWidth;
+            innerRadius  = level == 1? innerCircle : outerRadius;
+            outerRadius  = ringRadiusStep * level + innerCircle;
 
             double   segmentStartAngle;
             double   segmentEndAngle = 0;
-            TreeNode currentParent   = null;
+            TreeNode<T> currentParent   = null;
 
             for (TreeNode<T> node : nodesAtLevel) {
                 ChartItem segmentData  = node.getItem();
@@ -655,23 +662,22 @@ public class SunburstChart<T extends ChartItem> extends Region {
                     // The percentage is relevant to all siblings
                     segmentPercentage = segmentData.getValue() / levelOneSum;
                     segmentAngle      =  segmentPercentage * 360;
-                    segmentStartAngle = 90 + segmentEndAngle;
+                    segmentStartAngle = segmentEndAngle;
                 }else {
                     assert node.getParent() != null;
                     if (!node.getParent().equals(currentParent)) {
                         currentParent = node.getParent();
                         // Start each segment from the same point as the parent
                         segmentStartAngle = startAngles.get(currentParent);
-                        segmentEndAngle   = segmentStartAngle - 90;
                     } else {
                         // Start the segment relative to the previous sibling
-                        segmentStartAngle = 90 + segmentEndAngle;
+                        segmentStartAngle =segmentEndAngle;
                     }
                     // The percentage is relative to the parent
-                    segmentPercentage = segmentData.getValue() / ((ChartItem) currentParent.getItem()).getValue();
+                    segmentPercentage = segmentData.getValue() / currentParent.getItem().getValue();
                     segmentAngle      = angles.get(currentParent) * segmentPercentage;
                 }
-                segmentEndAngle -= segmentAngle;
+                segmentEndAngle = segmentStartAngle + segmentAngle;
                 // Save the startAngle as entry-point for the children
                 assert !Double.isNaN(segmentStartAngle);
                 startAngles.put(node,segmentStartAngle);
@@ -683,21 +689,23 @@ public class SunburstChart<T extends ChartItem> extends Region {
                     double value = segmentData.getValue();
 
                     if (isInteractive) {
-                        segments.add(createSegment(-segmentStartAngle, -segmentStartAngle + segmentAngle, innerRadius, outerRadius, segmentColor, bkgColor, node));
+                        segments.add(createSegment(segmentStartAngle, segmentEndAngle, innerRadius, outerRadius, segmentColor, bkgColor, node));
                     } else {
+                        double xy = center - ringRadiusStep * level;
+                        double wh = ringRadiusStep * level * 2;
                         // Segment Fill
                         chartCtx.setLineWidth(barWidth);
                         chartCtx.setStroke(segmentColor);
-                        chartCtx.strokeArc(xy, xy, wh, wh, segmentStartAngle, -segmentAngle, ArcType.OPEN);
+                        chartCtx.strokeArc(xy, xy, wh, wh, -segmentStartAngle+90, -segmentAngle, ArcType.OPEN);
 
                         // Segment Stroke
-                        double radStart = Math.toRadians(segmentStartAngle);
+                        double radStart = Math.toRadians(-segmentStartAngle+90);
                         double cosStart = Math.cos(radStart);
                         double sinStart = Math.sin(radStart);
-                        double x1       = centerX + innerRadius * cosStart;
-                        double y1       = centerY - innerRadius * sinStart;
-                        double x2       = centerX + outerRadius * cosStart;
-                        double y2       = centerY - outerRadius * sinStart;
+                        double x1       = center + innerRadius * cosStart;
+                        double y1       = center - innerRadius * sinStart;
+                        double x2       = center + outerRadius * cosStart;
+                        double y2       = center - outerRadius * sinStart;
 
                         chartCtx.setLineWidth(segmentStrokeWidth);
                         chartCtx.setStroke(bkgColor);
@@ -706,19 +714,19 @@ public class SunburstChart<T extends ChartItem> extends Region {
 
                     // Visible Data
                     if (getVisibleData() != VisibleData.NONE && segmentAngle > textOrientation.getMaxAngle()) {
-                        double radText    = Math.toRadians(segmentStartAngle - (segmentAngle * 0.5));
+                        double radText    = Math.toRadians(segmentStartAngle + (segmentAngle * 0.5));
                         double cosText    = Math.cos(radText);
                         double sinText    = Math.sin(radText);
-                        double textRadius = textRadiusStep * level;
-                        double textX      = centerX + textRadius * cosText;
-                        double textY      = centerY - textRadius * sinText;
+                        double textRadius = ringRadiusStep * level;
+                        double textX      = center + textRadius * sinText;
+                        double textY      = center - textRadius * cosText;
 
                         chartCtx.setFill(getUseChartItemTextColor() ? segmentData.getTextFill() : textColor);
 
                         chartCtx.save();
                         chartCtx.translate(textX, textY);
 
-                        rotateContextForText(chartCtx, segmentStartAngle, -(segmentAngle * 0.5), textOrientation);
+                        rotateContextForText(chartCtx, segmentStartAngle, (segmentAngle * 0.5), textOrientation);
 
                         switch (getVisibleData()) {
                             case VALUE:
@@ -740,23 +748,28 @@ public class SunburstChart<T extends ChartItem> extends Region {
         segmentPane.getChildren().setAll(segments);
     }
 
-    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Paint FILL, final Color STROKE, final TreeNode NODE) {
-        double  startAngleRad = Math.toRadians(START_ANGLE + 90);
-        double  endAngleRad   = Math.toRadians(END_ANGLE + 90);
+    private Path createSegment(final double START_ANGLE, final double END_ANGLE, final double INNER_RADIUS, final double OUTER_RADIUS, final Paint FILL, final Color STROKE, final TreeNode<T> NODE) {
+        double  startAngleRad = Math.toRadians(START_ANGLE);
+        double  endAngleRad   = Math.toRadians(END_ANGLE);
         boolean largeAngle    = Math.abs(END_ANGLE - START_ANGLE) > 180.0;
 
-        double x1 = centerX + INNER_RADIUS * Math.sin(startAngleRad);
-        double y1 = centerY - INNER_RADIUS * Math.cos(startAngleRad);
+        double x1 = center + INNER_RADIUS * Math.sin(startAngleRad);
+        double y1 = center - INNER_RADIUS * Math.cos(startAngleRad);
 
-        double x2 = centerX + OUTER_RADIUS * Math.sin(startAngleRad);
-        double y2 = centerY - OUTER_RADIUS * Math.cos(startAngleRad);
+        double x2 = center + OUTER_RADIUS * Math.sin(startAngleRad);
+        double y2 = center - OUTER_RADIUS * Math.cos(startAngleRad);
 
-        double x3 = centerX + OUTER_RADIUS * Math.sin(endAngleRad);
-        double y3 = centerY - OUTER_RADIUS * Math.cos(endAngleRad);
+        double x3 = center + OUTER_RADIUS * Math.sin(endAngleRad);
+        double y3 = center - OUTER_RADIUS * Math.cos(endAngleRad);
 
-        double x4 = centerX + INNER_RADIUS * Math.sin(endAngleRad);
-        double y4 = centerY - INNER_RADIUS * Math.cos(endAngleRad);
+        double x4 = center + INNER_RADIUS * Math.sin(endAngleRad);
+        double y4 = center - INNER_RADIUS * Math.cos(endAngleRad);
 
+        // Simulate full circles
+        if(Math.abs(x2 - x3) <= 0.001 && Math.abs(y3 - y2) <= 0.001 && END_ANGLE > 0){
+            x3 -= 1;
+            x4 -= 1;
+        }
         MoveTo moveTo1 = new MoveTo(x1, y1);
         LineTo lineTo2 = new LineTo(x2, y2);
         ArcTo  arcTo3  = new ArcTo(OUTER_RADIUS, OUTER_RADIUS, 0, x3, y3, largeAngle, true);
@@ -771,7 +784,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, ((ChartItem) NODE.getItem()).getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
-        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, EventType.NODE_SELECTED)));
+        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, TreeNodeEventType.NODE_SELECTED)));
 
         return path;
     }
@@ -779,17 +792,17 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private static void rotateContextForText(final GraphicsContext CTX, final double START_ANGLE, final double ANGLE, final TextOrientation ORIENTATION) {
         switch (ORIENTATION) {
             case TANGENT:
-                if ((360 - START_ANGLE - ANGLE) % 360 > 90 && (360 - START_ANGLE - ANGLE) % 360 < 270) {
-                    CTX.rotate((180 - START_ANGLE - ANGLE) % 360);
+                if (START_ANGLE + ANGLE < 180) {
+                    CTX.rotate((START_ANGLE + ANGLE -90) % 360);
                 } else {
-                    CTX.rotate((360 - START_ANGLE - ANGLE) % 360);
+                    CTX.rotate((START_ANGLE + ANGLE + 90) % 360);
                 }
                 break;
             case ORTHOGONAL:
-                if ((360 - START_ANGLE - ANGLE - 90) % 360 > 90 && (360 - START_ANGLE - ANGLE - 90) % 360 < 270) {
-                    CTX.rotate((90 - START_ANGLE - ANGLE) % 360);
+                if (START_ANGLE + ANGLE < 270) {
+                    CTX.rotate((START_ANGLE + ANGLE + 180) % 360);
                 } else {
-                    CTX.rotate((270 - START_ANGLE - ANGLE) % 360);
+                    CTX.rotate(START_ANGLE + ANGLE);
                 }
                 break;
             case HORIZONTAL:
@@ -803,7 +816,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
-        size   = width < height ? width : height;
+        size   = Math.min(width, height);
 
         if (width > 0 && height > 0) {
             pane.setMaxSize(size, size);
@@ -815,8 +828,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
             chartCanvas.setWidth(size);
             chartCanvas.setHeight(size);
 
-            centerX = size * 0.5;
-            centerY = centerX;
+            center = size * 0.5;
 
             redraw();
         }
