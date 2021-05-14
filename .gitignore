@@ -4,3 +4,6 @@
 /build
 /out
 /classes
+/bin/
+/.classpath
+/.project
