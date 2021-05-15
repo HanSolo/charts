@@ -16,6 +16,16 @@
 
 package eu.hansolo.fx.charts;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.event.ConnectionEvent;
@@ -51,16 +61,6 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 
 /**
@@ -127,7 +127,6 @@ public class CircularPlot extends Region {
     private              String                       formatString;
     private              ObservableList<Connection>   connections;
 
-
     // ******************** Constructors **************************************
     public CircularPlot() {
         _tickMarkColor                    = Color.BLACK;
@@ -157,10 +156,8 @@ public class CircularPlot extends Region {
             redraw();
         };
 
-        formatString                      = "%." + _decimals + "f";
-
+        formatString                      = "%." + _decimals + "f";      
         connections                       = FXCollections.observableArrayList();
-
         itemPaths                         = new LinkedHashMap<>();
         paths                             = new LinkedHashMap<>();
         connectionMap                     = new LinkedHashMap<>();
@@ -691,7 +688,7 @@ public class CircularPlot extends Region {
                 } else {
                     connectionFill = Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity());
                 }
-
+      
                 // Draw flow
                 Path path = new Path();
                 //path.setFill(Helper.getColorWithOpacity(item.getFill(), getConnectionOpacity()));
@@ -741,6 +738,9 @@ public class CircularPlot extends Region {
         }
     }
 
+    /**
+     * Overrideable drawTickMarks() method
+     */
     protected void drawTickMarks(final PlotItem ITEM, final double START_ANGLE, final double ANGLE_RANGE) {
         double        sinValue;
         double        cosValue;
@@ -899,7 +899,7 @@ public class CircularPlot extends Region {
     }
 
     /**
-     * public redraw()
+     * Overrideable redraw()
      */
     public void redraw() {
         drawChart();
