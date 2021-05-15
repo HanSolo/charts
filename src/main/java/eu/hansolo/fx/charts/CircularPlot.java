@@ -214,8 +214,11 @@ public class CircularPlot extends Region {
                         Platform.runLater(() -> {
                             //item0.fireItemEvent(new ItemEvent(item0, EventType.CONNECTION_SELECTED_FROM));
                             //item1.fireItemEvent(new ItemEvent(item1, EventType.CONNECTION_SELECTED_TO));
-                            connection.fireConnectionEvent(new ConnectionEvent(connection, EventType.CONNECTION_SELECTED));
-                        });
+                        	
+                        	// ConectionEvent with original mouseEvent attached for further information (isCtrlDown ...)
+                        	// and plot for redraw plot after connection has been selected and properties may have changed
+                            connection.fireConnectionEvent(new ConnectionEvent(connection, EventType.CONNECTION_SELECTED, e));
+                       });
                     }
                 }
             });
@@ -223,7 +226,8 @@ public class CircularPlot extends Region {
                 double eventX = e.getX();
                 double eventY = e.getY();
                 if (itemPath.contains(eventX, eventY)) {
-                    Platform.runLater(() -> plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED)));
+                	// ItemEvent with original mouseEvent attached for further information (isCtrlDown ...)
+                    Platform.runLater(() -> plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED, e)));
                 }
             });
         });
@@ -464,17 +468,17 @@ public class CircularPlot extends Region {
         return connections.stream().filter(connection -> connection.getOutgoingItem().equals(FROM) && connection.getIncomingItem().equals(TO)).findFirst().orElse(null);
     }
 
-    private void validateData() {
+    protected void validateData() {
         connections.clear();
         Map<PlotItem, Double> incoming = new HashMap<>(getItems().size());
         for (PlotItem item : getItems()) {
             item.getOutgoing().forEach((outgoingItem, value) -> {
                 if (incoming.containsKey(outgoingItem)) {
                     //incoming.put(outgoingItem, incoming.get(outgoingItem) + value);
-                    connections.add(new Connection(item, outgoingItem, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
+                	connections.add(createConnection(item, outgoingItem, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 } else {
                     //incoming.put(outgoingItem, value);
-                    connections.add(new Connection(outgoingItem, item, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
+                	connections.add(createConnection(outgoingItem, item, item.getOutgoing().get(outgoingItem), Color.TRANSPARENT));
                 }
             });
         }
@@ -487,8 +491,24 @@ public class CircularPlot extends Region {
             }
         }
     }
+    
+    /**
+     * Overrideable connection factory method
+     * 
+     * @param INCOMING_ITEM
+     * @param OUTGOING_ITEM
+     * @param VALUE
+     * @param FILL
+     * @return (not null) Connection
+     */
+    protected Connection createConnection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL) {
+    	return new Connection(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL);
+    }
 
-    private void drawChart() {
+    /**
+     * Overrideable drawChart() method
+     */
+    protected void drawChart() {
         itemPaths.clear();
         paths.clear();
         connectionMap.clear();
@@ -721,7 +741,7 @@ public class CircularPlot extends Region {
         }
     }
 
-    private void drawTickMarks(final PlotItem ITEM, final double START_ANGLE, final double ANGLE_RANGE) {
+    protected void drawTickMarks(final PlotItem ITEM, final double START_ANGLE, final double ANGLE_RANGE) {
         double        sinValue;
         double        cosValue;
         double[]      scaleParameters              = Helper.calcAutoScale(0, ITEM.getValue());
@@ -878,7 +898,10 @@ public class CircularPlot extends Region {
         }
     }
 
-    private void redraw() {
+    /**
+     * public redraw()
+     */
+    public void redraw() {
         drawChart();
     }
 

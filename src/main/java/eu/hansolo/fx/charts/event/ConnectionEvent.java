@@ -17,30 +17,34 @@
 package eu.hansolo.fx.charts.event;
 
 
+import eu.hansolo.fx.charts.CircularPlot;
 import eu.hansolo.fx.charts.data.Connection;
+import javafx.scene.input.MouseEvent;
 
 
 public class ConnectionEvent<T extends Connection> {
     private final EventType TYPE;
     private final T         CONNECTION;
-
+    
+    // (nullable) the orginal mouse event with additional information
+    private final MouseEvent MOUSE_EVENT;
 
     // ******************** Constructors **************************************
     public ConnectionEvent(final EventType TYPE) {
-        this(null, TYPE);
+        this(null, TYPE, null);
     }
-    public ConnectionEvent(final T CONNECTION) {
-        this(CONNECTION, EventType.UPDATE);
+    public ConnectionEvent(final CircularPlot plot, final T CONNECTION) {
+        this(CONNECTION, EventType.UPDATE, null);
     }
-    public ConnectionEvent(final T CONNECTION, final EventType TYPE) {
+    public ConnectionEvent(final T CONNECTION, final EventType TYPE, final MouseEvent MOUSE_EVENT) {
         this.CONNECTION = CONNECTION;
         this.TYPE = TYPE;
+        this.MOUSE_EVENT = MOUSE_EVENT;
     }
-
 
     // ******************** Methods *******************************************
     public T getConnection() { return CONNECTION; }
-
     public EventType getEventType() { return TYPE; }
+    public MouseEvent getMouseEvent() { return MOUSE_EVENT; }
 }
 

@@ -33,7 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Connection {
-    private final ConnectionEvent         SELECTED_EVENT = new ConnectionEvent(Connection.this, EventType.SELECTED);
+//    private final ConnectionEvent         SELECTED_EVENT = new ConnectionEvent(Connection.this, EventType.SELECTED);
     private List<ConnectionEventListener> listeners;
     private PlotItem                      _incomingItem;
     private ObjectProperty<PlotItem>      incomingItem;
