@@ -376,9 +376,10 @@ public class PlotItem implements Item, Comparable<PlotItem> {
 
         if (Double.compare(item.getValue(), getValue()) != 0) return false;
         if (getName() != null ? !getName().equals(item.getName()) : item.getName() != null) return false;
-        if (getFill() != null ? !getFill().equals(item.getFill()) : item.getFill() != null) return false;
-        if (getStroke() != null ? !getStroke().equals(item.getStroke()) : item.getStroke() != null) return false;
-        return getConnectionFill() != null ? getConnectionFill().equals(item.getConnectionFill()) : item.getConnectionFill() == null;
+        return (getName() != null ? !getName().equals(item.getName()) : item.getName() != null);
+//        if (getFill() != null ? !getFill().equals(item.getFill()) : item.getFill() != null) return false;
+//        if (getStroke() != null ? !getStroke().equals(item.getStroke()) : item.getStroke() != null) return false;
+//        return getConnectionFill() != null ? getConnectionFill().equals(item.getConnectionFill()) : item.getConnectionFill() == null;
     }
 
     @Override public int hashCode() {
@@ -387,9 +388,9 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         result = getName() != null ? getName().hashCode() : 0;
         temp = Double.doubleToLongBits(getValue());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (getFill() != null ? getFill().hashCode() : 0);
-        result = 31 * result + (getStroke() != null ? getStroke().hashCode() : 0);
-        result = 31 * result + (getConnectionFill() != null ? getConnectionFill().hashCode() : 0);
+//        result = 31 * result + (getFill() != null ? getFill().hashCode() : 0);
+//        result = 31 * result + (getStroke() != null ? getStroke().hashCode() : 0);
+//        result = 31 * result + (getConnectionFill() != null ? getConnectionFill().hashCode() : 0);
         return result;
     }
 
