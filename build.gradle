@@ -2,37 +2,40 @@ import java.text.SimpleDateFormat
 
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1'
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.2'
-        classpath 'org.javamodularity:moduleplugin:1.7.0'
-        classpath 'org.beryx:badass-jlink-plugin:2.21.3'
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0'
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.7.0'
+        classpath 'org.javamodularity:moduleplugin:1.8.7'
+        classpath 'org.beryx:badass-jlink-plugin:2.23.2'
     }
 }
 
 plugins {
     id 'idea'
+    id 'java'
     id 'java-library'
-    id 'com.google.osdetector' version '1.6.2'
-    id 'org.javamodularity.moduleplugin' version '1.7.0'
-    id 'org.beryx.jlink' version '2.21.3'
+    id 'com.google.osdetector' version '1.7.0'
+    id 'org.javamodularity.moduleplugin' version '1.8.7'
+    id 'org.beryx.jlink' version '2.23.2'
     id 'maven-publish'
+    id 'signing'
     id 'net.nemerosa.versioning' version '2.14.0'
-    id 'com.jfrog.bintray' version '1.8.5'
+    id ("io.github.gradle-nexus.publish-plugin").version("1.1.0")
 }
 
 apply plugin: 'biz.aQute.bnd.builder'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
-sourceCompatibility = '11'
+sourceCompatibility = '16'
 
 wrapper {
-    gradleVersion = '6.4'
+    gradleVersion = '7.0'
 }
 
 description = 'Charts is a JavaFX library containing different kind of charts'
@@ -47,14 +50,13 @@ ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'wi
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    implementation "org.openjfx:javafx-base:11:$platform"
-    implementation "org.openjfx:javafx-graphics:11:$platform"
-    implementation "org.openjfx:javafx-controls:11:$platform"
-    implementation "org.openjfx:javafx-swing:11:$platform"
+    implementation "org.openjfx:javafx-base:16:$platform"
+    implementation "org.openjfx:javafx-graphics:16:$platform"
+    implementation "org.openjfx:javafx-controls:16:$platform"
+    implementation "org.openjfx:javafx-swing:16:$platform"
 }
 
 mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
@@ -80,7 +82,6 @@ jar {
     }
 }
 
-
 // create one jar for the javadoc
 task javadocJar(type: Jar, dependsOn: javadoc) {
     archiveClassifier = 'javadoc'
@@ -99,75 +100,64 @@ artifacts {
     archives sourcesJar
 }
 
-def pomConfig = {
-    name 'charts'
-    url 'https://github.com/HanSolo/charts/wiki'
-    inceptionYear '2017'
-    licenses {
-        license([:]) {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
-        }
-    }
-    scm {
-        url 'scm:git@github.com:HanSolo/charts.git'
-        connection 'scm:git@github.com:HanSolo/charts.git'
-        developerConnection 'scm:git@github.com:HanSolo/charts.git'
-    }
-    developers {
-        developer {
-            id 'HanSolo'
-            name 'Gerrit Grunwald'
-        }
-    }
+signing {
+    sign configurations.archives
 }
 
 publishing {
     publications {
         mavenCustom(MavenPublication) {
+            group = 'eu.hansolo.fx'
+            artifactId = 'charts'
+            version = '16.0.0'
+
             from components.java
             artifact sourcesJar
             artifact javadocJar
 
-            pom.withXml {
-                asNode().children().last() + pomConfig
-                asNode().appendNode('description', description)
+            pom {
+                name = 'charts'
+                description = 'A JavaFX library for scientific charts.'
+                url = "https://github.com/HanSolo/charts/wiki"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "HanSolo"
+                        name = "Gerrit Grunwald"
+                        email = "han.solo@mac.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://HanSolo/charts"
+                    developerConnection = "scm:git:https://HanSolo/charts"
+                    url = "https://github.com/HanSolo/charts"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
 }
 
-if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = ''
-if (!project.hasProperty('bintrayApiKey')) ext.bintrayApiKey = ''
-if (!project.hasProperty('sonatypeUsername')) ext.sonatypeUsername = ''
-if (!project.hasProperty('sonatypePassword')) ext.sonatypePassword = ''
-
-
-bintray {
-    user = project.bintrayUsername
-    key  = project.bintrayApiKey
-    publications = ['mavenCustom']
-    pkg {
-        repo                  = 'charts'
-        userOrg               = 'hansolo'
-        name                  = project.name
-        desc                  = description
-        licenses              = ['Apache-2.0']
-        labels                = ['java', 'javafx']
-        websiteUrl            = 'https://github.com/HanSolo/charts/wiki'
-        issueTrackerUrl       = 'https://github.com/HanSolo/charts/issues'
-        vcsUrl                = 'git@github.com:HanSolo/charts.git'
-        publicDownloadNumbers = true
-        version {
-            name   = project.version
-            vcsTag = project.version
-            mavenCentralSync {
-                sync = true
-                user = project.sonatypeUsername
-                password = project.sonatypePassword
-                close = '1'
-            }
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(ossrhUsername)
+            password.set(ossrhPassword)
         }
     }
 }
