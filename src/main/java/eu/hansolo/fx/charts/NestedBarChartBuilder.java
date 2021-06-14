@@ -19,13 +19,16 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.Order;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.util.HashMap;
@@ -62,6 +65,21 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
 
     public final B chartBackground(final Paint BACKGROUND) {
         properties.put("chartBackground", new SimpleObjectProperty<>(BACKGROUND));
+        return (B)this;
+    }
+
+    public final B spacer(final double SPACER) {
+        properties.put("spacer", new SimpleDoubleProperty(SPACER));
+        return (B)this;
+    }
+
+    public final B seriesTitleVisible(final boolean VISIBLE) {
+        properties.put("seriesTitleVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B seriesTitleColor(final Color COLOR) {
+        properties.put("seriesTitleColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
     }
 
@@ -187,6 +205,12 @@ public class NestedBarChartBuilder<B extends NestedBarChartBuilder<B>> {
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("chartBackground".equals(key)) {
                 CONTROL.setChartBackground(((ObjectProperty<Paint>) properties.get(key)).get());
+            } else if ("spacer".equals(key)) {
+                CONTROL.setSpacer(((DoubleProperty) properties.get(key)).get());
+            } else if ("seriesTitleColor".equals(key)) {
+                CONTROL.setSeriesTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("seriesTitleVisible".equals(key)) {
+                CONTROL.setSeriesTitleVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

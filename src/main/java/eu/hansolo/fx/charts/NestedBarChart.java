@@ -24,11 +24,14 @@ import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -37,6 +40,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,8 +62,8 @@ public class NestedBarChart extends Region implements ChartArea {
     private static final double                                       PREFERRED_HEIGHT = 150;
     private static final double                                       MINIMUM_WIDTH    = 50;
     private static final double                                       MINIMUM_HEIGHT   = 50;
-    private static final double                                       MAXIMUM_WIDTH    = 1024;
-    private static final double                                       MAXIMUM_HEIGHT   = 1024;
+    private static final double                                       MAXIMUM_WIDTH    = 2048;
+    private static final double                                       MAXIMUM_HEIGHT   = 2048;
     private              double                                       size;
     private              double                                       width;
     private              double                                       height;
@@ -73,6 +78,11 @@ public class NestedBarChart extends Region implements ChartArea {
     private              EventHandler<MouseEvent>                     clickHandler;
     private              CopyOnWriteArrayList<SelectionEventListener> listeners;
     private              InfoPopup                                    popup;
+    private              double                                       spacer;
+    private              boolean                                      _seriesTitleVisible;
+    private              BooleanProperty                              seriesTitleVisible;
+    private              Color                                        _seriesTitleColor;
+    private              ObjectProperty<Color>                        seriesTitleColor;
 
 
     // ******************** Constructors **************************************
@@ -86,14 +96,17 @@ public class NestedBarChart extends Region implements ChartArea {
         this(SERIES, Color.TRANSPARENT);
     }
     public NestedBarChart(final List<ChartItemSeries<ChartItem>> SERIES, final Paint BACKGROUND) {
-        width            = PREFERRED_WIDTH;
-        height           = PREFERRED_HEIGHT;
-        size             = PREFERRED_HEIGHT;
-        series           = FXCollections.observableArrayList(SERIES);
-        _order           = Order.DESCENDING;
-        _chartBackground = BACKGROUND;
-        clickHandler     = e -> checkForClick(e);
-        listeners        = new CopyOnWriteArrayList<>();
+        width               = PREFERRED_WIDTH;
+        height              = PREFERRED_HEIGHT;
+        size                = PREFERRED_HEIGHT;
+        series              = FXCollections.observableArrayList(SERIES);
+        _order              = Order.DESCENDING;
+        _chartBackground    = BACKGROUND;
+        spacer              = -1;
+        _seriesTitleVisible = false;
+        _seriesTitleColor   = null;
+        clickHandler        = e -> checkForClick(e);
+        listeners           = new CopyOnWriteArrayList<>();
         initGraphics();
         registerListeners();
     }
@@ -225,6 +238,56 @@ public class NestedBarChart extends Region implements ChartArea {
         return chartBackground;
     }
 
+    public double getSpacer() { return spacer; }
+    public void setSpacer(final double SPACER) {
+        this.spacer = SPACER;
+        redraw();
+    }
+    public void setDefaultSpacer() {
+        this.spacer = -1;
+        redraw();
+    }
+
+    public boolean isSeriesTitleVisible() { return null == seriesTitleVisible ? _seriesTitleVisible : seriesTitleVisible.get(); }
+    public void setSeriesTitleVisible(final boolean VISIBLE) {
+        if (null == seriesTitleVisible) {
+            _seriesTitleVisible = VISIBLE;
+            redraw();
+        } else {
+            seriesTitleVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty seriesTitleVisibleProperty() {
+        if (null == seriesTitleVisible) {
+            seriesTitleVisible = new BooleanPropertyBase(_seriesTitleVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return NestedBarChart.this; }
+                @Override public String getName() { return "seriesTitleVisible"; }
+            };
+        }
+        return seriesTitleVisible;
+    }
+
+    public Color getSeriesTitleColor() { return null == seriesTitleColor ? _seriesTitleColor : seriesTitleColor.get(); }
+    public void setSeriesTitleColor(final Color COLOR) {
+        if (null == seriesTitleColor) {
+            _seriesTitleColor = COLOR;
+            redraw();
+        } else {
+            seriesTitleColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> seriesTitleColor() {
+        if (null == seriesTitleColor) {
+            seriesTitleColor = new ObjectPropertyBase<>(_seriesTitleColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return NestedBarChart.this; }
+                @Override public String getName() { return "seriesTitleColor"; }
+            };
+        }
+        return seriesTitleColor;
+    }
+
     public void checkForClick(final MouseEvent EVT) {
         final double X = EVT.getX();
         final double Y = EVT.getY();
@@ -232,9 +295,10 @@ public class NestedBarChart extends Region implements ChartArea {
         popup.setX(EVT.getScreenX());
         popup.setY(EVT.getScreenY() - popup.getHeight());
 
-        long noOfBars       = series.size();
-        double spacer       = width * 0.05;
-        double mainBarWidth = (width - (spacer * (noOfBars - 1))) / noOfBars;
+        long noOfBars        = series.size();
+        double defaultSpacer = width * 0.05;
+        double usedSpacer    = spacer == -1 ? defaultSpacer : spacer;
+        double mainBarWidth  = (width - (usedSpacer * (noOfBars - 1))) / noOfBars;
 
         // Find series with sum of values
         double maxSum = -Double.MAX_VALUE;
@@ -249,7 +313,7 @@ public class NestedBarChart extends Region implements ChartArea {
             double                     sumOfItems    = s.getItems().stream().mapToDouble(ChartItem::getValue).sum();
             double                     innerBarWidth = mainBarWidth / noOfItems;
             double                     mainBarHeight = sumOfItems * stepY;
-            double                     minX          = i * mainBarWidth + i * spacer;
+            double                     minX          = i * mainBarWidth + i * usedSpacer;
             if (Helper.isInRectangle(X, Y, minX, height - mainBarHeight, minX + mainBarWidth, height)) {
                 selectedSeries = s;
             }
@@ -295,9 +359,12 @@ public class NestedBarChart extends Region implements ChartArea {
         ctx.setFill(getChartBackground());
         ctx.fillRect(0, 0, width, height);
 
-        long noOfBars       = series.size();
-        double spacer       = width * 0.05;
-        double mainBarWidth = (width - (spacer * (noOfBars - 1))) / noOfBars;
+        long   noOfBars      = series.size();
+        double defaultSpacer = width * 0.025;
+        double usedSpacer    = spacer == -1 ? defaultSpacer : spacer;
+        double mainBarWidth  = (width - (usedSpacer * (noOfBars - 1))) / noOfBars;
+
+        boolean seriesTitleVisible = isSeriesTitleVisible();
 
         // Find series with sum of values
         double maxSum = -Double.MAX_VALUE;
@@ -306,13 +373,16 @@ public class NestedBarChart extends Region implements ChartArea {
         }
         double stepY = height / maxSum;
 
+
+        double fontSize = mainBarWidth * 0.125;
+        Font   font     = Font.font(fontSize);
         for (int i = 0 ; i < noOfBars ; i++) {
             ChartItemSeries<ChartItem> s             = series.get(i);
             int                        noOfItems     = s.getNoOfItems();
             double                     sumOfItems    = s.getSumOfAllItems();
             double                     innerBarWidth = mainBarWidth / noOfItems;
             double                     mainBarHeight = sumOfItems * stepY;
-            double                     minX          = i * mainBarWidth + i * spacer;
+            double                     minX          = i * mainBarWidth + i * usedSpacer;
             // Draw main bar
             ctx.setFill(s.getFill());
             ctx.fillRect(minX, height - mainBarHeight, mainBarWidth, mainBarHeight);
@@ -320,12 +390,30 @@ public class NestedBarChart extends Region implements ChartArea {
             // Sort items in bar
             sortItems(s.getItems(), getOrder());
 
+            double minMainBarX = minX;
+
             // Draw sub bars within main bar
             for (ChartItem item : s.getItems()) {
                 double innerBarHeight = item.getValue() * stepY;
                 ctx.setFill(item.getFill());
                 ctx.fillRect(minX, height - innerBarHeight, innerBarWidth, innerBarHeight);
                 minX += innerBarWidth;
+            }
+
+            // Draw series title if enabled
+            if (seriesTitleVisible) {
+                ctx.save();
+                ctx.setTextBaseline(VPos.CENTER);
+                ctx.setTextAlign(TextAlignment.CENTER);
+                ctx.setFill(null == getSeriesTitleColor() ? s.getTextFill() : getSeriesTitleColor());
+                ctx.setFill(getSeriesTitleColor());
+                ctx.setFont(font);
+                if (mainBarHeight <= 2 * fontSize) {
+                    ctx.fillText(s.getName(), minMainBarX + mainBarWidth * 0.5, height - mainBarHeight - fontSize - mainBarWidth * 0.01, mainBarWidth);
+                } else {
+                    ctx.fillText(s.getName(), minMainBarX + mainBarWidth * 0.5, height - mainBarHeight + fontSize + mainBarWidth * 0.01, mainBarWidth);
+                }
+                ctx.restore();
             }
         }
     }
