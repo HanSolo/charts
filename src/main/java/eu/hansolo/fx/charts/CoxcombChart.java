@@ -224,8 +224,8 @@ public class CoxcombChart extends Region {
 
     public double sumOfAllItems() { return items.stream().mapToDouble(ChartItem::getValue).sum(); }
 
-    public double getMinValue() { return items.stream().mapToDouble(ChartItem::getValue).min().getAsDouble(); }
-    public double getMaxValue() { return items.stream().mapToDouble(ChartItem::getValue).max().getAsDouble(); }
+    public double getMinValue() { return items.isEmpty() ? 0 : items.stream().mapToDouble(ChartItem::getValue).min().getAsDouble(); }
+    public double getMaxValue() { return items.isEmpty() ? 100 : items.stream().mapToDouble(ChartItem::getValue).max().getAsDouble(); }
 
     public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
     public void setTextColor(final Color COLOR) {
