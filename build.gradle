@@ -17,7 +17,6 @@ buildscript {
 
 plugins {
     id 'idea'
-    id 'java'
     id 'java-library'
     id 'com.google.osdetector' version '1.7.0'
     id 'org.javamodularity.moduleplugin' version '1.8.7'
@@ -25,7 +24,6 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'net.nemerosa.versioning' version '2.14.0'
-    id ("io.github.gradle-nexus.publish-plugin").version("1.1.0")
 }
 
 apply plugin: 'biz.aQute.bnd.builder'
@@ -35,10 +33,11 @@ apply plugin: 'signing'
 sourceCompatibility = '16'
 
 wrapper {
-    gradleVersion = '7.0'
+    gradleVersion = '7.1'
 }
 
 description = 'Charts is a JavaFX library containing different kind of charts'
+mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
 
 Date buildTimeAndDate = new Date()
 ext {
@@ -58,8 +57,6 @@ dependencies {
     implementation "org.openjfx:javafx-controls:16:$platform"
     implementation "org.openjfx:javafx-swing:16:$platform"
 }
-
-mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
 
 jar {
     manifest {
@@ -102,6 +99,7 @@ artifacts {
 
 signing {
     sign configurations.archives
+    sign publishing.publications
 }
 
 publishing {
@@ -117,7 +115,7 @@ publishing {
 
             pom {
                 name = 'charts'
-                description = 'A JavaFX library for scientific charts.'
+                description = 'A JavaFX library for scientific charts'
                 url = "https://github.com/HanSolo/charts/wiki"
                 licenses {
                     license {
@@ -149,15 +147,6 @@ publishing {
                 username = ossrhUsername
                 password = ossrhPassword
             }
-        }
-    }
-}
-
-nexusPublishing {
-    repositories {
-        sonatype {
-            username.set(ossrhUsername)
-            password.set(ossrhPassword)
         }
     }
 }
