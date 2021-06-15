@@ -1,3 +1,5 @@
+import org.gradle.execution.plan.Node
+
 import java.text.SimpleDateFormat
 
 buildscript {
@@ -29,12 +31,6 @@ plugins {
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
-
-sourceCompatibility = '16'
-
-wrapper {
-    gradleVersion = '7.1'
-}
 
 description = 'Charts is a JavaFX library containing different kind of charts'
 mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
@@ -107,11 +103,19 @@ publishing {
         mavenCustom(MavenPublication) {
             group = 'eu.hansolo.fx'
             artifactId = 'charts'
-            version = '16.0.0'
+            version = '16.0.1'
 
             from components.java
             artifact sourcesJar
             artifact javadocJar
+
+            pom.withXml {
+                asNode().dependencies.'*'.findAll {
+                    it.groupId.text() == 'org.openjfx'
+                }.each {
+                    it.remove(it.classifier)
+                }
+            }
 
             pom {
                 name = 'charts'
