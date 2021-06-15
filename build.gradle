@@ -2,30 +2,16 @@ import org.gradle.execution.plan.Node
 
 import java.text.SimpleDateFormat
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0'
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.7.0'
-        classpath 'org.javamodularity:moduleplugin:1.8.7'
-        classpath 'org.beryx:badass-jlink-plugin:2.23.2'
-    }
-}
-
 plugins {
     id 'idea'
     id 'java-library'
-    id 'com.google.osdetector' version '1.7.0'
-    id 'org.javamodularity.moduleplugin' version '1.8.7'
-    id 'org.beryx.jlink' version '2.23.2'
     id 'maven-publish'
     id 'signing'
-    id 'net.nemerosa.versioning' version '2.14.0'
+    id 'com.google.osdetector'           version '1.7.0'
+    id 'org.javamodularity.moduleplugin' version '1.8.7'
+    id 'org.beryx.jlink'                 version '2.23.2'
+    id 'net.nemerosa.versioning'         version '2.14.0'
+    id 'biz.aQute.bnd.builder'           version '5.3.0'
 }
 
 apply plugin: 'biz.aQute.bnd.builder'
@@ -103,7 +89,7 @@ publishing {
         mavenCustom(MavenPublication) {
             group = 'eu.hansolo.fx'
             artifactId = 'charts'
-            version = '16.0.1'
+            version = "${version}"
 
             from components.java
             artifact sourcesJar
