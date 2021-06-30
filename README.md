@@ -6,6 +6,7 @@ A library for scientific charts in JavaFX.
 
 This is still a work in development, but here are some of the charts being worked on so far. 
 
+The charts library can be found over at [maven central](https://search.maven.org/artifact/eu.hansolo.fx/charts)
 
 ## Area heat map
 ![Area heat map](https://i.ibb.co/kM77mrL/Area-Heat-Map-2020-09-04-07-47-41.png)

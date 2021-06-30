@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.ValueItem;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -27,7 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 
 
-public class YSeries<T extends YItem> extends Series {
+public class YSeries<T extends ValueItem> extends Series {
 
     // ******************** Constructors **************************************
     public YSeries() {
@@ -53,8 +53,8 @@ public class YSeries<T extends YItem> extends Series {
     // ******************** Methods *******************************************
     @Override public ObservableList<T> getItems() { return items; }
 
-    public double getMinY() { return getItems().stream().min(Comparator.comparingDouble(T::getY)).get().getY(); }
-    public double getMaxY() { return getItems().stream().max(Comparator.comparingDouble(T::getY)).get().getY(); }
+    public double getMinY() { return getItems().stream().min(Comparator.comparingDouble(T::getValue)).get().getValue(); }
+    public double getMaxY() { return getItems().stream().max(Comparator.comparingDouble(T::getValue)).get().getValue(); }
 
-    public double getSumOfYValues() { return getItems().stream().mapToDouble(T::getY).sum(); }
+    public double getSumOfYValues() { return getItems().stream().mapToDouble(T::getValue).sum(); }
 }

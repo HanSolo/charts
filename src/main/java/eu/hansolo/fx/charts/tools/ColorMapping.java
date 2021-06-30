@@ -39,11 +39,17 @@ public enum ColorMapping {
     BLACK_WHITE(new Stop(0.0, Color.BLACK), new Stop(1.0, Color.WHITE)),
     WHITE_BLACK(new Stop(0.0, Color.WHITE), new Stop(1.0, Color.BLACK));
 
-    private final LinearGradient GRADIENT;
+    private final LinearGradient gradient;
+
+    private final Stop[] stops;
 
     ColorMapping(final Stop... STOPS) {
-        GRADIENT = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, STOPS);
+        this.stops    = STOPS;
+        this.gradient = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, STOPS);
     }
 
-    public LinearGradient getGradient() { return GRADIENT; }
+
+    public Stop[] getStops() { return stops; }
+
+    public LinearGradient getGradient() { return gradient; }
 }

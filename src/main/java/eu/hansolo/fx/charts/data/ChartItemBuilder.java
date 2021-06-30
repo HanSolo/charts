@@ -19,11 +19,13 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -46,6 +48,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
     // ******************** Methods *******************************************
     public static final ChartItemBuilder create() {
         return new ChartItemBuilder();
+    }
+
+    public final B index(final int INDEX) {
+        properties.put("index", new SimpleIntegerProperty(INDEX));
+        return (B)this;
     }
 
     public final B name(final String NAME) {
@@ -116,7 +123,9 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
     public final ChartItem build() {
         final ChartItem ITEM = new ChartItem();
         for (String key : properties.keySet()) {
-            if ("name".equals(key)) {
+            if ("index".equals(key)) {
+                ITEM.setIndex(((IntegerProperty) properties.get(key)).get());
+            } else if ("name".equals(key)) {
                 ITEM.setName(((StringProperty) properties.get(key)).get());
             } else if ("value".equals(key)) {
                 ITEM.setValue(((DoubleProperty) properties.get(key)).get());

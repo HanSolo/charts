@@ -510,6 +510,12 @@ public class Helper {
                 Double.compare(Y, MAX_Y) <= 0);
     }
 
+    public static final boolean isInCircle(final double x, final double y, final double centerX, final double centerY, final double radius) {
+        double deltaX = centerX - x;
+        double deltaY = centerY - y;
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY) <= radius;
+    }
+
     public static final boolean isInEllipse(final double X, final double Y,
                                             final double ELLIPSE_CENTER_X, final double ELLIPSE_CENTER_Y,
                                             final double ELLIPSE_RADIUS_X, final double ELLIPSE_RADIUS_Y) {

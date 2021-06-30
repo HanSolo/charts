@@ -29,6 +29,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
@@ -48,6 +50,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private final ItemEvent               UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
     private final ItemEvent               FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
     private       List<ItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
+    private       int                     _index;
+    private       IntegerProperty         index;
     private       String                  _name;
     private       StringProperty          name;
     private       String                  _unit;
@@ -120,6 +124,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+        _index            = -1;
         _name             = NAME;
         _unit             = "";
         _value            = VALUE;
@@ -149,6 +154,25 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
 
     // ******************** Methods *******************************************
+    public int getIndex() { return null == index ? _index : index.get(); }
+    public void setIndex(final int index) {
+        if (null == this.index) {
+            _index = index;
+        } else {
+            this.index.set(index);
+        }
+    }
+    public IntegerProperty indexProperty() {
+        if (null == index) {
+            index = new IntegerPropertyBase(_index) {
+                @Override protected void invalidated() {  }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "index"; }
+            };
+        }
+        return index;
+    }
+
     @Override public String getName() { return null == name ? _name : name.get(); }
     public void setName(final String NAME) {
         if (null == name) {

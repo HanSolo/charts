@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.ValueItem;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
@@ -25,11 +25,10 @@ import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
-public class YChart<T extends YItem> extends Region {
+public class YChart<T extends ValueItem> extends Region {
     private static final double         PREFERRED_WIDTH  = 250;
     private static final double         PREFERRED_HEIGHT = 250;
     private static final double         MINIMUM_WIDTH    = 50;
