@@ -112,9 +112,9 @@ public class BubbleGridChartTest extends Application {
 
         // Setup Chart
         bubbleGridChart = BubbleGridChartBuilder.create()
-                                                .chartBackground(Color.web("#0e0e0e"))
-                                                .textColor(Color.WHITE)
-                                                .gridColor(Color.rgb(255, 255, 255, 0.1))
+                                                .chartBackground(Color.WHITE)
+                                                .textColor(Color.BLACK)
+                                                .gridColor(Color.rgb(0, 0, 0, 0.1))
                                                 .showGrid(true)
                                                 .showValues(true)
                                                 .showPercentage(true)
@@ -122,6 +122,7 @@ public class BubbleGridChartTest extends Application {
                                                 .sortXCategoryItemsByIndexAscending()
                                                 .sortYCategoryItemsByIndexDescending()
                                                 .useXCategoryFill()
+                                                .autoBubbleTextColor(true)
                                                 .useGradientFill(false)
                                                 .gradient(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE,
                                                                              new Stop(0.00, Color.web("#2C67D5")),

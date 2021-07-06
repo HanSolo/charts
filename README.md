@@ -122,3 +122,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## ArcChart
 ![Arc chart](https://i.ibb.co/Y8G2kmB/Arc-Chart-2020-11-21-07-25-04.png)
+
+
+## BubbleGridChart
+![BubbleGridChart](https://i.ibb.co/9nNqTXP/Bubble-Grid-Chart.png)
