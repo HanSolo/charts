@@ -21,9 +21,6 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Gradle
-        run: |
-          ossrhUsername=${{ secrets.OSSRHUSERNAME }}
-          ossrhPassword=${{ secrets.OSSRHPASSWORD }}
-          ./gradlew build
+        run: ./gradlew build
 
 ...
