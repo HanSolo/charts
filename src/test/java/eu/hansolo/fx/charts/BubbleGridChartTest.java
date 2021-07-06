@@ -137,7 +137,7 @@ public class BubbleGridChartTest extends Application {
         StackPane pane = new StackPane(bubbleGridChart);
         pane.setPadding(new Insets(10));
 
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(pane, 1240, 1000);
 
         stage.setTitle("Bubble Grid Chart");
         stage.setScene(scene);

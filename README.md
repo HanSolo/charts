@@ -125,4 +125,4 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 
 ## BubbleGridChart
-![BubbleGridChart](https://i.ibb.co/9nNqTXP/Bubble-Grid-Chart.png)
+![BubbleGridChart](https://i.ibb.co/vJtKSXR/Bubble-Grid-Chart.png)
