@@ -112,9 +112,9 @@ public class BubbleGridChartTest extends Application {
 
         // Setup Chart
         bubbleGridChart = BubbleGridChartBuilder.create()
-                                                //.chartBackground(Color.web("#0e0e0e"))
-                                                //.textColor(Color.WHITE)
-                                                //.gridColor(Color.rgb(255, 255, 255, 0.1))
+                                                .chartBackground(Color.web("#0e0e0e"))
+                                                .textColor(Color.WHITE)
+                                                .gridColor(Color.rgb(255, 255, 255, 0.1))
                                                 .showGrid(true)
                                                 .showValues(true)
                                                 .showPercentage(true)

@@ -344,6 +344,9 @@ public class InfoPopup extends Popup {
         }
     }
     public void update(final Item item) {
+        update(item, -1);
+    }
+    public void update(final Item item, final double sum) {
         Helper.enableNode(seriesText, false);
         Helper.enableNode(seriesSumText, false);
         Helper.enableNode(seriesNameText, false);
@@ -356,11 +359,19 @@ public class InfoPopup extends Popup {
         if (item instanceof BubbleGridChartItem) {
             BubbleGridChartItem i = (BubbleGridChartItem) item;
             text  = item.getName();
-            value = String.format(Locale.US, formatString, i.getValue());
+            if (sum != -1) {
+                value = String.join("/", String.format(Locale.US, formatString, i.getValue()), String.format(Locale.US, "%.0f%%", (i.getValue() / sum * 100)));
+            } else {
+                value = String.format(Locale.US, formatString, i.getValue());
+            }
         } else if (item instanceof ChartItem) {
             ChartItem i = (ChartItem) item;
             text  = item.getName();
-            value = String.format(Locale.US, formatString, i.getValue());
+            if (sum != -1) {
+                value = String.join("/", String.format(Locale.US, formatString, i.getValue()), String.format(Locale.US, "%.0f%%", (i.getValue() / sum * 100)));
+            } else {
+                value = String.format(Locale.US, formatString, i.getValue());
+            }
         } else {
             text  = "-";
             value = "-";

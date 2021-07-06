@@ -73,6 +73,11 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B autoBubbleTextColor(final boolean AUTO) {
+        properties.put("autoBubbleTextColor", new SimpleBooleanProperty(AUTO));
+        return (B)this;
+    }
+
     public final B showGrid(final boolean SHOW) {
         properties.put("showGrid", new SimpleBooleanProperty(SHOW));
         return (B)this;
@@ -280,6 +285,8 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
                 CONTROL.setChartBackground(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("textColor".equals(key)) {
                 CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("autoBubbleTextColor".equals(key)) {
+                CONTROL.setAutoBubbleTextColor(((BooleanProperty) properties.get(key)).get());
             } else if ("gridColor".equals(key)) {
                 CONTROL.setGridColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("showGrid".equals(key)) {

@@ -95,6 +95,8 @@ public class BubbleGridChart extends Region {
     private              BooleanProperty                         showGrid;
     private              Color                                   _textColor;
     private              ObjectProperty<Color>                   textColor;
+    private              boolean                                 _autoBubbleTextColor;
+    private              BooleanProperty                         autoBubbleTextColor;
     private              boolean                                 useXCategoryFill;
     private              boolean                                 _showValues;
     private              BooleanProperty                         showValues;
@@ -127,6 +129,7 @@ public class BubbleGridChart extends Region {
         maxValue             = 0;
         useXCategoryFill     = true;
         _textColor           = Color.BLACK;
+        _autoBubbleTextColor = false;
         _chartBackground     = Color.TRANSPARENT;
         _gridColor           = Color.rgb(0, 0, 0, 0.1);
         _showGrid            = true;
@@ -200,7 +203,7 @@ public class BubbleGridChart extends Region {
                 if (Helper.isInCircle(e.getX(), e.getY(), bubble.x, bubble.y, bubble.r)) {
                     popup.setX(e.getScreenX());
                     popup.setY(e.getScreenY() - popup.getHeight());
-                    popup.update(bubble.item);
+                    popup.update(bubble.item, sumOfValues);
                     popup.animatedShow(getScene().getWindow());
                 }
             }));
@@ -287,6 +290,26 @@ public class BubbleGridChart extends Region {
             _textColor = null;
         }
         return textColor;
+    }
+
+    public boolean isAutoBubbleTextColor() { return null == autoBubbleTextColor ? _autoBubbleTextColor : autoBubbleTextColor.get(); }
+    public void setAutoBubbleTextColor(final boolean AUTO) {
+        if (null == autoBubbleTextColor) {
+            _autoBubbleTextColor = AUTO;
+            redraw();
+        } else {
+            autoBubbleTextColor.set(AUTO);
+        }
+    }
+    public BooleanProperty autoBubbleTextColorProperty() {
+        if (null == autoBubbleTextColor) {
+            autoBubbleTextColor = new BooleanPropertyBase(_autoBubbleTextColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return BubbleGridChart.this; }
+                @Override public String getName() { return "autoBubbleTextColor"; }
+            };
+        }
+        return autoBubbleTextColor;
     }
 
     public boolean getShowGrid() { return null == showGrid ? _showGrid : showGrid.get(); }
@@ -524,8 +547,9 @@ public class BubbleGridChart extends Region {
         double dataFontSize      = height * 0.021;
         double valueFontSize     = height * 0.019;
         double maxBubbleDiameter = (stepX < stepY ? stepX : stepY) * 0.95;
-        double linearFactor      = maxBubbleDiameter / maxValue;
-        double sqrtFactor        = maxBubbleDiameter / Math.sqrt(maxBubbleDiameter);
+        double maxBubbleRadius   = maxBubbleDiameter * 0.5;
+        double maxBubbleArea     = Math.PI * maxBubbleRadius * maxBubbleRadius;
+        double factor            = maxBubbleArea / maxValue;
         Font   chartFont         = Fonts.latoLight(fontsize);
         Font   dataFont          = Fonts.latoRegular(dataFontSize);
         Font   valueFont         = Fonts.latoLight(valueFontSize);
@@ -605,21 +629,26 @@ public class BubbleGridChart extends Region {
                                                           .findFirst();
                 if (item.isPresent()) {
                     final BubbleGridChartItem bgci           = item.get();
-                    final double              bubbleDiameter = Math.sqrt(bgci.getValue() * linearFactor) * sqrtFactor;
-                    final double              bubbleRadius   = bubbleDiameter * 0.5;
+                    final double              bubbleArea     = bgci.getValue() * factor;
+                    final double              radius         = Math.sqrt(bubbleArea / Math.PI);
+                    final double              diameter       = radius * 2.0;
                     Color                     fill           = useXCategoryFill ? xItem.getFill() : yItem.getFill();
                     if (getUseGradientFill()) {
                         fill = Helper.getColorAt(gradient, bgci.getValue() / (maxValue - minValue));
                     }
 
-                    bubbles.add(new Bubble(cellCenterX, cellCenterY, bubbleRadius, bgci));
+                    bubbles.add(new Bubble(cellCenterX, cellCenterY, radius, bgci));
                     ctx.setFill(fill);
-                    ctx.fillOval(cellCenterX - bubbleRadius, cellCenterY - bubbleRadius, bubbleDiameter, bubbleDiameter);
+                    ctx.fillOval(cellCenterX - radius, cellCenterY - radius, diameter, diameter);
 
-                    if (bubbleDiameter > fontsize && dataFontSize > 7 && getShowValues()) {
+                    if (diameter > dataFontSize * 1.5 && dataFontSize > 7 && getShowValues()) {
                         ctx.setFont(dataFont);
                         ctx.setTextAlign(TextAlignment.CENTER);
-                        ctx.setFill(Helper.isDark(fill) ? Color.WHITE : Color.BLACK);
+                        if (isAutoBubbleTextColor()) {
+                            ctx.setFill(Helper.isDark(fill) ? Color.WHITE : Color.BLACK);
+                        } else {
+                            ctx.setFill(getTextColor());
+                        }
                         ctx.fillText(String.format(Locale.US, "%.0f", bgci.getValue()), cellCenterX, cellCenterY, maxBubbleDiameter);
                     }
                 }
