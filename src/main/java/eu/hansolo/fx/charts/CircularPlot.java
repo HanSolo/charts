@@ -597,8 +597,12 @@ public class CircularPlot extends Region {
 
             // Draw item name
             ctx.save();
-            ctx.setFill(getTextColor());
-            ctx.setFont(Fonts.latoRegular(size * 0.02));
+            ctx.setFill(Color.TRANSPARENT.equals(item.getTextColor()) ? getTextColor() : item.getTextColor());
+            if (item.getFont().getName().equals(Font.getDefault().getName())) {
+                ctx.setFont(Fonts.latoRegular(size * 0.02));
+            } else {
+                ctx.setFont(Font.font(item.getFont().getFamily(), size * 0.02));
+            }
             ctx.setTextAlign(TextAlignment.CENTER);
             ctx.setTextBaseline(VPos.CENTER);
             sinValue = Math.sin(Math.toRadians(-itemStartAngle - itemAngleRange * 0.5 - 180));
