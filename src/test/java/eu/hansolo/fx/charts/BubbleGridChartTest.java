@@ -120,7 +120,7 @@ public class BubbleGridChartTest extends Application {
                                                 .showPercentage(true)
                                                 .items(chartItems)
                                                 .sortXCategoryItemsByIndexAscending()
-                                                .sortYCategoryItemsByIndexDescending()
+                                                .sortYCategoryItemsByValueDescending()
                                                 .useXCategoryFill()
                                                 .autoBubbleTextColor(true)
                                                 .useGradientFill(false)

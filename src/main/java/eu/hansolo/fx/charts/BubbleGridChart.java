@@ -493,18 +493,18 @@ public class BubbleGridChart extends Region {
     }
 
     public void sortYCategoryItemsByIndexAscending() {
-        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex));
+        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
         redraw();
     }
     public void sortYCategoryItemsByIndexDescending() {
-        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
+        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex));
         redraw();
     }
 
     public void sortYCategoryItemsByValueAscending() {
         final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
                                                                          .stream()
-                                                                         .sorted(Map.Entry.comparingByValue())
+                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
                                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
         yCategoryItems.clear();
         yCategoryItems.addAll(sortedByValue.keySet());
@@ -513,7 +513,7 @@ public class BubbleGridChart extends Region {
     public void sortYCategoryItemsByValueDescending() {
         final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
                                                                          .stream()
-                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
+                                                                         .sorted(Map.Entry.comparingByValue())
                                                                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
         yCategoryItems.clear();
         yCategoryItems.addAll(sortedByValue.keySet());
