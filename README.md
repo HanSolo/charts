@@ -126,3 +126,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## BubbleGridChart
 ![BubbleGridChart](https://i.ibb.co/vJtKSXR/Bubble-Grid-Chart.png)
+
+
+## SectorChart
+![SectorChart](https://i.ibb.co/syvjchc/Sector-Chart-2021-07-11-07-56-59.png)
