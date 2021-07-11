@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
@@ -29,6 +30,7 @@ import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -76,7 +78,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              double                         height;
     private              Paint                          _chartBackground;
     private              ObjectProperty<Paint>          chartBackground;
-    private              List<XYSeries<T>>              listOfSeries;
+    private              ObservableList<XYSeries<T>>    listOfSeries;
     private              Canvas                         canvas;
     private              GraphicsContext                ctx;
     private              double                         scaleX;
@@ -101,6 +103,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              ObjectProperty<Color>          thresholdYColor;
     private              PolarTickStep                  _polarTickStep;
     private              ObjectProperty<PolarTickStep>  polarTickStep;
+    private              SeriesEventListener            seriesListener;
+
 
 
     // ******************** Constructors **************************************
@@ -129,6 +133,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         _thresholdYVisible = false;
         _thresholdYColor   = Color.RED;
         _polarTickStep     = PolarTickStep.FOURTY_FIVE;
+        seriesListener     = e -> redraw();
 
         initGraphics();
         registerListeners();
@@ -157,7 +162,16 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-
+        listOfSeries.addListener((ListChangeListener<XYSeries<T>>) c -> {
+            while(c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(series -> series.setOnSeriesEvent(seriesListener));
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(series -> series.removeSeriesEventListener(seriesListener));
+                }
+            }
+            redraw();
+        });
         listOfSeries.forEach(series -> series.setOnSeriesEvent(seriesEvent -> redraw()));
         canvas.setOnMouseClicked(e -> {
             final double LOWER_BOUND_X = getLowerBoundX();
