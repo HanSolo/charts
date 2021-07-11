@@ -55,6 +55,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -96,6 +97,8 @@ public class SectorChart extends Region {
     private              BooleanProperty                                itemTextVisible;
     private              boolean                                        _seriesTextVisible;
     private              BooleanProperty                                seriesTextVisible;
+    private              boolean                                        _seriesSumTextVisible;
+    private              BooleanProperty                                seriesSumTextVisible;
     private              Color                                          _gridColor;
     private              ObjectProperty<Color>                          gridColor;
     private              CopyOnWriteArrayList<SelectionEventListener>   listeners;
@@ -110,25 +113,26 @@ public class SectorChart extends Region {
     // ******************** Constructors **************************************
     public SectorChart() { this(null); }
     public SectorChart(final List<ChartItemSeries<ChartItem>> ALL_SERIES) {
-        centerX            = PREFERRED_WIDTH * 0.5;
-        centerY            = PREFERRED_HEIGHT * 0.5;
-        _threshold         = 100;
-        _thresholdVisible  = false;
-        _itemTextVisible   = true;
-        _seriesTextVisible = true;
-        _decimals          = 0;
-        formatString       = new StringBuilder("%.").append(decimals).append("f").toString();
-        allSeries          = null == ALL_SERIES ? FXCollections.observableArrayList() : FXCollections.observableArrayList(ALL_SERIES);
-        sectorMap          = new HashMap<>();
-        _gridColor         = Color.WHITE;
-        _thresholdColor    = Color.RED;
-        listeners          = new CopyOnWriteArrayList<>();
-        resizeListener     = o -> resize();
-        seriesListener     = c -> {
+        centerX               = PREFERRED_WIDTH * 0.5;
+        centerY               = PREFERRED_HEIGHT * 0.5;
+        _threshold            = 100;
+        _thresholdVisible     = false;
+        _itemTextVisible      = true;
+        _seriesTextVisible    = true;
+        _seriesSumTextVisible = true;
+        _decimals             = 0;
+        formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
+        allSeries             = null == ALL_SERIES ? FXCollections.observableArrayList() : FXCollections.observableArrayList(ALL_SERIES);
+        sectorMap             = new HashMap<>();
+        _gridColor            = Color.WHITE;
+        _thresholdColor       = Color.RED;
+        listeners             = new CopyOnWriteArrayList<>();
+        resizeListener        = o -> resize();
+        seriesListener        = c -> {
             angleStep = 360.0 / getNoOfSectors();
             redraw();
         };
-        mouseHandler       = e -> {
+        mouseHandler          = e -> {
             Optional<Entry<Sector, ChartItem>> optionalSector = sectorMap.entrySet()
                                                                          .parallelStream()
                                                                          .filter(entry -> Helper.isInSector(e.getX(), e.getY(), centerX,centerY, entry.getKey().radius, entry.getKey().startAngle, entry.getKey().segmentAngle))
@@ -137,8 +141,6 @@ public class SectorChart extends Region {
                 fireSelectionEvent(new SelectionEvent(optionalSector.get().getValue()));
             }
         };
-
-        angleStep          = 360.0 / getNoOfSectors();
 
         if (null == ALL_SERIES || ALL_SERIES.isEmpty()) {
             int noOfSectorsPerSeries = MAX_NO_OF_SECTORS / 4;
@@ -150,6 +152,7 @@ public class SectorChart extends Region {
                 addSeries(series);
             }
         }
+        angleStep             = 360.0 / getNoOfSectors();
 
         init();
         initGraphics();
@@ -347,6 +350,26 @@ public class SectorChart extends Region {
             };
         }
         return seriesTextVisible;
+    }
+
+    public boolean getSeriesSumTextVisible() { return null == seriesSumTextVisible ? _seriesSumTextVisible : seriesSumTextVisible.get(); }
+    public void setSeriesSumTextVisible(final boolean VISIBLE) {
+        if (null == seriesSumTextVisible) {
+            _seriesSumTextVisible = VISIBLE;
+            redraw();
+        } else {
+            seriesSumTextVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty seriesSumTextVisibleProperty() {
+        if (null == seriesSumTextVisible) {
+            seriesTextVisible = new BooleanPropertyBase(_seriesSumTextVisible) {
+                @Override protected void invalidated() { redraw();}
+                @Override public Object getBean() { return SectorChart.this; }
+                @Override public String getName() { return "seriesSumTextVisible"; }
+            };
+        }
+        return seriesSumTextVisible;
     }
 
     public ObservableList<ChartItemSeries<ChartItem>> getAllSeries() { return allSeries; }
@@ -611,6 +634,8 @@ public class SectorChart extends Region {
             overlayCtx.setTextAlign(TextAlignment.CENTER);
             overlayCtx.setTextBaseline(VPos.CENTER);
 
+            boolean sumVisible = getSeriesSumTextVisible();
+
             double currentAngle = 0;
             for (int i = 0; i < allSeries.size(); i++) {
                 ChartItemSeries<ChartItem> series = allSeries.get(i);
@@ -625,7 +650,12 @@ public class SectorChart extends Region {
                 overlayCtx.translate(-CENTER_X, -size * 0.035);
 
                 overlayCtx.setFill(series.getTextFill());
-                overlayCtx.fillText(series.getName(), CENTER_X, size * 0.035);
+                if (sumVisible) {
+                    System.out.println(formatString);
+                    overlayCtx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", CENTER_X, size * 0.035);
+                } else {
+                    overlayCtx.fillText(series.getName(), CENTER_X, size * 0.035);
+                }
                 overlayCtx.restore();
 
                 overlayCtx.translate(CENTER_X, CENTER_Y);

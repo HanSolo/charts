@@ -62,6 +62,7 @@ public class SectorChartTest extends Application {
                                   .prefSize(600, 600)
                                   .itemTextVisible(true)
                                   .seriesTextVisible(true)
+                                  .seriesSumTextVisible(false)
                                   .gridColor(Color.WHITE)
                                   .threshold(20)
                                   .thresholdColor(Color.LIME)

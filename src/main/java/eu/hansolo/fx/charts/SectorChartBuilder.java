@@ -65,6 +65,11 @@ public class SectorChartBuilder<B extends SectorChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B seriesSumTextVisible(final boolean VISIBLE) {
+        properties.put("seriesSumTextVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
     public final B thresholdVisible(final boolean VISIBLE) {
         properties.put("thresholdVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
@@ -212,6 +217,8 @@ public class SectorChartBuilder<B extends SectorChartBuilder<B>> {
                 CONTROL.setItemTextVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("seriesTextVisible".equals(key)) {
                 CONTROL.setSeriesTextVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("seriesSumTextVisible".equals(key)) {
+                CONTROL.setSeriesSumTextVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("thresholdVisible".equals(key)) {
                 CONTROL.setThresholdVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("threshold".equals(key)) {
