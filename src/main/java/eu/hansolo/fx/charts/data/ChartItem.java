@@ -56,6 +56,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       StringProperty          name;
     private       String                  _unit;
     private       StringProperty          unit;
+    private       String                  _description;
+    private       StringProperty          description;
     private       double                  _value;
     private       DoubleProperty          value;
     private       double                  oldValue;
@@ -127,6 +129,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _index            = -1;
         _name             = NAME;
         _unit             = "";
+        _description      = "";
         _value            = VALUE;
         oldValue          = 0;
         _fill             = FILL;
@@ -213,6 +216,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             _unit = null;
         }
         return unit;
+    }
+
+    public String getDescription() { return null == description ? _description : description.get(); }
+    public void setDescription(final String DESCRIPTION) {
+        if (null == description) {
+            _description = DESCRIPTION;
+            fireItemEvent(UPDATE_EVENT);
+        } else {
+            description.set(DESCRIPTION);
+        }
+    }
+    public StringProperty descriptionProperty() {
+        if (null == description) {
+            description = new StringPropertyBase(_description) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "description"; }
+            };
+            _description = null;
+        }
+        return description;
     }
 
     public double getValue() { return null == value ? _value : value.get(); }
@@ -450,6 +474,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":").append(getName()).append(",\n")
+                                  .append("  \"unit\":").append(getUnit()).append(",\n")
+                                  .append("  \"description\":").append(getDescription()).append(",\n")
                                   .append("  \"value\":").append(getValue()).append(",\n")
                                   .append("  \"timestamp\":").append(getTimestamp().toEpochMilli()).append(",\n")
                                   .append("}")
@@ -465,6 +491,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         ChartItem item = (ChartItem) o;
 
         return item.getName().equals(getName()) &&
+               item.getUnit().equals(getUnit()) &&
+               item.getDescription().equals(getDescription()) &&
                item.getTimestamp().equals(getTimestamp()) &&
                Double.compare(item.getValue(), getValue()) == 0;
     }
