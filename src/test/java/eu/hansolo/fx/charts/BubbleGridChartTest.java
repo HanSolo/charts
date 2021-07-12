@@ -18,10 +18,14 @@
 
 package eu.hansolo.fx.charts;
 
+
 import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.BubbleGridChartItemBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.tools.Order;
+import eu.hansolo.fx.charts.tools.Topic;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -33,10 +37,25 @@ import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Random;
 
 
 public class BubbleGridChartTest extends Application {
+    private static final Random RND = new Random();
+
     private BubbleGridChart bubbleGridChart;
+    private BubbleGridChartItem peaches1;
+    private BubbleGridChartItem peaches2;
+    private BubbleGridChartItem peaches3;
+    private BubbleGridChartItem peaches4;
+    private BubbleGridChartItem peaches5;
+    private BubbleGridChartItem peaches6;
+    private BubbleGridChartItem peaches7;
+    private BubbleGridChartItem peaches8;
+    private long                lastTimerCall;
+    private AnimationTimer      timer;
+
+
 
     @Override public void init() {
         // Setup Data
@@ -59,14 +78,14 @@ public class BubbleGridChartTest extends Application {
         ChartItem apricots = ChartItemBuilder.create().name("Apricots").index(4).fill(Color.DARKORANGE).build();
 
         // Dataset
-        BubbleGridChartItem peaches1  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(ripe).value(60).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches2  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(unripe).value(5).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches3  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(eatenByBirds).value(10).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches4  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(eatenByCaterpillars).value(0).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches5  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(hailDamaged).value(10).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches6  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(notEnoughWater).value(0).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches7  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(mouldy).value(5).fill(Color.BLUE).build();
-        BubbleGridChartItem peaches8  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(rotten).value(10).fill(Color.BLUE).build();
+        peaches1  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(ripe).value(60).fill(Color.BLUE).build();
+        peaches2  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(unripe).value(5).fill(Color.BLUE).build();
+        peaches3  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(eatenByBirds).value(10).fill(Color.BLUE).build();
+        peaches4  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(eatenByCaterpillars).value(0).fill(Color.BLUE).build();
+        peaches5  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(hailDamaged).value(10).fill(Color.BLUE).build();
+        peaches6  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(notEnoughWater).value(0).fill(Color.BLUE).build();
+        peaches7  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(mouldy).value(5).fill(Color.BLUE).build();
+        peaches8  = BubbleGridChartItemBuilder.create().categoryXItem(peaches).categoryYItem(rotten).value(10).fill(Color.BLUE).build();
 
         BubbleGridChartItem apples1  = BubbleGridChartItemBuilder.create().categoryXItem(apples).categoryYItem(ripe).value(90).fill(Color.BLUE).build();
         BubbleGridChartItem apples2  = BubbleGridChartItemBuilder.create().categoryXItem(apples).categoryYItem(unripe).value(0).fill(Color.BLUE).build();
@@ -119,8 +138,8 @@ public class BubbleGridChartTest extends Application {
                                                 .showValues(true)
                                                 .showPercentage(true)
                                                 .items(chartItems)
-                                                .sortXCategoryItemsByIndexAscending()
-                                                .sortYCategoryItemsByValueDescending()
+                                                .sortCategoryX(Topic.NAME, Order.ASCENDING)
+                                                .sortCategoryY(Topic.VALUE, Order.DESCENDING)
                                                 .useXCategoryFill()
                                                 .autoBubbleTextColor(true)
                                                 .useGradientFill(false)
@@ -131,6 +150,23 @@ public class BubbleGridChartTest extends Application {
                                                                              new Stop(0.75, Color.web("#FF8235")),
                                                                              new Stop(1.00, Color.web("#F23C5A"))))
                                                 .build();
+
+        lastTimerCall = System.nanoTime();
+        timer         = new AnimationTimer() {
+            @Override public void handle(final long now) {
+                if (now > lastTimerCall + 2_000_000_000l) {
+                    peaches1.setValue(RND.nextInt(60));
+                    peaches2.setValue(RND.nextInt(60));
+                    peaches3.setValue(RND.nextInt(60));
+                    peaches4.setValue(RND.nextInt(60));
+                    peaches5.setValue(RND.nextInt(60));
+                    peaches6.setValue(RND.nextInt(60));
+                    peaches7.setValue(RND.nextInt(60));
+                    peaches8.setValue(RND.nextInt(60));
+                    lastTimerCall = now;
+                }
+            }
+        };
     }
 
     @Override public void start(Stage stage) {
@@ -142,6 +178,8 @@ public class BubbleGridChartTest extends Application {
         stage.setTitle("Bubble Grid Chart");
         stage.setScene(scene);
         stage.show();
+
+        timer.start();
     }
 
     @Override public void stop() {

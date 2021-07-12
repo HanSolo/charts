@@ -19,6 +19,8 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.BubbleGridChartItem;
+import eu.hansolo.fx.charts.tools.Order;
+import eu.hansolo.fx.charts.tools.Topic;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -103,44 +105,16 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B sortXCategoryItemsByIndexAscending() {
-        properties.put("sortXCategoryItemsByIndexAscending", null);
-        return (B)this;
+    public final B sortCategoryX(final Topic TOPIC, final Order ORDER) {
+        properties.put("sortCategoryXTopic", new SimpleObjectProperty<>(TOPIC));
+        properties.put("sortCategoryXOrder", new SimpleObjectProperty<>(ORDER));
+        return (B) this;
     }
 
-    public final B sortXCategoryItemsByIndexDescending() {
-        properties.put("sortXCategoryItemsByIndexDescending", null);
-        return (B)this;
-    }
-
-    public final B sortXCategoryItemsByValueAscending() {
-        properties.put("sortXCategoryItemsByValueAscending", null);
-        return (B)this;
-    }
-
-    public final B sortXCategoryItemsByValueDescending() {
-        properties.put("sortXCategoryItemsByValueDescending", null);
-        return (B)this;
-    }
-
-    public final B sortYCategoryItemsByIndexAscending() {
-        properties.put("sortYCategoryItemsByIndexAscending", null);
-        return (B)this;
-    }
-
-    public final B sortYCategoryItemsByIndexDescending() {
-        properties.put("sortYCategoryItemsByIndexDescending", null);
-        return (B)this;
-    }
-
-    public final B sortYCategoryItemsByValueAscending() {
-        properties.put("sortYCategoryItemsByValueAscending", null);
-        return (B)this;
-    }
-
-    public final B sortYCategoryItemsByValueDescending() {
-        properties.put("sortYCategoryItemsByValueDescending", null);
-        return (B)this;
+    public final B sortCategoryY(final Topic TOPIC, final Order ORDER) {
+        properties.put("sortCategoryYTopic", new SimpleObjectProperty<>(TOPIC));
+        properties.put("sortCategoryYOrder", new SimpleObjectProperty<>(ORDER));
+        return (B) this;
     }
 
     public final B useGradientFill(final boolean USE) {
@@ -299,22 +273,10 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
                 CONTROL.useXCategoryFill();
             } else if ("useYCategoryFill".equals(key)) {
                 CONTROL.useYCategoryFill();
-            } else if ("sortXCategoryItemsByIndexAscending".equals(key)) {
-                CONTROL.sortXCategoryItemsByIndexAscending();
-            } else if ("sortXCategoryItemsByIndexDescending".equals(key)) {
-                CONTROL.sortXCategoryItemsByIndexDescending();
-            } else if ("sortXCategoryItemsByValueAscending".equals(key)) {
-                CONTROL.sortXCategoryItemsByValueAscending();
-            } else if ("sortXCategoryItemsByValueDescending".equals(key)) {
-                CONTROL.sortXCategoryItemsByValueDescending();
-            } else if ("sortYCategoryItemsByIndexAscending".equals(key)) {
-                CONTROL.sortYCategoryItemsByIndexAscending();
-            } else if ("sortYCategoryItemsByIndexDescending".equals(key)) {
-                CONTROL.sortYCategoryItemsByIndexDescending();
-            } else if ("sortYCategoryItemsByValueAscending".equals(key)) {
-                CONTROL.sortYCategoryItemsByValueAscending();
-            } else if ("sortYCategoryItemsByValueDescending".equals(key)) {
-                CONTROL.sortYCategoryItemsByValueDescending();
+            } else if ("sortCategoryXTopic".equals(key)) {
+                CONTROL.sortCategoryX(((ObjectProperty<Topic>) properties.get("sortCategoryXTopic")).get(), ((ObjectProperty<Order>) properties.get("sortCategoryXOrder")).get());
+            } else if ("sortCategoryYTopic".equals(key)) {
+                CONTROL.sortCategoryY(((ObjectProperty<Topic>) properties.get("sortCategoryYTopic")).get(), ((ObjectProperty<Order>) properties.get("sortCategoryYOrder")).get());
             } else if ("useGradientFill".equals(key)) {
                 CONTROL.setUseGradientFill(((BooleanProperty) properties.get(key)).get());
             } else if ("minColor".equals(key)) {

@@ -25,6 +25,8 @@ import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
+import eu.hansolo.fx.charts.tools.Order;
+import eu.hansolo.fx.charts.tools.Topic;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -109,6 +111,10 @@ public class BubbleGridChart extends Region {
     private              Color                                   _maxColor;
     private              ObjectProperty<Color>                   maxColor;
     private              LinearGradient                          gradient;
+    private              Topic                                   sortTopicX;
+    private              Topic                                   sortTopicY;
+    private              Order                                   sortOrderX;
+    private              Order                                   sortOrderY;
 
 
     private record Bubble(double x, double y, double r, BubbleGridChartItem item) {}
@@ -140,7 +146,11 @@ public class BubbleGridChart extends Region {
         _maxColor            = Color.web("#F23C5A");
         gradient             = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, _minColor), new Stop(1, _maxColor));
         bubbles              = new ArrayList<>();
-        itemListener         = e -> redraw();
+        sortTopicX           = Topic.INDEX;
+        sortTopicY           = Topic.INDEX;
+        sortOrderX           = Order.ASCENDING;
+        sortOrderY           = Order.ASCENDING;
+        itemListener         = e -> sort();
         itemListListener     = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -166,7 +176,7 @@ public class BubbleGridChart extends Region {
             maxValue    = items.parallelStream().max(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
             sumOfValues = items.parallelStream().mapToDouble(bgci -> bgci.getValue()).sum();
 
-            redraw();
+            sort();
         };
 
         initGraphics();
@@ -464,60 +474,117 @@ public class BubbleGridChart extends Region {
         redraw();
     }
 
-    public void sortXCategoryItemsByIndexAscending() {
-        Collections.sort(xCategoryItems, Comparator.comparing(ChartItem::getIndex));
+    public Topic getSortTopicX() { return sortTopicX; }
+    public void setSortTopicX(final Topic TOPIC) { sortCategoryX(TOPIC, getSortOrderX()); }
+
+    public Topic getSortTopicY() { return sortTopicY; }
+    public void setSortTopicY(final Topic TOPIC) { sortCategoryY(TOPIC, getSortOrderY()); }
+
+    public Order getSortOrderX() { return sortOrderX; }
+    public void setSortOrderX(final Order ORDER) { sortCategoryX(getSortTopicX(), ORDER); }
+
+    public Order getSortOrderY() { return sortOrderY; }
+    public void setSortOrderY(final Order ORDER) { sortCategoryY(getSortTopicY(), ORDER); }
+
+    public void sortCategoryX(final Topic TOPIC, final Order ORDER) {
+        sortTopicX = TOPIC;
+        sortOrderX = ORDER;
+        switch(TOPIC) {
+            case INDEX -> {
+                switch (ORDER) {
+                    case ASCENDING -> Collections.sort(xCategoryItems, Comparator.comparing(ChartItem::getIndex));
+                    case DESCENDING -> Collections.sort(xCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
+                }
+            }
+            case VALUE -> {
+                switch (ORDER) {
+                    case ASCENDING -> {
+                        final Map<ChartItem, Double> sortedByValue = sumsOfXCategoryItems.entrySet()
+                                                                                         .stream()
+                                                                                         .sorted(Map.Entry.comparingByValue())
+                                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
+                        xCategoryItems.clear();
+                        xCategoryItems.addAll(sortedByValue.keySet());
+                    }
+                    case DESCENDING -> {
+                        final Map<ChartItem, Double> sortedByValue = sumsOfXCategoryItems.entrySet()
+                                                                                         .stream()
+                                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
+                                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
+                        xCategoryItems.clear();
+                        xCategoryItems.addAll(sortedByValue.keySet());
+                    }
+                }
+            }
+            case NAME -> {
+                switch (ORDER) {
+                    case ASCENDING -> {
+                        List<ChartItem> sorted = xCategoryItems.stream().sorted(Comparator.comparing(ChartItem::getName)).collect(Collectors.toList());
+                        xCategoryItems.clear();
+                        xCategoryItems.addAll(sorted);
+                    }
+                    case DESCENDING -> {
+                        List<ChartItem> sorted = xCategoryItems.stream().sorted(Comparator.comparing(ChartItem::getName).reversed()).collect(Collectors.toList());
+                        System.out.println(sorted);
+                        xCategoryItems.clear();
+                        xCategoryItems.addAll(sorted);
+                    }
+                }
+            }
+        }
         redraw();
     }
-    public void sortXCategoryItemsByIndexDescending() {
-        Collections.sort(xCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
+    public void sortCategoryY(final Topic TOPIC, final Order ORDER) {
+        sortTopicY = TOPIC;
+        sortOrderY = ORDER;
+        switch(TOPIC) {
+            case INDEX -> {
+                switch (ORDER) {
+                    case ASCENDING -> Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
+                    case DESCENDING -> Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex));
+                }
+            }
+            case VALUE -> {
+                switch (ORDER) {
+                    case ASCENDING -> {
+                        final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
+                                                                                         .stream()
+                                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
+                                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                        yCategoryItems.clear();
+                        yCategoryItems.addAll(sortedByValue.keySet());
+                    }
+                    case DESCENDING -> {
+                        final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
+                                                                                         .stream()
+                                                                                         .sorted(Map.Entry.comparingByValue())
+                                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                        yCategoryItems.clear();
+                        yCategoryItems.addAll(sortedByValue.keySet());
+                    }
+                }
+            }
+            case NAME -> {
+                switch (ORDER) {
+                    case ASCENDING -> {
+                        List<ChartItem> sorted = yCategoryItems.stream().sorted(Comparator.comparing(ChartItem::getName)).collect(Collectors.toList());
+                        yCategoryItems.clear();
+                        yCategoryItems.addAll(sorted);
+                    }
+                    case DESCENDING -> {
+                        List<ChartItem> sorted = yCategoryItems.stream().sorted(Comparator.comparing(ChartItem::getName).reversed()).collect(Collectors.toList());
+                        yCategoryItems.clear();
+                        yCategoryItems.addAll(sorted);
+                    }
+                }
+            }
+        }
         redraw();
     }
 
-    public void sortXCategoryItemsByValueAscending() {
-        final Map<ChartItem, Double> sortedByValue = sumsOfXCategoryItems.entrySet()
-                                                                         .stream()
-                                                                         .sorted(Map.Entry.comparingByValue())
-                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
-        xCategoryItems.clear();
-        xCategoryItems.addAll(sortedByValue.keySet());
-        redraw();
-    }
-    public void sortXCategoryItemsByValueDescending() {
-        final Map<ChartItem, Double> sortedByValue = sumsOfXCategoryItems.entrySet()
-                                                                         .stream()
-                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
-                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
-        xCategoryItems.clear();
-        xCategoryItems.addAll(sortedByValue.keySet());
-        redraw();
-    }
-
-    public void sortYCategoryItemsByIndexAscending() {
-        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex).reversed());
-        redraw();
-    }
-    public void sortYCategoryItemsByIndexDescending() {
-        Collections.sort(yCategoryItems, Comparator.comparing(ChartItem::getIndex));
-        redraw();
-    }
-
-    public void sortYCategoryItemsByValueAscending() {
-        final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
-                                                                         .stream()
-                                                                         .sorted(Map.Entry.<ChartItem,Double>comparingByValue().reversed())
-                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
-        yCategoryItems.clear();
-        yCategoryItems.addAll(sortedByValue.keySet());
-        redraw();
-    }
-    public void sortYCategoryItemsByValueDescending() {
-        final Map<ChartItem, Double> sortedByValue = sumsOfYCategoryItems.entrySet()
-                                                                         .stream()
-                                                                         .sorted(Map.Entry.comparingByValue())
-                                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) ->e1, LinkedHashMap::new));
-        yCategoryItems.clear();
-        yCategoryItems.addAll(sortedByValue.keySet());
-        redraw();
+    private void sort() {
+        sortCategoryX(getSortTopicX(), getSortOrderX());
+        sortCategoryY(getSortTopicY(), getSortOrderY());
     }
 
     private static <T> Predicate<T> distinctByName(Function<? super T, ?> nameExtractor) {
