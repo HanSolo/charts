@@ -54,7 +54,7 @@ public class SectorChartTest extends Application {
         ChartItem lamboSian       = ChartItemBuilder.create().name("Sian").value(10).fill(Color.rgb(250, 154, 0)).build();
         ChartItemSeries<ChartItem> lamborghini = ChartItemSeriesBuilder.create().name("Lamborghini").fill(Color.rgb(253, 223, 177)).items(lamboAventador, lamboHuracan, lamboUrus, lamboSian).build();
 
-        ChartItem ferrari812       = ChartItemBuilder.create().name("812").value(13).fill(Color.rgb(220, 59, 21)).build();
+        ChartItem ferrari812       = ChartItemBuilder.create().name("812").description("Ferrari 812").value(13).fill(Color.rgb(220, 59, 21)).build();
         ChartItem ferrari296       = ChartItemBuilder.create().name("296").value(21).fill(Color.rgb(220, 59, 21)).build();
         ChartItem ferrariSf90      = ChartItemBuilder.create().name("SF 90").value(32).fill(Color.rgb(220, 59, 21)).build();
         ChartItem ferrariF8        = ChartItemBuilder.create().name("F8").value(11).fill(Color.rgb(220, 59, 21)).build();
