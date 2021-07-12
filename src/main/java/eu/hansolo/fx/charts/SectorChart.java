@@ -84,6 +84,7 @@ public class SectorChart extends Region {
     private              double                                         angleStep;
     private              ObservableList<ChartItemSeries<ChartItem>>     allSeries;
     private              Map<Sector, ChartItem>                         sectorMap;
+    private              double                                         originalThreshold;
     private              double                                         _threshold;
     private              DoubleProperty                                 threshold;
     private              Color                                          _thresholdColor;
@@ -114,6 +115,7 @@ public class SectorChart extends Region {
     public SectorChart(final List<ChartItemSeries<ChartItem>> ALL_SERIES) {
         centerX               = PREFERRED_WIDTH * 0.5;
         centerY               = PREFERRED_HEIGHT * 0.5;
+        originalThreshold     = 100;
         _threshold            = 100;
         _thresholdVisible     = false;
         _itemTextVisible      = true;
@@ -244,7 +246,7 @@ public class SectorChart extends Region {
         allSeries.addListener(seriesListener);
         chartCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         setOnSelectionEvent(e -> {
-            popup.update(e);
+            popup.update(e.getItem(), true);
             popup.animatedShow(getScene().getWindow());
         });
     }
@@ -263,11 +265,11 @@ public class SectorChart extends Region {
 
     // ******************** Methods *******************************************
     public double getMinValue() {
-        return allSeries.isEmpty() ? 0 : allSeries.stream().min(Comparator.comparingDouble(ChartItemSeries::getMinValue)).map(ChartItemSeries::getMinValue).get();
+        return allSeries.isEmpty() ? 0 : allSeries.stream().min(Comparator.comparingDouble(ChartItemSeries::getMinValue)).map(ChartItemSeries::getMinValue).orElse(0d);
     }
 
     public double getMaxValue() {
-        return allSeries.isEmpty() ? 100 : allSeries.stream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).map(ChartItemSeries::getMaxValue).get();
+        return allSeries.isEmpty() ? 100 : allSeries.stream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).map(ChartItemSeries::getMaxValue).orElse(100d);
     }
 
     public double getRange() {
@@ -300,8 +302,13 @@ public class SectorChart extends Region {
 
     public double getThreshold() { return null == threshold ? _threshold : threshold.get(); }
     public void setThreshold(final double VALUE) {
+        originalThreshold = VALUE;
         if (null == threshold) {
-            _threshold = clamp(getMinValue(), getMaxValue(), VALUE);
+            if (allSeries.isEmpty()) {
+                _threshold = VALUE;
+            } else {
+                _threshold = clamp(getMinValue(), getMaxValue(), VALUE);
+            }
             drawOverlay();
         } else {
             threshold.set(VALUE);
@@ -311,7 +318,10 @@ public class SectorChart extends Region {
         if (null == threshold) {
             threshold = new DoublePropertyBase(_threshold) {
                 @Override protected void invalidated() {
-                    set(clamp(getMinValue(), getMaxValue(), get()));
+                    if (!allSeries.isEmpty()) {
+                        originalThreshold = get();
+                        set(clamp(getMinValue(), getMaxValue(), get()));
+                    }
                     drawOverlay();
                 }
                 @Override public Object getBean() { return SectorChart.this; }
@@ -409,11 +419,13 @@ public class SectorChart extends Region {
         if (noOfSectors < MIN_NO_OF_SECTORS) throw new IllegalArgumentException("Not enough sectors (min. " + MIN_NO_OF_SECTORS + "needed)");
         if (noOfSectors > MAX_NO_OF_SECTORS) throw new IllegalArgumentException("Too many sectors (max. " + MAX_NO_OF_SECTORS + " sectors allowed)");
         allSeries.setAll(ALL_SERIES);
+        setThreshold(originalThreshold);
     }
     public void addSeries(final ChartItemSeries<ChartItem> SERIES) {
         int noOfSectors = allSeries.stream().mapToInt(l -> l.getItems().size()).sum();
         if (noOfSectors + SERIES.getItems().size() > MAX_NO_OF_SECTORS) throw new IllegalArgumentException("Too many sectors (max. " + getNoOfSectors() + " sectors allowed)");
         allSeries.add(SERIES);
+        setThreshold(originalThreshold);
     }
 
     public void reset() {
@@ -518,15 +530,16 @@ public class SectorChart extends Region {
     }
 
     private void drawChart() {
+        if (null == chartCtx) { return; }
         final double CENTER_X      = 0.5 * size;
         final double CENTER_Y      = CENTER_X;
         final double CIRCLE_SIZE   = 0.9 * size;
         final double CIRCLE_RADIUS = 0.45 * size;
-        final double DATA_RANGE    = getRange();
         final double RANGE         = 0.35714 * CIRCLE_SIZE;
         final double OFFSET        = 0.14286 * CIRCLE_SIZE;
         final double MIN_VALUE     = getMinValue();
         final double MAX_VALUE     = getMaxValue();
+        final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
 
         // clear the chartCanvas
         chartCtx.clearRect(0, 0, size, size);
@@ -581,16 +594,17 @@ public class SectorChart extends Region {
     }
 
     private void drawOverlay() {
+        if (null == overlayCtx) { return; }
         final double CENTER_X      = 0.5 * size;
         final double CENTER_Y      = CENTER_X;
         final double CIRCLE_SIZE   = 0.90 * size;
-        final double DATA_RANGE    = getRange();
+        final double CIRCLE_RADIUS = 0.45 * size;
         final double RANGE         = 0.35714 * CIRCLE_SIZE;
         final double OFFSET        = 0.14286 * CIRCLE_SIZE;
         final int    NO_OF_SECTORS = getNoOfSectors();
         final double MIN_VALUE     = getMinValue();
         final double MAX_VALUE     = getMaxValue();
-        double radius;
+        final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
 
         // clear the chartCanvas
         overlayCtx.clearRect(0, 0, size, size);
@@ -611,8 +625,8 @@ public class SectorChart extends Region {
         // draw threshold line
         if (isThresholdVisible()) {
             overlayCtx.save();
-            double radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold()) - MIN_VALUE) / DATA_RANGE);
-            double r = (CENTER_Y - (CENTER_Y - OFFSET - radiusFactor * RANGE));
+            double radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold() - MIN_VALUE)) / DATA_RANGE);
+            double r = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
             overlayCtx.setLineWidth(clamp(1d, 2d, size * 0.005));
             overlayCtx.setLineDashes(new double[] {12, 6});
             overlayCtx.setStroke(getThresholdColor());
@@ -620,7 +634,7 @@ public class SectorChart extends Region {
             overlayCtx.restore();
         }
 
-        // prerotate if sectormode
+        // prerotate
         overlayCtx.save();
 
         overlayCtx.translate(CENTER_X, CENTER_Y);
@@ -679,7 +693,6 @@ public class SectorChart extends Region {
                 overlayCtx.translate(CENTER_X, size * 0.035);
                 overlayCtx.rotate(currentAngle > 135 && currentAngle < 225 ? 180 : 0);
                 overlayCtx.translate(-CENTER_X, -size * 0.035);
-
                 overlayCtx.setFill(series.getTextFill());
                 if (sumVisible) {
                     System.out.println(formatString);
