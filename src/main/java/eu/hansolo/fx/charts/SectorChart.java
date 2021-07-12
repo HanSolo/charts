@@ -18,8 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
@@ -47,13 +47,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
 import javafx.scene.text.TextAlignment;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -105,6 +102,8 @@ public class SectorChart extends Region {
     private              InfoPopup                                      popup;
     private              InvalidationListener                           resizeListener;
     private              ListChangeListener<ChartItemSeries<ChartItem>> seriesListener;
+    private              ListChangeListener<ChartItem>                  itemListListener;
+    private              ItemEventListener                              itemEventListener;
     private              EventHandler<MouseEvent>                       mouseHandler;
 
     private record Sector(double centerX, double centerY, double radius, double startAngle, double segmentAngle) {}
@@ -129,9 +128,32 @@ public class SectorChart extends Region {
         listeners             = new CopyOnWriteArrayList<>();
         resizeListener        = o -> resize();
         seriesListener        = c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(series -> {
+                        series.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+                        series.getItems().addListener(itemListListener);
+                    });
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(series -> {
+                        series.getItems().forEach(item -> item.removeItemEventListener(itemEventListener));
+                        series.getItems().removeListener(itemListListener);
+                    });
+                }
+            }
             angleStep = 360.0 / getNoOfSectors();
             redraw();
         };
+        itemListListener      = c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(item -> item.addItemEventListener(itemEventListener));
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(item -> item.removeItemEventListener(itemEventListener));
+                }
+            }
+        };
+        itemEventListener     = e -> redraw();
         mouseHandler          = e -> {
             Optional<Entry<Sector, ChartItem>> optionalSector = sectorMap.entrySet()
                                                                          .parallelStream()
@@ -151,6 +173,11 @@ public class SectorChart extends Region {
                 }
                 addSeries(series);
             }
+        } else {
+            allSeries.forEach(series -> {
+                series.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+                series.getItems().addListener(itemListListener);
+            });
         }
         angleStep             = 360.0 / getNoOfSectors();
 
@@ -226,6 +253,10 @@ public class SectorChart extends Region {
         widthProperty().removeListener(resizeListener);
         heightProperty().removeListener(resizeListener);
         allSeries.removeListener(seriesListener);
+        allSeries.forEach(series -> {
+            series.getItems().forEach(item -> item.removeItemEventListener(itemEventListener));
+            series.getItems().removeListener(itemListListener);
+        });
         chartCanvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
 
