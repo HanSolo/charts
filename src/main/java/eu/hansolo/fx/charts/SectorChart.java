@@ -533,10 +533,11 @@ public class SectorChart extends Region {
         // draw the chart data
         ctx.save();
 
-        double radiusFactor;
         ctx.translate(CENTER_X, CENTER_Y);
         ctx.rotate(-90);
         ctx.translate(-CENTER_X, -CENTER_Y);
+
+        double radiusFactor;
         double radius;
 
         // draw series sectors
