@@ -664,7 +664,6 @@ public class SectorChart extends Region {
                 ctx.translate(-CENTER_X, -size * 0.035);
                 ctx.setFill(series.getTextFill());
                 if (sumVisible) {
-                    System.out.println(formatString);
                     ctx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", CENTER_X, size * 0.035);
                 } else {
                     ctx.fillText(series.getName(), CENTER_X, size * 0.035);
