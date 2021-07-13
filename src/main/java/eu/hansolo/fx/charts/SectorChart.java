@@ -74,10 +74,8 @@ public class SectorChart extends Region {
     private              double                                         centerX;
     private              double                                         centerY;
     private              Pane                                           pane;
-    private              Canvas                                         chartCanvas;
-    private              GraphicsContext                                chartCtx;
-    private              Canvas                                         overlayCanvas;
-    private              GraphicsContext                                overlayCtx;
+    private              Canvas                                         canvas;
+    private              GraphicsContext                                ctx;
     private              int                                            _decimals;
     private              IntegerProperty                                decimals;
     private              String                                         formatString;
@@ -228,17 +226,13 @@ public class SectorChart extends Region {
     }
 
     private void initGraphics() {
-        chartCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
-        chartCtx    = chartCanvas.getGraphicsContext2D();
-
-        overlayCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
-        overlayCanvas.setMouseTransparent(true);
-        overlayCtx    = overlayCanvas.getGraphicsContext2D();
-
+        canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+        ctx = canvas.getGraphicsContext2D();
+        
         popup = new InfoPopup();
 
         // Add all nodes
-        pane = new Pane(chartCanvas, overlayCanvas);
+        pane = new Pane(canvas);
 
         getChildren().setAll(pane);
     }
@@ -247,7 +241,7 @@ public class SectorChart extends Region {
         widthProperty().addListener(resizeListener);
         heightProperty().addListener(resizeListener);
         allSeries.addListener(seriesListener);
-        chartCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
 
     public void dispose() {
@@ -258,7 +252,7 @@ public class SectorChart extends Region {
             series.getItems().forEach(item -> item.removeItemEventListener(itemEventListener));
             series.getItems().removeListener(itemListListener);
         });
-        chartCanvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
 
 
@@ -308,7 +302,7 @@ public class SectorChart extends Region {
             } else {
                 _threshold = clamp(getMinValue(), getMaxValue(), VALUE);
             }
-            drawOverlay();
+            drawChart();
         } else {
             threshold.set(VALUE);
         }
@@ -321,7 +315,7 @@ public class SectorChart extends Region {
                         originalThreshold = get();
                         set(clamp(getMinValue(), getMaxValue(), get()));
                     }
-                    drawOverlay();
+                    drawChart();
                 }
                 @Override public Object getBean() { return SectorChart.this; }
                 @Override public String getName() { return "threshold"; }
@@ -506,30 +500,22 @@ public class SectorChart extends Region {
             pane.setMaxSize(size, size);
             pane.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
 
-            chartCanvas.setWidth(size);
-            chartCanvas.setHeight(size);
-
-            overlayCanvas.setWidth(size);
-            overlayCanvas.setHeight(size);
+            canvas.setWidth(size);
+            canvas.setHeight(size);
 
             redraw();
         }
     }
 
     public void redraw() {
-        chartCanvas.setCache(false);
+        canvas.setCache(false);
         drawChart();
-        chartCanvas.setCache(true);
-        chartCanvas.setCacheHint(CacheHint.QUALITY);
-
-        overlayCanvas.setCache(false);
-        drawOverlay();
-        overlayCanvas.setCache(true);
-        overlayCanvas.setCacheHint(CacheHint.QUALITY);
+        canvas.setCache(true);
+        canvas.setCacheHint(CacheHint.QUALITY);
     }
 
     private void drawChart() {
-        if (null == chartCtx) { return; }
+        if (null == ctx) { return; }
         final double CENTER_X      = 0.5 * size;
         final double CENTER_Y      = CENTER_X;
         final double CIRCLE_SIZE   = 0.9 * size;
@@ -539,34 +525,35 @@ public class SectorChart extends Region {
         final double MIN_VALUE     = getMinValue();
         final double MAX_VALUE     = getMaxValue();
         final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
+        final int    NO_OF_SECTORS = getNoOfSectors();
 
-        // clear the chartCanvas
-        chartCtx.clearRect(0, 0, size, size);
+        // clear the canvas
+        ctx.clearRect(0, 0, size, size);
 
         // draw the chart data
-        chartCtx.save();
+        ctx.save();
 
         double radiusFactor;
-        chartCtx.translate(CENTER_X, CENTER_Y);
-        chartCtx.rotate(-90);
-        chartCtx.translate(-CENTER_X, -CENTER_Y);
+        ctx.translate(CENTER_X, CENTER_Y);
+        ctx.rotate(-90);
+        ctx.translate(-CENTER_X, -CENTER_Y);
         double radius;
 
         // draw series sectors
-        chartCtx.save();
+        ctx.save();
         for (int i = 0 ; i < allSeries.size() ; i++) {
             ChartItemSeries<ChartItem> series = allSeries.get(i);
-            chartCtx.beginPath();
-            chartCtx.moveTo(CENTER_X, CENTER_Y);
-            chartCtx.arc(CENTER_X, CENTER_Y, CIRCLE_RADIUS, CIRCLE_RADIUS, 0, -angleStep * series.getItems().size());
-            chartCtx.closePath();
-            chartCtx.setFill(series.getFill());
-            chartCtx.fill();
-            chartCtx.translate(CENTER_X, CENTER_Y);
-            chartCtx.rotate(angleStep * series.getItems().size());
-            chartCtx.translate(-CENTER_X, -CENTER_Y);
+            ctx.beginPath();
+            ctx.moveTo(CENTER_X, CENTER_Y);
+            ctx.arc(CENTER_X, CENTER_Y, CIRCLE_RADIUS, CIRCLE_RADIUS, 0, -angleStep * series.getItems().size());
+            ctx.closePath();
+            ctx.setFill(series.getFill());
+            ctx.fill();
+            ctx.translate(CENTER_X, CENTER_Y);
+            ctx.rotate(angleStep * series.getItems().size());
+            ctx.translate(-CENTER_X, -CENTER_Y);
         }
-        chartCtx.restore();
+        ctx.restore();
 
         // draw item sectors
         double currentAngle = 0;
@@ -574,143 +561,126 @@ public class SectorChart extends Region {
             ChartItemSeries<ChartItem> series = allSeries.get(i);
             for (int j = 0 ; j < series.getItems().size() ; j++) {
                 ChartItem item = series.getItems().get(j);
-                radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (item.getValue() - MIN_VALUE)) / DATA_RANGE);
+                radiusFactor = clamp(MIN_VALUE, MAX_VALUE, (item.getValue() - MIN_VALUE)) / DATA_RANGE;
                 radius = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
-                chartCtx.beginPath();
-                chartCtx.moveTo(CENTER_X, CENTER_Y);
-                chartCtx.arc(CENTER_X, CENTER_Y, radius, radius, 0, -angleStep);
-                chartCtx.closePath();
-                chartCtx.setFill(item.getFill());
-                chartCtx.fill();
-                chartCtx.translate(CENTER_X, CENTER_Y);
-                chartCtx.rotate(angleStep);
-                chartCtx.translate(-CENTER_X, -CENTER_Y);
+                ctx.beginPath();
+                ctx.moveTo(CENTER_X, CENTER_Y);
+                ctx.arc(CENTER_X, CENTER_Y, radius, radius, 0, -angleStep);
+                ctx.closePath();
+                ctx.setFill(item.getFill());
+                ctx.fill();
+                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.rotate(angleStep);
+                ctx.translate(-CENTER_X, -CENTER_Y);
                 sectorMap.put(new Sector(centerX, centerY, radius, currentAngle, angleStep), item);
                 currentAngle += angleStep;
             }
         }
-        chartCtx.restore();
-    }
-
-    private void drawOverlay() {
-        if (null == overlayCtx) { return; }
-        final double CENTER_X      = 0.5 * size;
-        final double CENTER_Y      = CENTER_X;
-        final double CIRCLE_SIZE   = 0.90 * size;
-        final double CIRCLE_RADIUS = 0.45 * size;
-        final double RANGE         = 0.35714 * CIRCLE_SIZE;
-        final double OFFSET        = 0.14286 * CIRCLE_SIZE;
-        final int    NO_OF_SECTORS = getNoOfSectors();
-        final double MIN_VALUE     = getMinValue();
-        final double MAX_VALUE     = getMaxValue();
-        final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
-
-        // clear the chartCanvas
-        overlayCtx.clearRect(0, 0, size, size);
-
-        overlayCtx.setLineWidth(1);
-        overlayCtx.setStroke(getGridColor());
+        ctx.restore();
+        
+        ctx.setLineWidth(1);
+        ctx.setStroke(getGridColor());
 
         // draw star lines
-        overlayCtx.save();
+        ctx.save();
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
-            overlayCtx.strokeLine(CENTER_X, CENTER_Y, CENTER_X, CENTER_Y - size);
-            overlayCtx.translate(CENTER_X, CENTER_Y);
-            overlayCtx.rotate(angleStep);
-            overlayCtx.translate(-CENTER_X, -CENTER_Y);
+            ctx.strokeLine(CENTER_X, CENTER_Y, CENTER_X, CENTER_Y - CIRCLE_RADIUS);
+            ctx.translate(CENTER_X, CENTER_Y);
+            ctx.rotate(angleStep);
+            ctx.translate(-CENTER_X, -CENTER_Y);
         }
-        overlayCtx.restore();
+        ctx.restore();
 
         // draw threshold line
         if (isThresholdVisible()) {
-            overlayCtx.save();
-            double radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold() - MIN_VALUE)) / DATA_RANGE);
-            double r = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
-            overlayCtx.setLineWidth(clamp(1d, 2d, size * 0.005));
-            overlayCtx.setLineDashes(new double[] {12, 6});
-            overlayCtx.setStroke(getThresholdColor());
-            overlayCtx.strokeOval(0.5 * size - r, 0.5 * size - r, 2 * r, 2 * r);
-            overlayCtx.restore();
+            ctx.save();
+            radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold() - MIN_VALUE)) / DATA_RANGE);
+            radius       = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
+            ctx.setLineWidth(clamp(1d, 2d, size * 0.005));
+            ctx.setLineDashes(new double[] {12, 6});
+            ctx.setStroke(getThresholdColor());
+            ctx.strokeOval(0.5 * size - radius, 0.5 * size - radius, 2 * radius, 2 * radius);
+            ctx.restore();
         }
 
         // prerotate
-        overlayCtx.save();
+        ctx.save();
 
-        overlayCtx.translate(CENTER_X, CENTER_Y);
-        overlayCtx.rotate(angleStep * 0.5);
-        overlayCtx.translate(-CENTER_X, -CENTER_Y);
+        ctx.translate(CENTER_X, CENTER_Y);
+        ctx.rotate(angleStep * 0.5);
+        ctx.translate(-CENTER_X, -CENTER_Y);
 
         // draw item text
         if (getItemTextVisible()) {
-            overlayCtx.save();
-            overlayCtx.setFont(Fonts.latoRegular(0.015 * size));
-            overlayCtx.setTextAlign(TextAlignment.CENTER);
-            overlayCtx.setTextBaseline(VPos.CENTER);
+            ctx.save();
+            ctx.setFont(Fonts.latoRegular(0.015 * size));
+            ctx.setTextAlign(TextAlignment.CENTER);
+            ctx.setTextBaseline(VPos.CENTER);
 
-            double currentAngle = 0;
+            currentAngle = 0;
             for (int i = 0; i < allSeries.size(); i++) {
                 ChartItemSeries<ChartItem> series = allSeries.get(i);
                 for (int j = 0; j < series.getItems().size(); j++) {
                     ChartItem item = series.getItems().get(j);
-                    overlayCtx.setFill(item.getTextFill());
+                    ctx.setFill(item.getTextFill());
 
-                    overlayCtx.save();
-                    overlayCtx.setTextAlign(currentAngle < 180 ? TextAlignment.RIGHT : TextAlignment.LEFT);
-                    overlayCtx.translate(CENTER_X, size * 0.06);
-                    overlayCtx.rotate(currentAngle < 180 ? 270 : 90);
-                    overlayCtx.translate(-CENTER_X, -size * 0.06);
-                    overlayCtx.fillText(item.getName(), CENTER_X, size * 0.06);
-                    overlayCtx.restore();
+                    ctx.save();
+                    ctx.setTextAlign(currentAngle < 180 ? TextAlignment.RIGHT : TextAlignment.LEFT);
+                    ctx.translate(CENTER_X, size * 0.06);
+                    ctx.rotate(currentAngle < 180 ? 270 : 90);
+                    ctx.translate(-CENTER_X, -size * 0.06);
+                    ctx.fillText(item.getName(), CENTER_X, size * 0.06);
+                    ctx.restore();
 
-                    overlayCtx.translate(CENTER_X, CENTER_Y);
-                    overlayCtx.rotate(angleStep);
-                    overlayCtx.translate(-CENTER_X, -CENTER_Y);
+                    ctx.translate(CENTER_X, CENTER_Y);
+                    ctx.rotate(angleStep);
+                    ctx.translate(-CENTER_X, -CENTER_Y);
                     currentAngle += angleStep;
                 }
             }
-            overlayCtx.restore();
+            ctx.restore();
         }
 
         // draw series text
         if (getSeriesTextVisible()) {
-            overlayCtx.save();
-            overlayCtx.setFont(Fonts.latoRegular(0.015 * size));
-            overlayCtx.setTextAlign(TextAlignment.CENTER);
-            overlayCtx.setTextBaseline(VPos.CENTER);
+            ctx.save();
+            ctx.setFont(Fonts.latoRegular(0.015 * size));
+            ctx.setTextAlign(TextAlignment.CENTER);
+            ctx.setTextBaseline(VPos.CENTER);
 
             boolean sumVisible = getSeriesSumTextVisible();
 
-            double currentAngle = 0;
+            currentAngle = 0;
             for (int i = 0; i < allSeries.size(); i++) {
                 ChartItemSeries<ChartItem> series = allSeries.get(i);
-                overlayCtx.translate(CENTER_X, CENTER_Y);
-                overlayCtx.rotate(angleStep * series.getItems().size() * 0.5 - angleStep * 0.5);
-                overlayCtx.translate(-CENTER_X, -CENTER_Y);
+                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.rotate(angleStep * series.getItems().size() * 0.5 - angleStep * 0.5);
+                ctx.translate(-CENTER_X, -CENTER_Y);
                 currentAngle += angleStep * series.getItems().size() * 0.5 - angleStep * 0.5;
 
-                overlayCtx.save();
-                overlayCtx.translate(CENTER_X, size * 0.035);
-                overlayCtx.rotate(currentAngle > 135 && currentAngle < 225 ? 180 : 0);
-                overlayCtx.translate(-CENTER_X, -size * 0.035);
-                overlayCtx.setFill(series.getTextFill());
+                ctx.save();
+                ctx.translate(CENTER_X, size * 0.035);
+                ctx.rotate(currentAngle > 135 && currentAngle < 225 ? 180 : 0);
+                ctx.translate(-CENTER_X, -size * 0.035);
+                ctx.setFill(series.getTextFill());
                 if (sumVisible) {
                     System.out.println(formatString);
-                    overlayCtx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", CENTER_X, size * 0.035);
+                    ctx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", CENTER_X, size * 0.035);
                 } else {
-                    overlayCtx.fillText(series.getName(), CENTER_X, size * 0.035);
+                    ctx.fillText(series.getName(), CENTER_X, size * 0.035);
                 }
-                overlayCtx.restore();
+                ctx.restore();
 
-                overlayCtx.translate(CENTER_X, CENTER_Y);
-                overlayCtx.rotate(angleStep * series.getItems().size() * 0.5 + angleStep * 0.5);
-                overlayCtx.translate(-CENTER_X, -CENTER_Y);
+                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.rotate(angleStep * series.getItems().size() * 0.5 + angleStep * 0.5);
+                ctx.translate(-CENTER_X, -CENTER_Y);
 
                 currentAngle += angleStep * series.getItems().size() * 0.5 + angleStep * 0.5;
             }
 
-            overlayCtx.restore();
+            ctx.restore();
         }
 
-        overlayCtx.restore();
+        ctx.restore();
     }
 }
