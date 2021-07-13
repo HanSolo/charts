@@ -118,40 +118,38 @@ public class BubbleGridChart extends Region {
 
 
     private record Bubble(double x, double y, double r, BubbleGridChartItem item) {}
-
-
     private List<Bubble> bubbles;
 
 
     // ******************** Constructors **************************************
     public BubbleGridChart() {
-        items                = FXCollections.observableArrayList();
-        xCategoryItems       = new ArrayList<>();
-        yCategoryItems       = new ArrayList<>();
-        sumsOfXCategoryItems = new HashMap<>();
-        sumsOfYCategoryItems = new HashMap<>();
-        sumOfValues          = 0;
-        minValue             = 0;
-        maxValue             = 0;
-        useXCategoryFill     = true;
-        _textColor           = Color.BLACK;
-        _autoBubbleTextColor = false;
-        _chartBackground     = Color.TRANSPARENT;
-        _gridColor           = Color.rgb(0, 0, 0, 0.1);
-        _showGrid            = true;
-        _showValues          = true;
-        _showPercentage      = false;
-        _useGradientFill     = false;
-        _minColor            = Color.web("#2C67D5");
-        _maxColor            = Color.web("#F23C5A");
-        gradient             = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, _minColor), new Stop(1, _maxColor));
-        bubbles              = new ArrayList<>();
-        sortTopicX           = Topic.INDEX;
-        sortTopicY           = Topic.INDEX;
-        sortOrderX           = Order.ASCENDING;
-        sortOrderY           = Order.ASCENDING;
-        itemListener         = e -> sort();
-        itemListListener     = c -> {
+        items                  = FXCollections.observableArrayList();
+        xCategoryItems         = new ArrayList<>();
+        yCategoryItems         = new ArrayList<>();
+        sumsOfXCategoryItems   = new HashMap<>();
+        sumsOfYCategoryItems   = new HashMap<>();
+        sumOfValues            = 0;
+        minValue               = 0;
+        maxValue               = 0;
+        useXCategoryFill       = true;
+        _textColor             = Color.BLACK;
+        _autoBubbleTextColor   = false;
+        _chartBackground       = Color.TRANSPARENT;
+        _gridColor             = Color.rgb(0, 0, 0, 0.1);
+        _showGrid              = true;
+        _showValues            = true;
+        _showPercentage        = false;
+        _useGradientFill       = false;
+        _minColor              = Color.web("#2C67D5");
+        _maxColor              = Color.web("#F23C5A");
+        gradient               = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, _minColor), new Stop(1, _maxColor));
+        bubbles                = new ArrayList<>();
+        sortTopicX             = Topic.INDEX;
+        sortTopicY             = Topic.INDEX;
+        sortOrderX             = Order.ASCENDING;
+        sortOrderY             = Order.ASCENDING;
+        itemListener           = e -> sort();
+        itemListListener       = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
