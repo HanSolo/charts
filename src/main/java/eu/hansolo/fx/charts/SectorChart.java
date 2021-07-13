@@ -162,7 +162,10 @@ public class SectorChart extends Region {
                                                                          .filter(entry -> Helper.isInSector(e.getX(), e.getY(), centerX,centerY, entry.getKey().radius, entry.getKey().startAngle, entry.getKey().segmentAngle))
                                                                          .findFirst();
             if (optionalSector.isPresent()) {
-                fireSelectionEvent(new SelectionEvent(optionalSector.get().getValue()));
+                popup.setX(e.getScreenX());
+                popup.setY(e.getScreenY() - popup.getHeight());
+                popup.update(optionalSector.get().getValue());
+                popup.animatedShow(getScene().getWindow());
             }
         };
 
@@ -245,10 +248,6 @@ public class SectorChart extends Region {
         heightProperty().addListener(resizeListener);
         allSeries.addListener(seriesListener);
         chartCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
-        setOnSelectionEvent(e -> {
-            popup.update(e.getItem(), true);
-            popup.animatedShow(getScene().getWindow());
-        });
     }
 
     public void dispose() {
