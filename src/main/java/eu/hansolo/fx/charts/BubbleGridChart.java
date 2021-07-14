@@ -23,6 +23,7 @@ import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.tools.FontMetrix;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
@@ -714,7 +715,12 @@ public class BubbleGridChart extends Region {
                         } else {
                             ctx.setFill(getTextColor());
                         }
-                        ctx.fillText(String.format(Locale.US, "%.0f", bgci.getValue()), cellCenterX, cellCenterY, maxBubbleDiameter);
+                        String     bubbleText = String.format(Locale.US, "%.0f", bgci.getValue());
+                        FontMetrix metrix     = new FontMetrix(dataFont);
+                        metrix.computeStringWidth(bubbleText);
+                        if (metrix.computeStringWidth(bubbleText) < (radius * 2)) {
+                            ctx.fillText(bubbleText, cellCenterX, cellCenterY, maxBubbleDiameter);
+                        }
                     }
                 }
             }
