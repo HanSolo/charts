@@ -518,10 +518,8 @@ public class SectorChart extends Region {
         if (null == ctx) { return; }
         final double CENTER_X      = 0.5 * size;
         final double CENTER_Y      = CENTER_X;
-        final double CIRCLE_SIZE   = 0.9 * size;
-        final double CIRCLE_RADIUS = 0.45 * size;
-        final double RANGE         = 0.35714 * CIRCLE_SIZE;
-        final double OFFSET        = 0.14286 * CIRCLE_SIZE;
+        final double CIRCLE_SIZE   = 0.95 * size;
+        final double CIRCLE_RADIUS = 0.475 * CIRCLE_SIZE;
         final double MIN_VALUE     = getMinValue();
         final double MAX_VALUE     = getMaxValue();
         final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
@@ -563,7 +561,7 @@ public class SectorChart extends Region {
             for (int j = 0 ; j < series.getItems().size() ; j++) {
                 ChartItem item = series.getItems().get(j);
                 radiusFactor = clamp(MIN_VALUE, MAX_VALUE, (item.getValue() - MIN_VALUE)) / DATA_RANGE;
-                radius = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
+                radius = clamp(0, CIRCLE_RADIUS, radiusFactor * CIRCLE_RADIUS);
                 ctx.beginPath();
                 ctx.moveTo(CENTER_X, CENTER_Y);
                 ctx.arc(CENTER_X, CENTER_Y, radius, radius, 0, -angleStep);
@@ -579,7 +577,7 @@ public class SectorChart extends Region {
         }
         ctx.restore();
         
-        ctx.setLineWidth(1);
+        ctx.setLineWidth(0.75);
         ctx.setStroke(getGridColor());
 
         // draw star lines
@@ -596,9 +594,9 @@ public class SectorChart extends Region {
         if (isThresholdVisible()) {
             ctx.save();
             radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold() - MIN_VALUE)) / DATA_RANGE);
-            radius       = clamp(0, CIRCLE_RADIUS, radiusFactor * RANGE + OFFSET);
-            ctx.setLineWidth(clamp(1d, 2d, size * 0.005));
-            ctx.setLineDashes(new double[] {12, 6});
+            radius       = clamp(0, CIRCLE_RADIUS, radiusFactor * CIRCLE_RADIUS);
+            ctx.setLineWidth(clamp(0.75d, 1d, size * 0.005));
+            ctx.setLineDashes(new double[] {6, 3});
             ctx.setStroke(getThresholdColor());
             ctx.strokeOval(0.5 * size - radius, 0.5 * size - radius, 2 * radius, 2 * radius);
             ctx.restore();
@@ -645,7 +643,7 @@ public class SectorChart extends Region {
         // draw series text
         if (getSeriesTextVisible()) {
             ctx.save();
-            ctx.setFont(Fonts.latoRegular(0.015 * size));
+            ctx.setFont(Fonts.latoRegular(0.018 * size));
             ctx.setTextAlign(TextAlignment.CENTER);
             ctx.setTextBaseline(VPos.CENTER);
 
