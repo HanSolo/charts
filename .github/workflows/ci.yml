@@ -29,8 +29,8 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_KEY }}
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+      #- name: Validate Gradle wrapper
+      #  uses: gradle/wrapper-validation-action@v1
       - name: Build with Gradle
         run: ./gradlew clean build
         env:
