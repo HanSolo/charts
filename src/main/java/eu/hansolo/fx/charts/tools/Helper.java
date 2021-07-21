@@ -31,6 +31,11 @@ import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -1147,5 +1152,26 @@ public class Helper {
                 break;
         }
         return axis;
+    }
+
+
+    public static final ColorInput createColorMask(final Image sourceImage, final Color color) { return new ColorInput(0, 0, sourceImage.getWidth(), sourceImage.getHeight(), color); }
+    public static final Blend createColorBlend(final Image sourceImage, final Color color) {
+        final ColorInput mask  = createColorMask(sourceImage, color);
+        final Blend      blend = new Blend(BlendMode.MULTIPLY);
+        blend.setTopInput(mask);
+        return blend;
+    }
+    public static final WritableImage getRedChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.RED);  }
+    public static final WritableImage getGreenChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.LIME); }
+    public static final WritableImage getBlueChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.BLUE); }
+    private static final WritableImage getColorChannel(final Image sourceImage, final Color color) {
+        final Node  imageView = new ImageView(sourceImage);
+        final Blend blend     = createColorBlend(sourceImage, color);
+        imageView.setEffect(blend);
+
+        final SnapshotParameters params = new SnapshotParameters();
+        final WritableImage      result = imageView.snapshot(params, null);
+        return result;
     }
 }
