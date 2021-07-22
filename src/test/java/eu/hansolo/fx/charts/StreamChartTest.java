@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.StreamChart.Category;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.SortDirection;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -29,10 +30,12 @@ import javafx.stage.Stage;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 
 public class StreamChartTest extends Application {
     private StreamChart streamChart;
+    private ChartItem[] items;
     private enum Colors {
         LIGHT_BLUE(Color.web("#a6cee3")),
         ORANGE(Color.web("#fdbf6f")),
@@ -62,7 +65,7 @@ public class StreamChartTest extends Application {
 
 
     @Override public void init() {
-        ChartItem[] items = {
+        items = new ChartItem[] {
             createChartItem("Gerrit", 8, 1, 1, Colors.LIMA.color),
             createChartItem("Gerrit", 5, 2, 1, Colors.LIMA.color),
             createChartItem("Gerrit", 3, 3, 1, Colors.LIMA.color),
@@ -95,12 +98,16 @@ public class StreamChartTest extends Application {
             };
 
         streamChart = StreamChartBuilder.create()
-                                        .items(items)
+                                        //.items(items)
                                         .category(Category.DAY)
                                         .autoItemWidth(true)
                                         .itemWidth(80)
                                         .itemGap(10)
                                         .autoItemGap(true)
+                                        //.itemTextThreshold(2)
+                                        .itemTextVisible(true)
+                                        .categoryTextColor(Color.BLACK)
+                                        .sortDirection(SortDirection.ASCENDING)
                                         .build();
     }
 
@@ -113,6 +120,8 @@ public class StreamChartTest extends Application {
         stage.setTitle("Stream Chart");
         stage.setScene(scene);
         stage.show();
+
+        streamChart.setItems(items);
     }
 
     @Override public void stop() {
