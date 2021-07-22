@@ -121,6 +121,11 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B categorySumVisible(final boolean VISIBLE) {
+        properties.put("categorySumVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
         return (B)this;
@@ -262,6 +267,8 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
                 CONTROL.setCategoryTextColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("sortDirection".equals(key)) {
                 CONTROL.setSortDirection(((ObjectProperty<SortDirection>) properties.get(key)).get());
+            } else if ("categorySumVisible".equals(key)) {
+                CONTROL.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

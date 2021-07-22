@@ -108,6 +108,7 @@ public class StreamChartTest extends Application {
                                         .itemTextVisible(true)
                                         .categoryTextColor(Color.BLACK)
                                         .sortDirection(SortDirection.ASCENDING)
+                                        .categorySumVisible(true)
                                         .build();
     }
 

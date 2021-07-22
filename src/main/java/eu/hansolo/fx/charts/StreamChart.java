@@ -112,6 +112,7 @@ public class StreamChart extends Region {
     private              ObservableList<ChartItem>         items;
     private              Map<LocalDate, List<ChartItem>>   chartItems;
     private              Map<Integer, List<ChartItemData>> itemsPerCategory;
+    private              Map<Integer, Double>              sumsPerCategory;
     private              ItemEventListener                 itemListener;
     private              ListChangeListener<ChartItem>     itemListListener;
     private              double                            scaleY;
@@ -137,6 +138,8 @@ public class StreamChart extends Region {
     private              BooleanProperty                   itemTextVisible;
     private              SortDirection                     _sortDirection;
     private              ObjectProperty<SortDirection>     sortDirection;
+    private              boolean                           _categorySumVisible;
+    private              BooleanProperty                   categorySumVisible;
     private              String                            formatString;
     private              Font                              itemFont;
     private              Font                              categoryFont;
@@ -155,11 +158,12 @@ public class StreamChart extends Region {
         this(CATEGORY, Arrays.asList(ITEMS));
     }
     public StreamChart(final Category CATEGORY, final List<ChartItem> ITEMS) {
-        items              = FXCollections.observableArrayList();
-        chartItems         = new LinkedHashMap<>();
-        itemsPerCategory   = new LinkedHashMap<>();
-        itemListener       = e -> redraw();
-        itemListListener   = c -> {
+        items               = FXCollections.observableArrayList();
+        chartItems          = new LinkedHashMap<>();
+        itemsPerCategory    = new LinkedHashMap<>();
+        sumsPerCategory     = new LinkedHashMap<>();
+        itemListener        = e -> redraw();
+        itemListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
@@ -169,25 +173,26 @@ public class StreamChart extends Region {
             }
             groupBy(getCategory());
         };
-        _category          = CATEGORY;
-        _textColor         = Color.BLACK;
-        _categoryTextColor = Color.BLACK;
-        _itemWidth         = DEFAULT_ITEM_WIDTH;
-        _autoItemWidth     = true;
-        _itemGap           = DEFAULT_NODE_GAP;
-        _autoItemGap       = true;
-        _decimals          = 0;
-        _locale            = Locale.getDefault();
-        _itemTextThreshold = 1;
-        _itemTextVisible   = true;
-        _sortDirection     = SortDirection.ASCENDING;
-        itemFont           = Fonts.latoRegular(10);
-        categoryFont       = Fonts.latoRegular(10);
-        itemFontMetrix     = new FontMetrix(itemFont);
-        categoryFontMetrix = new FontMetrix(categoryFont);
-        formatString       = "%." + _decimals + "f";
-        rectPaths          = new LinkedHashMap<>();
-        bezierPaths        = new LinkedHashMap<>();
+        _category           = CATEGORY;
+        _textColor          = Color.BLACK;
+        _categoryTextColor  = Color.BLACK;
+        _itemWidth          = DEFAULT_ITEM_WIDTH;
+        _autoItemWidth      = true;
+        _itemGap            = DEFAULT_NODE_GAP;
+        _autoItemGap        = true;
+        _decimals           = 0;
+        _locale             = Locale.getDefault();
+        _itemTextThreshold  = 1;
+        _itemTextVisible    = true;
+        _sortDirection      = SortDirection.ASCENDING;
+        _categorySumVisible = false;
+        itemFont            = Fonts.latoRegular(10);
+        categoryFont        = Fonts.latoRegular(10);
+        itemFontMetrix      = new FontMetrix(itemFont);
+        categoryFontMetrix  = new FontMetrix(categoryFont);
+        formatString        = "%." + _decimals + "f";
+        rectPaths           = new LinkedHashMap<>();
+        bezierPaths         = new LinkedHashMap<>();
 
         items.setAll(null == ITEMS ? new ArrayList<>() : ITEMS);
 
@@ -532,6 +537,26 @@ public class StreamChart extends Region {
         return sortDirection;
     }
 
+    public boolean isCategorySumVisible() { return null == categorySumVisible ? _categorySumVisible : categorySumVisible.get(); }
+    public void setCategorySumVisible(final boolean VISIBLE) {
+        if (null == categorySumVisible) {
+            _categorySumVisible = VISIBLE;
+            redraw();
+        } else {
+            categorySumVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty categorySumVisibleProperty() {
+        if (null == categorySumVisible) {
+            categorySumVisible = new BooleanPropertyBase(_categorySumVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return StreamChart.this; }
+                @Override public String getName() { return "categorySumVisible"; }
+            };
+        }
+        return categorySumVisible;
+    }
+
     public void groupBy(final Category CATEGORY) {
         chartItems.clear();
         // Group items by category
@@ -603,6 +628,7 @@ public class StreamChart extends Region {
         double maxSum   = chartItems.entrySet().stream().mapToDouble(entry -> entry.getValue().stream().mapToDouble(ChartItem::getValue).sum()).max().getAsDouble();
         int    maxItems = chartItems.entrySet().stream().mapToInt(entry -> entry.getValue().size()).reduce(0, Integer::max);
 
+        sumsPerCategory.clear();
 
         // Define drawing parameters
         double itemWidth     = isAutoItemWidth() ? size * 0.1 : getItemWidth();
@@ -615,6 +641,7 @@ public class StreamChart extends Region {
             spacerY = 0;
             spacerX = horizontalGap * category;
 
+            double sum = 0;
             for (ChartItemData itemData : itemsPerCategory.get(category)) {
                 ChartItem     item        = itemData.getChartItem();
                 double        itemHeight  = item.getValue() * scaleY;
@@ -622,7 +649,9 @@ public class StreamChart extends Region {
                 itemData.setBounds(spacerX , (reducedHeight - itemHeight) - spacerY, itemWidth, itemHeight);
                 itemData.setTextPoint(spacerX + textOffsetX, (reducedHeight - itemHeight) - spacerY + ctx.getFont().getSize());
                 spacerY += itemHeight + verticalGap;
+                sum += item.getValue();
             }
+            sumsPerCategory.put(category, sum);
         }
 
         createPaths();
@@ -769,11 +798,14 @@ public class StreamChart extends Region {
                     }
                 }
             }
+
             // Draw category text
             ChartItemData firstItem = itemDataInCategory.get(0);
             ctx.setFill(getCategoryTextColor());
-            String categoryText = formatter.format(firstItem.getLocalDate());
-            ctx.fillText(categoryText, firstItem.getBounds().getCenterX(), reducedHeight + size * 0.02, firstItem.bounds.getWidth());
+            if (isCategorySumVisible()) {
+                ctx.fillText("\u03a3 " + String.format(getLocale(), formatString, sumsPerCategory.get(category)), firstItem.getBounds().getCenterX(), 15, firstItem.getBounds().getWidth());
+            }
+            ctx.fillText(formatter.format(firstItem.getLocalDate()), firstItem.getBounds().getCenterX(), reducedHeight + size * 0.02, firstItem.bounds.getWidth());
         }
     }
 
