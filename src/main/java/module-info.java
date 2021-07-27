@@ -1,4 +1,4 @@
-module charts {
+module eu.hansolo.fx.charts {
 
     // Java
     requires java.base;
