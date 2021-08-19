@@ -38,7 +38,7 @@ public class GraphEdge {
 
 
     private void addDefault(){
-        nummericAttributes.put(NodeEdgeModel.DEFAULT, new Double(1));
+        nummericAttributes.put(NodeEdgeModel.DEFAULT, 1.0);
     }
 
     public double getForce() {

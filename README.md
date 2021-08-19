@@ -128,3 +128,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## SectorChart
 ![SectorChart](https://i.ibb.co/syvjchc/Sector-Chart-2021-07-11-07-56-59.png)
+
+
+## Voronoi/Delauny chart
+![VoronoiChart](https://i.ibb.co/HrCbzYN/voronoi.png)

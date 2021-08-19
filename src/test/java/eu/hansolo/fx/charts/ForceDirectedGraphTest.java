@@ -414,22 +414,22 @@ public class ForceDirectedGraphTest extends Application {
             HashMap<String, Double> temp;
 
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(200));
+            temp.put(sizeKey, 200.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(400));
+            temp.put(sizeKey, 400.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(150));
+            temp.put(sizeKey, 150.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(600));
+            temp.put(sizeKey, 600.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(250));
+            temp.put(sizeKey, 250.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(300));
+            temp.put(sizeKey, 300.0);
             nodes.add(new GraphNode(temp, new HashMap<>()));
 
             edges.add(new GraphEdge(nodes.get(0), nodes.get(1), new HashMap<>()));
@@ -453,32 +453,32 @@ public class ForceDirectedGraphTest extends Application {
             HashMap<String, String> temp2;
 
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(200));
+            temp.put(sizeKey, 200.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group1");
             nodes.add(new GraphNode(temp, temp2));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(400));
+            temp.put(sizeKey, 400.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group1");
             nodes.add(new GraphNode(temp, temp2));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(150));
+            temp.put(sizeKey, 150.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group2");
             nodes.add(new GraphNode(temp, temp2));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(600));
+            temp.put(sizeKey, 600.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group2");
             nodes.add(new GraphNode(temp, temp2));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(250));
+            temp.put(sizeKey, 250.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group1");
             nodes.add(new GraphNode(temp, temp2));
             temp = new HashMap<String, Double>();
-            temp.put(sizeKey, new Double(300));
+            temp.put(sizeKey, 300.0);
             temp2 = new HashMap<String,String>();
             temp2.put(colorKey, "Group3");
             nodes.add(new GraphNode(temp, temp2));
@@ -538,9 +538,9 @@ public class ForceDirectedGraphTest extends Application {
             HashMap<String, String> temp2;
 
             for(int i=0; i<groups; i++){
-                temp = new HashMap<String, Double>();
-                temp.put(sizeKey, new Double(Math.random()*300+100));
-                temp2 = new HashMap<String,String>();
+                temp = new HashMap<>();
+                temp.put(sizeKey, Math.random() * 300.0 + 100.0);
+                temp2 = new HashMap<>();
                 temp2.put(colorKey, "Group" + i);
                 GraphNode gn = new GraphNode(temp, temp2);
                 gn.setSizeKey(sizeKey);
@@ -549,9 +549,9 @@ public class ForceDirectedGraphTest extends Application {
             System.out.println("Datagenerator: exit Nodes static grouping");
 
             for(int i=0; i<amountOfNodes-groups;i++){
-                temp = new HashMap<String, Double>();
-                temp.put(sizeKey, new Double(Math.random()*300+100));
-                temp2 = new HashMap<String,String>();
+                temp = new HashMap<>();
+                temp.put(sizeKey, Math.random()*300.0 + 100.0);
+                temp2 = new HashMap<>();
                 temp2.put(colorKey, "Group" + (int) (Math.random()*groups));
                 GraphNode gn = new GraphNode(temp, temp2);
                 gn.setSizeKey(sizeKey);
@@ -562,7 +562,7 @@ public class ForceDirectedGraphTest extends Application {
             ArrayList<Integer> notConnected = new ArrayList<>();
             ArrayList<Integer> connected = new ArrayList<>();
             for(int i=0;i<amountOfNodes; i++){
-                notConnected.add(new Integer(i));
+                notConnected.add(i);
             }
 
 
@@ -575,8 +575,8 @@ public class ForceDirectedGraphTest extends Application {
 
             edges.add(new GraphEdge(nodes.get(currentNode1),nodes.get(currentNode2), new HashMap<>()));
 
-            connected.add(new Integer(currentNode1));
-            connected.add(new Integer(currentNode2));
+            connected.add(currentNode1);
+            connected.add(currentNode2);
             if(currentNode1 > currentNode2){
                 notConnected.remove(currentNode1);
                 notConnected.remove(currentNode2);
@@ -641,7 +641,7 @@ public class ForceDirectedGraphTest extends Application {
 
         private void createNodeWithNameAndGroup(String name, HashMap<String,String> group){
             nodes.add(new GraphNode(name,new HashMap<>(),group));
-            indexMap.put(name, new Integer(index));
+            indexMap.put(name, index);
             index++;
         }
 

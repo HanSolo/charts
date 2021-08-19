@@ -113,7 +113,7 @@ public class GraphCalculator {
                     counterOfNextLevel = 0;
                 }
             }
-            node.setNumericAttribute(closenessKey, new Double(result));
+            node.setNumericAttribute(closenessKey, result);
         }
         return nodeEdgeModel;
     }

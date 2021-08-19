@@ -778,6 +778,84 @@ public class Helper {
         return p;
     }
 
+    public static Color hsbToRGB(final double hue, final double saturation, final double brightness) {
+        int r = 0, g = 0, b = 0;
+        if (saturation == 0) {
+            r = g = b = (int) (brightness * 255.0f + 0.5f);
+        } else {
+            double h = (hue - Math.floor(hue)) * 6.0;
+            double f = h - Math.floor(h);
+            double p = brightness * (1.0 - saturation);
+            double q = brightness * (1.0 - saturation * f);
+            double t = brightness * (1.0 - (saturation * (1.0 - f)));
+            switch ((int) h) {
+                case 0:
+                    r = (int) (brightness * 255.0 + 0.5);
+                    g = (int) (t * 255.0 + 0.5);
+                    b = (int) (p * 255.0 + 0.5);
+                    break;
+                case 1:
+                    r = (int) (q * 255.0 + 0.5);
+                    g = (int) (brightness * 255.0 + 0.5);
+                    b = (int) (p * 255.0 + 0.5);
+                    break;
+                case 2:
+                    r = (int) (p * 255.0 + 0.5);
+                    g = (int) (brightness * 255.0 + 0.5);
+                    b = (int) (t * 255.0 + 0.5);
+                    break;
+                case 3:
+                    r = (int) (p * 255.0 + 0.5);
+                    g = (int) (q * 255.0 + 0.5);
+                    b = (int) (brightness * 255.0 + 0.5);
+                    break;
+                case 4:
+                    r = (int) (t * 255.0 + 0.5);
+                    g = (int) (p * 255.0 + 0.5);
+                    b = (int) (brightness * 255.0 + 0.5);
+                    break;
+                case 5:
+                    r = (int) (brightness * 255.0 + 0.5);
+                    g = (int) (p * 255.0 + 0.5);
+                    b = (int) (q * 255.0 + 0.5);
+                    break;
+            }
+        }
+        return Color.rgb(r, g, b);
+    }
+
+    public static double[] ColorToHSB(final Color color) {
+        int      r         = (int) (color.getRed() * 255.0);
+        int      g         = (int) (color.getGreen() * 255.0);
+        int      b         = (int) (color.getBlue() * 255.0);
+        double[] hsbValues = new double[3];
+        double   hue;
+        double   saturation;
+        double   brightness;
+
+        int cmax = (r > g) ? r : g;
+        if (b > cmax) { cmax = b; }
+        int cmin = (r < g) ? r : g;
+        if (b < cmin) { cmin = b; }
+
+        brightness = ((double) cmax) / 255.0;
+        if (cmax != 0) { saturation = ((float) (cmax - cmin)) / ((double) cmax); } else { saturation = 0; }
+        if (saturation == 0) {
+            hue = 0;
+        } else {
+            double redc   = ((double) (cmax - r)) / ((double) (cmax - cmin));
+            double greenc = ((double) (cmax - g)) / ((double) (cmax - cmin));
+            double bluec  = ((double) (cmax - b)) / ((double) (cmax - cmin));
+            if (r == cmax) { hue = bluec - greenc; } else if (g == cmax) { hue = 2.0 + redc - bluec; } else { hue = 4.0 + greenc - redc; }
+            hue = hue / 6.0;
+            if (hue < 0) { hue = hue + 1.0; }
+        }
+        hsbValues[0] = hue;
+        hsbValues[1] = saturation;
+        hsbValues[2] = brightness;
+        return hsbValues;
+    }
+
     public static final String colorToRGB(final Color COLOR) {
         String hex      = COLOR.toString().replace("0x", "");
         String hexRed   = hex.substring(0, 2).toUpperCase();
