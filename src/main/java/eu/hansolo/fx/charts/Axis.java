@@ -46,6 +46,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -1370,7 +1371,7 @@ public class Axis extends Region {
 
             // Main Loop for tick marks and labels
             BigDecimal tmpStepBD = new BigDecimal(tmpStepSize);
-            tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
+            tmpStepBD = tmpStepBD.setScale(6, RoundingMode.HALF_UP); // newScale == number of decimals taken into account
             double tmpStep          = tmpStepBD.doubleValue();
             int    tickMarkCounter  = 0;
             int    tickLabelCounter = 0;
@@ -1454,7 +1455,7 @@ public class Axis extends Region {
                     }
                 }
 
-                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                if (Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick mark
                     isMinValue = Double.compare(minValue, counter) == 0;
                     isMaxValue = Double.compare(maxValue, counter) == 0;
@@ -1498,11 +1499,11 @@ public class Axis extends Region {
                         }
                         drawTickLabel(isOnlyFirstAndLastTickLabelVisible, isZero, isMinValue, isMaxValue, fullRange, zeroColor, tickLabelColor, textPointX, textPointY, maxTextWidth, tickLabelString, orientation);
                     }
-                } else if (mediumTickMarksVisible && Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                } else if (mediumTickMarksVisible && Double.compare(minorTickSpaceBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                     // Draw medium tick mark
                     drawTickMark(mediumTickMarkColor, mediumLineWidth, mediumPointX, mediumPointY, outerPointX, outerPointY);
-                } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                } else if (minorTickMarksVisible && Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick mark
                     drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
                 } else if (!isAutoScale && tickMarkCounter % 10 == 0) {

@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.YChartItem;
+import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.animation.AnimationTimer;
@@ -60,10 +60,10 @@ public class SingleChartTest extends Application {
     private Axis                 lineChartYAxisLeft;
     private Axis                 lineChartYAxisRight;
 
-    private YSeries<YChartItem> ySeries1;
-    private YSeries<YChartItem> ySeries2;
-    private YSeries<YChartItem> ySeries3;
-    private YChart<YChartItem>  yChart;
+    private YSeries<ValueChartItem> ySeries1;
+    private YSeries<ValueChartItem> ySeries2;
+    private YSeries<ValueChartItem> ySeries3;
+    private YChart<ValueChartItem>  yChart;
 
     private long                   lastTimerCall;
     private AnimationTimer         timer;
@@ -104,13 +104,13 @@ public class SingleChartTest extends Application {
                                 lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
 
         // YChart
-        List<YChartItem> yItem1 = new ArrayList<>(20);
-        List<YChartItem> yItem2 = new ArrayList<>(20);
-        List<YChartItem> yItem3 = new ArrayList<>(20);
+        List<ValueChartItem> yItem1 = new ArrayList<>(20);
+        List<ValueChartItem> yItem2 = new ArrayList<>(20);
+        List<ValueChartItem> yItem3 = new ArrayList<>(20);
         for (int i = 0 ; i < 20 ; i++) {
-            yItem1.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yItem2.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
-            yItem3.add(new YChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem1.add(new ValueChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem2.add(new ValueChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem3.add(new ValueChartItem(RND.nextDouble() * 100, "P" + i, COLORS[RND.nextInt(3)]));
         }
 
         ySeries1 = new YSeries(yItem1, ChartType.RADAR_SECTOR, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.5)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.8))), Color.TRANSPARENT);
@@ -134,14 +134,14 @@ public class SingleChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 4));
 
-                    ObservableList<YChartItem> yItems = ySeries1.getItems();
-                    yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
+                    ObservableList<ValueChartItem> yItems = ySeries1.getItems();
+                    yItems.forEach(item -> item.setValue(RND.nextDouble() * 100));
 
                     yItems = ySeries2.getItems();
-                    yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
+                    yItems.forEach(item -> item.setValue(RND.nextDouble() * 100));
 
                     yItems = ySeries3.getItems();
-                    yItems.forEach(item -> item.setY(RND.nextDouble() * 100));
+                    yItems.forEach(item -> item.setValue(RND.nextDouble() * 100));
 
                     // Can be used to update charts but if more than one series is in one xyPane
                     // it's easier to use the refresh() method of XYChart

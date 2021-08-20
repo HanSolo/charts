@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -30,6 +31,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +56,10 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     private       ObjectProperty<Color>   stroke;
     private       Color                   _connectionFill;
     private       ObjectProperty<Color>   connectionFill;
+    private       Color                   _textColor;
+    private       ObjectProperty<Color>   textColor;
+    private       Font                    _font;
+    private       ObjectProperty<Font>    font;
     private       Symbol                  _symbol;
     private       ObjectProperty<Symbol>  symbol;
     private       Map<PlotItem, Double>   outgoing;
@@ -93,6 +99,8 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         _fill           = FILL;
         _stroke         = Color.TRANSPARENT;
         _connectionFill = Color.TRANSPARENT;
+        _textColor      = Color.TRANSPARENT;
+        _font           = Fonts.opensansRegular(10);
         _symbol         = Symbol.NONE;
         level           = LEVEL;
         cluster         = null;
@@ -226,6 +234,48 @@ public class PlotItem implements Item, Comparable<PlotItem> {
             _connectionFill = null;
         }
         return stroke;
+    }
+
+    public Color getTextColor() { return null == textColor ? _textColor : textColor.get(); }
+    public void setTextColor(final Color TEXT_COLOR) {
+        if (null == textColor) {
+            _textColor = TEXT_COLOR;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            textColor.set(TEXT_COLOR);
+        }
+    }
+    public ObjectProperty<Color> textColorProperty() {
+        if (null == textColor) {
+            textColor = new ObjectPropertyBase<>(_textColor) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "textColor"; }
+            };
+            _textColor = null;
+        }
+        return textColor;
+    }
+
+    public Font getFont() { return null == font ? _font : font.get(); }
+    public void setFont(final Font FONT) {
+        if (null == font) {
+            _font = FONT;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            font.set(FONT);
+        }
+    }
+    public ObjectProperty<Font> fontProperty() {
+        if (null == font) {
+            font = new ObjectPropertyBase<>(_font) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "font"; }
+            };
+            _font = null;
+        }
+        return font;
     }
 
     @Override public Symbol getSymbol() { return null == symbol ? _symbol : symbol.get(); }

@@ -19,11 +19,13 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -48,6 +50,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
         return new ChartItemBuilder();
     }
 
+    public final B index(final int INDEX) {
+        properties.put("index", new SimpleIntegerProperty(INDEX));
+        return (B)this;
+    }
+
     public final B name(final String NAME) {
         properties.put("name", new SimpleStringProperty(NAME));
         return (B)this;
@@ -55,6 +62,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
 
     public final B unit(final String UNIT) {
         properties.put("unit", new SimpleStringProperty(UNIT));
+        return (B)this;
+    }
+
+    public final B description(final String DESCRIPTION) {
+        properties.put("description", new SimpleStringProperty(DESCRIPTION));
         return (B)this;
     }
 
@@ -116,12 +128,16 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
     public final ChartItem build() {
         final ChartItem ITEM = new ChartItem();
         for (String key : properties.keySet()) {
-            if ("name".equals(key)) {
+            if ("index".equals(key)) {
+                ITEM.setIndex(((IntegerProperty) properties.get(key)).get());
+            } else if ("name".equals(key)) {
                 ITEM.setName(((StringProperty) properties.get(key)).get());
             } else if ("value".equals(key)) {
                 ITEM.setValue(((DoubleProperty) properties.get(key)).get());
             } else if ("unit".equals(key)) {
                 ITEM.setUnit(((StringProperty) properties.get(key)).get());
+            } else if ("description".equals(key)) {
+                ITEM.setDescription(((StringProperty) properties.get(key)).get());
             } else if("fill".equals(key)) {
                 ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("stroke".equals(key)) {

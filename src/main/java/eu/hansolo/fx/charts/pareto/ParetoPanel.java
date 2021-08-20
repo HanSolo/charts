@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts.pareto;
 
 import eu.hansolo.fx.charts.Axis;
 import eu.hansolo.fx.charts.Position;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Point;
@@ -134,6 +135,7 @@ public class ParetoPanel extends Region {
     public ParetoPanel(final ParetoModel MODEL){
         decimals     = 1;
         numberFormat = new StringBuilder("%.").append(decimals).append("f").toString();
+        _labelingFont = Fonts.opensansRegular(10);
         paretoModel  = MODEL;
         init();
     }

@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.YChartItem;
+import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -43,33 +43,33 @@ import java.util.Random;
  * Time: 09:29
  */
 public class RadarChartTest extends Application {
-    private static final Random               RND        = new Random();
-    private static final long                 INTERVAL   = 10_000_000_000l;
-    private static final double               ANIM_TIME  = INTERVAL / 10_000_000;
-    private static final int                  ELEMENTS   = 30;
-    private static final ChartType            CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
-    private              YSeries<YChartItem> series1;
-    private              YSeries<YChartItem> series2;
-    private              YSeries<YChartItem> series3;
-    private              YChart<YChartItem>  chart;
-    private              Timeline            timeline;
-    private              long                lastTimerCall;
-    private              AnimationTimer      timer;
+    private static final Random                  RND        = new Random();
+    private static final long                    INTERVAL   = 10_000_000_000l;
+    private static final double                  ANIM_TIME  = INTERVAL / 10_000_000;
+    private static final int                     ELEMENTS   = 30;
+    private static final ChartType               CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
+    private              YSeries<ValueChartItem> series1;
+    private              YSeries<ValueChartItem> series2;
+    private              YSeries<ValueChartItem> series3;
+    private              YChart<ValueChartItem>  chart;
+    private              Timeline                timeline;
+    private              long                    lastTimerCall;
+    private              AnimationTimer          timer;
 
     @Override public void init() {
-        List<YChartItem> item1 = new ArrayList<>(ELEMENTS);
-        List<YChartItem> item2 = new ArrayList<>(ELEMENTS);
-        List<YChartItem> item3 = new ArrayList<>(ELEMENTS);
+        List<ValueChartItem> item1 = new ArrayList<>(ELEMENTS);
+        List<ValueChartItem> item2 = new ArrayList<>(ELEMENTS);
+        List<ValueChartItem> item3 = new ArrayList<>(ELEMENTS);
         for (int i = 0 ; i < ELEMENTS ; i++) {
-            YChartItem dataPoint;
+            ValueChartItem dataPoint;
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new ValueChartItem(RND.nextDouble() * 100, "P" + i);
             item1.add(dataPoint);
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new ValueChartItem(RND.nextDouble() * 100, "P" + i);
             item2.add(dataPoint);
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new ValueChartItem(RND.nextDouble() * 100, "P" + i);
             item3.add(dataPoint);
         }
 
@@ -129,10 +129,10 @@ public class RadarChartTest extends Application {
         timeline.getKeyFrames().setAll(keyFrames);
     }
 
-    private void animateSeries(final YSeries<YChartItem> SERIES, final List<KeyFrame> KEY_FRAMES) {
+    private void animateSeries(final YSeries<ValueChartItem> SERIES, final List<KeyFrame> KEY_FRAMES) {
         SERIES.getItems().forEach(item -> {
-            KeyValue kv0 = new KeyValue(item.yProperty(), item.getY());
-            KeyValue kv1 = new KeyValue(item.yProperty(), RND.nextDouble() * 100);
+            KeyValue kv0 = new KeyValue(item.valueProperty(), item.getValue());
+            KeyValue kv1 = new KeyValue(item.valueProperty(), RND.nextDouble() * 100);
             KeyFrame kf0 = new KeyFrame(Duration.ZERO, kv0);
             KeyFrame kf1 = new KeyFrame(Duration.millis(ANIM_TIME), kv1);
             KEY_FRAMES.add(kf0);

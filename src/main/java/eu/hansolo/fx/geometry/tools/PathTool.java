@@ -66,7 +66,7 @@ public class PathTool {
 
         while (!pathIterator.isDone()) {
             origIndex++;
-            indexes.add(new Integer(index));
+            indexes.add(index);
             segType = pathIterator.currentSegment(seg);
             switch (segType) {
                 case PathIterator.MOVE_TO:

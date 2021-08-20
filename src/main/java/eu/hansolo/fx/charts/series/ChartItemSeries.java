@@ -49,8 +49,8 @@ public class ChartItemSeries<T extends ChartItem> extends Series<T> {
     // ******************** Methods *******************************************
     @Override public ObservableList<T> getItems() { return items; }
 
-    public double getMinValue() { return items.stream().mapToDouble(T::getValue).min().getAsDouble(); }
-    public double getMaxValue() { return items.stream().mapToDouble(T::getValue).max().getAsDouble(); }
+    public double getMinValue() { return items.stream().mapToDouble(T::getValue).min().orElse(0d); }
+    public double getMaxValue() { return items.stream().mapToDouble(T::getValue).max().orElse(100d); }
 
     public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
 }

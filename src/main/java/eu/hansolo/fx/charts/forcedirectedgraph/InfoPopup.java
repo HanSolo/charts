@@ -100,8 +100,8 @@ public class InfoPopup extends Popup {
     }
 
     private void initGraphics() {
-        regularFont = Fonts.latoRegular(10);
-        lightFont   = Fonts.latoLight(10);
+        regularFont = Fonts.opensansRegular(10);
+        lightFont   = Fonts.opensansLight(10);
 
         itemText = new Text("NAME");
         itemText.setFill(_textColor);

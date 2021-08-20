@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts.series;
 
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.ValueItem;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.LongProperty;
@@ -50,12 +50,12 @@ public class YSeriesBuilder<B extends YSeriesBuilder<B>> {
         return new YSeriesBuilder();
     }
 
-    public final B items(final YItem... ITEMS) {
+    public final B items(final ValueItem... ITEMS) {
         properties.put("itemsArray", new SimpleObjectProperty<>(ITEMS));
         return (B)this;
     }
 
-    public final B items(final List<YItem> ITEMS) {
+    public final B items(final List<ValueItem> ITEMS) {
         properties.put("itemsList", new SimpleObjectProperty<>(ITEMS));
         return (B)this;
     }
@@ -130,10 +130,10 @@ public class YSeriesBuilder<B extends YSeriesBuilder<B>> {
         final YSeries SERIES = new YSeries();
 
         if (properties.keySet().contains("itemsArray")) {
-            SERIES.setItems(((ObjectProperty<YItem[]>) properties.get("itemsArray")).get());
+            SERIES.setItems(((ObjectProperty<ValueItem[]>) properties.get("itemsArray")).get());
         }
         if(properties.keySet().contains("itemsList")) {
-            SERIES.setItems(((ObjectProperty<List<YItem>>) properties.get("itemsList")).get());
+            SERIES.setItems(((ObjectProperty<List<ValueItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {

@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
@@ -412,7 +413,7 @@ public class CoxcombChart extends Region {
         double       clippingRadius;
 
         ctx.clearRect(0, 0, size, size);
-        ctx.setFont(Font.font(size * 0.03));
+        ctx.setFont(Fonts.opensansRegular(size * 0.03));
         for (int i = 0 ; i < noOfChartItems ; i++) {
             ChartItem item       = items.get(i);
             double    value      = item.getValue();

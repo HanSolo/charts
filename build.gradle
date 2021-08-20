@@ -1,53 +1,39 @@
 import java.text.SimpleDateFormat
 
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1'
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.2'
-        classpath 'org.javamodularity:moduleplugin:1.7.0'
-        classpath 'org.beryx:badass-jlink-plugin:2.21.3'
-    }
-}
-
 plugins {
     id 'idea'
     id 'java-library'
-    id 'com.google.osdetector' version '1.6.2'
-    id 'org.javamodularity.moduleplugin' version '1.7.0'
-    id 'org.beryx.jlink' version '2.21.3'
     id 'maven-publish'
-    id 'net.nemerosa.versioning' version '2.14.0'
-    id 'com.jfrog.bintray' version '1.8.5'
+    id 'signing'
+    id 'com.google.osdetector'           version '1.7.0'
+    id 'org.javamodularity.moduleplugin' version '1.8.7'
+    id 'org.beryx.jlink'                 version '2.23.2'
+    id 'net.nemerosa.versioning'         version '2.14.0'
+    id 'biz.aQute.bnd.builder'           version '5.3.0'
 }
 
 apply plugin: 'biz.aQute.bnd.builder'
-
-sourceCompatibility = '11'
-
-wrapper {
-    gradleVersion = '6.4'
-}
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 description = 'Charts is a JavaFX library containing different kind of charts'
+mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
 
 Date buildTimeAndDate = new Date()
 ext {
     buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
     buildTime = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
+    platform        = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
+    ciOssrhUsername = System.getenv('OSSRH_USERNAME')
+    ciOssrhPassword = System.getenv('OSSRH_PASSWORD')
+    ciGHUser        = System.getenv('GH_USER')
+    ciGHToken       = System.getenv('GH_TOKEN')
+    gpgkey          = System.getenv("GPG_PRIVATE_KEY")
+    gpgpassphrase   = System.getenv("PASSPHRASE")
 }
-
-ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -56,8 +42,6 @@ dependencies {
     implementation "org.openjfx:javafx-controls:11:$platform"
     implementation "org.openjfx:javafx-swing:11:$platform"
 }
-
-mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
 
 jar {
     manifest {
@@ -72,14 +56,13 @@ jar {
                 'Implementation-Title'  : project.name,
                 'Implementation-Version': project.version,
                 'Bundle-Name'           : project.name,
-                'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://www.eclipse.org/legal/eplfaq.php',
+                'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : description,
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
-                'Export-Package'        : 'eu.hansolo.fx.charts, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform'
+                'Export-Package'        : 'eu.hansolo.fx.charts, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform, eu.hansolo.fx.voronoi'
         )
     }
 }
-
 
 // create one jar for the javadoc
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -99,74 +82,75 @@ artifacts {
     archives sourcesJar
 }
 
-def pomConfig = {
-    name 'charts'
-    url 'https://github.com/HanSolo/charts/wiki'
-    inceptionYear '2017'
-    licenses {
-        license([:]) {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-            distribution 'repo'
-        }
+signing {
+    if (gpgkey && gpgpassphrase) {
+        useInMemoryPgpKeys(gpgkey, gpgpassphrase)
     }
-    scm {
-        url 'scm:git@github.com:HanSolo/charts.git'
-        connection 'scm:git@github.com:HanSolo/charts.git'
-        developerConnection 'scm:git@github.com:HanSolo/charts.git'
-    }
-    developers {
-        developer {
-            id 'HanSolo'
-            name 'Gerrit Grunwald'
-        }
-    }
+
+    sign configurations.archives
+    sign publishing.publications
 }
 
 publishing {
     publications {
         mavenCustom(MavenPublication) {
+            group = 'eu.hansolo.fx'
+            artifactId = 'charts'
+            version = "${version}"
+
             from components.java
             artifact sourcesJar
             artifact javadocJar
 
             pom.withXml {
-                asNode().children().last() + pomConfig
-                asNode().appendNode('description', description)
+                asNode().dependencies.'*'.findAll {
+                    it.groupId.text() == 'org.openjfx'
+                }.each {
+                    it.remove(it.classifier)
+                }
+            }
+
+            pom {
+                name = 'charts'
+                description = 'A JavaFX library for scientific charts'
+                url = "https://github.com/HanSolo/charts/wiki"
+                licenses {
+                    license {
+                        name = "The Apache License, Version 2.0"
+                        url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    }
+                }
+                developers {
+                    developer {
+                        id = "HanSolo"
+                        name = "Gerrit Grunwald"
+                        email = "han.solo@mac.com"
+                    }
+                }
+                scm {
+                    connection = "scm:git:https://HanSolo/charts"
+                    developerConnection = "scm:git:https://HanSolo/charts"
+                    url = "https://github.com/HanSolo/charts"
+                }
             }
         }
     }
-}
 
-if (!project.hasProperty('bintrayUsername')) ext.bintrayUsername = ''
-if (!project.hasProperty('bintrayApiKey')) ext.bintrayApiKey = ''
-if (!project.hasProperty('sonatypeUsername')) ext.sonatypeUsername = ''
-if (!project.hasProperty('sonatypePassword')) ext.sonatypePassword = ''
-
-
-bintray {
-    user = project.bintrayUsername
-    key  = project.bintrayApiKey
-    publications = ['mavenCustom']
-    pkg {
-        repo                  = 'charts'
-        userOrg               = 'hansolo'
-        name                  = project.name
-        desc                  = description
-        licenses              = ['Apache-2.0']
-        labels                = ['java', 'javafx']
-        websiteUrl            = 'https://github.com/HanSolo/charts/wiki'
-        issueTrackerUrl       = 'https://github.com/HanSolo/charts/issues'
-        vcsUrl                = 'git@github.com:HanSolo/charts.git'
-        publicDownloadNumbers = true
-        version {
-            name   = project.version
-            vcsTag = project.version
-            mavenCentralSync {
-                sync = true
-                user = project.sonatypeUsername
-                password = project.sonatypePassword
-                close = '1'
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+            credentials {
+                username = null == ciOssrhUsername ? ossrhUsername : ciOssrhUsername
+                password = null == ciOssrhPassword ? ossrhPassword : ciOssrhPassword
+            }
+        }
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/HanSolo/charts"
+            credentials {
+                username = null == ciGHUser  ? ghUser  : ciGHUser
+                password = null == ciGHToken ? ghToken : ciGHToken
             }
         }
     }

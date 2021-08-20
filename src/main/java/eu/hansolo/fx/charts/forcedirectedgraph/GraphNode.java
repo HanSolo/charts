@@ -82,7 +82,7 @@ public class GraphNode extends ChartItem {
     }
 
     private void addDefault() {
-        numericAttributes.putIfAbsent(NodeEdgeModel.DEFAULT, new Double(Math.sqrt(1/Math.PI)));
+        numericAttributes.putIfAbsent(NodeEdgeModel.DEFAULT, Math.sqrt(1/Math.PI));
         stringAttributes.putIfAbsent(NodeEdgeModel.DEFAULT, "Group1");
     }
 

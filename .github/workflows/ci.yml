@@ -9,18 +9,38 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04, macOS-latest, windows-latest]
-        java: [11, 11.0.3]
+        java: [11, 11.0.10]
       fail-fast: false
       max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
+      - name: Import GPG Key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Build with Gradle
-        run: ./gradlew build
-
+        run: ./gradlew clean build
+        env:
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          GH_USER: ${{ secrets.GH_USER }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_KEY }}
+          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Charts
+          path: ./build/libs/**
 ...

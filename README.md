@@ -1,11 +1,10 @@
-[ ![Download](https://api.bintray.com/packages/hansolo/charts/charts/images/download.svg?version=11.3) ](https://bintray.com/hansolo/charts/charts/11.3/link)
-
 # Charts
 
 A library for scientific charts in JavaFX. 
 
 This is still a work in development, but here are some of the charts being worked on so far. 
 
+The charts library can be found over at [maven central](https://search.maven.org/artifact/eu.hansolo.fx/charts)
 
 ## Area heat map
 ![Area heat map](https://i.ibb.co/kM77mrL/Area-Heat-Map-2020-09-04-07-47-41.png)
@@ -121,3 +120,15 @@ This is still a work in development, but here are some of the charts being worke
 
 ## ArcChart
 ![Arc chart](https://i.ibb.co/Y8G2kmB/Arc-Chart-2020-11-21-07-25-04.png)
+
+
+## BubbleGridChart
+![BubbleGridChart](https://i.ibb.co/vJtKSXR/Bubble-Grid-Chart.png)
+
+
+## SectorChart
+![SectorChart](https://i.ibb.co/syvjchc/Sector-Chart-2021-07-11-07-56-59.png)
+
+
+## Voronoi/Delauny chart
+![VoronoiChart](https://i.ibb.co/HrCbzYN/voronoi.png)

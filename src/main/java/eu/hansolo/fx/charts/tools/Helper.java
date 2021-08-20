@@ -30,6 +30,12 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -62,6 +68,7 @@ import java.util.function.Predicate;
 
 
 public class Helper {
+    public static final double   MIN_FONT_SIZE        = 5;
     public static final double   MAX_TICK_MARK_LENGTH = 0.125;
     public static final double   MAX_TICK_MARK_WIDTH  = 0.02;
     public static final String[] ABBREVIATIONS        = { "k", "M", "G", "T", "P", "E", "Z", "Y" };
@@ -501,6 +508,30 @@ public class Helper {
     public static final boolean isBright(final Color COLOR) { return Double.compare(colorToYUV(COLOR)[0], 0.5) >= 0.0; }
     public static final boolean isDark(final Color COLOR) { return colorToYUV(COLOR)[0] < 0.5; }
 
+    public static final Color getContrastColor(final Color COLOR) {
+        return COLOR.getBrightness() > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+
+    public static final double adjustTextSize(final Text TEXT, final double MAX_WIDTH, final double FONT_SIZE) {
+        final String FONT_NAME          = TEXT.getFont().getName();
+        double       adjustableFontSize = FONT_SIZE;
+
+        while (TEXT.getLayoutBounds().getWidth() > MAX_WIDTH && adjustableFontSize > MIN_FONT_SIZE) {
+            adjustableFontSize -= 0.1;
+            TEXT.setFont(new Font(FONT_NAME, adjustableFontSize));
+        }
+        return adjustableFontSize;
+    }
+    public static final void adjustTextSize(final Label TEXT, final double MAX_WIDTH, final double FONT_SIZE) {
+        final String FONT_NAME          = TEXT.getFont().getName();
+        double       adjustableFontSize = FONT_SIZE;
+
+        while (TEXT.getLayoutBounds().getWidth() > MAX_WIDTH && adjustableFontSize > MIN_FONT_SIZE) {
+            adjustableFontSize -= 0.1;
+            TEXT.setFont(new Font(FONT_NAME, adjustableFontSize));
+        }
+    }
+
     public static final boolean isInRectangle(final double X, final double Y,
                                               final double MIN_X, final double MIN_Y,
                                               final double MAX_X, final double MAX_Y) {
@@ -508,6 +539,12 @@ public class Helper {
                 Double.compare(X, MAX_X) <= 0 &&
                 Double.compare(Y, MIN_Y) >= 0 &&
                 Double.compare(Y, MAX_Y) <= 0);
+    }
+
+    public static final boolean isInCircle(final double x, final double y, final double centerX, final double centerY, final double radius) {
+        double deltaX = centerX - x;
+        double deltaY = centerY - y;
+        return Math.sqrt(deltaX * deltaX + deltaY * deltaY) <= radius;
     }
 
     public static final boolean isInEllipse(final double X, final double Y,
@@ -542,6 +579,10 @@ public class Helper {
             }
         }
         return inside;
+    }
+
+    public static final boolean isInSector(final double X, final double Y, final double CENTER_X, final double CENTER_Y, final double RADIUS, final double START_ANGLE, final double SEGMENT_ANGLE) {
+        return isInRingSegment(X, Y, CENTER_X, CENTER_Y, RADIUS, 0, START_ANGLE, SEGMENT_ANGLE);
     }
 
     public static final boolean isInRingSegment(final double MOUSE_X, final double MOUSE_Y, final double X, final double Y, final double WIDTH, final double HEIGHT, final double START_ANGLE, final double SEGMENT_ANGLE, final double LINE_WIDTH) {
@@ -735,6 +776,84 @@ public class Helper {
         if (2 * t < 1) { return q; }
         if (3 * t < 2) { return p + ((q - p) * 6 * ((2.0/3.0) - t)); }
         return p;
+    }
+
+    public static Color hsbToRGB(final double hue, final double saturation, final double brightness) {
+        int r = 0, g = 0, b = 0;
+        if (saturation == 0) {
+            r = g = b = (int) (brightness * 255.0f + 0.5f);
+        } else {
+            double h = (hue - Math.floor(hue)) * 6.0;
+            double f = h - Math.floor(h);
+            double p = brightness * (1.0 - saturation);
+            double q = brightness * (1.0 - saturation * f);
+            double t = brightness * (1.0 - (saturation * (1.0 - f)));
+            switch ((int) h) {
+                case 0:
+                    r = (int) (brightness * 255.0 + 0.5);
+                    g = (int) (t * 255.0 + 0.5);
+                    b = (int) (p * 255.0 + 0.5);
+                    break;
+                case 1:
+                    r = (int) (q * 255.0 + 0.5);
+                    g = (int) (brightness * 255.0 + 0.5);
+                    b = (int) (p * 255.0 + 0.5);
+                    break;
+                case 2:
+                    r = (int) (p * 255.0 + 0.5);
+                    g = (int) (brightness * 255.0 + 0.5);
+                    b = (int) (t * 255.0 + 0.5);
+                    break;
+                case 3:
+                    r = (int) (p * 255.0 + 0.5);
+                    g = (int) (q * 255.0 + 0.5);
+                    b = (int) (brightness * 255.0 + 0.5);
+                    break;
+                case 4:
+                    r = (int) (t * 255.0 + 0.5);
+                    g = (int) (p * 255.0 + 0.5);
+                    b = (int) (brightness * 255.0 + 0.5);
+                    break;
+                case 5:
+                    r = (int) (brightness * 255.0 + 0.5);
+                    g = (int) (p * 255.0 + 0.5);
+                    b = (int) (q * 255.0 + 0.5);
+                    break;
+            }
+        }
+        return Color.rgb(r, g, b);
+    }
+
+    public static double[] ColorToHSB(final Color color) {
+        int      r         = (int) (color.getRed() * 255.0);
+        int      g         = (int) (color.getGreen() * 255.0);
+        int      b         = (int) (color.getBlue() * 255.0);
+        double[] hsbValues = new double[3];
+        double   hue;
+        double   saturation;
+        double   brightness;
+
+        int cmax = (r > g) ? r : g;
+        if (b > cmax) { cmax = b; }
+        int cmin = (r < g) ? r : g;
+        if (b < cmin) { cmin = b; }
+
+        brightness = ((double) cmax) / 255.0;
+        if (cmax != 0) { saturation = ((float) (cmax - cmin)) / ((double) cmax); } else { saturation = 0; }
+        if (saturation == 0) {
+            hue = 0;
+        } else {
+            double redc   = ((double) (cmax - r)) / ((double) (cmax - cmin));
+            double greenc = ((double) (cmax - g)) / ((double) (cmax - cmin));
+            double bluec  = ((double) (cmax - b)) / ((double) (cmax - cmin));
+            if (r == cmax) { hue = bluec - greenc; } else if (g == cmax) { hue = 2.0 + redc - bluec; } else { hue = 4.0 + greenc - redc; }
+            hue = hue / 6.0;
+            if (hue < 0) { hue = hue + 1.0; }
+        }
+        hsbValues[0] = hue;
+        hsbValues[1] = saturation;
+        hsbValues[2] = brightness;
+        return hsbValues;
     }
 
     public static final String colorToRGB(final Color COLOR) {
@@ -1111,5 +1230,26 @@ public class Helper {
                 break;
         }
         return axis;
+    }
+
+
+    public static final ColorInput createColorMask(final Image sourceImage, final Color color) { return new ColorInput(0, 0, sourceImage.getWidth(), sourceImage.getHeight(), color); }
+    public static final Blend createColorBlend(final Image sourceImage, final Color color) {
+        final ColorInput mask  = createColorMask(sourceImage, color);
+        final Blend      blend = new Blend(BlendMode.MULTIPLY);
+        blend.setTopInput(mask);
+        return blend;
+    }
+    public static final WritableImage getRedChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.RED);  }
+    public static final WritableImage getGreenChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.LIME); }
+    public static final WritableImage getBlueChannel(final Image sourceImage) { return getColorChannel(sourceImage, Color.BLUE); }
+    private static final WritableImage getColorChannel(final Image sourceImage, final Color color) {
+        final Node  imageView = new ImageView(sourceImage);
+        final Blend blend     = createColorBlend(sourceImage, color);
+        imageView.setEffect(blend);
+
+        final SnapshotParameters params = new SnapshotParameters();
+        final WritableImage      result = imageView.snapshot(params, null);
+        return result;
     }
 }

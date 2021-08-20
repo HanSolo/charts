@@ -16,34 +16,22 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.YChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
-import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import static eu.hansolo.fx.charts.converter.Converter.Category.TEMPERATURE;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.CELSIUS;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.FAHRENHEIT;
 
 
 public class PolarChartTest extends Application {

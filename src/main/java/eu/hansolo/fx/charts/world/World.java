@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts.world;
 
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.heatmap.HeatMap;
 import eu.hansolo.fx.charts.heatmap.HeatMapBuilder;
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
@@ -638,7 +639,7 @@ public class World extends Region {
         String tooltipText = tooltipBuilder.toString();
         if (!tooltipText.isEmpty()) {
             Tooltip tooltip = new Tooltip(tooltipText);
-            tooltip.setFont(Font.font(10));
+            tooltip.setFont(Fonts.opensansRegular(10));
             Tooltip.install(locationIcon, tooltip);
         }
 
@@ -1007,7 +1008,7 @@ public class World extends Region {
         }
 
         double fontSize = size * 0.01;
-        ctx.setFont(Font.font(fontSize));
+        ctx.setFont(Fonts.opensansRegular(fontSize));
         ctx.setTextBaseline(VPos.CENTER);
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setLineWidth(1);

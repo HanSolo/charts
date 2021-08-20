@@ -1,4 +1,4 @@
-module charts {
+module eu.hansolo.fx.charts {
 
     // Java
     requires java.base;
@@ -26,4 +26,5 @@ module charts {
     exports eu.hansolo.fx.charts.series;
     exports eu.hansolo.fx.charts.tools;
     exports eu.hansolo.fx.charts.world;
+    exports eu.hansolo.fx.charts.voronoi;
 }

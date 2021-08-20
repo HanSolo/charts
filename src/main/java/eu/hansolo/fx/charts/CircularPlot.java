@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -597,8 +598,12 @@ public class CircularPlot extends Region {
 
             // Draw item name
             ctx.save();
-            ctx.setFill(getTextColor());
+            ctx.setFill(Color.TRANSPARENT.equals(item.getTextColor()) ? getTextColor() : item.getTextColor());
+            if (item.getFont().getName().equals(Font.getDefault().getName())) {
             ctx.setFont(Fonts.latoRegular(size * 0.02));
+            } else {
+                ctx.setFont(Fonts.latoRegular(size * 0.02));
+            }
             ctx.setTextAlign(TextAlignment.CENTER);
             ctx.setTextBaseline(VPos.CENTER);
             sinValue = Math.sin(Math.toRadians(-itemStartAngle - itemAngleRange * 0.5 - 180));
@@ -786,7 +791,7 @@ public class CircularPlot extends Region {
 
         // Main loop
         BigDecimal tmpStepBD = new BigDecimal(angleStep);
-        tmpStepBD            = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+        tmpStepBD            = tmpStepBD.setScale(3, RoundingMode.HALF_UP);
         double tmpStep       = tmpStepBD.doubleValue();
         double angle         = 0;
 

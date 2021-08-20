@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
@@ -738,7 +739,7 @@ public class SankeyPlot extends Region {
             canvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
             ctx.setTextBaseline(VPos.CENTER);
-            ctx.setFont(Font.font(Helper.clamp(8, 24, size * 0.025)));
+            ctx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, size * 0.025)));
 
             prepareData();
         }

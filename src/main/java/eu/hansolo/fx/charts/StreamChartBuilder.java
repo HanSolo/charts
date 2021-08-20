@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.StreamChart.Category;
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.tools.SortDirection;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -31,6 +32,7 @@ import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -96,6 +98,31 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
 
     public final B locale(final Locale LOCALE) {
         properties.put("locale", new SimpleObjectProperty<>(LOCALE));
+        return (B)this;
+    }
+
+    public final B itemTextThreshold(final double THRESHOLD) {
+        properties.put("itemTextThreshold", new SimpleDoubleProperty(THRESHOLD));
+        return (B)this;
+    }
+
+    public final B itemTextVisible(final boolean VISIBLE) {
+        properties.put("itemTextVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B categoryTextColor(final Color COLOR) {
+        properties.put("categoryTextColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B sortDirection(final SortDirection DIRECTION) {
+        properties.put("sortDirection", new SimpleObjectProperty<>(DIRECTION));
+        return (B)this;
+    }
+
+    public final B categorySumVisible(final boolean VISIBLE) {
+        properties.put("categorySumVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -176,8 +203,7 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
 
         if (properties.keySet().contains("itemsArray")) {
             CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
-        }
-        if(properties.keySet().contains("itemsList")) {
+        } else if(properties.keySet().contains("itemsList")) {
             CONTROL.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
         }
 
@@ -233,6 +259,16 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
                 CONTROL.setAutoItemGap(((BooleanProperty) properties.get(key)).get());
             } else if ("locale".equals(key)) {
                 CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+            } else if ("itemTextThreshold".equals(key)) {
+                CONTROL.setItemTextThreshold(((DoubleProperty) properties.get(key)).get());
+            } else if ("itemTextVisible".equals(key)) {
+                CONTROL.setItemTextVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("categoryTextColor".equals(key)) {
+                CONTROL.setCategoryTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("sortDirection".equals(key)) {
+                CONTROL.setSortDirection(((ObjectProperty<SortDirection>) properties.get(key)).get());
+            } else if ("categorySumVisible".equals(key)) {
+                CONTROL.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

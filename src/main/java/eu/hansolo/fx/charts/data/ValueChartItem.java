@@ -19,7 +19,6 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -27,38 +26,37 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Color;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class YChartItem implements YItem, Comparable<YChartItem> {
-    private final ItemEvent                         ITEM_EVENT = new ItemEvent(YChartItem.this);
-    private CopyOnWriteArrayList<ItemEventListener> listeners;
-    private double                                  _y;
-    private DoubleProperty                          y;
-    private String                                  _name;
-    private StringProperty                          name;
-    private Color                                   _fill;
-    private ObjectProperty<Color>                   fill;
-    private Color                                   _stroke;
-    private ObjectProperty<Color>                   stroke;
-    private Symbol                                  _symbol;
-    private ObjectProperty<Symbol>                  symbol;
+public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
+    private final ItemEvent                               ITEM_EVENT = new ItemEvent(ValueChartItem.this);
+    private       CopyOnWriteArrayList<ItemEventListener> listeners;
+    private       double                                  _value;
+    private       DoubleProperty                          value;
+    private       String                                  _name;
+    private       StringProperty                          name;
+    private       Color                                   _fill;
+    private       ObjectProperty<Color>                   fill;
+    private       Color                                   _stroke;
+    private       ObjectProperty<Color>                   stroke;
+    private       Symbol                                  _symbol;
+    private       ObjectProperty<Symbol>                  symbol;
 
 
     // ******************** Constructors **********************************
-    public YChartItem() {
+    public ValueChartItem() {
         this(0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
-    public YChartItem(final double Y, final String NAME) {
-        this(Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
+    public ValueChartItem(final double VALUE, final String NAME) {
+        this(VALUE, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
     }
-    public YChartItem(final double Y, final String NAME, final Color FILL) {
-        this(Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
+    public ValueChartItem(final double VALUE, final String NAME, final Color FILL) {
+        this(VALUE, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
     }
-    public YChartItem(final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
-        _y        = Y;
+    public ValueChartItem(final double VALUE, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
+        _value    = VALUE;
         _name     = NAME;
         _fill     = FILL;
         _stroke   = STROKE;
@@ -68,24 +66,24 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
 
 
     // ******************** Methods ***************************************
-    @Override public double getY() { return null == y ? _y : y.get(); }
-    @Override public void setY(final double Y) {
-        if (null == y) {
-            _y = Y;
+    @Override public double getValue() { return null == value ? _value : value.get(); }
+    @Override public void setValue(final double VALUE) {
+        if (null == value) {
+            _value = VALUE;
             fireItemEvent(ITEM_EVENT);
         } else {
-            y.set(Y);
+            value.set(VALUE);
         }
     }
-    @Override public DoubleProperty yProperty() {
-        if (null == y) {
-            y = new DoublePropertyBase(_y) {
+    @Override public DoubleProperty valueProperty() {
+        if (null == value) {
+            value = new DoublePropertyBase(_value) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
-                @Override public Object getBean() { return YChartItem.this; }
-                @Override public String getName() { return "y"; }
+                @Override public Object getBean() { return ValueChartItem.this; }
+                @Override public String getName() { return "value"; }
             };
         }
-        return y;
+        return value;
     }
 
     @Override public String getName() { return null == name ? _name : name.get(); }
@@ -101,7 +99,7 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
         if (null == name) {
             name = new StringPropertyBase(_name) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
-                @Override public Object getBean() { return YChartItem.this; }
+                @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
             _name = null;
@@ -122,7 +120,7 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
         if (null == fill) {
             fill = new ObjectPropertyBase<Color>(_fill) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
-                @Override public Object getBean() { return YChartItem.this; }
+                @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "fill"; }
             };
             _fill = null;
@@ -143,7 +141,7 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<Color>(_stroke) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
-                @Override public Object getBean() { return YChartItem.this; }
+                @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "stroke"; }
             };
             _stroke = null;
@@ -164,7 +162,7 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
                 @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
-                @Override public Object getBean() {  return YChartItem.this;  }
+                @Override public Object getBean() {  return ValueChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
             _symbol = null;
@@ -186,11 +184,11 @@ public class YChartItem implements YItem, Comparable<YChartItem> {
     @Override public String toString() {
         return new StringBuilder().append("{\n")
                                   .append("  \"name\":\"").append(getName()).append("\",\n")
-                                  .append("  \"y\":").append(getY()).append(",\n")
+                                  .append("  \"value\":").append(getValue()).append(",\n")
                                   .append("  \"symbol\":\"").append(getSymbol().name()).append("\"\n")
                                   .append("}")
                                   .toString();
     }
 
-    @Override public int compareTo(final YChartItem ITEM) { return Double.compare(getY(), ITEM.getY()); }
+    @Override public int compareTo(final ValueChartItem ITEM) { return Double.compare(getValue(), ITEM.getValue()); }
 }

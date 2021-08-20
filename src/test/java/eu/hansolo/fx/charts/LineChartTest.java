@@ -19,6 +19,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.XYSeriesBuilder;
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -31,6 +32,8 @@ import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
+import java.util.Random;
+
 
 /**
  * User: hansolo
@@ -38,27 +41,46 @@ import javafx.scene.Scene;
  * Time: 11:23
  */
 public class LineChartTest extends Application {
-    private static final Double  AXIS_WIDTH = 25d;
-    private XYChart<XYChartItem> lineChart;
-    private XYSeries             xySeries1;
-    private XYSeries             xySeries2;
-    private Axis                 xAxisBottom;
-    private Axis                 yAxisLeft;
+    private static final Random               RND        = new Random();
+    private static final Double               AXIS_WIDTH = 25d;
+    private              XYChartItem          p1;
+    private              XYChartItem          p2;
+    private              XYChartItem          p3;
+    private              XYChartItem          p4;
+    private              XYChartItem          p5;
+    private              XYChartItem          p6;
+    private              XYChartItem          p7;
+    private              XYChartItem          p8;
+    private              XYChartItem          p9;
+    private              XYChartItem          p10;
+    private              XYChartItem          p11;
+    private              XYChartItem          p12;
+    private              XYSeries             xySeries1;
+    private              XYSeries             xySeries2;
+    private              Axis                 xAxisBottom;
+    private              Axis                 yAxisLeft;
+    private              XYChart<XYChartItem> lineChart;
+    private              long                 lastTimerCalled;
+    private              AnimationTimer       timer;
+
 
     @Override public void init() {
+        p1  = new XYChartItem(1, RND.nextDouble() * 300 + 200, "Jan");
+        p2  = new XYChartItem(2, RND.nextDouble() * 300 + 200, "Feb");
+        p3  = new XYChartItem(3, RND.nextDouble() * 300 + 200, "Mar");
+        p4  = new XYChartItem(4, RND.nextDouble() * 300 + 200, "Apr");
+        p5  = new XYChartItem(5, RND.nextDouble() * 300 + 200, "May");
+        p6  = new XYChartItem(6, RND.nextDouble() * 300 + 200, "Jun");
+        p7  = new XYChartItem(7, RND.nextDouble() * 300 + 200, "Jul");
+        p8  = new XYChartItem(8, RND.nextDouble() * 300 + 200, "Aug");
+        p9  = new XYChartItem(9, RND.nextDouble() * 300 + 200, "Sep");
+        p10 = new XYChartItem(10, RND.nextDouble() * 300 + 200, "Oct");
+        p11 = new XYChartItem(11, RND.nextDouble() * 300 + 200, "Nov");
+        p12 = new XYChartItem(12, RND.nextDouble() * 300 + 200, "Dec");
+
+
         xySeries1 = XYSeriesBuilder.create()
-                                   .items(new XYChartItem(1, 600, "Jan"),
-                                          new XYChartItem(2, 760, "Feb"),
-                                          new XYChartItem(3, 585, "Mar"),
-                                          new XYChartItem(4, 410, "Apr"),
-                                          new XYChartItem(5, 605, "May"),
-                                          new XYChartItem(6, 825, "Jun"),
-                                          new XYChartItem(7, 595, "Jul"),
-                                          new XYChartItem(8, 300, "Aug"),
-                                          new XYChartItem(9, 515, "Sep"),
-                                          new XYChartItem(10, 780, "Oct"),
-                                          new XYChartItem(11, 570, "Nov"),
-                                          new XYChartItem(12, 620, "Dec"))
+                                   .items(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
                                    .chartType(ChartType.SMOOTH_AREA)
                                    .fill(Color.web("#00AEF520"))
                                    .stroke(Color.web("#00AEF5"))
@@ -135,6 +157,27 @@ public class LineChartTest extends Application {
         XYPane lineChartPane = new XYPane(xySeries1, xySeries2);
 
         lineChart = new XYChart<>(lineChartPane, grid, yAxisLeft, xAxisBottom);
+
+        lastTimerCalled = System.nanoTime();
+        timer = new AnimationTimer() {
+            @Override public void handle(final long now) {
+                if (now > lastTimerCalled + 2_000_000_000l) {
+                    p1.setY(RND.nextDouble() * 300 + 200);
+                    p2.setY(RND.nextDouble() * 300 + 200);
+                    p3.setY(RND.nextDouble() * 300 + 200);
+                    p4.setY(RND.nextDouble() * 300 + 200);
+                    p5.setY(RND.nextDouble() * 300 + 200);
+                    p6.setY(RND.nextDouble() * 300 + 200);
+                    p7.setY(RND.nextDouble() * 300 + 200);
+                    p8.setY(RND.nextDouble() * 300 + 200);
+                    p9.setY(RND.nextDouble() * 300 + 200);
+                    p10.setY(RND.nextDouble() * 300 + 200);
+                    p11.setY(RND.nextDouble() * 300 + 200);
+                    p12.setY(RND.nextDouble() * 300 + 200);
+                    lastTimerCalled = now;
+                }
+            }
+        };
     }
 
     @Override public void start(Stage stage) {
@@ -147,10 +190,40 @@ public class LineChartTest extends Application {
         stage.setTitle("Line Chart");
         stage.setScene(scene);
         stage.show();
+
+        lineChart.getXYPane().getListOfSeries().add(createSeries());
+
+        timer.start();
     }
 
     @Override public void stop() {
         System.exit(0);
+    }
+
+    private XYSeries createSeries() {
+        XYSeries xySeries = XYSeriesBuilder.create()
+                                           .items(new XYChartItem(1, 600, "Jan"),
+                                                  new XYChartItem(2, 760, "Feb"),
+                                                  new XYChartItem(3, 585, "Mar"),
+                                                  new XYChartItem(4, 410, "Apr"),
+                                                  new XYChartItem(5, 605, "May"),
+                                                  new XYChartItem(6, 825, "Jun"),
+                                                  new XYChartItem(7, 595, "Jul"),
+                                                  new XYChartItem(8, 300, "Aug"),
+                                                  new XYChartItem(9, 515, "Sep"),
+                                                  new XYChartItem(10, 780, "Oct"),
+                                                  new XYChartItem(11, 570, "Nov"),
+                                                  new XYChartItem(12, 620, "Dec"))
+                                           .chartType(ChartType.SMOOTH_AREA)
+                                           .fill(Color.web("#AE00F520"))
+                                           .stroke(Color.web("#AE00F5"))
+                                           .symbolFill(Color.web("#AE00F5"))
+                                           .symbolStroke(Color.web("#293C47"))
+                                           .symbolSize(10)
+                                           .strokeWidth(3)
+                                           .symbolsVisible(true)
+                                           .build();
+        return xySeries;
     }
 
     private Axis createLeftYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {

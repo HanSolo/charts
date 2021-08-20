@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;
-import eu.hansolo.fx.charts.data.YChartItem;
+import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -57,14 +57,14 @@ public class LogChartTest extends Application {
 
 
     @Override public void init() {
-        List<XYChartItem>  xyData1 = new ArrayList<>(20);
-        List<YChartItem>   yData   = new ArrayList<>(20);
-        List<XYZChartItem> xyzData = new ArrayList<>(20);
+        List<XYChartItem>    xyData1 = new ArrayList<>(20);
+        List<ValueChartItem> yData   = new ArrayList<>(20);
+        List<XYZChartItem>   xyzData = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
             xyData1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
-            yData.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
+            yData.add(new ValueChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
             xyzData.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
 

@@ -19,7 +19,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;
-import eu.hansolo.fx.charts.data.YChartItem;
+import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.XYSeriesBuilder;
 import eu.hansolo.fx.charts.series.XYZSeries;
@@ -85,8 +85,8 @@ public class ChartTest extends Application {
     private Axis                 scatterChartYAxisLeft;
     private Axis                 scatterChartYAxisCenter;
 
-    private YSeries<YChartItem> ySeries;
-    private YPane<YChartItem>   donutChart;
+    private YSeries<ValueChartItem> ySeries;
+    private YPane<ValueChartItem>   donutChart;
 
     private XYZSeries<XYZChartItem> xyzSeries;
     private XYZPane<XYZChartItem>   bubbleChart;
@@ -102,7 +102,7 @@ public class ChartTest extends Application {
         List<XYChartItem>  xyItems2 = new ArrayList<>(20);
         List<XYChartItem>  xyItems3 = new ArrayList<>(20);
         List<XYChartItem>  xyItems4 = new ArrayList<>(40);
-        List<YChartItem>   yItem   = new ArrayList<>(20);
+        List<ValueChartItem> yItem    = new ArrayList<>(20);
         List<XYZChartItem> xyzItem = new ArrayList<>(20);
         for (int i = 0 ; i < NO_OF_X_VALUES ; i++) {
             xyItems1.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
@@ -110,7 +110,7 @@ public class ChartTest extends Application {
             xyItems3.add(new XYChartItem(i, RND.nextDouble() * 15, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = 0 ; i < 20 ; i++) {
-            yItem.add(new YChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
+            yItem.add(new ValueChartItem(RND.nextDouble() * 10, "P" + i, COLORS[RND.nextInt(3)]));
             xyzItem.add(new XYZChartItem(RND.nextDouble() * 10, RND.nextDouble() * 10, RND.nextDouble() * 25, "P" + i, COLORS[RND.nextInt(3)]));
         }
         for (int i = -20 ; i < 20 ; i++) {
@@ -247,8 +247,8 @@ public class ChartTest extends Application {
                     xyItems = xySeries4.getItems();
                     xyItems.forEach(item -> item.setY(RND.nextDouble() * 15));
 
-                    ObservableList<YChartItem> yItems = ySeries.getItems();
-                    yItems.forEach(item -> item.setY(RND.nextDouble() * 20));
+                    ObservableList<ValueChartItem> yItems = ySeries.getItems();
+                    yItems.forEach(item -> item.setValue(RND.nextDouble() * 20));
 
                     ObservableList<XYZChartItem> xyzItems = xyzSeries.getItems();
                     xyzItems.forEach(item -> item.setZ(RND.nextDouble() * 25));

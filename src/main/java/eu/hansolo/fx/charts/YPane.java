@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.YItem;
+import eu.hansolo.fx.charts.data.ValueItem;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -51,7 +51,7 @@ import java.util.Locale;
 import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 
-public class YPane<T extends YItem> extends Region implements ChartArea {
+public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private static final double                   PREFERRED_WIDTH  = 250;
     private static final double                   PREFERRED_HEIGHT = 250;
     private static final double                   MINIMUM_WIDTH    = 0;
@@ -334,7 +334,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         double  innerRadius = size * 0.275;
         double  outerRadius = size * 0.4;
         double  barWidth    = size * 0.1;
-        double  sum         = items.stream().mapToDouble(T::getY).sum();
+        double  sum         = items.stream().mapToDouble(T::getValue).sum();
         double  stepSize    = 360.0 / sum;
         double  angle       = 0;
         double  startAngle  = 90;
@@ -348,7 +348,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         ctx.setTextBaseline(VPos.CENTER);
 
         for (T item : items) {
-            double value = item.getY();
+            double value = item.getValue();
             startAngle -= angle;
             angle = value * stepSize;
 
@@ -402,12 +402,12 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 ctx.beginPath();
                 ctx.moveTo(CENTER_X, 0.36239 * size);
                 SERIES.getItems().forEach(item -> {
-                    double r1 = (item.getY() - LOWER_BOUND_Y) / DATA_RANGE;
+                    double r1 = (item.getValue() - LOWER_BOUND_Y) / DATA_RANGE;
                     ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r1 * RANGE);
                     Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
                 //ADDED resuse first point if wrapping required
-                double r2 = SERIES.isWithWrapping()?((SERIES.getItems().get(0).getY() - LOWER_BOUND_Y) / DATA_RANGE) :((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE);
+                double r2 = SERIES.isWithWrapping() ? ((SERIES.getItems().get(0).getValue() - LOWER_BOUND_Y) / DATA_RANGE) : ((SERIES.getItems().get(NO_OF_SECTORS - 1).getValue() - LOWER_BOUND_Y) / DATA_RANGE);
                 ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r2 * RANGE);
                 ctx.closePath();
                 ctx.fill();
@@ -426,13 +426,13 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 }
 
                 for (T item : SERIES.getItems()) {
-                    double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                    double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
                     x = CENTER_X + (-Math.sin(radAngle) * r1);
                     y = CENTER_Y + (+Math.cos(radAngle) * r1);
                     points.add(new Point(x, y));
                     radAngle += radAngleStep;
                 }
-                double r3 = (SERIES.isWithWrapping())?(CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(0).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE)) :(CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getY() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                double r3 = (SERIES.isWithWrapping()) ? (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(0).getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE)) : (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
                 x = CENTER_X + (-Math.sin(radAngle) * r3);
                 y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
@@ -454,7 +454,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
             case RADAR_SECTOR:
                 Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -90);
                 SERIES.getItems().forEach(item -> {
-                    double r1 = (item.getY() - LOWER_BOUND_Y) / DATA_RANGE;
+                    double r1 = (item.getValue() - LOWER_BOUND_Y) / DATA_RANGE;
                     ctx.beginPath();
                     ctx.moveTo(CENTER_X, CENTER_Y);
                     ctx.arc(CENTER_X, CENTER_Y, r1 * RANGE + OFFSET, r1 * RANGE + OFFSET, 0, -angleStep);
