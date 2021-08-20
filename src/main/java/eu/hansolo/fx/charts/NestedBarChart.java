@@ -19,6 +19,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.SelectionEvent;
 import eu.hansolo.fx.charts.event.SelectionEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
@@ -375,7 +376,7 @@ public class NestedBarChart extends Region implements ChartArea {
 
 
         double fontSize = mainBarWidth * 0.125;
-        Font   font     = Font.font(fontSize);
+        Font   font     = Fonts.opensansRegular(fontSize);
         for (int i = 0 ; i < noOfBars ; i++) {
             ChartItemSeries<ChartItem> s             = series.get(i);
             int                        noOfItems     = s.getNoOfItems();

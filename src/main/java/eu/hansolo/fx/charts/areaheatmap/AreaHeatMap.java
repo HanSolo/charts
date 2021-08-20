@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.areaheatmap;
 
 import eu.hansolo.fx.charts.data.DataPoint;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.DefaultProperty;
@@ -428,7 +429,7 @@ public class AreaHeatMap extends Region {
     private void drawDataPoints() {
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
-        ctx.setFont(Font.font(size * 0.0175));
+        ctx.setFont(Fonts.opensansRegular(size * 0.0175));
 
         for (int i = 0 ; i < points.size() ; i++) {
             DataPoint point = points.get(i);

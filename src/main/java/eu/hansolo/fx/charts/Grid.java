@@ -34,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 
 /**
@@ -489,7 +490,7 @@ public class Grid extends Region {
             BigDecimal counterBD   = BigDecimal.valueOf(minX);
             double     counter     = minX;
             BigDecimal tmpStepBD   = new BigDecimal(tmpStepSize);
-            tmpStepBD = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+            tmpStepBD = tmpStepBD.setScale(3, RoundingMode.HALF_UP);
             double tmpStep = tmpStepBD.doubleValue();
             for (double i = 0; Double.compare(-rangeX - tmpStep, i) <= 0; i -= tmpStep) {
                 double startPointX = width + i * stepSizeX;
@@ -497,7 +498,7 @@ public class Grid extends Region {
                 double endPointX   = startPointX;
                 double endPointY   = height;
 
-                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                if (Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick grid line
                     isZero = Double.compare(0.0, maxX - counter + minX) == 0;
 
@@ -511,13 +512,13 @@ public class Grid extends Region {
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     }
                 } else if (getMediumVGridLinesVisible() &&
-                           Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                           Double.compare(minorTickSpaceBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                     // Draw medium tick grid line
                     ctx.setStroke(mediumVGridColor);
                     ctx.setLineWidth(mediumLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-                } else if (getMinorVGridLinesVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                } else if (getMinorVGridLinesVisible() && Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick grid line
                     ctx.setStroke(minorVGridColor);
                     ctx.setLineWidth(minorLineWidth);
@@ -577,7 +578,7 @@ public class Grid extends Region {
             BigDecimal counterBD   = BigDecimal.valueOf(minY);
             double     counter     = minY;
             BigDecimal tmpStepBD   = new BigDecimal(tmpStepSize);
-            tmpStepBD = tmpStepBD.setScale(3, BigDecimal.ROUND_HALF_UP);
+            tmpStepBD = tmpStepBD.setScale(3, RoundingMode.HALF_UP);
             double     tmpStep = tmpStepBD.doubleValue();
             for (double i = 0; Double.compare(-rangeY - tmpStep, i) <= 0; i -= tmpStep) {
                 double startPointX = 0;
@@ -585,7 +586,7 @@ public class Grid extends Region {
                 double endPointX   = width;
                 double endPointY   = startPointY;
 
-                if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                if (Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw major tick grid line
                     isZero = Double.compare(0.0, counter) == 0;
 
@@ -599,13 +600,13 @@ public class Grid extends Region {
                         ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
                     }
                 } else if (getMediumHGridLinesVisible() &&
-                           Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                           Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                           Double.compare(minorTickSpaceBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                           Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                     // Draw medium tick grid line
                     ctx.setStroke(mediumHGridColor);
                     ctx.setLineWidth(mediumLineWidth);
                     ctx.strokeLine(startPointX, startPointY, endPointX, endPointY);
-                } else if (getMinorHGridLinesVisible() && Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                } else if (getMinorHGridLinesVisible() && Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(minorTickSpaceBD).doubleValue(), 0.0) == 0) {
                     // Draw minor tick grid line
                     ctx.setStroke(minorHGridColor);
                     ctx.setLineWidth(minorLineWidth);

@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.PlotItem;
+import eu.hansolo.fx.charts.font.Fonts;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -241,7 +242,7 @@ public class Demo extends Application {
     @Override public void start(Stage stage) {
         Label title = new Label("Star Wars Episode I - Interactions");
         title.setAlignment(Pos.CENTER);
-        title.setFont(Font.font(24));
+        title.setFont(Fonts.opensansRegular(24));
         VBox vBox = new VBox(10, title, arcChart);
         vBox.setFillWidth(true);
         vBox.setAlignment(Pos.CENTER);

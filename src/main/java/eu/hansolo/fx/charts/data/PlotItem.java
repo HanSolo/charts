@@ -21,6 +21,7 @@ import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
@@ -99,7 +100,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         _stroke         = Color.TRANSPARENT;
         _connectionFill = Color.TRANSPARENT;
         _textColor      = Color.TRANSPARENT;
-        _font           = Font.getDefault();
+        _font           = Fonts.opensansRegular(10);
         _symbol         = Symbol.NONE;
         level           = LEVEL;
         cluster         = null;

@@ -729,9 +729,9 @@ public class ArcChart extends Region {
                 ctx.save();
                 ctx.setFill(getTextColor());
                 if (null == selectedItem) {
-                    ctx.setFont(Fonts.latoRegular(size * 0.016));
+                    ctx.setFont(Fonts.opensansRegular(size * 0.016));
                 } else {
-                    ctx.setFont(selectedItem.getName().equals(item.getName()) ? Fonts.latoRegular(size * 0.022) : Fonts.latoRegular(size * 0.016));
+                    ctx.setFont(selectedItem.getName().equals(item.getName()) ? Fonts.opensansRegular(size * 0.022) : Fonts.opensansRegular(size * 0.016));
                 }
                 ctx.setTextAlign(TickLabelOrientation.ORTHOGONAL == getTickLabelOrientation() ? TextAlignment.LEFT : TextAlignment.CENTER);
                 ctx.setTextBaseline(VPos.CENTER);

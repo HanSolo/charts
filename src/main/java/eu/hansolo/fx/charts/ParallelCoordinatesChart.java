@@ -22,6 +22,7 @@ import eu.hansolo.fx.charts.data.DataObject;
 import eu.hansolo.fx.charts.event.ChartEvent;
 import eu.hansolo.fx.charts.event.ChartEventListener;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.CtxBounds;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
@@ -50,6 +51,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -729,7 +731,7 @@ public class ParallelCoordinatesChart extends Region {
             double   range                = maxValue - minValue;
             double   minorTickSpace       = axisParam[2];
             double   majorTickSpace       = axisParam[3];
-            Font     headerFont           = Font.font(Helper.clamp(8, 24, headerFontSize));
+            Font     headerFont           = Fonts.opensansRegular(Helper.clamp(8, 24, headerFontSize));
 
             double   stepSize             = Math.abs(axisHeight / range);
             double   maxY                 = axisY + axisHeight;
@@ -749,7 +751,7 @@ public class ParallelCoordinatesChart extends Region {
             axisCtx.fillText(category, axisX, 5);
             if (!unit.isEmpty()) {
                 axisCtx.setFill(getUnitColor());
-                axisCtx.setFont(Font.font(Helper.clamp(8, 24, unitFontSize)));
+                axisCtx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, unitFontSize)));
                 axisCtx.fillText(String.join("", "[", unit, "]"), axisX, 18);
             }
 
@@ -758,7 +760,7 @@ public class ParallelCoordinatesChart extends Region {
             axisCtx.strokeLine(axisX, axisY, axisX, maxY);
 
             // TickMarks
-            axisCtx.setFont(Font.font(Helper.clamp(8, 24, axisFontSize)));
+            axisCtx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, axisFontSize)));
             axisCtx.setFill(getTickLabelColor());
             double     tmpStep          = minorTickSpace;
             BigDecimal minorTickSpaceBD = BigDecimal.valueOf(minorTickSpace);
@@ -771,7 +773,7 @@ public class ParallelCoordinatesChart extends Region {
             // Main Loop for tick marks and labels
             if (tickMarksVisible) {
                 BigDecimal tmpStepBD = new BigDecimal(tmpStep);
-                tmpStepBD = tmpStepBD.setScale(6, BigDecimal.ROUND_HALF_UP); // newScale == number of decimals taken into account
+                tmpStepBD = tmpStepBD.setScale(6, RoundingMode.HALF_UP); // newScale == number of decimals taken into account
                 tmpStep = tmpStepBD.doubleValue();
                 for (double j = 0; Double.compare(-range - tmpStep, j) <= 0; j -= tmpStep) {
                     double fixedPosition = (counter - minValue) * stepSize + HEADER_HEIGHT;
@@ -780,7 +782,7 @@ public class ParallelCoordinatesChart extends Region {
                     double outerPointX   = axisX + halfMajorTickLength;
                     double outerPointY   = fixedPosition;
 
-                    if (Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
+                    if (Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(majorTickSpaceBD).doubleValue(), 0.0) == 0) {
                         // Draw major tick mark
                         axisCtx.setStroke(Color.BLACK);
                         axisCtx.setLineWidth(1);
@@ -803,8 +805,8 @@ public class ParallelCoordinatesChart extends Region {
                             axisCtx.setTextAlign(TextAlignment.LEFT);
                             axisCtx.fillText(String.format(locale, formatString, axisValue), axisX + halfAxisWidth, outerPointY + offsetY);
                         }
-                    } else if (Double.compare(minorTickSpaceBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
-                               Double.compare(counterBD.setScale(12, BigDecimal.ROUND_HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
+                    } else if (Double.compare(minorTickSpaceBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck2).doubleValue(), 0.0) != 0.0 &&
+                               Double.compare(counterBD.setScale(12, RoundingMode.HALF_UP).remainder(mediumCheck5).doubleValue(), 0.0) == 0.0) {
                         // Draw medium tick mark
                         axisCtx.strokeLine(axisX - halfMediumTickLength, innerPointY, axisX + halfMediumTickLength, outerPointY);
                     }
@@ -820,7 +822,7 @@ public class ParallelCoordinatesChart extends Region {
                 // Max
                 axisCtx.strokeLine(axisX - 3, axisY, axisX + 3, axisY);
 
-                axisCtx.setFont(Font.font(Helper.clamp(8, 24, axisFontSize)));
+                axisCtx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, axisFontSize)));
                 axisCtx.setFill(Color.BLACK);
                 if (i == (noOfCategories - 1)) {
                     axisCtx.setTextAlign(TextAlignment.RIGHT);
@@ -847,7 +849,7 @@ public class ParallelCoordinatesChart extends Region {
     
     private void drawConnections() {
         connectionCtx.clearRect(0, 0, width, height);
-        connectionCtx.setFont(Font.font(Helper.clamp(8, 24, size * 0.015)));
+        connectionCtx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, size * 0.015)));
 
         int   noOfCategories  = categories.size();
         Color selectedColor   = getSelectedColor();
@@ -890,7 +892,7 @@ public class ParallelCoordinatesChart extends Region {
         double  spacer         = availableWidth / (noOfCategories - 1);
 
         connectionCtx.clearRect(0, 0, width, height);
-        connectionCtx.setFont(Font.font(Helper.clamp(8, 24, size * 0.015)));
+        connectionCtx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, size * 0.015)));
 
         Color selectedColor   = getSelectedColor();
         Color unselectedColor = getUnselectedColor();
