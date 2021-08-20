@@ -7,7 +7,7 @@ plugins {
     id 'signing'
     id 'com.google.osdetector'           version '1.7.0'
     id 'org.javamodularity.moduleplugin' version '1.8.7'
-    id 'org.beryx.jlink'                 version '2.23.2'
+    id 'org.beryx.jlink'                 version '2.24.1'
     id 'net.nemerosa.versioning'         version '2.14.0'
     id 'biz.aQute.bnd.builder'           version '5.3.0'
 }
@@ -59,7 +59,7 @@ jar {
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description'    : description,
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
-                'Export-Package'        : 'eu.hansolo.fx.charts, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform'
+                'Export-Package'        : 'eu.hansolo.fx.charts, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.charts.voronoi, eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform'
         )
     }
 }
