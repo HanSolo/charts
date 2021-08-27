@@ -19,6 +19,8 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -48,22 +50,45 @@ public class XYZChartItem implements XYZItem {
     private ObjectProperty<Color>                   stroke;
     private Symbol                                  _symbol;
     private ObjectProperty<Symbol>                  symbol;
+    private boolean                                 _isEmpty;
+    private BooleanProperty                         isEmpty;
 
 
     // ******************** Constructors **********************************
     public XYZChartItem() {
-        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, false);
+    }
+    public XYZChartItem(final boolean IS_EMPTY) {
+        this(0, 0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, IS_EMPTY);
     }
     public XYZChartItem(final double X, final double Y, final double Z) {
-        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, false);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final boolean IS_EMPTY) {
+        this(X, Y, Z, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, IS_EMPTY);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, false);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final boolean IS_EMPTY) {
+        this(X, Y, Z, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, IS_EMPTY);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL) {
-        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, false);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final boolean IS_EMPTY) {
+        this(X, Y, Z, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, IS_EMPTY);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE) {
+        this(X, Y, Z, NAME, FILL, STROKE, Symbol.NONE, false);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE, final boolean IS_EMPTY) {
+        this(X, Y, Z, NAME, FILL, STROKE, Symbol.NONE, IS_EMPTY);
     }
     public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
+        this(X, Y, Z, NAME, FILL, STROKE, SYMBOL, false);
+    }
+    public XYZChartItem(final double X, final double Y, final double Z, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL, final boolean IS_EMPTY) {
         _x        = X;
         _y        = Y;
         _z        = Z;
@@ -71,6 +96,7 @@ public class XYZChartItem implements XYZItem {
         _fill     = FILL;
         _stroke   = STROKE;
         _symbol   = SYMBOL;
+        _isEmpty  = IS_EMPTY;
         listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -218,6 +244,26 @@ public class XYZChartItem implements XYZItem {
             _symbol = null;
         }
         return symbol;
+    }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return XYZChartItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
     }
 
 

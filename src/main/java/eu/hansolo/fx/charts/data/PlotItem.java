@@ -23,6 +23,8 @@ import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -62,6 +64,8 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     private       ObjectProperty<Font>    font;
     private       Symbol                  _symbol;
     private       ObjectProperty<Symbol>  symbol;
+    private       boolean                 _isEmpty;
+    private       BooleanProperty         isEmpty;
     private       Map<PlotItem, Double>   outgoing;
     private       Map<PlotItem, Double>   incoming;
     private       List<ItemEventListener> listeners;
@@ -71,28 +75,51 @@ public class PlotItem implements Item, Comparable<PlotItem> {
 
     // ******************** Constructors **************************************
     public PlotItem() {
-            this("", 0,"", Color.RED, -1);
+            this("", 0,"", Color.RED, -1, false);
+    }
+    public PlotItem(final boolean IS_EMPTY) {
+        this("", 0,"", Color.RED, -1, IS_EMPTY);
     }
     public PlotItem(final String NAME, final double VALUE) {
-        this(NAME, VALUE, "", Color.RED, -1);
+        this(NAME, VALUE, "", Color.RED, -1, false);
+    }
+    public PlotItem(final String NAME, final double VALUE, final boolean IS_EMPTY) {
+        this(NAME, VALUE, "", Color.RED, -1, IS_EMPTY);
     }
     public PlotItem(final String NAME, final Color COLOR) {
-        this(NAME, 0, "", COLOR, -1);
+        this(NAME, 0, "", COLOR, -1, false);
+    }
+    public PlotItem(final String NAME, final Color COLOR, final boolean IS_EMPTY) {
+        this(NAME, 0, "", COLOR, -1, IS_EMPTY);
     }
     public PlotItem(final String NAME, final Color COLOR, final int LEVEL) {
-        this(NAME, 0, NAME, COLOR, LEVEL);
+        this(NAME, 0, NAME, COLOR, LEVEL, false);
+    }
+    public PlotItem(final String NAME, final Color COLOR, final int LEVEL, final boolean IS_EMPTY) {
+        this(NAME, 0, NAME, COLOR, LEVEL, IS_EMPTY);
     }
     public PlotItem(final String NAME, final double VALUE, final Color COLOR) {
-        this(NAME, VALUE, "", COLOR, -1);
+        this(NAME, VALUE, "", COLOR, -1, false);
+    }
+    public PlotItem(final String NAME, final double VALUE, final Color COLOR, final boolean IS_EMPTY) {
+        this(NAME, VALUE, "", COLOR, -1, IS_EMPTY);
     }
     public PlotItem(final String NAME, final double VALUE, final Color COLOR, final int LEVEL) {
-        this(NAME, VALUE, "", COLOR, LEVEL);
+        this(NAME, VALUE, "", COLOR, LEVEL, false);
+    }
+    public PlotItem(final String NAME, final double VALUE, final Color COLOR, final int LEVEL, final boolean IS_EMPTY) {
+        this(NAME, VALUE, "", COLOR, LEVEL, IS_EMPTY);
     }
     public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL) {
-        this(NAME, VALUE, DESCRIPTION, FILL, -1);
+        this(NAME, VALUE, DESCRIPTION, FILL, -1, false);
     }
-
+    public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL, final boolean IS_EMPTY) {
+        this(NAME, VALUE, DESCRIPTION, FILL, -1, IS_EMPTY);
+    }
     public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL, final int LEVEL) {
+        this(NAME, VALUE, DESCRIPTION, FILL, LEVEL, false);
+    }
+    public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL, final int LEVEL, final boolean IS_EMPTY) {
         _name           = NAME;
         _value          = VALUE;
         _description    = DESCRIPTION;
@@ -102,6 +129,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         _textColor      = Color.TRANSPARENT;
         _font           = Fonts.opensansRegular(10);
         _symbol         = Symbol.NONE;
+        _isEmpty        = IS_EMPTY;
         level           = LEVEL;
         cluster         = null;
         outgoing        = new LinkedHashMap<>();
@@ -297,6 +325,26 @@ public class PlotItem implements Item, Comparable<PlotItem> {
             _symbol = null;
         }
         return symbol;
+    }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
     }
 
     public double getSumOfIncoming() { return incoming.values().stream().mapToDouble(Double::doubleValue).sum(); }

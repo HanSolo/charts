@@ -304,7 +304,9 @@ public class Helper {
             CatmullRom<Point> crs = new CatmullRom<>(p0, p1, p2, p3);
 
             for (int j = 0 ; j <= SUB_DIVISIONS ; j++) {
-                subdividedPoints[(i * SUB_DIVISIONS) + j] = crs.q(j * increments);
+                Point subPoint = crs.q(j * increments);
+                subPoint.setEmpty(p1.isEmpty() || p2.isEmpty());
+                subdividedPoints[(i * SUB_DIVISIONS) + j] = subPoint;
             }
         }
 

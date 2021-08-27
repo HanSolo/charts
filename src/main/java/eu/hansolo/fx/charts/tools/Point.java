@@ -17,17 +17,25 @@
 package eu.hansolo.fx.charts.tools;
 
 public class Point implements Comparable<Point> {
-    private double x;
-    private double y;
+    private double  x;
+    private double  y;
+    private boolean empty;
 
 
     // ******************** Constructors **************************************
     public Point() {
-        this(0.0, 0.0);
+        this(0.0, 0.0, false);
+    }
+    public Point(final boolean IS_EMPTY) {
+        this(0.0, 0.0, IS_EMPTY);
     }
     public Point(final double X, final double Y) {
-        x = X;
-        y = Y;
+        this(X, Y, false);
+    }
+    public Point(final double X, final double Y, final boolean IS_EMPTY) {
+        x     = X;
+        y     = Y;
+        empty = IS_EMPTY;
     }
 
 
@@ -42,6 +50,9 @@ public class Point implements Comparable<Point> {
         x = X;
         y = Y;
     }
+
+    public boolean isEmpty() { return empty; }
+    public void setEmpty(final boolean isEmpty) { this.empty = isEmpty; }
 
     public double distanceTo(final Point P) { return distance(P.getX(), P.getY(), x, y); }
     public double distanceTo(final double X, final double Y) { return distance(X, Y, x, y); }

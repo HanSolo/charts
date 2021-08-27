@@ -146,6 +146,10 @@ public class XYChart<T extends XYItem> extends Region {
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
+    public void dispose() {
+        xyPane.dispose();
+    }
+
     public String getTitle() { return null == title ? _title : title.get(); }
     public void setTitle(final String TITLE) {
         if (null == title) {

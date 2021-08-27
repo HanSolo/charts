@@ -19,13 +19,17 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.series.XYSeries;
+import eu.hansolo.fx.charts.tools.Circle;
+import eu.hansolo.fx.charts.tools.Helper;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Color;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,32 +53,79 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
     private ObjectProperty<Color>                   stroke;
     private Symbol                                  _symbol;
     private ObjectProperty<Symbol>                  symbol;
+    private boolean                                 _isEmpty;
+    private BooleanProperty                         isEmpty;
+    private String                                  _tooltipText;
+    private StringProperty                          tooltipText;
+    private Circle                                  tooltipCircle;
 
 
     // ******************** Constructors **********************************
     public XYChartItem() {
-        this(0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, "", false);
+    }
+    public XYChartItem(final boolean IS_EMPTY) {
+        this(0, 0, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, "", IS_EMPTY);
     }
     public XYChartItem(final double X, final double Y) {
-        this(X, Y, "", Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, "", false);
+    }
+    public XYChartItem(final double X, final double Y, final boolean IS_EMPTY) {
+        this(X, Y, "", Color.RED, Color.TRANSPARENT, Symbol.NONE, "", IS_EMPTY);
     }
     public XYChartItem(final double X, final double Y, final Color FILL) {
-        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE, "", false);
+    }
+    public XYChartItem(final double X, final double Y, final Color FILL, final String TOOLTIP) {
+        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, false);
+    }
+    public XYChartItem(final double X, final double Y, final Color FILL, final boolean IS_EMPTY) {
+        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE, "", IS_EMPTY);
+    }
+    public XYChartItem(final double X, final double Y, final Color FILL, final String TOOLTIP, final boolean IS_EMPTY) {
+        this(X, Y, "", FILL, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, IS_EMPTY);
     }
     public XYChartItem(final double X, final double Y, final String NAME) {
-        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, "", false);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final String TOOLTIP) {
+        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, false);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final boolean IS_EMPTY) {
+        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, "", IS_EMPTY);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final String TOOLTIP, final boolean IS_EMPTY) {
+        this(X, Y, NAME, Color.RED, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, IS_EMPTY);
     }
     public XYChartItem(final double X, final double Y, final String NAME, final Color FILL) {
-        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE);
+        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, "", false);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final String TOOLTIP) {
+        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, false);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final boolean IS_EMPTY) {
+        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, "", IS_EMPTY);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final String TOOLTIP, final boolean IS_EMPTY) {
+        this(X, Y, NAME, FILL, Color.TRANSPARENT, Symbol.NONE, TOOLTIP, IS_EMPTY);
     }
     public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL) {
-        _x        = X;
-        _y        = Y;
-        _name     = NAME;
-        _fill     = FILL;
-        _stroke   = STROKE;
-        _symbol   = SYMBOL;
-        listeners = new CopyOnWriteArrayList<>();
+        this(X, Y, NAME, FILL, STROKE, SYMBOL, false);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL, final boolean IS_EMPTY) {
+        this(X, Y, NAME, FILL, STROKE, SYMBOL, "", IS_EMPTY);
+    }
+    public XYChartItem(final double X, final double Y, final String NAME, final Color FILL, final Color STROKE, final Symbol SYMBOL, final String TOOLTIP, final boolean IS_EMPTY) {
+        _x            = X;
+        _y            = Y;
+        _name         = NAME;
+        _fill         = FILL;
+        _stroke       = STROKE;
+        _symbol       = SYMBOL;
+        _isEmpty      = IS_EMPTY;
+        _tooltipText  = TOOLTIP;
+        tooltipCircle = new Circle(X, Y, 0.25);
+        listeners     = new CopyOnWriteArrayList<>();
     }
 
 
@@ -83,6 +134,7 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
     @Override public void setX(final double X) {
         if (null == x) {
             _x = X;
+            tooltipCircle.setCenterX(X);
             fireItemEvent(ITEM_EVENT);
         } else {
             x.set(X);
@@ -91,7 +143,10 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
     @Override public DoubleProperty xProperty() {
         if (null == x) {
             x = new DoublePropertyBase(_x) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() {
+                    tooltipCircle.setCenterX(get());
+                    fireItemEvent(ITEM_EVENT);
+                }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "x"; }
             };
@@ -103,6 +158,7 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
     @Override public void setY(final double Y) {
         if (null == y) {
             _y = Y;
+            tooltipCircle.setCenterY(Y);
             fireItemEvent(ITEM_EVENT);
         } else {
             y.set(Y);
@@ -111,7 +167,10 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
     @Override public DoubleProperty yProperty() {
         if (null == y) {
             y = new DoublePropertyBase(_y) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() {
+                    tooltipCircle.setCenterY(get());
+                    fireItemEvent(ITEM_EVENT);
+                }
                 @Override public Object getBean() { return XYChartItem.this; }
                 @Override public String getName() { return "y"; }
             };
@@ -202,6 +261,49 @@ public class XYChartItem implements XYItem, Comparable<XYChartItem> {
         }
         return symbol;
     }
+
+    @Override public String getTooltipText() { return null == tooltipText ? _tooltipText : tooltipText.get(); }
+    @Override public void setTooltipText(final String TOOLTIP) {
+        if (null == tooltipText) {
+            _tooltipText = TOOLTIP;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            tooltipText.set(TOOLTIP);
+        }
+    }
+    @Override public StringProperty tooltipTextProperty() {
+        if (null == tooltipText) {
+            tooltipText = new StringPropertyBase(_tooltipText) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return XYChartItem.this; }
+                @Override public String getName() { return "tooltip"; }
+            };
+            _tooltipText = null;
+        }
+        return tooltipText;
+    }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return XYChartItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
+    }
+
+    @Override public boolean symbolContainsXY(final double X, final double Y) { return tooltipCircle.contains(X, Y); }
 
     
     // ******************** Event handling ************************************
