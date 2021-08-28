@@ -113,6 +113,7 @@ public class EmptyItemTest extends Application {
                                    .symbolFill(Color.RED)
                                    .symbolStroke(Color.TRANSPARENT)
                                    .symbolsVisible(true)
+                                   .symbolSize(10)
                                    .build();
 
         xySeries2 = XYSeriesBuilder.create()
@@ -123,6 +124,7 @@ public class EmptyItemTest extends Application {
                                    .symbolFill(Color.BLUE)
                                    .symbolStroke(Color.TRANSPARENT)
                                    .symbolsVisible(true)
+                                   .symbolSize(10)
                                    .build();
 
         xySeries3 = new XYSeries<>(xyItems3, ChartType.SMOOTH_LINE);

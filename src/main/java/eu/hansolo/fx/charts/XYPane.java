@@ -140,12 +140,11 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         popup              = new TooltipPopup(2000);
         seriesListener     = e -> redraw();
         mouseHandler       = e -> {
-            Point2D local = sceneToLocal(new Point2D(e.getSceneX(), e.getSceneY()));
-            double  x     = local.getX() / scaleX + getLowerBoundX();
-            double  y     = (local.getY() - height) / (-scaleY) + getLowerBoundY();
             for (XYSeries<T> series : listOfSeries) {
+                double  radius = series.getSymbolSize() * 0.5;
                 for (T item : series.getItems()) {
-                    if (item.symbolContainsXY(x, y) && !item.getTooltipText().isEmpty() && !popup.getText().equals(item.getTooltipText())) {
+                    Point2D pointInScene = localToScene(new Point2D((item.getX() - getLowerBoundX()) * scaleX , height - (item.getY() - getLowerBoundY()) * scaleY));
+                    if (Helper.isInCircle(e.getSceneX(), e.getSceneY(), pointInScene.getX(), pointInScene.getY(), radius) && !item.getTooltipText().isEmpty() && !popup.getText().equals(item.getTooltipText())) {
                         popup.setX(e.getScreenX());
                         popup.setY(e.getScreenY() - popup.getHeight());
                         popup.setText(item.getTooltipText());
