@@ -132,3 +132,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## Voronoi/Delauny chart
 ![VoronoiChart](https://i.ibb.co/HrCbzYN/voronoi.png)
+
+
+## Multi Time Series chart
+![MultiTimeSeries](https://i.ibb.co/KLvcLfb/Multi-Time-Series-Charts.png)
