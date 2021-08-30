@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
@@ -23,6 +24,7 @@ import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.fx.charts.tools.Statistics;
 import eu.hansolo.fx.charts.tools.TooltipPopup;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -56,6 +58,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static eu.hansolo.fx.charts.ChartType.SMOOTH_POLAR;
 import static eu.hansolo.fx.charts.tools.Helper.clamp;
@@ -105,6 +109,22 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              ObjectProperty<Color>          thresholdYColor;
     private              PolarTickStep                  _polarTickStep;
     private              ObjectProperty<PolarTickStep>  polarTickStep;
+    private              Paint                          _envelopeFill;
+    private              ObjectProperty<Paint>          envelopeFill;
+    private              Color                          _envelopeStroke;
+    private              ObjectProperty<Color>          envelopeStroke;
+    private              Color                          _averageStroke;
+    private              ObjectProperty<Color>          averageStroke;
+    private              Paint                          _stdDeviationFill;
+    private              ObjectProperty<Paint>          stdDeviationFill;
+    private              Color                          _stdDeviationStroke;
+    private              ObjectProperty<Color>          stdDeviationStroke;
+    private              boolean                        _envelopeVisible;
+    private              BooleanProperty                envelopeVisible;
+    private              boolean                        _stdDeviationVisible;
+    private              BooleanProperty                stdDeviationVisible;
+    private              double                         _averageStrokeWidth;
+    private              DoubleProperty                 averageStrokeWidth;
     private              TooltipPopup                   popup;
     private              SeriesEventListener            seriesListener;
     private              EventHandler<MouseEvent>       mouseHandler;
@@ -112,6 +132,9 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
 
     // ******************** Constructors **************************************
+    public XYPane(final List<XYSeries<T>> SERIES) {
+        this(Color.TRANSPARENT, 1, SERIES.toArray(new XYSeries[0]));
+    }
     public XYPane(final XYSeries<T>... SERIES) {
         this(Color.TRANSPARENT, 1,  SERIES);
     }
@@ -120,26 +143,34 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
     public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
-        aspectRatio        = PREFERRED_HEIGHT / PREFERRED_WIDTH;
-        keepAspect         = false;
-        _chartBackground   = BACKGROUND;
-        listOfSeries       = FXCollections.observableArrayList(SERIES);
-        scaleX             = 1;
-        scaleY             = 1;
-        symbolSize         = 2;
-        noOfBands          = clamp(1, 5, BANDS);
-        _lowerBoundX       = 0;
-        _upperBoundX       = 100;
-        _lowerBoundY       = 0;
-        _upperBoundY       = 100;
-        referenceZero      = true;
-        _thresholdY        = 100;
-        _thresholdYVisible = false;
-        _thresholdYColor   = Color.RED;
-        _polarTickStep     = PolarTickStep.FOURTY_FIVE;
-        popup              = new TooltipPopup(2000);
-        seriesListener     = e -> redraw();
-        mouseHandler       = e -> {
+        aspectRatio          = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        keepAspect           = false;
+        _chartBackground     = BACKGROUND;
+        listOfSeries         = FXCollections.observableArrayList(SERIES);
+        scaleX               = 1;
+        scaleY               = 1;
+        symbolSize           = 2;
+        noOfBands            = clamp(1, 5, BANDS);
+        _lowerBoundX         = 0;
+        _upperBoundX         = 100;
+        _lowerBoundY         = 0;
+        _upperBoundY         = 100;
+        referenceZero        = true;
+        _thresholdY          = 100;
+        _thresholdYVisible   = false;
+        _thresholdYColor     = Color.RED;
+        _polarTickStep       = PolarTickStep.FOURTY_FIVE;
+        _envelopeFill        = Color.rgb(120, 120, 120, 0.2);
+        _envelopeStroke      = Color.rgb(120, 120, 120);
+        _averageStroke       = Color.BLACK;
+        _stdDeviationFill    = Color.rgb(200, 0, 0, 0.2);
+        _stdDeviationStroke  = Color.rgb(200, 0, 0);
+        _envelopeVisible     = false;
+        _stdDeviationVisible = true;
+        _averageStrokeWidth  = 1;
+        popup                = new TooltipPopup(2000);
+        seriesListener       = e -> redraw();
+        mouseHandler         = e -> {
             for (XYSeries<T> series : listOfSeries) {
                 double  radius = series.getSymbolSize() * 0.5;
                 for (T item : series.getItems()) {
@@ -429,6 +460,171 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         return polarTickStep;
     }
 
+    public Paint getEnvelopeFill() { return null == envelopeFill ? _envelopeFill : envelopeFill.get(); }
+    public void setEnvelopeFill(final Paint ENVELOPE_FILL) {
+        if (null == envelopeFill) {
+            _envelopeFill = ENVELOPE_FILL;
+            redraw();
+        } else {
+            envelopeFill.set(ENVELOPE_FILL);
+        }
+    }
+    public ObjectProperty<Paint> envelopeFillProperty() {
+        if (null == envelopeFill) {
+            envelopeFill = new ObjectPropertyBase<>(_envelopeFill) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "envelopeFill"; }
+            };
+            _envelopeFill = null;
+        }
+        return envelopeFill;
+    }
+
+    public Color getEnvelopeStroke() { return null == envelopeStroke ? _envelopeStroke : envelopeStroke.get(); }
+    public void setEnvelopeStroke(final Color ENVELOPE_STROKE) {
+        if (null == envelopeStroke) {
+            _envelopeStroke = ENVELOPE_STROKE;
+            redraw();
+        } else {
+            envelopeStroke.set(ENVELOPE_STROKE);
+        }
+    }
+    public ObjectProperty<Color> envelopeStrokeProperty() {
+        if (null == envelopeStroke) {
+            envelopeStroke = new ObjectPropertyBase<>(_envelopeStroke) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() {return "envelopeStroke"; }
+            };
+            _envelopeStroke = null;
+        }
+        return envelopeStroke;
+    }
+
+    public Color getAverageStroke() { return null == averageStroke ? _averageStroke : averageStroke.get(); }
+    public void setAverageStroke(final Color AVERAGE_STROKE) {
+        if (null == averageStroke) {
+            _averageStroke = AVERAGE_STROKE;
+            redraw();
+        } else {
+            averageStroke.set(AVERAGE_STROKE);
+        }
+    }
+    public ObjectProperty<Color> averageStrokeProperty() {
+        if (null == averageStroke) {
+            averageStroke = new ObjectPropertyBase<>(_averageStroke) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "averageStroke"; }
+            };
+            _averageStroke = null;
+        }
+        return averageStroke;
+    }
+
+    public Paint getStdDeviationFill() { return null == stdDeviationFill ? _stdDeviationFill : stdDeviationFill.get(); }
+    public void setStdDeviationFill(final Paint STD_DEVIATION_FILL) {
+        if (null == stdDeviationFill) {
+            _stdDeviationFill = STD_DEVIATION_FILL;
+            redraw();
+        } else {
+            stdDeviationFill.set(STD_DEVIATION_FILL);
+        }
+    }
+    public ObjectProperty<Paint> stdDeviationFillProperty() {
+        if (null == stdDeviationFill) {
+            stdDeviationFill = new ObjectPropertyBase<>(_stdDeviationFill) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "stdDeviationFill"; }
+            };
+            _stdDeviationFill = null;
+        }
+        return stdDeviationFill;
+    }
+
+    public Color getStdDeviationStroke() { return null == stdDeviationStroke ? _stdDeviationStroke : stdDeviationStroke.get(); }
+    public void setStdDeviationStroke(final Color STD_DEVIATION_STROKE) {
+        if (null == stdDeviationStroke) {
+            _stdDeviationStroke = STD_DEVIATION_STROKE;
+            redraw();
+        } else {
+            stdDeviationStroke.set(STD_DEVIATION_STROKE);
+        }
+    }
+    public ObjectProperty<Color> stdDeviationStrokeProperty() {
+        if (null == stdDeviationStroke) {
+            stdDeviationStroke = new ObjectPropertyBase<>(_stdDeviationStroke) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "stdDeviationStroke"; }
+            };
+            _stdDeviationStroke = null;
+        }
+        return stdDeviationStroke;
+    }
+
+    public boolean isEnvelopeVisible() { return null == envelopeVisible ? _envelopeVisible : envelopeVisible.get(); }
+    public void setEnvelopeVisible(final boolean VISIBLE) {
+        if (null == envelopeVisible) {
+            _envelopeVisible = VISIBLE;
+            redraw();
+        } else {
+            envelopeVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty envelopeVisibleProperty() {
+        if (null == envelopeVisible) {
+            envelopeVisible = new BooleanPropertyBase() {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "envelopeVisible"; }
+            };
+        }
+        return envelopeVisible;
+    }
+
+    public boolean isStdDeviationVisible() { return null == stdDeviationVisible ? _stdDeviationVisible : stdDeviationVisible.get(); }
+    public void setStdDeviationVisbile(final boolean VISIBLE) {
+        if (null == stdDeviationVisible) {
+            _stdDeviationVisible = VISIBLE;
+            redraw();
+        } else {
+            stdDeviationVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty stdDeviationVisibleProperty() {
+        if (null == stdDeviationVisible) {
+            stdDeviationVisible = new BooleanPropertyBase(_stdDeviationVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "stdDeviationVisible"; }
+            };
+        }
+        return stdDeviationVisible;
+    }
+
+    public double getAverageStrokeWidth() { return null == averageStrokeWidth ? _averageStrokeWidth : averageStrokeWidth.get(); }
+    public void setAverageStrokeWidth(final double WIDTH) {
+        if (null == averageStrokeWidth) {
+            _averageStrokeWidth = Helper.clamp(0.1, 10, WIDTH);
+            redraw();
+        } else {
+            averageStrokeWidth.set(WIDTH);
+        }
+    }
+    public DoubleProperty averageStrokeWidthProperty() {
+        if (null == averageStrokeWidth) {
+             averageStrokeWidth = new DoublePropertyBase(_averageStrokeWidth) {
+                 @Override protected void invalidated() { set(Helper.clamp(0.1, 10, get())); }
+                 @Override public Object getBean() { return XYPane.this; }
+                 @Override public String getName() { return "averageStrokeWidth"; }
+             };
+        }
+        return averageStrokeWidth;
+    }
+
     public boolean containsPolarChart() {
         for(XYSeries<T> series : listOfSeries) {
             if (null == series) { continue; }
@@ -468,22 +664,54 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             }
         }
 
-        for (XYSeries<T> series : listOfSeries) {
-            final ChartType TYPE        = series.getChartType();
-            final boolean   SHOW_POINTS = series.getSymbolsVisible();
-            switch(TYPE) {
-                case LINE             : drawLine(series, SHOW_POINTS); break;
-                case SMOOTH_LINE      : drawSmoothLine(series, SHOW_POINTS); break;
-                case AREA             : drawArea(series, SHOW_POINTS); break;
-                case SMOOTH_AREA      : drawSmoothArea(series, SHOW_POINTS); break;
-                case SCATTER          : drawScatter(series) ;break;
-                case HORIZON          : drawHorizon(series, false); break;
-                case RIDGE_LINE       : drawRidgeLine(series); break;
-                case SMOOTHED_HORIZON : drawHorizon(series, true); break;
-                case POLAR            :
-                case SMOOTH_POLAR     : drawPolar(series); break;
+        List<XYSeries<T>> listOfmultiTimeSeries = listOfSeries.stream()
+                                                              .filter(series -> ChartType.MULTI_TIME_SERIES == series.getChartType())
+                                                              .collect(Collectors.toList());
+        List<XYSeries<T>> listOfSmoothedMultiTimeSeries = listOfSeries.stream()
+                                                                      .filter(series -> ChartType.SMOOTHED_MULTI_TIME_SERIES == series.getChartType())
+                                                                      .collect(Collectors.toList());
+        if (listOfmultiTimeSeries.isEmpty() && listOfSmoothedMultiTimeSeries.isEmpty()) {
+            for (XYSeries<T> series : listOfSeries) {
+                final ChartType TYPE        = series.getChartType();
+                final boolean   SHOW_POINTS = series.getSymbolsVisible();
+                switch (TYPE) {
+                    case LINE:
+                        drawLine(series, SHOW_POINTS);
+                        break;
+                    case SMOOTH_LINE:
+                        drawSmoothLine(series, SHOW_POINTS);
+                        break;
+                    case AREA:
+                        drawArea(series, SHOW_POINTS);
+                        break;
+                    case SMOOTH_AREA:
+                        drawSmoothArea(series, SHOW_POINTS);
+                        break;
+                    case SCATTER:
+                        drawScatter(series);
+                        break;
+                    case HORIZON:
+                        drawHorizon(series, false);
+                        break;
+                    case RIDGE_LINE:
+                        drawRidgeLine(series);
+                        break;
+                    case SMOOTHED_HORIZON:
+                        drawHorizon(series, true);
+                        break;
+                    case POLAR:
+                    case SMOOTH_POLAR:
+                        drawPolar(series);
+                        break;
+                }
             }
-        };
+        } else {
+            if (listOfmultiTimeSeries.size() == listOfSeries.size()) {
+                drawMultiTimeSeries(listOfmultiTimeSeries);
+            } else if (listOfSmoothedMultiTimeSeries.size() == listOfSeries.size()){
+                drawSmoothedMultiTimeSeries(listOfSmoothedMultiTimeSeries);
+            }
+        }
     }
 
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
@@ -1183,6 +1411,243 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             ctx.setFill(COLORS.get(band));
             ctx.fill();
         }
+    }
+
+    private void drawMultiTimeSeries(final List<XYSeries<T>> LIST_OF_SERIES) {
+        // Aggregating data
+        List<XYItem> minItems    = new LinkedList<>();
+        List<XYItem> maxItems    = new LinkedList<>();
+        List<XYItem> avgItems    = new LinkedList<>();
+        List<XYItem> stdDevItems = new LinkedList<>();
+        XYSeries<T> series0 = LIST_OF_SERIES.get(0);
+        for (int i = 0 ; i < series0.getItems().size() ; i++) {
+            T item = series0.getItems().get(i);
+            double x = item.getX();
+            double minYForX = Double.MAX_VALUE;
+            double maxYForX = Double.MIN_VALUE;
+            List<Double> valuesForX = new LinkedList<>();
+            for (int j = 0 ; j < LIST_OF_SERIES.size() ; j++) {
+                XYSeries<T> series        = LIST_OF_SERIES.get(j);
+                Optional<T> optionalValue = series.getItems().stream().filter(si -> Double.compare(x, si.getX()) == 0).findFirst();
+                if (optionalValue.isPresent()) {
+                    minYForX = Math.min(minYForX, optionalValue.get().getY());
+                    maxYForX = Math.max(maxYForX, optionalValue.get().getY());
+                    valuesForX.add(optionalValue.get().getY());
+                }
+            }
+            minItems.add(new XYChartItem(x, minYForX));
+            maxItems.add(new XYChartItem(x, maxYForX));
+            avgItems.add(new XYChartItem(x, Statistics.getAverage(valuesForX)));
+            stdDevItems.add(new XYChartItem(x, Statistics.getStdDev(valuesForX)));
+        }
+
+        // Visualize data
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+
+        double startX = (maxItems.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double startY = height - (maxItems.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+
+        if (isEnvelopeVisible()) {
+            ctx.setFill(getEnvelopeFill());
+            ctx.setStroke(getEnvelopeStroke());
+            ctx.setLineWidth(0.5);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            for (int i = 1; i < maxItems.size(); i++) {
+                XYItem item = maxItems.get(i);
+                double x    = (item.getX() - LOWER_BOUND_X) * scaleX;
+                double y    = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            for (int i = minItems.size() - 1; i >= 0; i--) {
+                XYItem item = minItems.get(i);
+                double x    = (item.getX() - LOWER_BOUND_X) * scaleX;
+                double y    = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(startX, startY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        for (XYSeries<T> SERIES : LIST_OF_SERIES) {
+            if (SERIES.getSymbolsVisible()) { drawSymbols(SERIES); }
+        }
+
+        double oldX;
+        double oldY;
+
+        if (isStdDeviationVisible()) {
+            // Std. Deviation area
+            ctx.setFill(getStdDeviationFill());
+            ctx.setStroke(getStdDeviationStroke());
+            ctx.setLineWidth(0.5);
+            ctx.beginPath();
+            startX = (stdDevItems.get(0).getX() - LOWER_BOUND_X) * scaleX;
+            startY = height - (avgItems.get(0).getY() - stdDevItems.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+            ctx.moveTo(startX, startY);
+            for (int i = 0; i < stdDevItems.size(); i++) {
+                XYItem stdItem = stdDevItems.get(i);
+                XYItem avgItem = avgItems.get(i);
+                double x       = (avgItem.getX() - LOWER_BOUND_X) * scaleX;
+                double y       = height - (avgItem.getY() - stdItem.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            for (int i = stdDevItems.size() - 1; i >= 0; i--) {
+                XYItem stdItem = stdDevItems.get(i);
+                XYItem avgItem = avgItems.get(i);
+                double x       = (avgItem.getX() - LOWER_BOUND_X) * scaleX;
+                double y       = height - (avgItem.getY() + stdItem.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(startX, startY);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Average
+        ctx.setLineWidth(getAverageStrokeWidth());
+        ctx.setStroke(getAverageStroke());
+        ctx.beginPath();
+        oldX = (avgItems.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        oldY = height - (avgItems.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        ctx.moveTo(oldX, oldY);
+        for (int i = 1 ; i < avgItems.size(); i++) {
+            XYItem item = avgItems.get(i);
+            double x    = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double y    = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    private void drawSmoothedMultiTimeSeries(final List<XYSeries<T>> LIST_OF_SERIES) {
+        // Aggregating data
+        List<XYItem> minItems    = new LinkedList<>();
+        List<XYItem> maxItems    = new LinkedList<>();
+        List<XYItem> avgItems    = new LinkedList<>();
+        List<XYItem> stdDevItems = new LinkedList<>();
+        XYSeries<T> series0 = LIST_OF_SERIES.get(0);
+        for (int i = 0 ; i < series0.getItems().size() ; i++) {
+            T item = series0.getItems().get(i);
+            double x = item.getX();
+            double minYForX = Double.MAX_VALUE;
+            double maxYForX = Double.MIN_VALUE;
+            List<Double> valuesForX = new LinkedList<>();
+            for (int j = 0 ; j < LIST_OF_SERIES.size() ; j++) {
+                XYSeries<T> series        = LIST_OF_SERIES.get(j);
+                Optional<T> optionalValue = series.getItems().stream().filter(si -> Double.compare(x, si.getX()) == 0).findFirst();
+                if (optionalValue.isPresent()) {
+                    minYForX = Math.min(minYForX, optionalValue.get().getY());
+                    maxYForX = Math.max(maxYForX, optionalValue.get().getY());
+                    valuesForX.add(optionalValue.get().getY());
+                }
+            }
+            minItems.add(new XYChartItem(x, minYForX));
+            maxItems.add(new XYChartItem(x, maxYForX));
+            avgItems.add(new XYChartItem(x, Statistics.getAverage(valuesForX)));
+            stdDevItems.add(new XYChartItem(x, Statistics.getStdDev(valuesForX)));
+        }
+
+        List<Point> avgItemsPoints = new ArrayList<>(avgItems.size());
+        avgItems.forEach(item -> avgItemsPoints.add(new Point(item.getX(), item.getY(), item.isEmptyItem())));
+        Point[] avgInterpolatedPoints = Helper.subdividePoints(avgItemsPoints.toArray(new Point[0]), SUB_DIVISIONS);
+
+
+        // Visualize data
+        final double LOWER_BOUND_X = getLowerBoundX();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+
+        if (isEnvelopeVisible()) {
+            List<Point> minItemsPoints = new ArrayList<>(minItems.size());
+            minItems.forEach(item -> minItemsPoints.add(new Point(item.getX(), item.getY(), item.isEmptyItem())));
+            Point[] minInterpolatedPoints = Helper.subdividePoints(minItemsPoints.toArray(new Point[0]), SUB_DIVISIONS);
+
+            List<Point> maxItemsPoints = new ArrayList<>(maxItems.size());
+            maxItems.forEach(item -> maxItemsPoints.add(new Point(item.getX(), item.getY(), item.isEmptyItem())));
+            Point[] maxInterpolatedPoints = Helper.subdividePoints(maxItemsPoints.toArray(new Point[0]), SUB_DIVISIONS);
+
+            double startX = (maxInterpolatedPoints[0].getX() - LOWER_BOUND_X) * scaleX;
+            double startY = height - (maxInterpolatedPoints[0].getY() - LOWER_BOUND_Y) * scaleY;
+
+            ctx.setFill(getEnvelopeFill());
+            ctx.setStroke(getEnvelopeStroke());
+            ctx.setLineWidth(0.5);
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            for (int i = 1; i < maxInterpolatedPoints.length ; i++) {
+                Point point = maxInterpolatedPoints[i];
+                double x    = (point.getX() - LOWER_BOUND_X) * scaleX;
+                double y    = height - (point.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            for (int i = minInterpolatedPoints.length - 1; i >= 0; i--) {
+                Point point = minInterpolatedPoints[i];
+                double x    = (point.getX() - LOWER_BOUND_X) * scaleX;
+                double y    = height - (point.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(startX, startY);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        for (XYSeries<T> SERIES : LIST_OF_SERIES) {
+            if (SERIES.getSymbolsVisible()) { drawSymbols(SERIES); }
+        }
+
+        double oldX;
+        double oldY;
+
+        if (isStdDeviationVisible()) {
+            List<Point> stdDevItemsPoints = new ArrayList<>(stdDevItems.size());
+            stdDevItems.forEach(item -> stdDevItemsPoints.add(new Point(item.getX(), item.getY(), item.isEmptyItem())));
+            Point[] stdDevInterpolatedPoints = Helper.subdividePoints(stdDevItemsPoints.toArray(new Point[0]), SUB_DIVISIONS);
+
+            // Std. Deviation area
+            ctx.setFill(getStdDeviationFill());
+            ctx.setStroke(getStdDeviationStroke());
+            ctx.setLineWidth(0.5);
+            ctx.beginPath();
+            double startX = (stdDevInterpolatedPoints[0].getX() - LOWER_BOUND_X) * scaleX;
+            double startY = height - (avgInterpolatedPoints[0].getY() - stdDevInterpolatedPoints[0].getY() - LOWER_BOUND_Y) * scaleY;
+            ctx.moveTo(startX, startY);
+            for (int i = 0; i < stdDevInterpolatedPoints.length ; i++) {
+                Point stdPoint = stdDevInterpolatedPoints[i];
+                Point avgPoint = avgInterpolatedPoints[i];
+                double x       = (avgPoint.getX() - LOWER_BOUND_X) * scaleX;
+                double y       = height - (avgPoint.getY() - stdPoint.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            for (int i = stdDevInterpolatedPoints.length - 1; i >= 0; i--) {
+                Point stdPoint = stdDevInterpolatedPoints[i];
+                Point avgPoint = avgInterpolatedPoints[i];
+                double x       = (avgPoint.getX() - LOWER_BOUND_X) * scaleX;
+                double y       = height - (avgPoint.getY() + stdPoint.getY() - LOWER_BOUND_Y) * scaleY;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(startX, startY);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        // Average
+        ctx.setLineWidth(getAverageStrokeWidth());
+        ctx.setStroke(getAverageStroke());
+        ctx.beginPath();
+        oldX = (avgInterpolatedPoints[0].getX() - LOWER_BOUND_X) * scaleX;
+        oldY = height - (avgItems.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        ctx.moveTo(oldX, oldY);
+        for (int i = 1 ; i < avgInterpolatedPoints.length ; i++) {
+            Point point = avgInterpolatedPoints[i];
+            double x    = (point.getX() - LOWER_BOUND_X) * scaleX;
+            double y    = height - (point.getY() - LOWER_BOUND_Y) * scaleY;
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke();
     }
 
     private List<Point>[] splitIntoAboveAndBelow(final List<Point> POINTS) {
