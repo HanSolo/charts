@@ -20,6 +20,8 @@ import eu.hansolo.fx.charts.pareto.ParetoBar;
 import eu.hansolo.fx.charts.pareto.ParetoModel;
 import eu.hansolo.fx.charts.pareto.ParetoPanel;
 import javafx.application.Application;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -36,10 +38,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 
 public class ParetoTest extends Application {
@@ -99,23 +101,16 @@ public class ParetoTest extends Application {
         unitList.add(new ParetoBar("cavalry",100.0));
         ParetoBar units = new ParetoBar("Documents",unitList);
 
-
-
-
         paretoModel.getData().add(new ParetoBar("Product Quality",103.0));
         paretoModel.getData().add(new ParetoBar("Packaging",217.0));
         paretoModel.getData().add(woods);
         paretoModel.getData().add(units);
 
-
-
-
         return paretoModel;
     }
 
 
-    private class PresentationPareto extends BorderPane implements Observer {
-
+    private class PresentationPareto extends BorderPane {
         private ParetoPanel            paretoPanel;
         private ColorPicker            circleColor;
         private ColorPicker            graphColor;
@@ -146,7 +141,6 @@ public class ParetoTest extends Application {
             initParts();
             setUpBindings();
             layoutParts();
-            addObserver();
             setUpListener();
         }
 
@@ -230,19 +224,9 @@ public class ParetoTest extends Application {
             this.setRight(menu);
         }
 
-        private void addObserver(){
-            paretoPanel.addObserver(this);
-        }
-
         private void setUpListener(){
-
             backButton.setOnAction(event -> paretoPanel.returnToPreviousLayer());
             colorTheme.valueProperty().addListener(((observable, oldValue, newValue) -> paretoPanel.activateColorTheme(newValue)));
-        }
-
-        @Override
-        public void update(Observable o, Object arg) {
-            updateBarColorPicker();
         }
 
         public void updateBarColorPicker(){
@@ -268,7 +252,5 @@ public class ParetoTest extends Application {
             }
             return theme;
         }
-
-
     }
 }

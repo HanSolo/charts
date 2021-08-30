@@ -217,13 +217,9 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         listOfSeries.addListener((ListChangeListener<XYSeries<T>>) c -> {
             while(c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(series -> {
-                        series.setOnSeriesEvent(seriesListener);
-                    });
+                    c.getAddedSubList().forEach(series -> series.setOnSeriesEvent(seriesListener));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(series -> {
-                        series.removeSeriesEventListener(seriesListener);
-                    });
+                    c.getRemoved().forEach(series -> series.removeSeriesEventListener(seriesListener));
                 }
             }
             redraw();
