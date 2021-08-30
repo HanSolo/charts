@@ -1482,20 +1482,20 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             ctx.setLineWidth(0.5);
             ctx.beginPath();
             startX = (stdDevItems.get(0).getX() - LOWER_BOUND_X) * scaleX;
-            startY = height - (avgItems.get(0).getY() - stdDevItems.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+            startY = height - (avgItems.get(0).getY() - stdDevItems.get(0).getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
             ctx.moveTo(startX, startY);
             for (int i = 0; i < stdDevItems.size(); i++) {
                 XYItem stdItem = stdDevItems.get(i);
                 XYItem avgItem = avgItems.get(i);
                 double x       = (avgItem.getX() - LOWER_BOUND_X) * scaleX;
-                double y       = height - (avgItem.getY() - stdItem.getY() - LOWER_BOUND_Y) * scaleY;
+                double y       = height - (avgItem.getY() - stdItem.getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
                 ctx.lineTo(x, y);
             }
             for (int i = stdDevItems.size() - 1; i >= 0; i--) {
                 XYItem stdItem = stdDevItems.get(i);
                 XYItem avgItem = avgItems.get(i);
                 double x       = (avgItem.getX() - LOWER_BOUND_X) * scaleX;
-                double y       = height - (avgItem.getY() + stdItem.getY() - LOWER_BOUND_Y) * scaleY;
+                double y       = height - (avgItem.getY() + stdItem.getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
                 ctx.lineTo(x, y);
             }
             ctx.lineTo(startX, startY);
@@ -1609,20 +1609,20 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             ctx.setLineWidth(0.5);
             ctx.beginPath();
             double startX = (stdDevInterpolatedPoints[0].getX() - LOWER_BOUND_X) * scaleX;
-            double startY = height - (avgInterpolatedPoints[0].getY() - stdDevInterpolatedPoints[0].getY() - LOWER_BOUND_Y) * scaleY;
+            double startY = height - (avgInterpolatedPoints[0].getY() - stdDevInterpolatedPoints[0].getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
             ctx.moveTo(startX, startY);
             for (int i = 0; i < stdDevInterpolatedPoints.length ; i++) {
                 Point stdPoint = stdDevInterpolatedPoints[i];
                 Point avgPoint = avgInterpolatedPoints[i];
                 double x       = (avgPoint.getX() - LOWER_BOUND_X) * scaleX;
-                double y       = height - (avgPoint.getY() - stdPoint.getY() - LOWER_BOUND_Y) * scaleY;
+                double y       = height - (avgPoint.getY() - stdPoint.getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
                 ctx.lineTo(x, y);
             }
             for (int i = stdDevInterpolatedPoints.length - 1; i >= 0; i--) {
                 Point stdPoint = stdDevInterpolatedPoints[i];
                 Point avgPoint = avgInterpolatedPoints[i];
                 double x       = (avgPoint.getX() - LOWER_BOUND_X) * scaleX;
-                double y       = height - (avgPoint.getY() + stdPoint.getY() - LOWER_BOUND_Y) * scaleY;
+                double y       = height - (avgPoint.getY() + stdPoint.getY() * 0.5 - LOWER_BOUND_Y) * scaleY;
                 ctx.lineTo(x, y);
             }
             ctx.lineTo(startX, startY);
