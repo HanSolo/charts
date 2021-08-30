@@ -21,6 +21,8 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -49,12 +51,20 @@ public class BubbleGridChartItem implements BubbleGridItem {
     private       ObjectProperty<ChartItem>               categoryY;
     private       double                                  _value;
     private       DoubleProperty                          value;
+    private       boolean                                 _isEmpty;
+    private       BooleanProperty                         isEmpty;
 
 
     BubbleGridChartItem() {
-        this("", Color.BLACK, Color.BLACK, Symbol.NONE, new ChartItem(), new ChartItem(), 0);
+        this("", Color.BLACK, Color.BLACK, Symbol.NONE, new ChartItem(), new ChartItem(), 0, false);
+    }
+    BubbleGridChartItem(final boolean isEmpty) {
+        this("", Color.BLACK, Color.BLACK, Symbol.NONE, new ChartItem(), new ChartItem(), 0, isEmpty);
     }
     BubbleGridChartItem(final String name, final Color fill, final Color stroke, final Symbol symbol, final ChartItem categoryX, final ChartItem categoryY, final double value) {
+        this(name, fill, stroke, symbol, categoryX, categoryY, value, false);
+    }
+    BubbleGridChartItem(final String name, final Color fill, final Color stroke, final Symbol symbol, final ChartItem categoryX, final ChartItem categoryY, final double value, final boolean isEmpty) {
         _name      = name;
         _fill      = fill;
         _stroke    = stroke;
@@ -62,6 +72,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
         _categoryX = categoryX;
         _categoryY = categoryY;
         _value     = value;
+        _isEmpty   = isEmpty;
         listeners  = new CopyOnWriteArrayList<>();
     }
 
@@ -209,6 +220,26 @@ public class BubbleGridChartItem implements BubbleGridItem {
             };
         }
         return value;
+    }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return BubbleGridChartItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
     }
 
 

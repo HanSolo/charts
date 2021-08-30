@@ -19,9 +19,11 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -79,6 +81,10 @@ public class BubbleGridChartItemBuilder<B extends BubbleGridChartItemBuilder<B>>
         return (B)this;
     }
 
+    public final B isEmpty() {
+        properties.put("isEmpty", new SimpleBooleanProperty(true));
+        return (B)this;
+    }
 
     public final BubbleGridChartItem build() {
         final BubbleGridChartItem ITEM = new BubbleGridChartItem();
@@ -97,6 +103,8 @@ public class BubbleGridChartItemBuilder<B extends BubbleGridChartItemBuilder<B>>
                 ITEM.setCategoryX(((ObjectProperty<ChartItem>) properties.get(key)).get());
             } else if("categoryY".equals(key)) {
                 ITEM.setCategoryY(((ObjectProperty<ChartItem>) properties.get(key)).get());
+            } else if ("isEmpty".equals(key)) {
+                ITEM.setIsEmpty(((BooleanProperty) properties.get(key)).get());
             }
         }
         return ITEM;

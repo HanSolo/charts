@@ -50,6 +50,9 @@ import javafx.scene.text.TextAlignment;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -304,7 +307,9 @@ public class Helper {
             CatmullRom<Point> crs = new CatmullRom<>(p0, p1, p2, p3);
 
             for (int j = 0 ; j <= SUB_DIVISIONS ; j++) {
-                subdividedPoints[(i * SUB_DIVISIONS) + j] = crs.q(j * increments);
+                Point subPoint = crs.q(j * increments);
+                subPoint.setEmpty(p1.isEmpty() || p2.isEmpty());
+                subdividedPoints[(i * SUB_DIVISIONS) + j] = subPoint;
             }
         }
 
@@ -1148,54 +1153,94 @@ public class Helper {
     }
 
     public static final Axis createLeftAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+    }
+    public static final Axis createLeftAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
     }
     public static final Axis createLeftAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
+    }
+    public static final Axis createLeftAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
     }
 
     public static final Axis createCenterYAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+    }
+    public static final Axis createCenterYAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
     }
     public static final Axis createCenterYAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
+    }
+    public static final Axis createCenterYAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.CENTER);
     }
 
     public static final Axis createRightAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+    }
+    public static final Axis createRightAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE,true, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
     }
     public static final Axis createRightAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
+    }
+    public static final Axis createRightAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.VERTICAL, Position.RIGHT);
     }
 
     public static final Axis createTopAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+    }
+    public static final Axis createTopAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE,true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
     }
     public static final Axis createTopAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
+    }
+    public static final Axis createTopAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.TOP);
     }
 
     public static final Axis createCenterXAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+    }
+    public static final Axis createCenterXAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE,true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
     }
     public static final Axis createCenterXAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
+    }
+    public static final Axis createCenterXAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.CENTER);
     }
 
     public static final Axis createBottomAxis(final double MIN, final double MAX, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+        return createAxis(MIN, MAX, "", true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+    }
+    public static final Axis createBottomAxis(final double MIN, final double MAX, final String TITLE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, true, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
     }
     public static final Axis createBottomAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
+    }
+    public static final Axis createBottomAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH) {
+        return createAxis(MIN, MAX, TITLE, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, Orientation.HORIZONTAL, Position.BOTTOM);
     }
 
     public static final Axis createAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH, final Orientation ORIENTATION, final Position POSITION) {
-        return createAxis(MIN, MAX, AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, ORIENTATION, POSITION);
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, AXIS_WIDTH, ORIENTATION, POSITION);
     }
     public static final Axis createAxis(final double MIN, final double MAX, final boolean AUTO_SCALE, final double AXIS_WIDTH, final double ANCHOR, final Orientation ORIENTATION, final Position POSITION) {
+        return createAxis(MIN, MAX, "", AUTO_SCALE, AXIS_WIDTH, ANCHOR, ORIENTATION, POSITION);
+    }
+    public static final Axis createAxis(final double MIN, final double MAX, final String TITLE, final boolean AUTO_SCALE, final double AXIS_WIDTH, final double ANCHOR, final Orientation ORIENTATION, final Position POSITION) {
         Axis axis = AxisBuilder.create(ORIENTATION, POSITION)
                                .minValue(MIN)
                                .maxValue(MAX)
+                               .title(TITLE)
                                .autoScale(AUTO_SCALE)
                                .build();
 
@@ -1251,5 +1296,16 @@ public class Helper {
         final SnapshotParameters params = new SnapshotParameters();
         final WritableImage      result = imageView.snapshot(params, null);
         return result;
+    }
+
+
+    public static final String readTextFile(final String filename) {
+        if (null == filename || !new File(filename).exists()) { throw new IllegalArgumentException("File: " + filename + " not found or null"); }
+        try {
+            Path   fileName = Path.of(filename);
+            return Files.readString(fileName);
+        } catch (IOException e) {
+            return "";
+        }
     }
 }

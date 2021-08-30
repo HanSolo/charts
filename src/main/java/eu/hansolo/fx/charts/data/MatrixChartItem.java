@@ -19,6 +19,8 @@ package eu.hansolo.fx.charts.data;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ItemEvent;
 import eu.hansolo.fx.charts.event.ItemEventListener;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.IntegerProperty;
@@ -50,19 +52,33 @@ public class MatrixChartItem implements MatrixItem {
     private ObjectProperty<Color>                   stroke;
     private Symbol                                  _symbol;
     private ObjectProperty<Symbol>                  symbol;
+    private boolean                                 _isEmpty;
+    private BooleanProperty                         isEmpty;
 
 
     // ******************** Constructors **********************************
     public MatrixChartItem() {
-        this(0, 0, 0, "", Color.RED);
+        this(0, 0, 0, "", Color.RED, false);
+    }
+    public MatrixChartItem(final boolean IS_EMPTY) {
+        this(0, 0, 0, "", Color.RED, IS_EMPTY);
     }
     public MatrixChartItem(final int X, final int Y, final double Z) {
-        this(X, Y, Z, "", Color.RED);
+        this(X, Y, Z, "", Color.RED, false);
+    }
+    public MatrixChartItem(final int X, final int Y, final double Z, final boolean IS_EMPTY) {
+        this(X, Y, Z, "", Color.RED, IS_EMPTY);
     }
     public MatrixChartItem(final int X, final int Y, final double Z, final String NAME) {
-        this(X, Y, Z, NAME, Color.RED);
+        this(X, Y, Z, NAME, Color.RED, false);
+    }
+    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final boolean IS_EMPTY) {
+        this(X, Y, Z, NAME, Color.RED, IS_EMPTY);
     }
     public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final Color FILL) {
+        this(X, Y, Z, NAME, FILL, false);
+    }
+    public MatrixChartItem(final int X, final int Y, final double Z, final String NAME, final Color FILL, final boolean IS_EMPTY) {
         _x        = X;
         _y        = Y;
         _z        = Z;
@@ -70,6 +86,7 @@ public class MatrixChartItem implements MatrixItem {
         _fill     = FILL;
         _stroke   = Color.TRANSPARENT;
         _symbol   = Symbol.NONE;
+        _isEmpty  = IS_EMPTY;
         listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -210,6 +227,26 @@ public class MatrixChartItem implements MatrixItem {
             _symbol = null;
         }
         return symbol;
+    }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(ITEM_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override public Object getBean() { return MatrixChartItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
     }
 
 

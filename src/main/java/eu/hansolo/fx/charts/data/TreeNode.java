@@ -17,9 +17,9 @@
 package eu.hansolo.fx.charts.data;
 
 
-import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEventListener;
+import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -205,6 +205,7 @@ public class TreeNode<T extends Item> {
         final int LEVEL = getDepth();
         return getTreeRoot().stream().filter(node -> node.getDepth() == LEVEL).collect(Collectors.toList());
     }
+
 
     // ******************** Event handling ************************************
     public void setOnTreeNodeEvent(final TreeNodeEventListener<T> LISTENER) { addTreeNodeEventListener(LISTENER); }

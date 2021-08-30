@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SeriesEvent;

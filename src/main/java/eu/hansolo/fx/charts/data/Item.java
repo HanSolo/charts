@@ -30,4 +30,6 @@ public interface Item {
 
     Symbol getSymbol();
     void setSymbol(Symbol symbol);
+
+    boolean isEmptyItem();
 }

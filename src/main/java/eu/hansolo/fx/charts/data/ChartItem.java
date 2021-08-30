@@ -77,6 +77,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       DoubleProperty          x;
     private       double                  _y;
     private       DoubleProperty          y;
+    private       boolean                 _isEmpty;
+    private       BooleanProperty         isEmpty;
     private       long                    animationDuration;
     private       DoubleProperty          currentValue;
     private       Timeline                timeline;
@@ -86,46 +88,91 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ChartItem() {
         this("", 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
+    public ChartItem(final boolean IS_EMPTY) {
+        this("", 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
+    }
     public ChartItem(final String NAME) {
         this(NAME, 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
+    }
+    public ChartItem(final String NAME, final boolean IS_EMPTY) {
+        this(NAME, 0, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
     }
     public ChartItem(double VALUE) {
         this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
+    public ChartItem(double VALUE, final boolean IS_EMPTY) {
+        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
+    }
     public ChartItem(final double VALUE, final Instant TIMESTAMP) {
         this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800);
+    }
+    public ChartItem(final double VALUE, final Instant TIMESTAMP, final boolean IS_EMPTY) {
+        this("", VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800, IS_EMPTY);
     }
     public ChartItem(final double VALUE, final Color FILL_COLOR) {
         this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
+    public ChartItem(final double VALUE, final Color FILL_COLOR, final boolean IS_EMPTY) {
+        this("", VALUE, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final Color FILL_COLOR) {
         this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
+    }
+    public ChartItem(final String NAME, final Color FILL_COLOR, final boolean IS_EMPTY) {
+        this(NAME, 0, FILL_COLOR, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
     }
     public ChartItem(final String NAME, final double VALUE) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
+    public ChartItem(final String NAME, final double VALUE, final boolean IS_EMPTY) {
+        this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final double VALUE, final Instant TIMESTAMP) {
         this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800);
+    }
+    public ChartItem(final String NAME, final double VALUE, final Instant TIMESTAMP, final boolean IS_EMPTY) {
+        this(NAME, VALUE, Color.rgb(233, 30, 99), Color.TRANSPARENT, Color.BLACK, TIMESTAMP, true, 800, IS_EMPTY);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800);
     }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, Instant.now(), false, 800, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, Instant.now(), false, 800);
+    }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, Instant.now(), false, 800, IS_EMPTY);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800);
     }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, false, 800, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, false, 800);
+    }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, false, 800, IS_EMPTY);
     }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, Color.BLACK, TIMESTAMP, ANIMATED, ANIMATION_DURATION, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
         this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, ANIMATED, ANIMATION_DURATION);
     }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION, final boolean IS_EMPTY) {
+        this(NAME, VALUE, FILL, Color.TRANSPARENT, TEXT_FILL, TIMESTAMP, ANIMATED, ANIMATION_DURATION, IS_EMPTY);
+    }
     public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION) {
+        this(NAME, VALUE, FILL, STROKE, TEXT_FILL, TIMESTAMP, ANIMATED, ANIMATION_DURATION, false);
+    }
+    public ChartItem(final String NAME, final double VALUE, final Color FILL, final Color STROKE, final Color TEXT_FILL, final Instant TIMESTAMP, final boolean ANIMATED, final long ANIMATION_DURATION, final boolean IS_EMPTY) {
         _index            = -1;
         _name             = NAME;
         _unit             = "";
@@ -140,6 +187,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _animated         = ANIMATED;
         _x                = 0;
         _y                = 0;
+        _isEmpty          = IS_EMPTY;
         currentValue      = new DoublePropertyBase(_value) {
             @Override protected void invalidated() {
                 oldValue = ChartItem.this.getValue();
@@ -467,6 +515,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         }
         return y;
     }
+
+    @Override public boolean isEmptyItem() { return null == isEmpty ? _isEmpty : isEmpty.get(); }
+    public void setIsEmpty(final boolean isEmpty) {
+        if (null == this.isEmpty) {
+            _isEmpty = isEmpty;
+            fireItemEvent(UPDATE_EVENT);
+        } else {
+            this.isEmpty.set(isEmpty);
+        }
+    }
+    public BooleanProperty isEmptyProperty() {
+        if (null == isEmpty) {
+            isEmpty = new BooleanPropertyBase(_isEmpty) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "isEmpty"; }
+            };
+        }
+        return isEmpty;
+    }
+
     
     public long getAnimationDuration() { return animationDuration; }
     public void setAnimationDuration(final long DURATION) { animationDuration = Helper.clamp(10, 10000, DURATION); }
@@ -494,6 +563,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
                item.getUnit().equals(getUnit()) &&
                item.getDescription().equals(getDescription()) &&
                item.getTimestamp().equals(getTimestamp()) &&
+               item.isEmptyItem() == isEmptyItem() &&
                Double.compare(item.getValue(), getValue()) == 0;
     }
 

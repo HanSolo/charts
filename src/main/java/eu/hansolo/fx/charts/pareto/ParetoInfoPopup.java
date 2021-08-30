@@ -116,8 +116,8 @@ public class ParetoInfoPopup extends Popup {
     }
 
     private void initGraphics() {
-        regularFont = Fonts.opensansRegular(10);
-        lightFont   = Fonts.opensansLight(10);
+        regularFont = Fonts.opensansRegular(9);
+        lightFont   = Fonts.opensansLight(9);
 
         itemText = new Text("NAME");
         itemText.setFill(_textColor);
