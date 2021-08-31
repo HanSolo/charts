@@ -56,6 +56,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -138,6 +139,8 @@ public class StreamChart extends Region {
     private              BooleanProperty                   itemTextVisible;
     private              SortDirection                     _sortDirection;
     private              ObjectProperty<SortDirection>     sortDirection;
+    private              boolean                           _sortByName;
+    private              BooleanProperty                   sortByName;
     private              boolean                           _categorySumVisible;
     private              BooleanProperty                   categorySumVisible;
     private              String                            formatString;
@@ -185,6 +188,7 @@ public class StreamChart extends Region {
         _itemTextThreshold  = 1;
         _itemTextVisible    = true;
         _sortDirection      = SortDirection.ASCENDING;
+        _sortByName         = false;
         _categorySumVisible = false;
         itemFont            = Fonts.latoRegular(10);
         categoryFont        = Fonts.latoRegular(10);
@@ -537,6 +541,26 @@ public class StreamChart extends Region {
         return sortDirection;
     }
 
+    public boolean isSortByName() { return null == sortByName ? _sortByName : sortByName.get(); }
+    public void setSortByName(final boolean BY_NAME) {
+        if (null == sortByName) {
+            _sortByName = BY_NAME;
+            groupBy(getCategory());
+        } else {
+            sortByName.set(BY_NAME);
+        }
+    }
+    public BooleanProperty sortByNameProperty() {
+        if (null == sortByName) {
+            sortByName = new BooleanPropertyBase(_sortByName) {
+                @Override protected void invalidated() { groupBy(getCategory()); }
+                @Override public Object getBean() { return StreamChart.this; }
+                @Override public String getName() { return "sortByName"; }
+            };
+        }
+        return sortByName;
+    }
+
     public boolean isCategorySumVisible() { return null == categorySumVisible ? _categorySumVisible : categorySumVisible.get(); }
     public void setCategorySumVisible(final boolean VISIBLE) {
         if (null == categorySumVisible) {
@@ -596,10 +620,18 @@ public class StreamChart extends Region {
     }
 
     private void sortItemsAscending(final List<ChartItem> ITEMS) {
-        Collections.sort(ITEMS);
+        if (isSortByName()) {
+            Collections.sort(ITEMS, Comparator.comparing(ChartItem::getName));
+        } else {
+            Collections.sort(ITEMS);
+        }
     }
     private void sortItemsDescending(final List<ChartItem> ITEMS) {
-        Collections.sort(ITEMS, Collections.reverseOrder());
+        if (isSortByName()) {
+            Collections.sort(ITEMS, Comparator.comparing(ChartItem::getName).reversed());
+        } else {
+            Collections.sort(ITEMS, Collections.reverseOrder());
+        }
     }
 
     public double getSumOfItems() { return items.stream().mapToDouble(ChartItem::getValue).sum(); }
