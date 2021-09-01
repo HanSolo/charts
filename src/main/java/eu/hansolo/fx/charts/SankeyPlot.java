@@ -83,6 +83,7 @@ public class SankeyPlot extends Region {
     private static final Color                            DEFAULT_STREAM_COLOR    = Color.rgb(164, 164, 164, 0.55);
     private static final Color                            DEFAULT_ITEM_COLOR      = Color.rgb(164, 164, 164);
     private static final Color                            DEFAULT_SELECTION_COLOR = Color.rgb(128, 0, 0, 0.25);
+    private static final Color                            UNSELECTED_COLOR        = Color.rgb(128, 128, 128, 0.2);
     private static final int                              DEFAULT_ITEM_WIDTH      = 20;
     private static final int                              DEFAULT_NODE_GAP        = 20;
     private static final double                           DEFAULT_OPACITY         = 0.55;
@@ -841,7 +842,7 @@ public class SankeyPlot extends Region {
     private void redraw() {
         ctx.clearRect(0, 0, width, height);
         boolean useItemColor = getUseItemColor();
-        Color   itemColor    = null == selectedConnection ? getItemColor() : Color.rgb(128, 128, 128, 0.2);
+        Color   itemColor    = null == selectedConnection ? getItemColor() : UNSELECTED_COLOR;
         Color   textColor    = getTextColor();
 
         // Draw bezier curves between items
