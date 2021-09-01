@@ -1,4 +1,4 @@
-# Charts <img style="float:right;" src="https://i.ibb.co/wQCW5Q6/Candidate-1.png" width="100">
+# Charts <a align="right"><img style="float:right;" src="https://i.ibb.co/wQCW5Q6/Candidate-1.png" width="100"></a>
 
 A library for scientific charts in JavaFX. 
 
