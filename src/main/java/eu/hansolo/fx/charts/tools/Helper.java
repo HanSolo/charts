@@ -479,7 +479,8 @@ public class Helper {
     }
 
     public static final List<Color> createColorVariations(final Color COLOR, final int NO_OF_COLORS) {
-        int    noOfColors  = clamp(1, 5, NO_OF_COLORS);
+        if (NO_OF_COLORS > 25) { throw new IllegalArgumentException("Not more than 25 number of colors are allowed"); }
+        int    noOfColors  = clamp(1, 25, NO_OF_COLORS);
         double step        = 0.8 / noOfColors;
         double hue         = COLOR.getHue();
         double brg         = COLOR.getBrightness();
