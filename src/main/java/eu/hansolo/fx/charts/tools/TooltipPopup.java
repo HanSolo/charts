@@ -99,6 +99,7 @@ public class TooltipPopup extends Popup {
 
         tooltipText.setTextFill(DEFAULT_TEXT_COLOR);
         tooltipText.setFont(lightFont);
+        tooltipText.setMouseTransparent(true);
 
         pane = new StackPane(tooltipText);
         pane.setPadding(new Insets(5));

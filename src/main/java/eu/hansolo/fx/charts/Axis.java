@@ -246,7 +246,7 @@ public class Axis extends Region {
         _maxValue                         = END.toEpochSecond(Helper.getZoneOffset());
         _end                              = END;
 
-        _type                             = AxisType.DATE;
+        _type                             = AxisType.TIME;
         _autoScale                        = true;
         _title                            = "";
         _unit                             = "";
@@ -347,8 +347,23 @@ public class Axis extends Region {
     }
 
     public LocalDateTime getStart() { return null == start ? _start : start.get(); }
+    public void setStart(final long EPOCH_SECONDS) {
+        if (0 > EPOCH_SECONDS) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0"); }
+        setStart(Instant.ofEpochSecond(EPOCH_SECONDS));
+    }
+    public void setStart(final long EPOCH_SECONDS, final ZoneId ZONE_ID) {
+        if (0 > EPOCH_SECONDS || null == ZONE_ID) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0 and zone id cannot be null"); }
+        setStart(Instant.ofEpochSecond(EPOCH_SECONDS), ZONE_ID);
+    }
+    public void setStart(final Instant INSTANT) {
+        setStart(INSTANT, ZoneId.systemDefault());
+    }
+    public void setStart(final Instant INSTANT, final ZoneId ZONE_ID) {
+        if (null == INSTANT || null == ZONE_ID) { throw new IllegalArgumentException("Instant cannot be null"); }
+        setStart(LocalDateTime.ofInstant(INSTANT, ZONE_ID));
+    }
     public void setStart(final LocalDateTime DATE_TIME) {
-        if (AxisType.DATE != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
+        if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
         if (null == start) {
             _start = DATE_TIME;
             setMinValue(_start.toEpochSecond(Helper.getZoneOffset()));
@@ -360,7 +375,7 @@ public class Axis extends Region {
         if (null == start) {
             start = new ObjectPropertyBase<LocalDateTime>(_start) {
                 @Override protected void invalidated() {
-                    if (AxisType.DATE != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
+                    if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
                     setMinValue(get().toEpochSecond(Helper.getZoneOffset()));
                 }
                 @Override public Object getBean() { return Axis.this; }
@@ -395,6 +410,21 @@ public class Axis extends Region {
     }
 
     public LocalDateTime getEnd() { return null == end ? _end : end.get(); }
+    public void setEnd(final Instant INSTANT) {
+        setEnd(INSTANT, ZoneId.systemDefault());
+    }
+    public void setEnd(final long EPOCH_SECONDS) {
+        if (0 > EPOCH_SECONDS) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0"); }
+        setEnd(Instant.ofEpochSecond(EPOCH_SECONDS));
+    }
+    public void setEnd(final long EPOCH_SECONDS, final ZoneId ZONE_ID) {
+        if (0 > EPOCH_SECONDS || null == ZONE_ID) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0 and zone id cannot be null"); }
+        setEnd(Instant.ofEpochSecond(EPOCH_SECONDS), ZONE_ID);
+    }
+    public void setEnd(final Instant INSTANT, final ZoneId ZONE_ID) {
+        if (null == INSTANT || null == ZONE_ID) { throw new IllegalArgumentException("Instant cannot be null"); }
+        setEnd(LocalDateTime.ofInstant(INSTANT, ZONE_ID));
+    }
     public void setEnd(final LocalDateTime DATE_TIME) {
         if (null == end) {
             _end = DATE_TIME;
@@ -2010,7 +2040,7 @@ public class Axis extends Region {
     }
 
     private void redraw() {
-        if (AxisType.DATE == getType()) {
+        if (AxisType.TIME == getType()) {
             drawTimeAxis();
         } else {
             if (isAutoScale()) { 

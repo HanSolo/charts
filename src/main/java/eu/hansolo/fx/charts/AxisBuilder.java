@@ -33,6 +33,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.paint.Color;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -73,11 +74,51 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B) this;
     }
 
+    public final B setStart(final long EPOCH_SECONDS) {
+        if (0 > EPOCH_SECONDS) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0"); }
+        properties.put("start", new SimpleObjectProperty<>(LocalDateTime.ofInstant(Instant.ofEpochSecond(EPOCH_SECONDS), ZoneId.systemDefault())));
+        return (B) this;
+    }
+    public final B setStart(final long EPOCH_SECONDS, final ZoneId ZONE_ID) {
+        if (0 > EPOCH_SECONDS || null == ZONE_ID) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0 and zone id cannot be null"); }
+        properties.put("start", new SimpleObjectProperty<>(LocalDateTime.ofInstant(Instant.ofEpochSecond(EPOCH_SECONDS), ZONE_ID)));
+        return (B) this;
+    }
+    public final B setStart(final Instant INSTANT) {
+        if (null == INSTANT) { throw new IllegalArgumentException("Instant cannot be null"); }
+        properties.put("start", new SimpleObjectProperty<>(LocalDateTime.ofInstant(INSTANT, ZoneId.systemDefault())));
+        return (B) this;
+    }
+    public final B setStart(final Instant INSTANT, final ZoneId ZONE_ID) {
+        if (null == INSTANT || null == ZONE_ID) { throw new IllegalArgumentException("Instant or zone id cannot be null"); }
+        properties.put("start", new SimpleObjectProperty<>(LocalDateTime.ofInstant(INSTANT, ZONE_ID)));
+        return (B) this;
+    }
     public final B start(final LocalDateTime DATE_TIME) {
         properties.put("start", new SimpleObjectProperty<>(DATE_TIME));
         return (B) this;
     }
 
+    public final B setEnd(final long EPOCH_SECONDS) {
+        if (0 > EPOCH_SECONDS) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0"); }
+        properties.put("end", new SimpleObjectProperty<>(LocalDateTime.ofInstant(Instant.ofEpochSecond(EPOCH_SECONDS), ZoneId.systemDefault())));
+        return (B) this;
+    }
+    public final B setEnd(final long EPOCH_SECONDS, final ZoneId ZONE_ID) {
+        if (0 > EPOCH_SECONDS || null == ZONE_ID) { throw new IllegalArgumentException("Epoch seconds cannot be smaller than 0 and zone id cannot be null"); }
+        properties.put("end", new SimpleObjectProperty<>(LocalDateTime.ofInstant(Instant.ofEpochSecond(EPOCH_SECONDS), ZONE_ID)));
+        return (B) this;
+    }
+    public final B setEnd(final Instant INSTANT) {
+        if (null == INSTANT) { throw new IllegalArgumentException("Instant cannot be null"); }
+        properties.put("end", new SimpleObjectProperty<>(LocalDateTime.ofInstant(INSTANT, ZoneId.systemDefault())));
+        return (B) this;
+    }
+    public final B setEnd(final Instant INSTANT, final ZoneId ZONE_ID) {
+        if (null == INSTANT || null == ZONE_ID) { throw new IllegalArgumentException("Instant or zone id cannot be null"); }
+        properties.put("end", new SimpleObjectProperty<>(LocalDateTime.ofInstant(INSTANT, ZONE_ID)));
+        return (B) this;
+    }
     public final B end(final LocalDateTime DATE_TIME) {
         properties.put("end", new SimpleObjectProperty<>(DATE_TIME));
         return (B) this;
