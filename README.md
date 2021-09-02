@@ -1,4 +1,4 @@
-# Charts <img align="right" src="https://i.ibb.co/x3JSsv7/Works-with-Open-JDK.png" width="100">
+# Charts <img align="right" src="https://github.com/foojay2020/badges/raw/main/works_with_openjdk/Works-with-OpenJDK.png" width="100">
 
 
 A library for scientific charts in JavaFX. 
