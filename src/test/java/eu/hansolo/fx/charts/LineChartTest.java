@@ -23,6 +23,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -32,6 +33,9 @@ import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Locale;
 import java.util.Random;
 
 
@@ -43,6 +47,9 @@ import java.util.Random;
 public class LineChartTest extends Application {
     private static final Random               RND        = new Random();
     private static final Double               AXIS_WIDTH = 25d;
+    private              double               mouseX     = -1;
+    private              double               mouseY     = -1;
+    private              Tooltip              tooltip    = new Tooltip("");
     private              XYChartItem          p1;
     private              XYChartItem          p2;
     private              XYChartItem          p3;
@@ -155,8 +162,24 @@ public class LineChartTest extends Application {
                                .build();
 
         XYPane lineChartPane = new XYPane(xySeries1, xySeries2);
+        lineChartPane.setCrossHairVisible(true);
+        lineChartPane.addCursorEventListener(e -> {
+            mouseX = e.getX();
+            mouseY = e.getY();
+        });
 
         lineChart = new XYChart<>(lineChartPane, grid, yAxisLeft, xAxisBottom);
+        Tooltip.install(lineChart, tooltip);
+        tooltip.setAutoHide(true);
+        lineChart.setOnMouseReleased(e -> {
+            int month = (int) mouseX - 1;
+            if (month == -1) { month = 11; }
+            tooltip.setText("x: " + Month.values()[month] + "\ny: " + String.format(Locale.US, "%.2f", mouseY));
+            if (tooltip.isShowing()) {
+                tooltip.hide();
+            }
+            tooltip.show(lineChartPane.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+        });
 
         lastTimerCalled = System.nanoTime();
         timer = new AnimationTimer() {

@@ -18,6 +18,8 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.event.CursorEvent;
+import eu.hansolo.fx.charts.event.CursorEventListener;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
@@ -59,6 +61,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import static eu.hansolo.fx.charts.ChartType.SMOOTH_POLAR;
@@ -88,6 +91,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              ObservableList<XYSeries<T>>    listOfSeries;
     private              Canvas                         canvas;
     private              GraphicsContext                ctx;
+    private              Canvas                         cursorCanvas;
+    private              GraphicsContext                cursorCtx;
+    private              double                         cursorX;
+    private              double                         cursorY;
     private              double                         scaleX;
     private              double                         scaleY;
     private              double                         symbolSize;
@@ -125,9 +132,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     private              BooleanProperty                stdDeviationVisible;
     private              double                         _averageStrokeWidth;
     private              DoubleProperty                 averageStrokeWidth;
+    private              boolean                        _crossHairVisible;
+    private              BooleanProperty                crossHairVisible;
+    private              Color                          _crossHairColor;
+    private              ObjectProperty<Color>          crossHairColor;
     private              TooltipPopup                   popup;
     private              SeriesEventListener            seriesListener;
     private              EventHandler<MouseEvent>       mouseHandler;
+    private              List<CursorEventListener>      cursorEventListeners;
 
 
 
@@ -144,6 +156,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public XYPane(final Paint BACKGROUND, final int BANDS, final XYSeries<T>... SERIES) {
         getStylesheets().add(XYPane.class.getResource("chart.css").toExternalForm());
         aspectRatio          = PREFERRED_HEIGHT / PREFERRED_WIDTH;
+        cursorEventListeners = new CopyOnWriteArrayList<>();
         keepAspect           = false;
         _chartBackground     = BACKGROUND;
         listOfSeries         = FXCollections.observableArrayList(SERIES);
@@ -168,9 +181,16 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         _envelopeVisible     = false;
         _stdDeviationVisible = true;
         _averageStrokeWidth  = 1;
+        _crossHairVisible    = false;
+        _crossHairColor      = Color.GRAY;
+        cursorX              = -1;
+        cursorY              = -1;
         popup                = new TooltipPopup(2000);
         seriesListener       = e -> redraw();
         mouseHandler         = e -> {
+            cursorX = e.getX();
+            cursorY = e.getY();
+            drawCursor();
             for (XYSeries<T> series : listOfSeries) {
                 double  radius = series.getSymbolSize() * 0.5;
                 for (T item : series.getItems()) {
@@ -208,7 +228,12 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
 
-        getChildren().setAll(canvas);
+        cursorCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+        cursorCanvas.setMouseTransparent(true);
+        Helper.enableNode(cursorCanvas, true);
+        cursorCtx    = cursorCanvas.getGraphicsContext2D();
+
+        getChildren().setAll(canvas, cursorCanvas);
     }
 
     private void registerListeners() {
@@ -245,6 +270,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
     public void dispose() {
         canvas.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseHandler);
+        removeAllCursorEventListeners();
     }
 
     public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
@@ -621,6 +647,50 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         return averageStrokeWidth;
     }
 
+    public boolean isCrossHairVisible() { return null == crossHairVisible ? _crossHairVisible : crossHairVisible.get(); }
+    public void setCrossHairVisible(final boolean VISIBLE) {
+        if (null == crossHairVisible) {
+            _crossHairVisible = VISIBLE;
+            Helper.enableNode(cursorCanvas, VISIBLE);
+            drawCursor();
+        } else {
+            crossHairVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty crossHairVisibleProperty() {
+        if (null == crossHairVisible) {
+            crossHairVisible = new BooleanPropertyBase(_crossHairVisible) {
+                @Override protected void invalidated() {
+                    Helper.enableNode(cursorCanvas, get());
+                    drawCursor();
+                }
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "crossHairVisible"; }
+            };
+        }
+        return crossHairVisible;
+    }
+
+    public Color getCrossHairColor() { return null == crossHairColor ? _crossHairColor : crossHairColor.get(); }
+    public void setCrossHairColor(final Color COLOR) {
+        if (null == crossHairColor) {
+            _crossHairColor = COLOR;
+            drawCursor();
+        } else {
+            crossHairColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> crossHairColorProperty() {
+        if (null == crossHairColor) {
+            crossHairColor = new ObjectPropertyBase<>(_crossHairColor) {
+                @Override public Object getBean() { return XYPane.this; }
+                @Override public String getName() { return "crossHairColor"; }
+            };
+            _crossHairColor = null;
+        }
+        return crossHairColor;
+    }
+
     public boolean containsPolarChart() {
         for(XYSeries<T> series : listOfSeries) {
             if (null == series) { continue; }
@@ -634,6 +704,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     // ******************** Draw Chart ****************************************
     protected void redraw() {
         drawChart();
+        drawCursor();
     }
 
     private void drawChart() {
@@ -707,6 +778,19 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             } else if (listOfSmoothedMultiTimeSeries.size() == listOfSeries.size()){
                 drawSmoothedMultiTimeSeries(listOfSmoothedMultiTimeSeries);
             }
+        }
+    }
+
+    private void drawCursor() {
+        cursorCtx.clearRect(0, 0, width, height);
+        if (isCrossHairVisible()) {
+            cursorCtx.setStroke(getCrossHairColor());
+            cursorCtx.strokeLine(0, cursorY, width, cursorY);
+            cursorCtx.strokeLine(cursorX, 0, cursorX, height);
+
+            double x = cursorX / scaleX + getLowerBoundX();
+            double y = ((cursorY - height) / scaleY - getLowerBoundY()) * -1;
+            fireCursorEvent(new CursorEvent(x, y));
         }
     }
 
@@ -1806,6 +1890,23 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
 
+    // ******************** Event Handling ************************************
+    public void addCursorEventListener(final CursorEventListener LISTENER) {
+        if (cursorEventListeners.contains(LISTENER)) { return; }
+        cursorEventListeners.add(LISTENER);
+    }
+    public void removeCursorEventListener(final CursorEventListener LISTENER) {
+        if (cursorEventListeners.contains(LISTENER)) {
+            cursorEventListeners.remove(LISTENER);
+        }
+    }
+    public void removeAllCursorEventListeners() { cursorEventListeners.clear(); }
+
+    public void fireCursorEvent(final CursorEvent EVT) {
+        cursorEventListeners.forEach(listener -> listener.handleCursorEvent(EVT));
+    }
+
+
     // ******************** Resizing ******************************************
     private void resize() {
         width  = getWidth(); // - getInsets().getLeft() - getInsets().getRight();
@@ -1824,6 +1925,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             canvas.setWidth(width);
             canvas.setHeight(height);
             canvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
+
+            cursorCanvas.setWidth(width);
+            cursorCanvas.setHeight(height);
+            cursorCanvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
             symbolSize = clamp(MIN_SYMBOL_SIZE, MAX_SYMBOL_SIZE, size * 0.016);
 
