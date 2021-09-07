@@ -104,14 +104,6 @@ public class MatrixHeatmapTest extends Application {
 
 
         List<MatrixChartItem> matrixData3 = new ArrayList<>();
-        for (int x = 0 ; x <108 ; x++) {
-            int start = RND.nextInt(5);
-            int stop  = RND.nextInt(35 + 5);
-            for (int y = 0 ; y < 40 ; y++) {
-                MatrixChartItem mdo = new MatrixChartItem(x, y, RND.nextDouble());
-            }
-        }
-
         matrixItemSeries3 = new MatrixItemSeries<>(matrixData3, ChartType.MATRIX_HEATMAP);
 
         matrixHeatMap3 = new MatrixPane<>(matrixItemSeries3);
@@ -157,7 +149,7 @@ public class MatrixHeatmapTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        VBox pane = new VBox(10, matrixHeatMap1, matrixHeatMap2);
+        VBox pane = new VBox(10, matrixHeatMap1, matrixHeatMap2);//, matrixHeatMap3);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);
@@ -167,6 +159,15 @@ public class MatrixHeatmapTest extends Application {
         stage.show();
 
         timer.start();
+
+        /*
+        for (int x = 0 ; x <108 ; x++) {
+            for (int y = 0 ; y < 40 ; y++) {
+                MatrixChartItem mdo = new MatrixChartItem(x, y, RND.nextDouble());
+                matrixHeatMap3.getSeries().getItems().add(mdo);
+            }
+        }
+        */
     }
 
     @Override public void stop() {

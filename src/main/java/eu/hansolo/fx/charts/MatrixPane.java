@@ -25,6 +25,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
@@ -70,6 +71,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
     private              DoubleProperty        lowerBoundZ;
     private              double                _upperBoundZ;
     private              DoubleProperty        upperBoundZ;
+    private              ListChangeListener<T> itemListener;
 
 
     // ******************** Constructors **************************************
@@ -92,6 +94,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
         _upperBoundY     = 100;
         _lowerBoundZ     = 0;
         _upperBoundZ     = 100;
+        itemListener     = c -> redraw();
 
         initGraphics();
         registerListeners();
@@ -129,6 +132,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
         heightProperty().addListener(o -> resize());
 
         series.setOnSeriesEvent(seriesEvent -> redraw());
+        series.getItems().addListener(itemListener);
     }
 
 
@@ -141,6 +145,12 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
     @Override protected double computeMaxHeight(final double WIDTH)  { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
+
+    public void dispose() {
+        if (null != series) {
+            series.getItems().removeListener(itemListener);
+        }
+    }
 
     public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
     public void setChartBackground(final Paint PAINT) {
