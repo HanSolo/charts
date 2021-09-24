@@ -37,10 +37,10 @@ repositories {
 }
 
 dependencies {
-    implementation "org.openjfx:javafx-base:16:$platform"
-    implementation "org.openjfx:javafx-graphics:16:$platform"
-    implementation "org.openjfx:javafx-controls:16:$platform"
-    implementation "org.openjfx:javafx-swing:16:$platform"
+    implementation "org.openjfx:javafx-base:${javafxVersion}:${platform}"
+    implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
+    implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
+    implementation "org.openjfx:javafx-swing:${javafxVersion}:$platform"
 }
 
 jar {
