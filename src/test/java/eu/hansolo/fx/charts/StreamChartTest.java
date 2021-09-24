@@ -94,7 +94,10 @@ public class StreamChartTest extends Application {
             createChartItem("Anton", 3, 4, 1, Colors.DARK_PASTEL_GREEN.color),
             createChartItem("Anton", 4, 5, 1, Colors.DARK_PASTEL_GREEN.color),
             createChartItem("Anton", 3, 6, 1, Colors.DARK_PASTEL_GREEN.color),
-            createChartItem("Anton", 2, 7, 1, Colors.DARK_PASTEL_GREEN.color)
+            createChartItem("Anton", 2, 7, 1, Colors.DARK_PASTEL_GREEN.color),
+
+            createChartItem("Neo", 5, 3, 1, Colors.STARSHIP.color),
+            createChartItem("Neo", 3, 6, 1, Colors.STARSHIP.color)
         };
 
         for (ChartItem item : itemsStacked) {

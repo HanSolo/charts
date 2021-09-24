@@ -47,6 +47,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
@@ -823,12 +824,14 @@ public class StreamChart extends Region {
         int    noOfCategories = chartItems.size();
         Type   type           = getType();
         double halfItemWidth  = getItemWidth() * 0.5;
+        double singleItemWith = getItemWidth() * 5;
         double offsetY        = Type.STACKED == type ? 0 : height * 0.5;
 
         // Draw bezier curves between items
         for (int category = 0 ; category < noOfCategories ; category++) {
             List<ChartItemData> itemDataInCategory = itemsPerCategory.get(category);
-            int nextCategory = category + 1;
+            int previousCategory = category - 1;
+            int nextCategory     = category + 1;
 
             if (null == itemDataInCategory) { continue; }
             // Go through all item data of the current category
@@ -838,15 +841,36 @@ public class StreamChart extends Region {
 
                 // Create path if current item is also present in next category
                 if (category < noOfCategories) {
-                    List<ChartItemData> nextCategoryItemDataList = itemsPerCategory.get(nextCategory);
+                    List<ChartItemData> previousCategoryItemDataList = previousCategory >= 0 ? itemsPerCategory.get(previousCategory) : new ArrayList<>();
+                    List<ChartItemData> nextCategoryItemDataList     = itemsPerCategory.get(nextCategory);
                     if (null == nextCategoryItemDataList) continue;
-                    Optional<ChartItemData> targetItemDataOptional = nextCategoryItemDataList.stream().filter(id -> {
+                    Optional<ChartItemData> nextItemDataOptional = nextCategoryItemDataList.stream().filter(id -> {
                         if (null == id.getChartItem().getName() || null == item.getName()) { return false; }
                         return id.getChartItem().getName().equals(item.getName());
                     }).findFirst();
-                    if (!targetItemDataOptional.isPresent()) { continue; }
+                    Optional<ChartItemData> previousItemDataOptional = previousCategoryItemDataList.stream().filter(id -> {
+                        if (null == id.getChartItem().getName() || null == item.getName()) { return false; }
+                        return id.getChartItem().getName().equals(item.getName());
+                    }).findFirst();
 
-                    ChartItemData targetItemData   = targetItemDataOptional.get();
+                    // Drawing a box for one time events
+                    if (!nextItemDataOptional.isPresent()) {
+                        if (!previousItemDataOptional.isPresent()) {
+                            Path rectPath = new Path();
+                            rectPath.setFill(item.getFill());
+                            rectPath.setStroke(item.getFill());
+                            rectPath.moveTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 3);
+                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMinY() + 3);
+                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMaxY() - 3);
+                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMaxY() - 3);
+                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 3);
+                            rectPath.closePath();
+                            bezierPaths.put(rectPath, item);
+                        }
+                        continue;
+                    }
+
+                    ChartItemData targetItemData   = nextItemDataOptional.get();
                     CtxBounds     targetItemBounds = targetItemData.getBounds();
 
                     // Calculate the offset in x direction for the bezier curve control points
