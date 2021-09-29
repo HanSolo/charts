@@ -824,7 +824,7 @@ public class StreamChart extends Region {
         int    noOfCategories = chartItems.size();
         Type   type           = getType();
         double halfItemWidth  = getItemWidth() * 0.5;
-        double singleItemWith = getItemWidth() * 5;
+        double singleItemWith = getItemWidth();
         double offsetY        = Type.STACKED == type ? 0 : height * 0.5;
 
         // Draw bezier curves between items
@@ -859,11 +859,11 @@ public class StreamChart extends Region {
                             Path rectPath = new Path();
                             rectPath.setFill(item.getFill());
                             rectPath.setStroke(item.getFill());
-                            rectPath.moveTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 3);
-                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMinY() + 3);
-                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMaxY() - 3);
-                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMaxY() - 3);
-                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 3);
+                            rectPath.moveTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 1);
+                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMinY() + 1);
+                            rectPath.lineTo(bounds.getCenterX() + singleItemWith, bounds.getMaxY() - 1);
+                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMaxY() - 1);
+                            rectPath.lineTo(bounds.getCenterX() - singleItemWith, bounds.getMinY() + 1);
                             rectPath.closePath();
                             bezierPaths.put(rectPath, item);
                         }
