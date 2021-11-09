@@ -1,7 +1,10 @@
 # Charts <a href="https://foojay.io/today/works-with-openjdk"><img align="right" src="https://github.com/foojayio/badges/raw/main/works_with_openjdk/Works-with-OpenJDK.png" width="100"></a>
+
+[![GitHub stars](https://badgen.net/github/stars/HanSolo/charts)](https://GitHub.com/HanSolo/charts/stargazers/)
+
+[![GitHub license](https://badgen.net/github/license/HanSolo/charts)](https://github.com/HanSolo/charts/blob/master/LICENSE)
+
 <br>
-
-
 A library for scientific charts in JavaFX. 
 
 This is still a work in development, but here are some of the charts being worked on so far. 
