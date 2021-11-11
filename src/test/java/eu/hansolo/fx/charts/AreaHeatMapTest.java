@@ -20,7 +20,7 @@ import eu.hansolo.fx.charts.areaheatmap.AreaHeatMap;
 import eu.hansolo.fx.charts.areaheatmap.AreaHeatMap.Quality;
 import eu.hansolo.fx.charts.areaheatmap.AreaHeatMapBuilder;
 import eu.hansolo.fx.charts.data.DataPoint;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
@@ -55,7 +55,7 @@ public class AreaHeatMapTest extends Application {
 
         areaHeatMap = AreaHeatMapBuilder.create()
                                         .prefSize(400, 400)
-                                        .colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
+                                        .colorMapping(ChartsColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
                                         .quality(Quality.FINE)
                                         .heatMapOpacity(0.5)
                                         .useColorMapping(true)

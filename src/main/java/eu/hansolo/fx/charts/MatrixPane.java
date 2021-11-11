@@ -19,8 +19,9 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.PixelMatrix.PixelShape;
 import eu.hansolo.fx.charts.data.MatrixItem;
 import eu.hansolo.fx.charts.series.MatrixItemSeries;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.Mapping;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -84,7 +85,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
         keepAspect       = false;
         _chartBackground = BACKGROUND;
         series           = SERIES;
-        matrixGradient   = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.getGradient();
+        matrixGradient   = ChartsColorMapping.BLUE_CYAN_GREEN_YELLOW_RED.getGradient();
         scaleX           = 1;
         scaleY           = 1;
         scaleZ           = 1;
@@ -317,7 +318,7 @@ public class MatrixPane<T extends MatrixItem> extends Region implements ChartAre
 
     public PixelMatrix getMatrix() { return matrix; }
 
-    public void setColorMapping(final ColorMapping MAPPING) { setMatrixGradient(MAPPING.getGradient()); }
+    public void setColorMapping(final Mapping MAPPING) { setMatrixGradient(MAPPING.getGradient()); }
 
     public LinearGradient getMatrixGradient() { return matrixGradient; }
     public void setMatrixGradient(final LinearGradient GRADIENT) {

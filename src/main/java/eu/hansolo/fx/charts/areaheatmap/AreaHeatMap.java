@@ -18,8 +18,9 @@ package eu.hansolo.fx.charts.areaheatmap;
 
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.Mapping;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -39,7 +40,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -51,11 +51,7 @@ import java.util.List;
 @DefaultProperty("children")
 public class AreaHeatMap extends Region {
     public enum Quality {
-        FINE(2),
-        BETTER(4),
-        NORMAL(8),
-        POOR(16),
-        RAW(32);
+        FINE(2), BETTER(4), NORMAL(8), POOR(16), RAW(32);
 
         private final int FACTOR;
 
@@ -65,38 +61,40 @@ public class AreaHeatMap extends Region {
 
         public int getFactor() { return FACTOR; }
     }
-    private static final double                       PREFERRED_WIDTH  = 250;
-    private static final double                       PREFERRED_HEIGHT = 250;
-    private static final double                       MINIMUM_WIDTH    = 50;
-    private static final double                       MINIMUM_HEIGHT   = 50;
-    private static final double                       MAXIMUM_WIDTH    = 1024;
-    private static final double                       MAXIMUM_HEIGHT   = 1024;
-    private              double                       size;
-    private              double                       width;
-    private              double                       height;
-    private              Canvas                       canvas;
-    private              GraphicsContext              ctx;
-    private              List<DataPoint>              points;
-    private              List<DataPoint>              polygon;
-    private              int                          _quality;
-    private              IntegerProperty              quality;
-    private              int                          _noOfCloserInfluentPoints;
-    private              IntegerProperty              noOfCloserInfluentPoints;
-    private              double                       _heatMapOpacity;
-    private              DoubleProperty               heatMapOpacity;
-    private              boolean                      _dataPointsVisible;
-    private              BooleanProperty              dataPointsVisible;
-    private              boolean                      _discreteColors;
-    private              BooleanProperty              discreteColors;
-    private              boolean                      _smoothedHull;
-    private              BooleanProperty              smoothedHull;
-    private              ColorMapping                 _mapping;
-    private              ObjectProperty<ColorMapping> mapping;
-    private              boolean                      _useColorMapping;
-    private              BooleanProperty              useColorMapping;
-    private              double                       minValue;
-    private              double                       maxValue;
-    private              double                       range;
+
+
+    private static final double                  PREFERRED_WIDTH  = 250;
+    private static final double                  PREFERRED_HEIGHT = 250;
+    private static final double                  MINIMUM_WIDTH    = 50;
+    private static final double                  MINIMUM_HEIGHT   = 50;
+    private static final double                  MAXIMUM_WIDTH    = 1024;
+    private static final double                  MAXIMUM_HEIGHT   = 1024;
+    private              double                  size;
+    private              double                  width;
+    private              double                  height;
+    private              Canvas                  canvas;
+    private              GraphicsContext         ctx;
+    private              List<DataPoint>         points;
+    private              List<DataPoint>         polygon;
+    private              int                     _quality;
+    private              IntegerProperty         quality;
+    private              int                     _noOfCloserInfluentPoints;
+    private              IntegerProperty         noOfCloserInfluentPoints;
+    private              double                  _heatMapOpacity;
+    private              DoubleProperty          heatMapOpacity;
+    private              boolean                 _dataPointsVisible;
+    private              BooleanProperty         dataPointsVisible;
+    private              boolean                 _discreteColors;
+    private              BooleanProperty         discreteColors;
+    private              boolean                 _smoothedHull;
+    private              BooleanProperty         smoothedHull;
+    private              Mapping                 _mapping;
+    private              ObjectProperty<Mapping> mapping;
+    private              boolean                 _useColorMapping;
+    private              BooleanProperty         useColorMapping;
+    private              double                  minValue;
+    private              double                  maxValue;
+    private              double                  range;
 
 
     // ******************** Constructors **************************************
@@ -119,7 +117,7 @@ public class AreaHeatMap extends Region {
         _discreteColors           = false;
         _smoothedHull             = false;
 
-        _mapping                  = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED;
+        _mapping                  = ChartsColorMapping.BLUE_CYAN_GREEN_YELLOW_RED;
 
         _useColorMapping          = true;
         minValue                  = Double.MAX_VALUE;
@@ -297,8 +295,8 @@ public class AreaHeatMap extends Region {
         return discreteColors;
     }
 
-    public ColorMapping getMapping() { return null == mapping ? _mapping : mapping.get(); }
-    public void setColorMapping(final ColorMapping MAPPING) {
+    public Mapping getMapping() { return null == mapping ? _mapping : mapping.get(); }
+    public void setColorMapping(final Mapping MAPPING) {
         if (null == mapping) {
             _mapping = MAPPING;
             redraw();
@@ -306,9 +304,9 @@ public class AreaHeatMap extends Region {
             mapping.set(MAPPING);
         }
     }
-    public ObjectProperty<ColorMapping> mappingProperty() {
+    public ObjectProperty<Mapping> mappingProperty() {
         if (null == mapping) {
-            mapping = new ObjectPropertyBase<ColorMapping>(_mapping) {
+            mapping = new ObjectPropertyBase<Mapping>(_mapping) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return AreaHeatMap.this; }
                 @Override public String getName() { return "mapping"; }

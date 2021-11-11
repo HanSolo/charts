@@ -19,9 +19,10 @@ package eu.hansolo.fx.charts.world;
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
+import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -140,7 +141,7 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
         return (B)this;
     }
 
-    public final B colorMapping(final ColorMapping COLOR_MAPPING) {
+    public final B colorMapping(final Mapping COLOR_MAPPING) {
         properties.put("colorMapping", new SimpleObjectProperty<>(COLOR_MAPPING));
         return (B) this;
     }
@@ -283,7 +284,7 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
     }
 
     public final World build() {
-        ColorMapping        colorMapping        = properties.containsKey("colorMapping") ? ((ObjectProperty<ColorMapping>) properties.get("colorMapping")).get() : ColorMapping.INFRARED_3;
+        Mapping             colorMapping        = properties.containsKey("colorMapping") ? ((ObjectProperty<Mapping>) properties.get("colorMapping")).get() : ChartsColorMapping.INFRARED_3;
         double              eventRadius         = properties.containsKey("eventRadius") ? ((DoubleProperty) properties.get("eventRadius")).get() : 5;
         boolean             fadeColors          = properties.containsKey("fadeColors") ? ((BooleanProperty) properties.get("fadeColors")).get() : false;
         double              heatMapOpacity      = properties.containsKey("heatMapOpacity") ? ((DoubleProperty) properties.get("heatMapOpacity")).get() : 0.5;

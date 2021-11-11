@@ -16,7 +16,8 @@
 
 package eu.hansolo.fx.charts.heatmap;
 
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
+import eu.hansolo.fx.charts.tools.Mapping;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -62,7 +63,7 @@ public class HeatMapBuilder<B extends HeatMapBuilder<B>> {
         return (B)this;
     }
 
-    public final B colorMapping(final ColorMapping COLOR_MAPPING) {
+    public final B colorMapping(final Mapping COLOR_MAPPING) {
         properties.put("colorMapping", new SimpleObjectProperty<>(COLOR_MAPPING));
         return (B)this;
     }
@@ -90,7 +91,7 @@ public class HeatMapBuilder<B extends HeatMapBuilder<B>> {
     public final HeatMap build() {
         double              width               = 400;
         double              height              = 400;
-        ColorMapping        colorMapping        = ColorMapping.LIME_YELLOW_RED;
+        Mapping             colorMapping        = ChartsColorMapping.LIME_YELLOW_RED;
         double              spotRadius          = 15.5;
         boolean             fadeColors          = false;
         double              heatMapOpacity      = 0.5;
@@ -106,7 +107,7 @@ public class HeatMapBuilder<B extends HeatMapBuilder<B>> {
             } else if ("height".equals(key)) {
                 height = ((DoubleProperty) properties.get(key)).get();
             } else if ("colorMapping".equals(key)) {
-                colorMapping = ((ObjectProperty<ColorMapping>) properties.get(key)).get();
+                colorMapping = ((ObjectProperty<Mapping>) properties.get(key)).get();
             } else if ("spotRadius".equals(key)) {
                 spotRadius = ((DoubleProperty) properties.get(key)).get();
             } else if ("fadeColors".equals(key)) {

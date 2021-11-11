@@ -16,8 +16,9 @@
 
 package eu.hansolo.fx.charts.heatmap;
 
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.animation.Interpolator;
 import javafx.application.Platform;
@@ -49,7 +50,7 @@ public class HeatMap extends ImageView {
     private static final SnapshotParameters SNAPSHOT_PARAMETERS = new SnapshotParameters();
     private              List<HeatMapSpot>   spotList;
     private              Map<String, Image>  spotImages;
-    private              ColorMapping        colorMapping;
+    private              Mapping             colorMapping;
     private              LinearGradient      mappingGradient;
     private              boolean             fadeColors;
     private              double              radius;
@@ -63,18 +64,18 @@ public class HeatMap extends ImageView {
 
     // ******************** Constructors **************************************
     public HeatMap() {
-        this(100, 100, ColorMapping.LIME_YELLOW_RED, 15.5, true, 0.5, OpacityDistribution.CUSTOM);
+        this(100, 100, ChartsColorMapping.LIME_YELLOW_RED, 15.5, true, 0.5, OpacityDistribution.CUSTOM);
     }
     public HeatMap(final double WIDTH, final double HEIGHT) {
-        this(WIDTH, HEIGHT, ColorMapping.LIME_YELLOW_RED, 15.5, true, 0.5, OpacityDistribution.CUSTOM);
+        this(WIDTH, HEIGHT, ChartsColorMapping.LIME_YELLOW_RED, 15.5, true, 0.5, OpacityDistribution.CUSTOM);
     }
-    public HeatMap(final double WIDTH, final double HEIGHT, ColorMapping COLOR_MAPPING) {
+    public HeatMap(final double WIDTH, final double HEIGHT, Mapping COLOR_MAPPING) {
         this(WIDTH, HEIGHT, COLOR_MAPPING, 15.5, true, 0.5, OpacityDistribution.CUSTOM);
     }
-    public HeatMap(final double WIDTH, final double HEIGHT, ColorMapping COLOR_MAPPING, final double SPOT_RADIUS) {
+    public HeatMap(final double WIDTH, final double HEIGHT, Mapping COLOR_MAPPING, final double SPOT_RADIUS) {
         this(WIDTH, HEIGHT, COLOR_MAPPING, SPOT_RADIUS, true, 0.5, OpacityDistribution.CUSTOM);
     }
-    public HeatMap(final double WIDTH, final double HEIGHT, ColorMapping COLOR_MAPPING, final double SPOT_RADIUS, final boolean FADE_COLORS, final double HEAT_MAP_OPACITY, final OpacityDistribution OPACITY_DISTRIBUTION) {
+    public HeatMap(final double WIDTH, final double HEIGHT, Mapping COLOR_MAPPING, final double SPOT_RADIUS, final boolean FADE_COLORS, final double HEAT_MAP_OPACITY, final OpacityDistribution OPACITY_DISTRIBUTION) {
         super();
         SNAPSHOT_PARAMETERS.setFill(Color.TRANSPARENT);
         spotList            = new ArrayList<>();
@@ -171,7 +172,7 @@ public class HeatMap extends ImageView {
      * to visualize the data
      * @return
      */
-    public ColorMapping getColorMapping() { return colorMapping; }
+    public Mapping getColorMapping() { return colorMapping; }
     /**
      * The ColorMapping enum contains some examples for color mappings
      * that might be useful to visualize data and here you could set
@@ -179,7 +180,7 @@ public class HeatMap extends ImageView {
      * the heat map automatically.
      * @param COLOR_MAPPING
      */
-    public void setColorMapping(final ColorMapping COLOR_MAPPING) {
+    public void setColorMapping(final Mapping COLOR_MAPPING) {
         colorMapping    = COLOR_MAPPING;
         mappingGradient = COLOR_MAPPING.getGradient();
         updateHeatMap();

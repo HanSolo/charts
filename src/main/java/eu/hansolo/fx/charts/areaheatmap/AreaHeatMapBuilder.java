@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts.areaheatmap;
 
 import eu.hansolo.fx.charts.areaheatmap.AreaHeatMap.Quality;
 import eu.hansolo.fx.charts.data.DataPoint;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.Mapping;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -67,7 +67,7 @@ public class AreaHeatMapBuilder<B extends AreaHeatMapBuilder<B>> {
         return (B)this;
     }
 
-    public final B colorMapping(final ColorMapping COLOR_MAPPING) {
+    public final B colorMapping(final Mapping COLOR_MAPPING) {
         properties.put("colorMapping", new SimpleObjectProperty<>(COLOR_MAPPING));
         return (B)this;
     }
@@ -118,7 +118,7 @@ public class AreaHeatMapBuilder<B extends AreaHeatMapBuilder<B>> {
                 Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
                 CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
             } else if ("colorMapping".equals(key)) {
-                CONTROL.setColorMapping(((ObjectProperty<ColorMapping>) properties.get(key)).get());
+                CONTROL.setColorMapping(((ObjectProperty<Mapping>) properties.get(key)).get());
             } else if("useColorMapping".equals(key)) {
                 CONTROL.setUseColorMapping(((BooleanProperty) properties.get(key)).get());
             } else if ("quality".equals(key)) {

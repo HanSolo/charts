@@ -18,8 +18,6 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
-import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ColorMapping;
 import eu.hansolo.fx.charts.tools.MapPoint;
 import eu.hansolo.fx.charts.world.World;
 import eu.hansolo.fx.charts.world.World.Resolution;
@@ -31,7 +29,6 @@ import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 

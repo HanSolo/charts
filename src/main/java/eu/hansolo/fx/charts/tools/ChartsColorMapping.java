@@ -22,7 +22,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 
 
-public enum ColorMapping {
+public enum ChartsColorMapping implements Mapping {
     LIME_YELLOW_RED(new Stop(0.0, Color.LIME), new Stop(0.8, Color.YELLOW), new Stop(1.0, Color.RED)),
     BLUE_CYAN_GREEN_YELLOW_RED(new Stop(0.0, Color.BLUE), new Stop(0.25, Color.CYAN), new Stop(0.5, Color.LIME), new Stop(0.75, Color.YELLOW), new Stop(1.0, Color.RED)),
     INFRARED_1(new Stop(0.0, Color.BLACK), new Stop(0.1, Color.rgb(25, 20, 126)), new Stop(0.3, Color.rgb(192, 40, 150)), new Stop(0.5, Color.rgb(234, 82, 10)), new Stop(0.85, Color.rgb(255, 220, 25)), new Stop(1.0, Color.WHITE)),
@@ -43,13 +43,13 @@ public enum ColorMapping {
 
     private final Stop[] stops;
 
-    ColorMapping(final Stop... STOPS) {
+    ChartsColorMapping(final Stop... STOPS) {
         this.stops    = STOPS;
         this.gradient = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, STOPS);
     }
 
 
-    public Stop[] getStops() { return stops; }
+    @Override public Stop[] getStops() { return stops; }
 
-    public LinearGradient getGradient() { return gradient; }
+    @Override public LinearGradient getGradient() { return gradient; }
 }

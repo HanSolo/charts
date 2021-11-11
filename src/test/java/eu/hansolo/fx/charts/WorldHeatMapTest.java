@@ -17,12 +17,17 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
+import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.charts.world.World;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import eu.hansolo.fx.charts.world.WorldBuilder;
 import javafx.application.Application;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
@@ -52,12 +57,25 @@ public class WorldHeatMapTest extends Application {
             e.printStackTrace();
         }
 
+        Mapping customMapping = new Mapping() {
+            private final Stop[]         stops = { new Stop(0.0, Color.LIME), new Stop(0.8, Color.YELLOW), new Stop(1.0, Color.CYAN) };
+            private final LinearGradient gradient = new LinearGradient(0, 0, 100, 0, false, CycleMethod.NO_CYCLE, stops);
+
+            @Override public Stop[] getStops() { return stops; }
+            @Override public LinearGradient getGradient() { return gradient; }
+        };
+
         worldMap = WorldBuilder.create()
                                .resolution(Resolution.HI_RES)
+                               //.backgroundColor(Color.BLACK)
+                               .fillColor(Color.BLACK)
                                .zoomEnabled(false)
                                .hoverEnabled(false)
                                .selectionEnabled(false)
-                               .colorMapping(ColorMapping.BLUE_YELLOW_RED)
+                               //.colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
+                               //.colorMapping(ChartsColorMapping.BLUE_GREEN_RED)
+                               //.colorMapping(ChartsColorMapping.BLACK_WHITE)
+                               .colorMapping(customMapping)
                                .fadeColors(true)
                                .eventRadius(3)
                                .heatMapOpacity(0.75)

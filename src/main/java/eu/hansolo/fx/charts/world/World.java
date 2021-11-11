@@ -22,10 +22,11 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.heatmap.HeatMap;
 import eu.hansolo.fx.charts.heatmap.HeatMapBuilder;
 import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ColorMapping;
+import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
+import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -75,11 +76,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.shape.ArcType;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
@@ -88,7 +87,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -96,7 +94,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -161,7 +158,7 @@ public class World extends Region {
     private              GraphicsContext                 overlayCtx;
     private              Map<String, List<CountryPath>>  countryPaths;
     private              ObservableMap<Location, Shape>  locations;
-    private              ColorMapping                    colorMapping;
+    private              Mapping                         colorMapping;
     private              double                          spotRadius;
     private              boolean                         fadeColors;
     private              OpacityDistribution             opacityDistribution;
@@ -201,12 +198,12 @@ public class World extends Region {
 
     // ******************** Constructors **************************************
     public World() {
-        this(Resolution.HI_RES, ColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
+        this(Resolution.HI_RES, ChartsColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
     }
     public World(final Resolution RESOLUTION) {
-        this(RESOLUTION, ColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
+        this(RESOLUTION, ChartsColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
     }
-    public World(final Resolution RESOLUTION, final ColorMapping COLOR_MAPPING, final double EVENT_RADIUS, final boolean FADE_COLORS, final OpacityDistribution OPACITY_DISTRIBUTION, final double HEAT_MAP_OPACITY) {
+    public World(final Resolution RESOLUTION, final Mapping COLOR_MAPPING, final double EVENT_RADIUS, final boolean FADE_COLORS, final OpacityDistribution OPACITY_DISTRIBUTION, final double HEAT_MAP_OPACITY) {
         resolutionProperties   = readProperties(Resolution.HI_RES == RESOLUTION ? World.HIRES_PROPERTIES : World.LORES_PROPERTIES);
         backgroundColor        = new StyleableObjectProperty<Color>(BACKGROUND_COLOR.getInitialValue(World.this)) {
             @Override protected void invalidated() { setBackground(new Background(new BackgroundFill(get(), CornerRadii.EMPTY, Insets.EMPTY))); }
@@ -733,7 +730,7 @@ public class World extends Region {
      * to visualize the data
      * @return
      */
-    public ColorMapping getColorMapping() { return heatMap.getColorMapping(); }
+    public Mapping getColorMapping() { return heatMap.getColorMapping(); }
 
     /**
      * The ColorMapping enum contains some examples for color mappings
@@ -742,7 +739,7 @@ public class World extends Region {
      * the heat map automatically.
      * @param COLOR_MAPPING
      */
-    public void setColorMapping(final ColorMapping COLOR_MAPPING) { heatMap.setColorMapping(COLOR_MAPPING); }
+    public void setColorMapping(final Mapping COLOR_MAPPING) { heatMap.setColorMapping(COLOR_MAPPING); }
 
     /**
      * Returns true if the heat map is used to visualize frequencies (default)
