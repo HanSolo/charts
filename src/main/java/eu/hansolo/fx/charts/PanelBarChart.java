@@ -193,10 +193,11 @@ public class PanelBarChart extends Region {
     public ObservableList<? extends Category> getCategories() { return categories; }
 
     public ObservableList<ChartItemSeries<ChartItem>> getListOfSeries() { return listOfSeries; }
-    public void setSeries(final ChartItemSeries<ChartItem>... arrayOfSeries) {
-        setSeries(Arrays.asList(arrayOfSeries));
+    public void setListOfSeries(final ChartItemSeries<ChartItem>... arrayOfSeries) {
+        setListOfSeries(Arrays.asList(arrayOfSeries));
     }
-    public void setSeries(final List<ChartItemSeries<ChartItem>> listOfSeries) {
+    public void setListOfSeries(final List<ChartItemSeries<ChartItem>> listOfSeries) {
+        this.sumsPerCategory.clear();
         this.listOfSeries.setAll(listOfSeries);
     }
 
