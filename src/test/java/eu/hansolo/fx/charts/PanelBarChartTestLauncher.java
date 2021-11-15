@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2021 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +18,6 @@
 
 package eu.hansolo.fx.charts;
 
-public enum ChartType {
-    SCATTER, LINE, SMOOTH_LINE, AREA, SMOOTH_AREA, BAR, BUBBLE, DONUT, RADAR_POLYGON, SMOOTH_RADAR_POLYGON, RADAR_SECTOR,
-    POLAR, SMOOTH_POLAR, HORIZON, SMOOTHED_HORIZON, MATRIX_HEATMAP, LINE_DELTA, SMOOTH_LINE_DELTA, NESTED_BAR, PARALLEL_COORDINATES,
-    RIDGE_LINE, MULTI_TIME_SERIES, SMOOTHED_MULTI_TIME_SERIES, PANEL_BAR_CHART
+public class PanelBarChartTestLauncher {
+    public static void main(String[] args) { PanelBarChartTest.main(args); }
 }

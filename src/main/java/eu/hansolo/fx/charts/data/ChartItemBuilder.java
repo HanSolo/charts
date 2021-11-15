@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts.data;
 
+import eu.hansolo.fx.charts.Category;
 import eu.hansolo.fx.charts.Symbol;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -67,6 +68,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
 
     public final B description(final String DESCRIPTION) {
         properties.put("description", new SimpleStringProperty(DESCRIPTION));
+        return (B)this;
+    }
+
+    public final B category(final Category CATEGORY) {
+        properties.put("category", new SimpleObjectProperty(CATEGORY));
         return (B)this;
     }
 
@@ -143,6 +149,8 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setUnit(((StringProperty) properties.get(key)).get());
             } else if ("description".equals(key)) {
                 ITEM.setDescription(((StringProperty) properties.get(key)).get());
+            } else if ("category".equals(key)) {
+                ITEM.setCategory(((ObjectProperty<Category>) properties.get(key)).get());
             } else if("fill".equals(key)) {
                 ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if("stroke".equals(key)) {

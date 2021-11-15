@@ -50,7 +50,6 @@ import javafx.scene.text.TextAlignment;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -67,6 +66,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 
@@ -1308,5 +1309,25 @@ public class Helper {
         } catch (IOException e) {
             return "";
         }
+    }
+
+    private static final NavigableMap<Long, String> SUFFIXES = new TreeMap<>(Map.of(1_000L, "k",
+                                                                                    1_000_000L, "M",
+                                                                                    1_000_000_000L, "G",
+                                                                                    1_000_000_000_000L, "T",
+                                                                                    1_000_000_000_000_000L, "P",
+                                                                                    1_000_000_000_000_000_000L, "E"));
+    public static String format(final long value) {
+        //Long.MIN_VALUE == -Long.MIN_VALUE so we need an adjustment here
+        if (value == Long.MIN_VALUE) { return format(Long.MIN_VALUE + 1); }
+        if (value < 0)               { return "-" + format(-value); }
+        if (value < 1000)            { return Long.toString(value); }
+
+        final Entry<Long, String> entry      = SUFFIXES.floorEntry(value);
+        final Long                divideBy   = entry.getKey();
+        final String              suffix     = entry.getValue();
+        final long                truncated  = value / (divideBy / 10);
+        final boolean             hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
+        return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
     }
 }

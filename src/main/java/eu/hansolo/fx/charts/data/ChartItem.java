@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts.data;
 
+import eu.hansolo.fx.charts.Category;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEvent;
@@ -47,41 +48,43 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ChartItem implements Item, Comparable<ChartItem> {
-    private final ItemEvent               UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
-    private final ItemEvent               FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
-    private       List<ItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
-    private       int                     _index;
-    private       IntegerProperty         index;
-    private       String                  _name;
-    private       StringProperty          name;
-    private       String                  _unit;
-    private       StringProperty          unit;
-    private       String                  _description;
-    private       StringProperty          description;
-    private       double                  _value;
-    private       DoubleProperty          value;
-    private       double                  oldValue;
-    private       Color                   _fill;
-    private       ObjectProperty<Color>   fill;
-    private       Color                   _stroke;
-    private       ObjectProperty<Color>   stroke;
-    private       Color                   _textFill;
-    private       ObjectProperty<Color>   textFill;
-    private       Instant                 _timestamp;
-    private       ObjectProperty<Instant> timestamp;
-    private       Symbol                  _symbol;
-    private       ObjectProperty<Symbol>  symbol;
-    private       boolean                 _animated;
-    private       BooleanProperty         animated;
-    private       double                  _x;
-    private       DoubleProperty          x;
-    private       double                  _y;
-    private       DoubleProperty          y;
-    private       boolean                 _isEmpty;
-    private       BooleanProperty         isEmpty;
-    private       long                    animationDuration;
-    private       DoubleProperty          currentValue;
-    private       Timeline                timeline;
+    private final ItemEvent                UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
+    private final ItemEvent                FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
+    private       List<ItemEventListener>  listenerList   = new CopyOnWriteArrayList<>();
+    private       int                      _index;
+    private       IntegerProperty          index;
+    private       String                   _name;
+    private       StringProperty           name;
+    private       String                   _unit;
+    private       StringProperty           unit;
+    private       String                   _description;
+    private       StringProperty           description;
+    private       Category                 _category;
+    private       ObjectProperty<Category> category;
+    private       double                   _value;
+    private       DoubleProperty           value;
+    private       double                   oldValue;
+    private       Color                    _fill;
+    private       ObjectProperty<Color>    fill;
+    private       Color                    _stroke;
+    private       ObjectProperty<Color>    stroke;
+    private       Color                    _textFill;
+    private       ObjectProperty<Color>    textFill;
+    private       Instant                  _timestamp;
+    private       ObjectProperty<Instant>  timestamp;
+    private       Symbol                   _symbol;
+    private       ObjectProperty<Symbol>   symbol;
+    private       boolean                  _animated;
+    private       BooleanProperty          animated;
+    private       double                   _x;
+    private       DoubleProperty           x;
+    private       double                   _y;
+    private       DoubleProperty           y;
+    private       boolean                  _isEmpty;
+    private       BooleanProperty          isEmpty;
+    private       long                     animationDuration;
+    private       DoubleProperty           currentValue;
+    private       Timeline                 timeline;
 
 
     // ******************** Constructors **************************************
@@ -177,6 +180,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _name             = NAME;
         _unit             = "";
         _description      = "";
+        _category         = null;
         _value            = VALUE;
         oldValue          = 0;
         _fill             = FILL;
@@ -285,6 +289,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             _description = null;
         }
         return description;
+    }
+
+    public Category getCategory() { return null == category ? _category : category.get(); }
+    public void setCategory(final Category CATEGORY) {
+        if (null == category) {
+            _category = CATEGORY;
+            fireItemEvent(UPDATE_EVENT);
+        } else {
+            category.set(CATEGORY);
+        }
+    }
+    public ObjectProperty<Category> categoryProperty() {
+        if (null == category) {
+            category = new ObjectPropertyBase<>(_category) {
+                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "category"; }
+            };
+            _category = null;
+        }
+        return category;
     }
 
     public double getValue() { return null == value ? _value : value.get(); }
@@ -545,6 +570,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
                                   .append("  \"name\":").append(getName()).append(",\n")
                                   .append("  \"unit\":").append(getUnit()).append(",\n")
                                   .append("  \"description\":").append(getDescription()).append(",\n")
+                                  .append("  \"category\":").append(getCategory()).append(",\n")
                                   .append("  \"value\":").append(getValue()).append(",\n")
                                   .append("  \"timestamp\":").append(getTimestamp().toEpochMilli()).append(",\n")
                                   .append("}")

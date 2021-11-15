@@ -33,6 +33,9 @@ public class Rectangle {
     public Rectangle(Rectangle r) {
         this(r.x, r.y, r.width, r.height);
     }
+    public Rectangle(double x, double y, double width, double height) {
+        this((int) x, (int) y, (int) width, (int) height);
+    }
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
@@ -59,6 +62,9 @@ public class Rectangle {
         height = y2 - y;
     }
 
+    public boolean contains(double cx, double cy) {
+        return contains((int) cx, (int) cy);
+    }
     public boolean contains(int cx, int cy) {
         int tw = this.width;
         int th = this.height;

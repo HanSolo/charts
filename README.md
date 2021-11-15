@@ -141,3 +141,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## Multi Time Series chart
 ![MultiTimeSeries](https://i.ibb.co/KLvcLfb/Multi-Time-Series-Charts.png)
+
+
+## PanelBarChart
+![PanelBarChart](https://i.ibb.co/VpzbnfT/Panel-Bar-Chart.png")

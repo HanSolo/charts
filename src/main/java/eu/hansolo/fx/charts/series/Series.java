@@ -20,7 +20,6 @@ import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.data.XYItem;
 import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.ItemEventListener;
 import eu.hansolo.fx.charts.event.SeriesEvent;
@@ -143,24 +142,22 @@ public abstract class Series<T extends Item> {
 
     // ******************** Initialization ************************************
     private void registerListeners() {
-        items.addListener(new ListChangeListener<T>() {
-            @Override public void onChanged(final Change<? extends T> c) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        c.getAddedSubList().forEach(item -> {
-                            if (item instanceof XYChartItem) {
-                                XYChartItem xyChartItem = (XYChartItem) item;
-                                xyChartItem.addItemEventListener(itemEventListener);
-                            }
-                        });
-                    } else if (c.wasRemoved()) {
-                        c.getRemoved().forEach(item -> {
-                            if (item instanceof XYChartItem) {
-                                XYChartItem xyChartItem = (XYChartItem) item;
-                                xyChartItem.removeItemEventListener(itemEventListener);
-                            }
-                        });
-                    }
+        items.addListener((ListChangeListener<T>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(item -> {
+                        if (item instanceof XYChartItem) {
+                            XYChartItem xyChartItem = (XYChartItem) item;
+                            xyChartItem.addItemEventListener(itemEventListener);
+                        }
+                    });
+                } else if (c.wasRemoved()) {
+                    c.getRemoved().forEach(item -> {
+                        if (item instanceof XYChartItem) {
+                            XYChartItem xyChartItem = (XYChartItem) item;
+                            xyChartItem.removeItemEventListener(itemEventListener);
+                        }
+                    });
                 }
             }
         });
