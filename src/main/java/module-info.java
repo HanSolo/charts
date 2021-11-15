@@ -27,5 +27,4 @@ module eu.hansolo.fx.charts {
     exports eu.hansolo.fx.charts.tools;
     exports eu.hansolo.fx.charts.world;
     exports eu.hansolo.fx.charts.voronoi;
-    exports eu.hansolo.fx.charts.panelbarchart;
 }

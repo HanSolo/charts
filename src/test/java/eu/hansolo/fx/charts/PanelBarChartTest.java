@@ -22,8 +22,6 @@ import eu.hansolo.fx.charts.data.Categories;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
 import eu.hansolo.fx.charts.data.MonthCategory;
-import eu.hansolo.fx.charts.panelbarchart.PanelBarChart;
-import eu.hansolo.fx.charts.panelbarchart.PanelBarChartBuilder;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -39,6 +37,9 @@ import static eu.hansolo.fx.charts.color.MaterialDesignColors.CYAN_900;
 
 public class PanelBarChartTest extends Application {
     private PanelBarChart chart;
+    private ChartItemSeries<ChartItem> data7;
+    private ChartItemSeries<ChartItem> data8;
+    private ChartItemSeries<ChartItem> data9;
 
     @Override public void init() {
         List<MonthCategory> categories = (List.of(Categories.JANUARY, Categories.FEBRUARY, Categories.MARCH, Categories.APRIL, Categories.MAY, Categories.JUNE, Categories.JULY, Categories.AUGUST, Categories.SEPTEMBER, Categories.OCTOBER, Categories.NOVEMBER, Categories.DECEMBER));
@@ -86,12 +87,12 @@ public class PanelBarChartTest extends Application {
         ChartItem data9Dec = ChartItemBuilder.create().name("data 9").category(Categories.DECEMBER).value(12).fill(Color.LIGHTGRAY).build();
 
 
-        ChartItemSeries<ChartItem> data7 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 7", CYAN_900.get(), Color.TRANSPARENT, data7Jan, data7Feb, data7Mar, data7Apr, data7May, data7Jun, data7Jul, data7Aug, data7Sep, data7Oct, data7Nov, data7Dec);
-        ChartItemSeries<ChartItem> data8 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 8", CYAN_900.get(), Color.TRANSPARENT, data8Jan, data8Feb, data8Mar, data8Apr, data8May, data8Jun, data8Jul, data8Aug, data8Sep, data8Oct, data8Nov, data8Dec);
-        ChartItemSeries<ChartItem> data9 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 9", CYAN_900.get(), Color.TRANSPARENT, data9Jan, data9Feb, data9Mar, data9Apr, data9May, data9Jun, data9Jul, data9Aug, data9Sep, data9Oct, data9Nov, data9Dec);
+        data7 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 7", CYAN_900.get(), Color.TRANSPARENT, data7Jan, data7Feb, data7Mar, data7Apr, data7May, data7Jun, data7Jul, data7Aug, data7Sep, data7Oct, data7Nov, data7Dec);
+        data8 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 8", CYAN_900.get(), Color.TRANSPARENT, data8Jan, data8Feb, data8Mar, data8Apr, data8May, data8Jun, data8Jul, data8Aug, data8Sep, data8Oct, data8Nov, data8Dec);
+        data9 = new ChartItemSeries<>(ChartType.PANEL_BAR_CHART, "data 9", CYAN_900.get(), Color.TRANSPARENT, data9Jan, data9Feb, data9Mar, data9Apr, data9May, data9Jun, data9Jul, data9Aug, data9Sep, data9Oct, data9Nov, data9Dec);
 
         chart = PanelBarChartBuilder.create(categories)
-                                    .series(data7, data8, data9)
+                                    //.series(data7, data8, data9)
                                     .build();
     }
 
@@ -104,6 +105,8 @@ public class PanelBarChartTest extends Application {
         stage.setTitle("Panel Bar Chart");
         stage.setScene(scene);
         stage.show();
+
+        chart.setSeries(data7, data8, data9);
     }
 
     @Override public void stop() {

@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.panelbarchart;
+package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.Category;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import javafx.beans.property.DoubleProperty;

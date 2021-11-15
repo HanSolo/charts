@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.panelbarchart;
+package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.Category;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DayOfWeekCategory;
 import eu.hansolo.fx.charts.data.MonthCategory;
@@ -74,7 +73,6 @@ public class PanelBarChart extends Region {
     private static final double                                         MINIMUM_HEIGHT   = 50;
     private static final double                                         MAXIMUM_WIDTH    = 2048;
     private static final double                                         MAXIMUM_HEIGHT   = 2048;
-    private              String                                         userAgentStyleSheet;
     private              double                                         width;
     private              double                                         height;
     private              Canvas                                         canvas;
@@ -156,8 +154,6 @@ public class PanelBarChart extends Region {
                 setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
             }
         }
-
-        getStyleClass().add("panel-barchart");
 
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
@@ -371,11 +367,6 @@ public class PanelBarChart extends Region {
     // ******************** Layout *******************************************
     @Override public void layoutChildren() {
         super.layoutChildren();
-    }
-
-    @Override public String getUserAgentStylesheet() {
-        if (null == userAgentStyleSheet) { userAgentStyleSheet = PanelBarChart.class.getResource("../chart.css").toExternalForm(); }
-        return userAgentStyleSheet;
     }
 
     private void resize() {
