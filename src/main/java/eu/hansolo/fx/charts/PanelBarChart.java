@@ -29,6 +29,8 @@ import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.geometry.Rectangle;
 import javafx.beans.DefaultProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -93,6 +95,8 @@ public class PanelBarChart extends Region {
     private              ObjectProperty<Color>                          categorySumColor;
     private              Color                                          _seriesSumColor;
     private              ObjectProperty<Color>                          seriesSumColor;
+    private              boolean                                        _colorByCategory;
+    private              BooleanProperty                                colorByCategory;
     private              Map<Category, Double>                          sumsPerCategory;
     private              Map<Rectangle, ChartItem>                      itemMap;
     private              EventHandler<MouseEvent>                       mouseHandler;
@@ -123,6 +127,7 @@ public class PanelBarChart extends Region {
         this._seriesNameColor   = Color.BLACK;
         this._categorySumColor  = Color.BLACK;
         this._seriesSumColor    = Color.BLACK;
+        this._colorByCategory   = false;
         this.sumsPerCategory    = new ConcurrentHashMap<>();
         this.itemMap            = new ConcurrentHashMap<>();
         this.mouseHandler       = e -> handleMouseEvent(e);
@@ -328,6 +333,26 @@ public class PanelBarChart extends Region {
         return seriesSumColor;
     }
 
+    public boolean getColorByCategory() { return null == colorByCategory ? _colorByCategory : colorByCategory.get(); }
+    public void setColorByCategory(final boolean colorByCategory) {
+        if (null == this.colorByCategory) {
+            _colorByCategory = colorByCategory;
+            redraw();
+        } else {
+            this.colorByCategory.set(colorByCategory);
+        }
+    }
+    public BooleanProperty colorByCategoryProperty() {
+        if (null == colorByCategory) {
+            colorByCategory = new BooleanPropertyBase(_colorByCategory) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "colorByCategory"; }
+            };
+        }
+        return colorByCategory;
+    }
+
     public void dispose() {
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         categories.removeListener(categoryListener);
@@ -400,8 +425,11 @@ public class PanelBarChart extends Region {
             final double                spaceBetweenCategories = width * 0.00625;
             final double                spaceBetweenSeries     = height * 0.0075;
             final double                cellWidth              = (width - ((noOfCategories - 1) * spaceBetweenCategories) - nameColumnWidth - sumColumnWidth) / (noOfCategories);
-            final double                cellHeight             = (height - ((noOfSeries + 1) * spaceBetweenSeries)) / (noOfCategories + 2);
+            final double                cellHeight             = (height - ((noOfSeries + 1) * spaceBetweenSeries)) / (noOfSeries + 2);
             final double                scaleFactorX           = cellWidth / listOfSeries.parallelStream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).get().getMaxValue();
+            final double                itemHeight             = cellHeight * 0.8;
+            final double                itemOffsetY            = cellHeight * 0.1;
+            final boolean               useCategoryColor       = getColorByCategory();
 
             ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
 
@@ -413,10 +441,10 @@ public class PanelBarChart extends Region {
                 final double posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight;
                 ctx.setTextAlign(TextAlignment.LEFT);
                 ctx.setFill(getSeriesNameColor());
-                ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), cellWidth);
+                ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
                 ctx.setTextAlign(TextAlignment.RIGHT);
                 ctx.setFill(getSeriesSumColor());
-                ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), cellWidth);
+                ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), sumColumnWidth);
             }
 
             // Draw category names and their sums
@@ -450,16 +478,16 @@ public class PanelBarChart extends Region {
                 for (int x = 0 ; x < noOfCategories ; x++) {
                     final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
                     ctx.setStroke(Color.LIGHTGRAY);
-                    ctx.strokeLine(posX, cellHeight, posX, height - cellHeight);
-                    final String              categoryName = categories.get(x).getName();
+                    ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
+                    final Category            category     = categories.get(x);
+                    final String              categoryName = category.getName();
                     final Optional<ChartItem> chartItem    = series.getItems().stream().filter(item -> item.getCategory().getName().equals(categoryName)).findFirst();
                     if (chartItem.isPresent()) {
                         final ChartItem item       = chartItem.get();
                         final double    itemWidth  = item.getValue() * scaleFactorX;
-                        final double    itemHeight = cellHeight;
-                        ctx.setFill(item.getFill());
-                        ctx.fillRect(posX, posY, itemWidth, itemHeight);
-                        itemMap.put(new Rectangle(posX, posY, itemWidth, itemHeight), item);
+                        ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                        ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
+                        itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
                     }
                 }
             }

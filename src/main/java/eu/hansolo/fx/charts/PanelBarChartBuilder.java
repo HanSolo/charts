@@ -20,9 +20,11 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
@@ -84,6 +86,11 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
 
     public final B seriesSumColor(final Color COLOR) {
         properties.put("seriesNameColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B colorByCategory(final boolean COLOR_BY_CATEGORY) {
+        properties.put("colorByCategory", new SimpleBooleanProperty(COLOR_BY_CATEGORY));
         return (B)this;
     }
 
@@ -213,6 +220,8 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
                 chart.setSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("seriesSumColor".equals(key)) {
                 chart.setSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("colorByCategory".equals(key)) {
+                chart.setColorByCategory(((BooleanProperty) properties.get(key)).get());
             }
         }
         return chart;
