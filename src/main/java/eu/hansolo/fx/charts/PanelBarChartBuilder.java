@@ -85,7 +85,12 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
     }
 
     public final B seriesSumColor(final Color COLOR) {
-        properties.put("seriesNameColor", new SimpleObjectProperty<>(COLOR));
+        properties.put("seriesSumColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B gridColor(final Color COLOR) {
+        properties.put("gridColor", new SimpleObjectProperty(COLOR));
         return (B)this;
     }
 
@@ -220,6 +225,8 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
                 chart.setSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("seriesSumColor".equals(key)) {
                 chart.setSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("gridColor".equals(key)) {
+                chart.setGridColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("colorByCategory".equals(key)) {
                 chart.setColorByCategory(((BooleanProperty) properties.get(key)).get());
             }

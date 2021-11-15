@@ -95,6 +95,8 @@ public class PanelBarChart extends Region {
     private              ObjectProperty<Color>                          categorySumColor;
     private              Color                                          _seriesSumColor;
     private              ObjectProperty<Color>                          seriesSumColor;
+    private              Color                                          _gridColor;
+    private              ObjectProperty<Color>                          gridColor;
     private              boolean                                        _colorByCategory;
     private              BooleanProperty                                colorByCategory;
     private              Map<Category, Double>                          sumsPerCategory;
@@ -127,6 +129,7 @@ public class PanelBarChart extends Region {
         this._seriesNameColor   = Color.BLACK;
         this._categorySumColor  = Color.BLACK;
         this._seriesSumColor    = Color.BLACK;
+        this._gridColor         = Color.LIGHTGRAY;
         this._colorByCategory   = false;
         this.sumsPerCategory    = new ConcurrentHashMap<>();
         this.itemMap            = new ConcurrentHashMap<>();
@@ -333,6 +336,27 @@ public class PanelBarChart extends Region {
         return seriesSumColor;
     }
 
+    public Color getGridColor() { return null == gridColor ? _gridColor : gridColor.get(); }
+    public void setGridColor(final Color color) {
+        if (null == gridColor) {
+            _gridColor = color;
+            redraw();
+        } else {
+            gridColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> gridColorProperty() {
+        if (null == gridColor) {
+            gridColor = new ObjectPropertyBase<>() {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "gridColor"; }
+            };
+            _gridColor = null;
+        }
+        return gridColor;
+    }
+
     public boolean getColorByCategory() { return null == colorByCategory ? _colorByCategory : colorByCategory.get(); }
     public void setColorByCategory(final boolean colorByCategory) {
         if (null == this.colorByCategory) {
@@ -472,12 +496,12 @@ public class PanelBarChart extends Region {
 
             // Draw items
             itemMap.clear();
+            ctx.setStroke(getGridColor());
             for (int y = 0 ; y < noOfSeries ; y++) {
                 final ChartItemSeries<ChartItem> series = listOfSeries.get(y);
                 final double posY = y * (cellHeight + spaceBetweenSeries) + cellHeight;
                 for (int x = 0 ; x < noOfCategories ; x++) {
                     final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
-                    ctx.setStroke(Color.LIGHTGRAY);
                     ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
                     final Category            category     = categories.get(x);
                     final String              categoryName = category.getName();
