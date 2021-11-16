@@ -393,7 +393,6 @@ public class InfoPopup extends Popup {
 
         VBox.setMargin(itemText, new Insets(0, 0, 0, 0));
         VBox.setMargin(itemNameText, new Insets(0, 0, 0, 0));
-
     }
 
     private void setTo2Rows() {
@@ -402,6 +401,13 @@ public class InfoPopup extends Popup {
         hBox.setPrefHeight(36);
         hBox.setMinHeight(36);
         hBox.setMaxHeight(36);
+    }
+    private void setTo3Rows() {
+        setHeight(56);
+        line.setEndY(40);
+        hBox.setPrefHeight(54);
+        hBox.setMinHeight(54);
+        hBox.setMaxHeight(54);
     }
     private void setTo4Rows() {
         setHeight(71);

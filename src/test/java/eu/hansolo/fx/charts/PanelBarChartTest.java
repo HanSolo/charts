@@ -28,46 +28,68 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
-
-import static eu.hansolo.fx.charts.color.MaterialDesignColors.CYAN_900;
 
 
 public class PanelBarChartTest extends Application {
     private static final Random RND = new Random();
-    private PanelBarChart chart;
+    private PanelBarChart       chart1;
+    private PanelBarChart       chart2;
 
 
     @Override public void init() {
-        List<MonthCategory>              categories       = List.of(Categories.JANUARY, Categories.FEBRUARY, Categories.MARCH, Categories.APRIL, Categories.MAY, Categories.JUNE, Categories.JULY, Categories.AUGUST, Categories.SEPTEMBER, Categories.OCTOBER, Categories.NOVEMBER, Categories.DECEMBER);
-        List<Integer>                    ltsReleases    = List.of(8, 11, 17);
-        List<ChartItemSeries<ChartItem>> listOfSeries   = new ArrayList<>();
+        List<MonthCategory>              categories   = List.of(Categories.JANUARY, Categories.FEBRUARY, Categories.MARCH, Categories.APRIL, Categories.MAY, Categories.JUNE, Categories.JULY, Categories.AUGUST, Categories.SEPTEMBER, Categories.OCTOBER, Categories.NOVEMBER, Categories.DECEMBER);
+        List<Integer>                    ltsReleases  = List.of(8, 11, 17);
+        List<ChartItemSeries<ChartItem>> listOfSeries = new ArrayList<>();
         for (int v = 6 ; v < 19 ; v++) {
             int featureVersion = v;
             ChartItemSeries series = ChartItemSeriesBuilder.create().name("JDK " + featureVersion).build();
             categories.forEach(category -> {
-                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).category(category).value(RND.nextDouble() * 100).fill(ltsReleases.contains(featureVersion) ? Color.BLUE : Color.LIGHTGRAY).build();
+                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).description("Zulu 2019").category(category).value(RND.nextDouble() * 100).fill(ltsReleases.contains(featureVersion) ? Color.LIGHTBLUE : Color.LIGHTGRAY).build();
                 series.getItems().add(item);
             });
             listOfSeries.add(series);
         }
-        chart = PanelBarChartBuilder.create(categories)
-                                    .series(listOfSeries)
-                                    .colorByCategory(true)
-                                    .build();
+        chart1 = PanelBarChartBuilder.create(categories)
+                                     .listOfSeries(listOfSeries)
+                                     .name("Zulu")
+                                     .colorByCategory(true)
+                                     .build();
+
+        // Chart with comparison
+        List<ChartItemSeries<ChartItem>> comparisonListOfSeries = new ArrayList<>();
+        for (int v = 6 ; v < 19 ; v++) {
+            int featureVersion = v;
+            ChartItemSeries series = ChartItemSeriesBuilder.create().name("JDK " + featureVersion).build();
+            categories.forEach(category -> {
+                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).description("Zulu 2020").category(category).value(RND.nextDouble() * 100).fill(ltsReleases.contains(featureVersion) ? Color.BLUE : Color.GRAY).build();
+                series.getItems().add(item);
+            });
+            comparisonListOfSeries.add(series);
+        }
+
+
+        chart2 = PanelBarChartBuilder.create(categories)
+                                     .name("Zulu 2019")
+                                     .nameColor(Color.LIGHTBLUE)
+                                     .listOfSeries(listOfSeries)
+                                     .comparisonEnabled(true)
+                                     .comparisonName("Zulu 2020")
+                                     .comparisonNameColor(Color.BLUE)
+                                     .comparisonListOfSeries(comparisonListOfSeries)
+                                     .build();
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(chart);
+        VBox pane = new VBox(10, chart1, chart2);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);

@@ -33,6 +33,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.StringPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -81,6 +83,7 @@ public class PanelBarChart extends Region {
     private              GraphicsContext                                ctx;
     private              Pane                                           pane;
     private              ObservableList<ChartItemSeries<ChartItem>>     listOfSeries;
+    private              ObservableList<ChartItemSeries<ChartItem>>     comparisonListOfSeries;
     private              SeriesEventListener                            seriesEvtListener;
     private              ObservableList<? extends Category>             categories;
     private              Locale                                         _locale;
@@ -89,18 +92,36 @@ public class PanelBarChart extends Region {
     private              ObjectProperty<Paint>                          chartBackground;
     private              Color                                          _categoryNameColor;
     private              ObjectProperty<Color>                          categoryNameColor;
+    private              String                                         _name;
+    private              StringProperty                                 name;
+    private              Color                                          _nameColor;
+    private              ObjectProperty<Color>                          nameColor;
     private              Color                                          _seriesNameColor;
     private              ObjectProperty<Color>                          seriesNameColor;
     private              Color                                          _categorySumColor;
     private              ObjectProperty<Color>                          categorySumColor;
     private              Color                                          _seriesSumColor;
     private              ObjectProperty<Color>                          seriesSumColor;
+    private              boolean                                        _comparisonEnabled;
+    private              BooleanProperty                                comparisonEnabled;
+    private              String                                         _comparisonName;
+    private              StringProperty                                 comparisonName;
+    private              Color                                          _comparisonNameColor;
+    private              ObjectProperty<Color>                          comparisonNameColor;
+    private              Color                                          _comparisonSeriesNameColor;
+    private              ObjectProperty<Color>                          comparisonSeriesNameColor;
+    private              Color                                          _comparisonCategorySumColor;
+    private              ObjectProperty<Color>                          comparisonCategorySumColor;
+    private              Color                                          _comparisonSeriesSumColor;
+    private              ObjectProperty<Color>                          comparisonSeriesSumColor;
     private              Color                                          _gridColor;
     private              ObjectProperty<Color>                          gridColor;
     private              boolean                                        _colorByCategory;
     private              BooleanProperty                                colorByCategory;
     private              Map<Category, Double>                          sumsPerCategory;
+    private              Map<Category, Double>                          comparisonSumsPerCategory;
     private              Map<Rectangle, ChartItem>                      itemMap;
+    private              Map<Rectangle, ChartItem>                      comparisonItemMap;
     private              EventHandler<MouseEvent>                       mouseHandler;
     private              ListChangeListener<Category>                   categoryListener;
     private              ListChangeListener<ChartItemSeries<ChartItem>> seriesListener;
@@ -115,27 +136,38 @@ public class PanelBarChart extends Region {
         this(categories, Arrays.asList(series));
     }
     public PanelBarChart(final List<? extends Category> categories, final List<ChartItemSeries<ChartItem>> series) {
-        this.listOfSeries       = FXCollections.observableArrayList(series);
-        this.seriesEvtListener  = evt -> {
+        this.listOfSeries                = FXCollections.observableArrayList(series);
+        this.comparisonListOfSeries      = FXCollections.observableArrayList();
+        this.seriesEvtListener           = evt -> {
             switch(evt.getEventType()) {
                 case UPDATE -> redraw();
                 case FINISHED -> redraw();
             }
         };
-        this.categories         = FXCollections.observableArrayList(categories);
-        this._locale            = Locale.getDefault();
-        this._chartBackground   = Color.TRANSPARENT;
-        this._categoryNameColor = Color.BLACK;
-        this._seriesNameColor   = Color.BLACK;
-        this._categorySumColor  = Color.BLACK;
-        this._seriesSumColor    = Color.BLACK;
-        this._gridColor         = Color.LIGHTGRAY;
-        this._colorByCategory   = false;
-        this.sumsPerCategory    = new ConcurrentHashMap<>();
-        this.itemMap            = new ConcurrentHashMap<>();
-        this.mouseHandler       = e -> handleMouseEvent(e);
-        this.categoryListener   = c -> redraw();
-        this.seriesListener     = c -> {
+        this.categories                  = FXCollections.observableArrayList(categories);
+        this._locale                     = Locale.getDefault();
+        this._chartBackground            = Color.TRANSPARENT;
+        this._categoryNameColor          = Color.BLACK;
+        this._seriesNameColor            = Color.BLACK;
+        this._categorySumColor           = Color.BLACK;
+        this._seriesSumColor             = Color.BLACK;
+        this._comparisonSeriesNameColor  = Color.BLACK;
+        this._comparisonCategorySumColor = Color.BLACK;
+        this._comparisonSeriesSumColor   = Color.BLACK;
+        this._gridColor                  = Color.LIGHTGRAY;
+        this._colorByCategory            = false;
+        this._comparisonEnabled          = false;
+        this._name                       = "";
+        this._nameColor                  = Color.BLACK;
+        this._comparisonName             = "";
+        this._comparisonNameColor        = Color.BLACK;
+        this.sumsPerCategory             = new ConcurrentHashMap<>();
+        this.comparisonSumsPerCategory   = new ConcurrentHashMap<>();
+        this.itemMap                     = new ConcurrentHashMap<>();
+        this.comparisonItemMap           = new ConcurrentHashMap<>();
+        this.mouseHandler                = e -> handleMouseEvent(e);
+        this.categoryListener            = c -> redraw();
+        this.seriesListener              = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(series1 -> series1.addSeriesEventListener(seriesEvtListener));
@@ -146,7 +178,7 @@ public class PanelBarChart extends Region {
             recalc();
             redraw();
         };
-        this.popup              = new InfoPopup();
+        this.popup                       = new InfoPopup();
         recalc();
         initGraphics();
         registerListeners();
@@ -176,6 +208,7 @@ public class PanelBarChart extends Region {
         heightProperty().addListener(o -> resize());
         categories.addListener(categoryListener);
         listOfSeries.addListener(seriesListener);
+        comparisonListOfSeries.addListener(seriesListener);
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
 
@@ -196,10 +229,7 @@ public class PanelBarChart extends Region {
     public void setListOfSeries(final ChartItemSeries<ChartItem>... arrayOfSeries) {
         setListOfSeries(Arrays.asList(arrayOfSeries));
     }
-    public void setListOfSeries(final List<ChartItemSeries<ChartItem>> listOfSeries) {
-        this.sumsPerCategory.clear();
-        this.listOfSeries.setAll(listOfSeries);
-    }
+    public void setListOfSeries(final List<ChartItemSeries<ChartItem>> listOfSeries) { this.listOfSeries.setAll(listOfSeries); }
 
     public void addSeries(final ChartItemSeries<ChartItem> series) {
         if (listOfSeries.contains(series)) { return; }
@@ -209,6 +239,21 @@ public class PanelBarChart extends Region {
     public void removeSeries(final Series<ChartItem> series) {
         if (!listOfSeries.contains(series)) { return; }
         listOfSeries.remove(series);
+    }
+
+    public ObservableList<ChartItemSeries<ChartItem>> getComparisonListOfSeries() { return comparisonListOfSeries; }
+    public void setComparisonListOfSeries(final ChartItemSeries<ChartItem>... arrayOfSeries) { setComparisonListOfSeries(Arrays.asList(arrayOfSeries)); }
+    public void setComparisonListOfSeries(final List<ChartItemSeries<ChartItem>> listOfOfSeries) { this.comparisonListOfSeries.setAll(listOfOfSeries); }
+
+    public void addComparisonSeries(final ChartItemSeries<ChartItem> series) {
+        if (comparisonListOfSeries.contains(series)) { return; }
+        comparisonListOfSeries.add(series);
+    }
+
+    public void removeComparisonSeries(final ChartItemSeries<ChartItem> series) {
+        if (comparisonListOfSeries.contains(series)) {
+            comparisonListOfSeries.remove(series);
+        }
     }
 
     public Locale getLocale() { return null == locale ? _locale : locale.get(); }
@@ -253,13 +298,55 @@ public class PanelBarChart extends Region {
         return chartBackground;
     }
 
-    public Color getCategoryNameColor() { return null == categoryNameColor ? _categoryNameColor : categoryNameColor.get(); }
-    public void setCategoryNameColor(final Color categoryNameColor) {
-        if (null == this.categoryNameColor) {
-            _categoryNameColor = categoryNameColor;
+    public String getName() { return null == name ? _name : name.get(); }
+    public void setName(final String name) {
+        if (null == this.name) {
+            _name = name;
             redraw();
         } else {
-            this.categoryNameColor.set(categoryNameColor);
+            this.name.set(name);
+        }
+    }
+    public StringProperty nameProperty() {
+        if (null == name) {
+            name = new StringPropertyBase(_name) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "name"; }
+            };
+            _name = null;
+        }
+        return name;
+    }
+
+    public Color getNameColor() { return null == nameColor ? _nameColor : nameColor.get(); }
+    public void setNameColor(final Color color) {
+        if (null == this.nameColor) {
+            _nameColor = color;
+            redraw();
+        } else {
+            this.nameColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> nameColorProperty() {
+        if (null == nameColor) {
+            nameColor = new ObjectPropertyBase<>(_nameColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "nameColor"; }
+            };
+            _nameColor = null;
+        }
+        return nameColor;
+    }
+
+    public Color getCategoryNameColor() { return null == categoryNameColor ? _categoryNameColor : categoryNameColor.get(); }
+    public void setCategoryNameColor(final Color color) {
+        if (null == this.categoryNameColor) {
+            _categoryNameColor = color;
+            redraw();
+        } else {
+            this.categoryNameColor.set(color);
         }
     }
     public ObjectProperty<Color> categoryNameColorProperty() {
@@ -275,12 +362,12 @@ public class PanelBarChart extends Region {
     }
 
     public Color getSeriesNameColor() { return null == seriesNameColor ? _seriesNameColor : seriesNameColor.get(); }
-    public void setSeriesNameColor(final Color seriesNameColor) {
+    public void setSeriesNameColor(final Color color) {
         if (null == this.seriesNameColor) {
-            _seriesNameColor = seriesNameColor;
+            _seriesNameColor = color;
             redraw();
         } else {
-            this.seriesNameColor.set(seriesNameColor);
+            this.seriesNameColor.set(color);
         }
     }
     public ObjectProperty<Color> seriesNameColorProperty() {
@@ -378,14 +465,144 @@ public class PanelBarChart extends Region {
         return colorByCategory;
     }
 
+    public boolean getComparisonEnabled() { return null == comparisonEnabled ? _comparisonEnabled : comparisonEnabled.get(); }
+    public void setComparisonEnabled(final boolean comparisonEnabled) {
+        if (null == this.comparisonEnabled) {
+            _comparisonEnabled = comparisonEnabled;
+            redraw();
+        } else {
+            this.comparisonEnabled.set(comparisonEnabled);
+        }
+    }
+    public BooleanProperty comparisonEnabledProperty() {
+        if (null == comparisonEnabled) {
+            comparisonEnabled = new BooleanPropertyBase(_comparisonEnabled) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonEnabled"; }
+            };
+        }
+        return comparisonEnabled;
+    }
+
+    public String getComparisonName() { return null == comparisonName ? _comparisonName : comparisonName.get(); }
+    public void setComparisonName(final String name) {
+        if (null == this.comparisonName) {
+            _comparisonName = name;
+            redraw();
+        } else {
+            comparisonName.set(name);
+        }
+    }
+    public StringProperty comparisonNameProperty() {
+        if (null == comparisonName) {
+            comparisonName = new StringPropertyBase(_comparisonName) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonName"; }
+            };
+            _comparisonName = null;
+        }
+        return comparisonName;
+    }
+
+    public Color getComparisonNameColor() { return null == comparisonNameColor ? _comparisonNameColor : comparisonNameColor.get(); }
+    public void setComparisonNameColor(final Color color) {
+        if (null == this.comparisonNameColor) {
+            _comparisonNameColor = color;
+            redraw();
+        } else {
+            this.comparisonNameColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> comparisonNameColorProperty() {
+        if (null == comparisonNameColor) {
+            comparisonNameColor = new ObjectPropertyBase<>(_comparisonNameColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonNameColor"; }
+            };
+            _comparisonNameColor = null;
+        }
+        return comparisonNameColor;
+    }
+
+    public Color getComparisonCategorySumColor() { return null == comparisonCategorySumColor ? _comparisonCategorySumColor : comparisonCategorySumColor.get(); }
+    public void setComparisonCategorySumColor(final Color color) {
+        if (null == comparisonCategorySumColor) {
+            _comparisonCategorySumColor = color;
+            redraw();
+        } else {
+            comparisonCategorySumColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> comparisonCategorySumColorProperty() {
+        if (null == comparisonCategorySumColor) {
+            comparisonCategorySumColor = new ObjectPropertyBase<>(_comparisonCategorySumColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonCategorySumColor"; }
+            };
+            _comparisonCategorySumColor = null;
+        }
+        return comparisonCategorySumColor;
+    }
+
+    public Color getComparisonSeriesNameColor() { return null == comparisonSeriesNameColor ? _comparisonSeriesNameColor : comparisonSeriesNameColor.get(); }
+    public void setComparisonSeriesNameColor(final Color color) {
+        if (null == this.comparisonSeriesNameColor) {
+            _comparisonSeriesNameColor = color;
+            redraw();
+        } else {
+            this.comparisonSeriesNameColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> comparisonSeriesNameColorProperty() {
+        if (null == comparisonSeriesNameColor) {
+            comparisonSeriesNameColor = new ObjectPropertyBase<>(_comparisonSeriesNameColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonSeriesNameColor"; }
+            };
+            _comparisonSeriesNameColor = null;
+        }
+        return comparisonSeriesNameColor;
+    }
+
+    public Color getComparisonSeriesSumColor() { return null == comparisonSeriesSumColor ? _comparisonSeriesSumColor : comparisonSeriesSumColor.get(); }
+    public void setComparisonSeriesSumColor(final Color color) {
+        if (null == comparisonSeriesSumColor) {
+            _comparisonSeriesSumColor = color;
+            redraw();
+        } else {
+            comparisonSeriesSumColor.set(color);
+        }
+    }
+    public ObjectProperty<Color> comparisonSeriesSumColorProperty() {
+        if (null == comparisonSeriesSumColor) {
+            comparisonSeriesSumColor = new ObjectPropertyBase<>(_comparisonSeriesSumColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return PanelBarChart.this; }
+                @Override public String getName() { return "comparisonSeriesSumColor"; }
+            };
+            _comparisonSeriesSumColor = null;
+        }
+        return comparisonSeriesSumColor;
+    }
+
+
     public void dispose() {
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         categories.removeListener(categoryListener);
         listOfSeries.forEach(series -> series.removeSeriesEventListener(seriesEvtListener));
         listOfSeries.removeListener(seriesListener);
+        comparisonListOfSeries.forEach(series -> series.removeSeriesEventListener(seriesEvtListener));
+        comparisonListOfSeries.removeListener(seriesListener);
     }
 
     private void recalc() {
+        sumsPerCategory.clear();
+        comparisonSumsPerCategory.clear();
         // Calculate sums per category
         for (Category category : categories) {
             listOfSeries.stream()
@@ -394,6 +611,12 @@ public class PanelBarChart extends Region {
                             double sum = sumsPerCategory.getOrDefault(category, 0.0);
                             sumsPerCategory.put(category, sum + seriesSum);
                         });
+            comparisonListOfSeries.stream()
+                                  .mapToDouble(comparisonSeries -> comparisonSeries.getItems().parallelStream().filter(item -> item.getCategory().getName().equals(category.getName())).map(ChartItem::getValue).reduce(0.0, Double::sum))
+                                  .forEach(comparisonSeriesSum -> {
+                                      double comparisonSum = comparisonSumsPerCategory.getOrDefault(category, 0.0);
+                                      comparisonSumsPerCategory.put(category, comparisonSum + comparisonSeriesSum);
+                                  });
         }
     }
 
@@ -407,8 +630,24 @@ public class PanelBarChart extends Region {
             if (optionalItem.isPresent()) {
                 popup.setX(evt.getScreenX());
                 popup.setY(evt.getScreenY() - popup.getHeight());
-                popup.update(optionalItem.get().getValue());
+                if (optionalItem.get().getValue().getDescription().isEmpty()) {
+                    popup.update(optionalItem.get().getValue());
+                } else {
+                    popup.update(optionalItem.get().getValue(), true);
+                }
                 popup.animatedShow(getScene().getWindow());
+            } else {
+                Optional<Entry<Rectangle, ChartItem>> optionalComparisonItem = comparisonItemMap.entrySet().parallelStream().filter(entry -> entry.getKey().contains(x, y)).findFirst();
+                if (optionalComparisonItem.isPresent()) {
+                    popup.setX(evt.getScreenX());
+                    popup.setY(evt.getScreenY() - popup.getHeight());
+                    if (optionalComparisonItem.get().getValue().getDescription().isEmpty()) {
+                        popup.update(optionalComparisonItem.get().getValue());
+                    } else {
+                        popup.update(optionalComparisonItem.get().getValue(), true);
+                    }
+                    popup.animatedShow(getScene().getWindow());
+                }
             }
         }
     }
@@ -443,76 +682,214 @@ public class PanelBarChart extends Region {
         ctx.setTextAlign(TextAlignment.LEFT);
         ctx.setTextBaseline(VPos.CENTER);
         if (!listOfSeries.isEmpty()) {
-            final int                   noOfSeries             = listOfSeries.size();
-            final int                   noOfCategories         = categories.size();
-            final double                nameColumnWidth        = width * 0.125;
-            final double                sumColumnWidth         = width * 0.125;
-            final double                spaceBetweenCategories = width * 0.00625;
-            final double                spaceBetweenSeries     = height * 0.0075;
-            final double                cellWidth              = (width - ((noOfCategories - 1) * spaceBetweenCategories) - nameColumnWidth - sumColumnWidth) / (noOfCategories);
-            final double                cellHeight             = (height - ((noOfSeries + 1) * spaceBetweenSeries)) / (noOfSeries + 2);
-            final double                scaleFactorX           = cellWidth / listOfSeries.parallelStream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).get().getMaxValue();
-            final double                itemHeight             = cellHeight * 0.8;
-            final double                itemOffsetY            = cellHeight * 0.1;
-            final boolean               useCategoryColor       = getColorByCategory();
+            if (getComparisonEnabled() && !comparisonListOfSeries.isEmpty() && listOfSeries.size() == comparisonListOfSeries.size()) {
+                // Draw items of both series
+                final int     noOfSeries             = listOfSeries.size();
+                final int     noOfCategories         = categories.size();
+                final double  nameColumnWidth        = width * 0.125;
+                final double  sumColumnWidth         = width * 0.06125;
+                final double  spaceBetweenCategories = width * 0.00625;
+                final double  spaceBetweenSeries     = height * 0.0075;
+                final double  cellWidth              = (width - ((noOfCategories - 1) * spaceBetweenCategories) - nameColumnWidth - sumColumnWidth) / (noOfCategories);
+                final double  cellHeight             = (height - ((noOfSeries + 1) * spaceBetweenSeries)) / (noOfSeries + 2);
+                final double  maxCellValue           = Math.max(listOfSeries.parallelStream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).get().getMaxValue(), comparisonListOfSeries.parallelStream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).get().getMaxValue());
+                final double  scaleFactorX           = cellWidth / maxCellValue;
+                final double  itemHeight             = cellHeight * 0.4;
+                final double  itemOffsetY            = cellHeight * 0.1;
+                final double  spaceBetweenItems      = cellHeight * 0.05;
+                final boolean useCategoryColor       = getColorByCategory();
+                final double  completeSum            = sumsPerCategory.values().stream().reduce(0.0, (a, b) -> a + b);
+                final double  comparisonCompleteSum  = comparisonSumsPerCategory.values().stream().reduce(0.0, (a, b) -> a + b);
 
-            ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
+                // Draw name and comparisonName
+                ctx.setFont(Fonts.opensansSemibold(cellHeight * 0.25));
+                ctx.setFill(getNameColor());
+                ctx.fillText(getName(), 0, cellHeight * 0.25, cellWidth);
+                ctx.setFill(getComparisonNameColor());
+                ctx.fillText(getComparisonName(), 0, cellHeight * 0.75, cellWidth);
 
-            // Draw series names and their sums
-            for (int y = 0 ; y < noOfSeries ; y++) {
-                final ChartItemSeries<ChartItem> series = listOfSeries.get(y);
-                final String seriesName  = series.getName();
-                final String sumOfSeries = Helper.format((long) series.getSumOfAllItems());
-                final double posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight;
-                ctx.setTextAlign(TextAlignment.LEFT);
-                ctx.setFill(getSeriesNameColor());
-                ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
+                // Draw complete sum
                 ctx.setTextAlign(TextAlignment.RIGHT);
-                ctx.setFill(getSeriesSumColor());
-                ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), sumColumnWidth);
-            }
-
-            // Draw category names and their sums
-            ctx.setTextAlign(TextAlignment.LEFT);
-            final Locale locale = getLocale();
-            for (int x = 0 ; x < noOfCategories ; x++) {
-                final double   posX     = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
-                final Category category = categories.get(x);
-                final double   sum      = sumsPerCategory.get(category);
-                final String   categoryName;
-                if (category instanceof MonthCategory) {
-                    MonthCategory monthCategory = (MonthCategory) category;
-                    categoryName = monthCategory.getName(TextStyle.SHORT, locale);
-                } else if (category instanceof DayOfWeekCategory) {
-                    DayOfWeekCategory dayOfWeekCategory = (DayOfWeekCategory) category;
-                    categoryName = dayOfWeekCategory.getName(TextStyle.SHORT, locale);
-                } else {
-                    categoryName = category.getName();
-                }
-                ctx.setFill(getCategorySumColor());
-                ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.5, cellWidth);
                 ctx.setFill(getCategoryNameColor());
-                ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth);
-            }
+                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.25, sumColumnWidth);
+                ctx.setFill(getComparisonCategorySumColor());
+                ctx.fillText(Helper.format((long) comparisonCompleteSum), width, cellHeight * 0.75, sumColumnWidth);
 
-            // Draw items
-            itemMap.clear();
-            ctx.setStroke(getGridColor());
-            for (int y = 0 ; y < noOfSeries ; y++) {
-                final ChartItemSeries<ChartItem> series = listOfSeries.get(y);
-                final double posY = y * (cellHeight + spaceBetweenSeries) + cellHeight;
-                for (int x = 0 ; x < noOfCategories ; x++) {
-                    final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
-                    ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
-                    final Category            category     = categories.get(x);
-                    final String              categoryName = category.getName();
-                    final Optional<ChartItem> chartItem    = series.getItems().stream().filter(item -> item.getCategory().getName().equals(categoryName)).findFirst();
-                    if (chartItem.isPresent()) {
-                        final ChartItem item       = chartItem.get();
-                        final double    itemWidth  = item.getValue() * scaleFactorX;
-                        ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
-                        ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
-                        itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
+                // Draw series names and their sums
+                for (int y = 0; y < noOfSeries; y++) {
+                    final ChartItemSeries<ChartItem> series      = listOfSeries.get(y);
+                    final String                     seriesName  = series.getName();
+                    final String                     sumOfSeries = Helper.format((long) series.getSumOfAllItems());
+                    final double                     posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight + cellHeight * 0.1;
+                    ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
+                    ctx.setTextAlign(TextAlignment.LEFT);
+                    ctx.setFill(getSeriesNameColor());
+                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
+
+                    ctx.setFont(Fonts.opensansRegular(cellHeight * 0.25));
+                    ctx.setTextAlign(TextAlignment.RIGHT);
+                    ctx.setFill(getSeriesSumColor());
+                    ctx.fillText(sumOfSeries, width, posY + (itemHeight * 0.5), sumColumnWidth);
+
+                    final ChartItemSeries<ChartItem> comparisonSeries      = comparisonListOfSeries.get(y);
+                    final String                     comparisonSumOfSeries = Helper.format((long) comparisonSeries.getSumOfAllItems());
+                    final double                     comparisonPosY        = y * (cellHeight + spaceBetweenSeries) + cellHeight + itemHeight + spaceBetweenItems + cellHeight * 0.1;
+                    ctx.setFill(getComparisonSeriesSumColor());
+                    ctx.fillText(comparisonSumOfSeries, width, comparisonPosY + (itemHeight * 0.5), sumColumnWidth);
+                }
+
+                // Draw category names and their sums
+                ctx.setTextAlign(TextAlignment.LEFT);
+                final Locale locale = getLocale();
+                for (int x = 0; x < noOfCategories; x++) {
+                    ctx.setFont(Fonts.opensansRegular(cellHeight * 0.25));
+                    final double   posX          = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
+                    final Category category      = categories.get(x);
+                    final double   sum           = sumsPerCategory.get(category);
+                    final double   comparisonSum = comparisonSumsPerCategory.get(category);
+                    final String   categoryName;
+                    if (category instanceof MonthCategory) {
+                        MonthCategory monthCategory = (MonthCategory) category;
+                        categoryName = monthCategory.getName(TextStyle.SHORT, locale);
+                    } else if (category instanceof DayOfWeekCategory) {
+                        DayOfWeekCategory dayOfWeekCategory = (DayOfWeekCategory) category;
+                        categoryName = dayOfWeekCategory.getName(TextStyle.SHORT, locale);
+                    } else {
+                        categoryName = category.getName();
+                    }
+                    ctx.setFill(getCategorySumColor());
+                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.25, cellWidth);
+                    ctx.setFill(getComparisonCategorySumColor());
+                    ctx.fillText(Helper.format((long) comparisonSum), posX, cellHeight * 0.75, cellWidth);
+                    ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
+                    ctx.setFill(getCategoryNameColor());
+                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth);
+                }
+
+                // Draw items
+                ctx.setFont(Fonts.opensansRegular(cellHeight * 0.25));
+                itemMap.clear();
+                ctx.setStroke(getGridColor());
+                for (int y = 0; y < noOfSeries; y++) {
+                    final ChartItemSeries<ChartItem> series = listOfSeries.get(y);
+                    final double                     posY   = y * (cellHeight + spaceBetweenSeries) + cellHeight;
+                    for (int x = 0; x < noOfCategories; x++) {
+                        final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
+                        ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
+                        final Category            category     = categories.get(x);
+                        final String              categoryName = category.getName();
+                        final Optional<ChartItem> chartItem    = series.getItems().stream().filter(item -> item.getCategory().getName().equals(categoryName)).findFirst();
+                        if (chartItem.isPresent()) {
+                            final ChartItem item      = chartItem.get();
+                            final double    itemWidth = item.getValue() * scaleFactorX;
+                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
+                            itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
+                        }
+                    }
+
+                    final ChartItemSeries<ChartItem> comparisonSeries = comparisonListOfSeries.get(y);
+                    final double                     comparisonPosY   = y * (cellHeight + spaceBetweenSeries) + cellHeight + itemHeight + spaceBetweenItems;
+                    for (int x = 0; x < noOfCategories; x++) {
+                        final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
+                        ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
+                        final Category            category     = categories.get(x);
+                        final String              categoryName = category.getName();
+                        final Optional<ChartItem> chartItem    = comparisonSeries.getItems().stream().filter(item -> item.getCategory().getName().equals(categoryName)).findFirst();
+                        if (chartItem.isPresent()) {
+                            final ChartItem item      = chartItem.get();
+                            final double    itemWidth = item.getValue() * scaleFactorX;
+                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.fillRect(posX, comparisonPosY + itemOffsetY, itemWidth, itemHeight);
+                            itemMap.put(new Rectangle(posX, comparisonPosY + itemOffsetY, itemWidth, itemHeight), item);
+                        }
+                    }
+                }
+            } else {
+                // Draw items of standard series
+                final int     noOfSeries             = listOfSeries.size();
+                final int     noOfCategories         = categories.size();
+                final double  nameColumnWidth        = width * 0.125;
+                final double  sumColumnWidth         = width * 0.06125;
+                final double  spaceBetweenCategories = width * 0.00625;
+                final double  spaceBetweenSeries     = height * 0.0075;
+                final double  cellWidth              = (width - ((noOfCategories - 1) * spaceBetweenCategories) - nameColumnWidth - sumColumnWidth) / (noOfCategories);
+                final double  cellHeight             = (height - ((noOfSeries + 1) * spaceBetweenSeries)) / (noOfSeries + 2);
+                final double  maxCellValue           = listOfSeries.parallelStream().max(Comparator.comparingDouble(ChartItemSeries::getMaxValue)).get().getMaxValue();
+                final double  scaleFactorX           = cellWidth / maxCellValue;
+                final double  itemHeight             = cellHeight * 0.8;
+                final double  itemOffsetY            = cellHeight * 0.1;
+                final boolean useCategoryColor       = getColorByCategory();
+                final double  completeSum            = sumsPerCategory.values().stream().reduce(0.0, (a,b) -> a + b);
+
+                // Draw name
+                ctx.setFont(Fonts.opensansSemibold(cellHeight * 0.5));
+                ctx.setFill(getNameColor());
+                ctx.fillText(getName(), 0, cellHeight * 0.5, cellWidth);
+
+                // Draw complete sum
+                ctx.setTextAlign(TextAlignment.RIGHT);
+                ctx.setFill(getCategoryNameColor());
+                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.5, sumColumnWidth);
+
+                ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
+
+                // Draw series names and their sums
+                for (int y = 0; y < noOfSeries; y++) {
+                    final ChartItemSeries<ChartItem> series      = listOfSeries.get(y);
+                    final String                     seriesName  = series.getName();
+                    final String                     sumOfSeries = Helper.format((long) series.getSumOfAllItems());
+                    final double                     posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight;
+                    ctx.setTextAlign(TextAlignment.LEFT);
+                    ctx.setFill(getSeriesNameColor());
+                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
+                    ctx.setTextAlign(TextAlignment.RIGHT);
+                    ctx.setFill(getSeriesSumColor());
+                    ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), sumColumnWidth);
+                }
+
+                // Draw category names and their sums
+                ctx.setTextAlign(TextAlignment.LEFT);
+                final Locale locale = getLocale();
+                for (int x = 0; x < noOfCategories; x++) {
+                    final double   posX     = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
+                    final Category category = categories.get(x);
+                    final double   sum      = sumsPerCategory.get(category);
+                    final String   categoryName;
+                    if (category instanceof MonthCategory) {
+                        MonthCategory monthCategory = (MonthCategory) category;
+                        categoryName = monthCategory.getName(TextStyle.SHORT, locale);
+                    } else if (category instanceof DayOfWeekCategory) {
+                        DayOfWeekCategory dayOfWeekCategory = (DayOfWeekCategory) category;
+                        categoryName = dayOfWeekCategory.getName(TextStyle.SHORT, locale);
+                    } else {
+                        categoryName = category.getName();
+                    }
+                    ctx.setFill(getCategorySumColor());
+                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.5, cellWidth);
+                    ctx.setFill(getCategoryNameColor());
+                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth);
+                }
+
+                // Draw items
+                itemMap.clear();
+                ctx.setStroke(getGridColor());
+                for (int y = 0; y < noOfSeries; y++) {
+                    final ChartItemSeries<ChartItem> series = listOfSeries.get(y);
+                    final double                     posY   = y * (cellHeight + spaceBetweenSeries) + cellHeight;
+                    for (int x = 0; x < noOfCategories; x++) {
+                        final double posX = nameColumnWidth + x * (cellWidth + spaceBetweenCategories);
+                        ctx.strokeLine(posX, cellHeight, posX, ((noOfSeries) * (cellHeight + spaceBetweenSeries) + cellHeight));
+                        final Category            category     = categories.get(x);
+                        final String              categoryName = category.getName();
+                        final Optional<ChartItem> chartItem    = series.getItems().stream().filter(item -> item.getCategory().getName().equals(categoryName)).findFirst();
+                        if (chartItem.isPresent()) {
+                            final ChartItem item      = chartItem.get();
+                            final double    itemWidth = item.getValue() * scaleFactorX;
+                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
+                            itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
+                        }
                     }
                 }
             }

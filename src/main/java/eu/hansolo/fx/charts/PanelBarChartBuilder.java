@@ -27,6 +27,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
@@ -55,11 +57,21 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
     }
 
 
-    public final B series(final ChartItemSeries<ChartItem>... SERIES) {
-        return series(Arrays.asList(SERIES));
+    public final B name(final String NAME) {
+        properties.put("name", new SimpleStringProperty(NAME));
+        return (B)this;
     }
 
-    public final B series(final List<ChartItemSeries<ChartItem>> SERIES) {
+    public final B nameColor(final Color COLOR) {
+        properties.put("nameColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B listOfSeries(final ChartItemSeries<ChartItem>... SERIES) {
+        return listOfSeries(Arrays.asList(SERIES));
+    }
+
+    public final B listOfSeries(final List<ChartItemSeries<ChartItem>> SERIES) {
         properties.put("chartItemSeriesList", new SimpleObjectProperty<>(SERIES));
         return (B)this;
     }
@@ -96,6 +108,45 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
 
     public final B colorByCategory(final boolean COLOR_BY_CATEGORY) {
         properties.put("colorByCategory", new SimpleBooleanProperty(COLOR_BY_CATEGORY));
+        return (B)this;
+    }
+
+    public final B comparisonEnabled(final boolean ENABLED) {
+        properties.put("comparisonEnabled", new SimpleBooleanProperty(ENABLED));
+        return (B)this;
+    }
+
+    public final B comparisonName(final String NAME) {
+        properties.put("comparisonName", new SimpleStringProperty(NAME));
+        return (B)this;
+    }
+
+    public final B comparisonNameColor(final Color COLOR) {
+        properties.put("comparisonNameColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B comparisonListOfSeries(final ChartItemSeries<ChartItem>... SERIES) {
+        return comparisonListOfSeries(Arrays.asList(SERIES));
+    }
+
+    public final B comparisonListOfSeries(final List<ChartItemSeries<ChartItem>> SERIES) {
+        properties.put("comparisonChartItemSeriesList", new SimpleObjectProperty<>(SERIES));
+        return (B)this;
+    }
+
+    public final B comparisonCategorySumColor(final Color COLOR) {
+        properties.put("comparisonCategorySumColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B comparisonSeriesNameColor(final Color COLOR) {
+        properties.put("comparisonSeriesNameColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
+    public final B comparisonSeriesSumColor(final Color COLOR) {
+        properties.put("comparisonSeriesSumColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
     }
 
@@ -172,12 +223,18 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
     }
 
     public final PanelBarChart build() {
-        List<ChartItemSeries<ChartItem>> series = new ArrayList<>();
+        List<ChartItemSeries<ChartItem>> listOfSeries = new ArrayList<>();
         if(properties.keySet().contains("chartItemSeriesList")) {
-            series.addAll(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("chartItemSeriesList")).get());
+            listOfSeries.addAll(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("chartItemSeriesList")).get());
         }
 
-        final PanelBarChart chart = new PanelBarChart(categories, series);
+        final PanelBarChart chart = new PanelBarChart(categories, listOfSeries);
+
+        List<ChartItemSeries<ChartItem>> comparisonListOfSeries = new ArrayList<>();
+        if (properties.keySet().contains("comparisonChartItemSeriesList")) {
+            comparisonListOfSeries.addAll(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("comparisonChartItemSeriesList")).get());
+        }
+        chart.setComparisonListOfSeries(comparisonListOfSeries);
 
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {
@@ -217,6 +274,10 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
                 chart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
             } else if ("chartBackground".equals(key)) {
                 chart.setChartBackground(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("name".equals(key)) {
+                chart.setName(((StringProperty) properties.get(key)).get());
+            } else if ("nameColor".equals(key)) {
+                chart.setNameColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("categoryNameColor".equals(key)) {
                 chart.setCategoryNameColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("categorySumColor".equals(key)) {
@@ -229,6 +290,18 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
                 chart.setGridColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("colorByCategory".equals(key)) {
                 chart.setColorByCategory(((BooleanProperty) properties.get(key)).get());
+            } else if ("comparisonEnabled".equals(key)) {
+                chart.setComparisonEnabled(((BooleanProperty) properties.get(key)).get());
+            } else if ("comparisonName".equals(key)) {
+                chart.setComparisonName(((StringProperty) properties.get(key)).get());
+            } else if ("comparisonNameColor".equals(key)) {
+                chart.setComparisonNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("comparisonCategorySumColor".equals(key)) {
+                chart.setComparisonCategorySumColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("comparisonSeriesNameColor".equals(key)) {
+                chart.setComparisonSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("comparisonSeriesSumColor".equals(key)) {
+                chart.setComparisonSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
         return chart;
