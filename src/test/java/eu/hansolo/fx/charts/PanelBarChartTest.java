@@ -21,6 +21,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.Categories;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.data.DayOfWeekCategory;
 import eu.hansolo.fx.charts.data.MonthCategory;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
@@ -46,31 +47,30 @@ public class PanelBarChartTest extends Application {
 
 
     @Override public void init() {
-        List<MonthCategory>              categories   = List.of(Categories.JANUARY, Categories.FEBRUARY, Categories.MARCH, Categories.APRIL, Categories.MAY, Categories.JUNE, Categories.JULY, Categories.AUGUST, Categories.SEPTEMBER, Categories.OCTOBER, Categories.NOVEMBER, Categories.DECEMBER);
-        List<Integer>                    ltsReleases  = List.of(8, 11, 17);
+        List<DayOfWeekCategory> categories  = List.of(Categories.MONDAY, Categories.TUESDAY, Categories.WEDNESDAY, Categories.THURSDAY, Categories.FRIDAY, Categories.SATURDAY, Categories.SUNDAY);
         List<ChartItemSeries<ChartItem>> listOfSeries = new ArrayList<>();
-        for (int v = 6 ; v < 19 ; v++) {
-            int featureVersion = v;
-            ChartItemSeries series = ChartItemSeriesBuilder.create().name("JDK " + featureVersion).build();
+        for (int s = 0 ; s < 3 ; s++) {
+            int serverNo = s;
+            ChartItemSeries series = ChartItemSeriesBuilder.create().name("This week " + serverNo).build();
             categories.forEach(category -> {
-                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).description("Zulu 2019").category(category).value(RND.nextDouble() * 100).fill(ltsReleases.contains(featureVersion) ? Color.LIGHTBLUE : Color.LIGHTGRAY).build();
+                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).category(category).value(RND.nextDouble() * 100).fill(Color.ORANGE).build();
                 series.getItems().add(item);
             });
             listOfSeries.add(series);
         }
         chart1 = PanelBarChartBuilder.create(categories)
                                      .listOfSeries(listOfSeries)
-                                     .name("Zulu")
+                                     .name("This week")
                                      .colorByCategory(true)
                                      .build();
 
         // Chart with comparison
         List<ChartItemSeries<ChartItem>> comparisonListOfSeries = new ArrayList<>();
-        for (int v = 6 ; v < 19 ; v++) {
-            int featureVersion = v;
-            ChartItemSeries series = ChartItemSeriesBuilder.create().name("JDK " + featureVersion).build();
+        for (int s = 0 ; s < 3 ; s++) {
+            int serverNo = s;
+            ChartItemSeries series = ChartItemSeriesBuilder.create().name("Last week " + serverNo).build();
             categories.forEach(category -> {
-                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).description("Zulu 2020").category(category).value(RND.nextDouble() * 100).fill(ltsReleases.contains(featureVersion) ? Color.BLUE : Color.GRAY).build();
+                ChartItem item = ChartItemBuilder.create().name(series.getName() + " " + category.getName(TextStyle.SHORT, Locale.US)).category(category).value(RND.nextDouble() * 100).fill(Color.BLUE).build();
                 series.getItems().add(item);
             });
             comparisonListOfSeries.add(series);
@@ -78,12 +78,16 @@ public class PanelBarChartTest extends Application {
 
 
         chart2 = PanelBarChartBuilder.create(categories)
-                                     .name("Zulu 2019")
-                                     .nameColor(Color.LIGHTBLUE)
+                                     .name("This week")
+                                     .nameColor(Color.ORANGE)
+                                     .seriesSumColor(Color.ORANGE)
+                                     .categorySumColor(Color.ORANGE)
                                      .listOfSeries(listOfSeries)
                                      .comparisonEnabled(true)
-                                     .comparisonName("Zulu 2020")
+                                     .comparisonName("Last week")
                                      .comparisonNameColor(Color.BLUE)
+                                     .comparisonSeriesSumColor(Color.BLUE)
+                                     .comparisonCategorySumColor(Color.BLUE)
                                      .comparisonListOfSeries(comparisonListOfSeries)
                                      .build();
     }

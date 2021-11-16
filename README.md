@@ -144,4 +144,4 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 
 ## PanelBarChart
-![PanelBarChart](https://i.ibb.co/pKwWdN5/Panel-Bar-Chart.png")
+![PanelBarChart](https://i.ibb.co/NsccdJL/Panel-Bar-Chart.png")

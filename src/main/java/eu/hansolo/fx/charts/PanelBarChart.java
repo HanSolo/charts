@@ -706,14 +706,14 @@ public class PanelBarChart extends Region {
                 ctx.setFill(getNameColor());
                 ctx.fillText(getName(), 0, cellHeight * 0.25, cellWidth);
                 ctx.setFill(getComparisonNameColor());
-                ctx.fillText(getComparisonName(), 0, cellHeight * 0.75, cellWidth);
+                ctx.fillText(getComparisonName(), 0, cellHeight * 0.75, cellWidth * 0.95);
 
                 // Draw complete sum
                 ctx.setTextAlign(TextAlignment.RIGHT);
-                ctx.setFill(getCategoryNameColor());
+                ctx.setFill(getCategorySumColor());
                 ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.25, sumColumnWidth);
                 ctx.setFill(getComparisonCategorySumColor());
-                ctx.fillText(Helper.format((long) comparisonCompleteSum), width, cellHeight * 0.75, sumColumnWidth);
+                ctx.fillText(Helper.format((long) comparisonCompleteSum), width, cellHeight * 0.75, sumColumnWidth * 0.95);
 
                 // Draw series names and their sums
                 for (int y = 0; y < noOfSeries; y++) {
@@ -724,18 +724,18 @@ public class PanelBarChart extends Region {
                     ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
                     ctx.setTextAlign(TextAlignment.LEFT);
                     ctx.setFill(getSeriesNameColor());
-                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
+                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth * 0.95);
 
                     ctx.setFont(Fonts.opensansRegular(cellHeight * 0.25));
                     ctx.setTextAlign(TextAlignment.RIGHT);
                     ctx.setFill(getSeriesSumColor());
-                    ctx.fillText(sumOfSeries, width, posY + (itemHeight * 0.5), sumColumnWidth);
+                    ctx.fillText(sumOfSeries, width, posY + (itemHeight * 0.5), sumColumnWidth * 0.95);
 
                     final ChartItemSeries<ChartItem> comparisonSeries      = comparisonListOfSeries.get(y);
                     final String                     comparisonSumOfSeries = Helper.format((long) comparisonSeries.getSumOfAllItems());
                     final double                     comparisonPosY        = y * (cellHeight + spaceBetweenSeries) + cellHeight + itemHeight + spaceBetweenItems + cellHeight * 0.1;
                     ctx.setFill(getComparisonSeriesSumColor());
-                    ctx.fillText(comparisonSumOfSeries, width, comparisonPosY + (itemHeight * 0.5), sumColumnWidth);
+                    ctx.fillText(comparisonSumOfSeries, width, comparisonPosY + (itemHeight * 0.5), sumColumnWidth * 0.95);
                 }
 
                 // Draw category names and their sums
@@ -758,12 +758,12 @@ public class PanelBarChart extends Region {
                         categoryName = category.getName();
                     }
                     ctx.setFill(getCategorySumColor());
-                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.25, cellWidth);
+                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.25, cellWidth * 0.95);
                     ctx.setFill(getComparisonCategorySumColor());
-                    ctx.fillText(Helper.format((long) comparisonSum), posX, cellHeight * 0.75, cellWidth);
+                    ctx.fillText(Helper.format((long) comparisonSum), posX, cellHeight * 0.75, cellWidth * 0.95);
                     ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
                     ctx.setFill(getCategoryNameColor());
-                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth);
+                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth * 0.95);
                 }
 
                 // Draw items
@@ -825,12 +825,12 @@ public class PanelBarChart extends Region {
                 // Draw name
                 ctx.setFont(Fonts.opensansSemibold(cellHeight * 0.5));
                 ctx.setFill(getNameColor());
-                ctx.fillText(getName(), 0, cellHeight * 0.5, cellWidth);
+                ctx.fillText(getName(), 0, cellHeight * 0.5, cellWidth * 0.95);
 
                 // Draw complete sum
                 ctx.setTextAlign(TextAlignment.RIGHT);
                 ctx.setFill(getCategoryNameColor());
-                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.5, sumColumnWidth);
+                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.5, sumColumnWidth * 0.95);
 
                 ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
 
@@ -842,10 +842,10 @@ public class PanelBarChart extends Region {
                     final double                     posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight;
                     ctx.setTextAlign(TextAlignment.LEFT);
                     ctx.setFill(getSeriesNameColor());
-                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth);
+                    ctx.fillText(seriesName, 0, posY + (cellHeight * 0.5), nameColumnWidth * 0.95);
                     ctx.setTextAlign(TextAlignment.RIGHT);
                     ctx.setFill(getSeriesSumColor());
-                    ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), sumColumnWidth);
+                    ctx.fillText(sumOfSeries, width, posY + (cellHeight * 0.5), sumColumnWidth * 0.95);
                 }
 
                 // Draw category names and their sums
@@ -866,9 +866,9 @@ public class PanelBarChart extends Region {
                         categoryName = category.getName();
                     }
                     ctx.setFill(getCategorySumColor());
-                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.5, cellWidth);
+                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.5, cellWidth * 0.95);
                     ctx.setFill(getCategoryNameColor());
-                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth);
+                    ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth * 0.95);
                 }
 
                 // Draw items
