@@ -23,6 +23,7 @@ import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.BubbleGridChartItemBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
 import eu.hansolo.fx.charts.tools.Topic;
 import javafx.animation.AnimationTimer;
@@ -37,6 +38,7 @@ import javafx.scene.paint.Stop;
 import javafx.stage.Stage;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 

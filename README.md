@@ -1,4 +1,4 @@
-# Charts <a href="https://foojay.io/today/works-with-openjdk"><img align="right" src="https://github.com/foojayio/badges/raw/main/works_with_openjdk/Works-with-OpenJDK.png" width="100"></a>
+# Charts
 
 [![GitHub stars](https://badgen.net/github/stars/HanSolo/charts)](https://GitHub.com/HanSolo/charts/stargazers/)
 

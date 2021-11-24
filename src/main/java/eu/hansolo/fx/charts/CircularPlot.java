@@ -837,7 +837,7 @@ public class CircularPlot extends Region {
                             ctx.setFill(Color.TRANSPARENT);
                         }
                     }
-                    ctx.fillText(Helper.shortenNumbers(counter, getDecimals(), getLocale()), 0, 0);
+                    ctx.fillText(Helper.shortenNumber(counter, getDecimals(), getLocale()), 0, 0);
                     ctx.restore();
                 }
             } else if (mediumTickMarksVisible &&
