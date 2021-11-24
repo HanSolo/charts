@@ -107,6 +107,8 @@ public class BubbleGridChart extends Region {
     private              BooleanProperty                         showPercentage;
     private              boolean                                 _useGradientFill;
     private              BooleanProperty                         useGradientFill;
+    private              boolean                                 _shortenNumbers;
+    private              BooleanProperty                         shortenNumbers;
     private              Color                                   _minColor;
     private              ObjectProperty<Color>                   minColor;
     private              Color                                   _maxColor;
@@ -141,6 +143,7 @@ public class BubbleGridChart extends Region {
         _showValues            = true;
         _showPercentage        = false;
         _useGradientFill       = false;
+        _shortenNumbers        = false;
         _minColor              = Color.web("#2C67D5");
         _maxColor              = Color.web("#F23C5A");
         gradient               = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, _minColor), new Stop(1, _maxColor));
@@ -149,7 +152,12 @@ public class BubbleGridChart extends Region {
         sortTopicY             = Topic.INDEX;
         sortOrderX             = Order.ASCENDING;
         sortOrderY             = Order.ASCENDING;
-        itemListener           = e -> sort();
+        itemListener           = e -> {
+            minValue    = items.parallelStream().min(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
+            maxValue    = items.parallelStream().max(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
+            sumOfValues = items.parallelStream().mapToDouble(bgci -> bgci.getValue()).sum();
+            sort();
+        };
         itemListListener       = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -174,7 +182,6 @@ public class BubbleGridChart extends Region {
             minValue    = items.parallelStream().min(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
             maxValue    = items.parallelStream().max(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
             sumOfValues = items.parallelStream().mapToDouble(bgci -> bgci.getValue()).sum();
-
             sort();
         };
 
@@ -208,6 +215,7 @@ public class BubbleGridChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
+        items.forEach(item -> item.addItemEventListener(itemListener));
         canvas.setOnMouseClicked(e -> bubbles.forEach(bubble -> {
                 if (Helper.isInCircle(e.getX(), e.getY(), bubble.x, bubble.y, bubble.r)) {
                     popup.setX(e.getScreenX());
@@ -418,6 +426,26 @@ public class BubbleGridChart extends Region {
         return useGradientFill;
     }
 
+    public boolean getShortenNumbers() { return null == shortenNumbers ? _shortenNumbers : shortenNumbers.get(); }
+    public void setShortenNumbers(final boolean SHORTEN) {
+        if (null == shortenNumbers) {
+            _shortenNumbers = SHORTEN;
+            redraw();
+        } else {
+            shortenNumbers.set(SHORTEN);
+        }
+    }
+    public BooleanProperty shortenNumbersProperty() {
+        if (null == shortenNumbers) {
+            shortenNumbers = new BooleanPropertyBase(_shortenNumbers) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return BubbleGridChart.this; }
+                @Override public String getName() { return "shortenNumbers"; }
+            };
+        }
+        return shortenNumbers;
+    }
+
     public Color getMinColor() { return null == minColor ? _minColor : minColor.get(); }
     public void setMinColor(final Color MIN_COLOR) {
         if (null == minColor) {
@@ -581,6 +609,19 @@ public class BubbleGridChart extends Region {
         redraw();
     }
 
+    public void removeAllData() {
+        items.clear();
+        xCategoryItems.clear();
+        yCategoryItems.clear();
+        sumsOfXCategoryItems.clear();
+        sumsOfYCategoryItems.clear();
+        sumOfValues = 0;
+        minValue    = Double.MAX_VALUE;
+        maxValue    = 0;
+
+        redraw();
+    }
+
     private void sort() {
         sortCategoryX(getSortTopicX(), getSortOrderX());
         sortCategoryY(getSortTopicY(), getSortOrderY());
@@ -653,11 +694,19 @@ public class BubbleGridChart extends Region {
                 ctx.fillText(xItem.getName(), cellCenterX, height - xCategoryHeight * 0.68, stepX);
                 ctx.setFont(valueFont);
                 if (getShowValues() && !getShowPercentage()) {
-                    ctx.fillText("(" + String.format(Locale.US, "%.0f", sumsOfXCategoryItems.get(xItem)) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    if (getShortenNumbers()) {
+                        ctx.fillText("(" + Helper.shortenNumbers(sumsOfXCategoryItems.get(xItem).longValue()) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    } else {
+                        ctx.fillText("(" + String.format(Locale.US, "%.0f", sumsOfXCategoryItems.get(xItem)) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    }
                 } else if (!getShowValues() && getShowPercentage()) {
                     ctx.fillText("(" + String.format(Locale.US, "%.0f%%", sumsOfXCategoryItems.get(xItem) / sumOfValues * 100) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
                 } else {
-                    ctx.fillText("(" + String.join("/", String.format(Locale.US, "%.0f", sumsOfXCategoryItems.get(xItem)), String.format(Locale.US, "%.0f%%", sumsOfXCategoryItems.get(xItem) / sumOfValues * 100)) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    if (getShortenNumbers()) {
+                        ctx.fillText("(" + String.join("/", Helper.shortenNumbers(sumsOfXCategoryItems.get(xItem).longValue()), String.format(Locale.US, "%.0f%%", sumsOfXCategoryItems.get(xItem) / sumOfValues * 100)) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    } else {
+                        ctx.fillText("(" + String.join("/", String.format(Locale.US, "%.0f", sumsOfXCategoryItems.get(xItem)), String.format(Locale.US, "%.0f%%", sumsOfXCategoryItems.get(xItem) / sumOfValues * 100)) + ")", cellCenterX, height - xCategoryHeight * 0.3, stepX);
+                    }
                 }
             } else {
                 ctx.setFont(chartFont);
@@ -678,11 +727,19 @@ public class BubbleGridChart extends Region {
                         ctx.fillText(yItem.getName(), yCategoryWidth * 0.5, cellCenterY - stepY * 0.18, maxYCategoryWidth);
                         ctx.setFont(valueFont);
                         if (getShowValues() && !getShowPercentage()) {
-                            ctx.fillText("(" + String.format(Locale.US, "%.0f", sumsOfYCategoryItems.get(yItem)) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            if (getShortenNumbers()) {
+                                ctx.fillText("(" + Helper.shortenNumbers(sumsOfYCategoryItems.get(yItem).longValue()) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            } else {
+                                ctx.fillText("(" + String.format(Locale.US, "%.0f", sumsOfYCategoryItems.get(yItem)) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            }
                         } else if (!getShowValues() && getShowPercentage()) {
                             ctx.fillText("(" + String.format(Locale.US, "%.0f%%", sumsOfYCategoryItems.get(yItem) / sumOfValues * 100) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
                         } else {
-                            ctx.fillText("(" + String.join("/", String.format(Locale.US, "%.0f", sumsOfYCategoryItems.get(yItem)), String.format(Locale.US, "%.0f%%", sumsOfYCategoryItems.get(yItem) / sumOfValues * 100)) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            if (getShortenNumbers()) {
+                                ctx.fillText("(" + String.join("/", Helper.shortenNumbers(sumsOfYCategoryItems.get(yItem).longValue()), String.format(Locale.US, "%.0f%%", sumsOfYCategoryItems.get(yItem) / sumOfValues * 100)) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            } else {
+                                ctx.fillText("(" + String.join("/", String.format(Locale.US, "%.0f", sumsOfYCategoryItems.get(yItem)), String.format(Locale.US, "%.0f%%", sumsOfYCategoryItems.get(yItem) / sumOfValues * 100)) + ")", yCategoryWidth * 0.5, cellCenterY + stepY * 0.18, maxYCategoryWidth);
+                            }
                         }
                     } else {
                         ctx.fillText(yItem.getName(), yCategoryWidth * 0.5, cellCenterY, maxYCategoryWidth);
@@ -715,7 +772,12 @@ public class BubbleGridChart extends Region {
                         } else {
                             ctx.setFill(getTextColor());
                         }
-                        String     bubbleText = String.format(Locale.US, "%.0f", bgci.getValue());
+                        String bubbleText;
+                        if (getShortenNumbers()) {
+                            bubbleText = Helper.shortenNumbers((long) bgci.getValue());
+                        } else {
+                            bubbleText = String.format(Locale.US, "%.0f", bgci.getValue());
+                        }
                         FontMetrix metrix     = new FontMetrix(dataFont);
                         metrix.computeStringWidth(bubbleText);
                         if (metrix.computeStringWidth(bubbleText) < (radius * 2)) {
@@ -729,7 +791,11 @@ public class BubbleGridChart extends Region {
         if (getShowValues()) {
             ctx.setFill(getTextColor());
             ctx.setFont(sumFont);
-            ctx.fillText("Sum\n" + String.format(Locale.US, "%.0f", sumOfValues), yCategoryWidth * 0.5, height - xCategoryHeight * 0.5, yCategoryWidth);
+            if (getShortenNumbers()) {
+                ctx.fillText("Sum\n" + Helper.shortenNumbers((long) sumOfValues), yCategoryWidth * 0.5, height - xCategoryHeight * 0.5, yCategoryWidth);
+            } else {
+                ctx.fillText("Sum\n" + String.format(Locale.US, "%.0f", sumOfValues), yCategoryWidth * 0.5, height - xCategoryHeight * 0.5, yCategoryWidth);
+            }
         }
     }
 

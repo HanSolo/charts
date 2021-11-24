@@ -138,6 +138,7 @@ public class BubbleGridChartTest extends Application {
                                                 .showValues(true)
                                                 .showPercentage(true)
                                                 .items(chartItems)
+                                                .shortenNumbers(true)
                                                 .sortCategoryX(Topic.NAME, Order.ASCENDING)
                                                 .sortCategoryY(Topic.VALUE, Order.DESCENDING)
                                                 .useXCategoryFill()

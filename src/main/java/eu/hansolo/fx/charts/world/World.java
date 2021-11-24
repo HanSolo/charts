@@ -794,7 +794,10 @@ public class World extends Region {
      * opacity distribution (at the same event radius).
      * @param OPACITY_DISTRIBUTION
      */
-    public void setOpacityDistribution(final OpacityDistribution OPACITY_DISTRIBUTION) { heatMap.setOpacityDistribution(OPACITY_DISTRIBUTION); }
+    public void setOpacityDistribution(final OpacityDistribution OPACITY_DISTRIBUTION) {
+        heatMap.setOpacityDistribution(OPACITY_DISTRIBUTION);
+        heatMap.updateMonochromeMap(OPACITY_DISTRIBUTION);
+    }
 
     public static double[] latLonToXY(final double LATITUDE, final double LONGITUDE) {
         double x = (LONGITUDE + 180) * (PREFERRED_WIDTH / 360) + MAP_OFFSET_X;

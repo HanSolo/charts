@@ -590,6 +590,11 @@ public class PanelBarChart extends Region {
         return comparisonSeriesSumColor;
     }
 
+    public void removeAllData() {
+        listOfSeries.clear();
+        comparisonListOfSeries.clear();
+        redraw();
+    }
 
     public void dispose() {
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
@@ -711,15 +716,15 @@ public class PanelBarChart extends Region {
                 // Draw complete sum
                 ctx.setTextAlign(TextAlignment.RIGHT);
                 ctx.setFill(getCategorySumColor());
-                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.25, sumColumnWidth);
+                ctx.fillText(Helper.shortenNumbers((long) completeSum), width, cellHeight * 0.25, sumColumnWidth);
                 ctx.setFill(getComparisonCategorySumColor());
-                ctx.fillText(Helper.format((long) comparisonCompleteSum), width, cellHeight * 0.75, sumColumnWidth * 0.95);
+                ctx.fillText(Helper.shortenNumbers((long) comparisonCompleteSum), width, cellHeight * 0.75, sumColumnWidth * 0.95);
 
                 // Draw series names and their sums
                 for (int y = 0; y < noOfSeries; y++) {
                     final ChartItemSeries<ChartItem> series      = listOfSeries.get(y);
                     final String                     seriesName  = series.getName();
-                    final String                     sumOfSeries = Helper.format((long) series.getSumOfAllItems());
+                    final String                     sumOfSeries = Helper.shortenNumbers((long) series.getSumOfAllItems());
                     final double                     posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight + cellHeight * 0.1;
                     ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
                     ctx.setTextAlign(TextAlignment.LEFT);
@@ -732,7 +737,7 @@ public class PanelBarChart extends Region {
                     ctx.fillText(sumOfSeries, width, posY + (itemHeight * 0.5), sumColumnWidth * 0.95);
 
                     final ChartItemSeries<ChartItem> comparisonSeries      = comparisonListOfSeries.get(y);
-                    final String                     comparisonSumOfSeries = Helper.format((long) comparisonSeries.getSumOfAllItems());
+                    final String                     comparisonSumOfSeries = Helper.shortenNumbers((long) comparisonSeries.getSumOfAllItems());
                     final double                     comparisonPosY        = y * (cellHeight + spaceBetweenSeries) + cellHeight + itemHeight + spaceBetweenItems + cellHeight * 0.1;
                     ctx.setFill(getComparisonSeriesSumColor());
                     ctx.fillText(comparisonSumOfSeries, width, comparisonPosY + (itemHeight * 0.5), sumColumnWidth * 0.95);
@@ -758,9 +763,9 @@ public class PanelBarChart extends Region {
                         categoryName = category.getName();
                     }
                     ctx.setFill(getCategorySumColor());
-                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.25, cellWidth * 0.95);
+                    ctx.fillText(Helper.shortenNumbers((long) sum), posX, cellHeight * 0.25, cellWidth * 0.95);
                     ctx.setFill(getComparisonCategorySumColor());
-                    ctx.fillText(Helper.format((long) comparisonSum), posX, cellHeight * 0.75, cellWidth * 0.95);
+                    ctx.fillText(Helper.shortenNumbers((long) comparisonSum), posX, cellHeight * 0.75, cellWidth * 0.95);
                     ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
                     ctx.setFill(getCategoryNameColor());
                     ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth * 0.95);
@@ -830,7 +835,7 @@ public class PanelBarChart extends Region {
                 // Draw complete sum
                 ctx.setTextAlign(TextAlignment.RIGHT);
                 ctx.setFill(getCategoryNameColor());
-                ctx.fillText(Helper.format((long) completeSum), width, cellHeight * 0.5, sumColumnWidth * 0.95);
+                ctx.fillText(Helper.shortenNumbers((long) completeSum), width, cellHeight * 0.5, sumColumnWidth * 0.95);
 
                 ctx.setFont(Fonts.opensansRegular(cellHeight * 0.5));
 
@@ -838,7 +843,7 @@ public class PanelBarChart extends Region {
                 for (int y = 0; y < noOfSeries; y++) {
                     final ChartItemSeries<ChartItem> series      = listOfSeries.get(y);
                     final String                     seriesName  = series.getName();
-                    final String                     sumOfSeries = Helper.format((long) series.getSumOfAllItems());
+                    final String                     sumOfSeries = Helper.shortenNumbers((long) series.getSumOfAllItems());
                     final double                     posY        = y * (cellHeight + spaceBetweenSeries) + cellHeight;
                     ctx.setTextAlign(TextAlignment.LEFT);
                     ctx.setFill(getSeriesNameColor());
@@ -866,7 +871,7 @@ public class PanelBarChart extends Region {
                         categoryName = category.getName();
                     }
                     ctx.setFill(getCategorySumColor());
-                    ctx.fillText(Helper.format((long) sum), posX, cellHeight * 0.5, cellWidth * 0.95);
+                    ctx.fillText(Helper.shortenNumbers((long) sum), posX, cellHeight * 0.5, cellWidth * 0.95);
                     ctx.setFill(getCategoryNameColor());
                     ctx.fillText(categoryName, posX, height - cellHeight * 0.5, cellWidth * 0.95);
                 }

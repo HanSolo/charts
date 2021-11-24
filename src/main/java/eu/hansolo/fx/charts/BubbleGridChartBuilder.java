@@ -122,6 +122,11 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B shortenNumbers(final boolean SHORTEN) {
+        properties.put("shortenNumbers", new SimpleBooleanProperty(SHORTEN));
+        return (B)this;
+    }
+
     public final B minColor(final Color MIN_COLOR) {
         properties.put("minColor", new SimpleObjectProperty<>(MIN_COLOR));
         return (B)this;
@@ -279,6 +284,8 @@ public class BubbleGridChartBuilder<B extends BubbleGridChartBuilder<B>> {
                 CONTROL.sortCategoryY(((ObjectProperty<Topic>) properties.get("sortCategoryYTopic")).get(), ((ObjectProperty<Order>) properties.get("sortCategoryYOrder")).get());
             } else if ("useGradientFill".equals(key)) {
                 CONTROL.setUseGradientFill(((BooleanProperty) properties.get(key)).get());
+            } else if ("shortenNumbers".equals(key)) {
+                CONTROL.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
             } else if ("minColor".equals(key)) {
                 CONTROL.setMinColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("maxColor".equals(key)) {
