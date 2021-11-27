@@ -110,6 +110,7 @@ public class WorldmapConnectionsTest extends Application {
         List<MapPoint> asia         = List.of(beijing, hong_kong, singapore, tokio, chongqing);
         List<MapPoint> australia    = List.of(sydney, perth, christchurch);
 
+
         worldMap.addMapPoints(berlin, paris, san_francisco, abu_dabi, new_york, chicago, denver, sao_paulo, madrid, calgary,
                               mexico_city, buenos_aires, santiago_de_chile, johannesburg, moscow, novosibirsk, magadan,
                               mumbai, beijing, hong_kong, sydney, christchurch, tokio, singapore, casablanca, tunis, alexandria, nairobi,

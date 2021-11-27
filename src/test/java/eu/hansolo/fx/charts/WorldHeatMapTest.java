@@ -69,13 +69,18 @@ public class WorldHeatMapTest extends Application {
                                .resolution(Resolution.HI_RES)
                                //.backgroundColor(Color.BLACK)
                                .fillColor(Color.BLACK)
-                               .zoomEnabled(false)
+                               .zoomEnabled(true)
                                .hoverEnabled(false)
-                               .selectionEnabled(false)
+                               .selectionEnabled(true)
+                               .selectedColor(Color.LIGHTBLUE)
+                               .mousePressHandler(e -> {
+                                   //worldMap.setSelectedColor(worldMap.getSelectedCountry().getFill());
+                                   System.out.println(worldMap.getSelectedCountry());
+                               })
                                //.colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
-                               //.colorMapping(ChartsColorMapping.BLUE_GREEN_RED)
+                               .colorMapping(ChartsColorMapping.BLUE_GREEN_RED)
                                //.colorMapping(ChartsColorMapping.BLACK_WHITE)
-                               .colorMapping(customMapping)
+                               //.colorMapping(customMapping)
                                .fadeColors(true)
                                .eventRadius(3)
                                .heatMapOpacity(0.75)

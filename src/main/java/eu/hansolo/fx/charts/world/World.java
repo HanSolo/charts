@@ -250,16 +250,16 @@ public class World extends Region {
             @Override public CssMetaData<? extends Styleable, Color> getCssMetaData() { return LOCATION_COLOR; }
         };
         hoverEnabled           = new BooleanPropertyBase(true) {
-            @Override protected void invalidated() {}
+            @Override protected void invalidated() { }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "hoverEnabled"; }
         };
         selectionEnabled       = new BooleanPropertyBase(false) {
-            @Override protected void invalidated() {}
+            @Override protected void invalidated() { enableMouseInteraction(get()); }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "selectionEnabled"; }
         };
-        selectedCountry        = new ObjectPropertyBase<Country>() {
+        selectedCountry        = new ObjectPropertyBase<>() {
             @Override protected void invalidated() {}
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "selectedCountry"; }
@@ -370,7 +370,7 @@ public class World extends Region {
         countryPaths.forEach((name, pathList) -> {
             Country country = Country.valueOf(name);
             pathList.forEach(path -> {
-                path.setFill(null == country.getColor() ? fill : country.getColor());
+                path.setFill(null == country.getFill() ? fill : country.getFill());
                 path.setStroke(stroke);
                 path.setStrokeWidth(0.2);
                 path.setOnMouseEntered(new WeakEventHandler<>(_mouseEnterHandler));
@@ -397,6 +397,8 @@ public class World extends Region {
 
         overlayCanvas = new Canvas(1009, 665);
         overlayCtx    = overlayCanvas.getGraphicsContext2D();
+
+        if (isSelectionEnabled()) { enableMouseInteraction(true); }
 
         getChildren().setAll(group, heatMap, canvas, overlayCanvas);
 
@@ -858,6 +860,12 @@ public class World extends Region {
         setTranslateY(getTranslateY() - Y);
     }
 
+    private void enableMouseInteraction(final boolean ENABLE) {
+        heatMap.setMouseTransparent(ENABLE);
+        canvas.setMouseTransparent(ENABLE);
+        overlayCanvas.setMouseTransparent(ENABLE);
+    }
+
     private void handleMouseEvent(final MouseEvent EVENT, final EventHandler<MouseEvent> HANDLER) {
         final CountryPath       COUNTRY_PATH = (CountryPath) EVENT.getSource();
         final String            COUNTRY_NAME = COUNTRY_PATH.getName();
@@ -877,7 +885,7 @@ public class World extends Region {
                     setSelectedCountry(COUNTRY);
                     color = getSelectedColor();
                 } else {
-                    color = null == getSelectedCountry().getColor() ? getFillColor() : getSelectedCountry().getColor();
+                    color = null == getSelectedCountry().getFill() ? getFillColor() : getSelectedCountry().getFill();
                 }
                 for (SVGPath path : countryPaths.get(getSelectedCountry().getName())) { path.setFill(color); }
             } else {
@@ -890,7 +898,7 @@ public class World extends Region {
             if (isSelectionEnabled()) {
                 if (formerSelectedCountry == COUNTRY) {
                     setSelectedCountry(null);
-                    color = null == COUNTRY.getColor() ? getFillColor() : COUNTRY.getColor();
+                    color = null == COUNTRY.getFill() ? getFillColor() : COUNTRY.getFill();
                 } else {
                     setSelectedCountry(COUNTRY);
                     color = getSelectedColor();
@@ -906,7 +914,7 @@ public class World extends Region {
             if (isHoverEnabled()) {
                 Color color = isSelectionEnabled() && COUNTRY.equals(getSelectedCountry()) ? getSelectedColor() : getFillColor();
                 for (SVGPath path : PATHS) {
-                    path.setFill(null == COUNTRY.getColor() || COUNTRY == getSelectedCountry() ? color : COUNTRY.getColor());
+                    path.setFill(null == COUNTRY.getFill() || COUNTRY == getSelectedCountry() ? color : COUNTRY.getFill());
                 }
             }
         }
@@ -917,7 +925,7 @@ public class World extends Region {
     private void setFillAndStroke() {
         countryPaths.keySet().forEach(name -> {
             Country country = Country.valueOf(name);
-            setCountryFillAndStroke(country, null == country.getColor() ? getFillColor() : country.getColor(), getStrokeColor());
+            setCountryFillAndStroke(country, null == country.getFill() ? getFillColor() : country.getFill(), null == country.getStroke() ? getStrokeColor() : country.getStroke());
         });
     }
     private void setCountryFillAndStroke(final Country COUNTRY, final Color FILL, final Color STROKE) {

@@ -16,7 +16,6 @@
 
 package eu.hansolo.fx.charts.tools;
 
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;

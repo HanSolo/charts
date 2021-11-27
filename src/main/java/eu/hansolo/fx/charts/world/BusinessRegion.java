@@ -53,6 +53,6 @@ public enum BusinessRegion implements CRegion {
     @Override public List<Country> getCountries() { return countries; }
 
     @Override public void setColor(final Color COLOR) {
-        for (Country country : getCountries()) { country.setColor(COLOR); }
+        for (Country country : getCountries()) { country.setFill(COLOR); }
     }
 }
