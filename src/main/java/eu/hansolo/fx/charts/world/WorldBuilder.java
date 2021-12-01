@@ -22,6 +22,7 @@ import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
 import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
+import eu.hansolo.fx.charts.tools.MapPointSize;
 import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import javafx.beans.property.BooleanProperty;
@@ -183,6 +184,16 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
 
     public final B weightedMapConnections(final boolean WEIGHTED) {
         properties.put("weightedMapConnections", new SimpleBooleanProperty(WEIGHTED));
+        return (B)this;
+    }
+
+    public final B mapPointSize(final MapPointSize SIZE) {
+        properties.put("mapPointSize", new SimpleObjectProperty<>(SIZE));
+        return (B)this;
+    }
+
+    public final B mapPointsVisible(final boolean VISIBLE) {
+        properties.put("mapPointsVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -368,6 +379,10 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
                 CONTROL.setWeightedMapPoints(((ObjectProperty<WeightedMapPoints>) properties.get(key)).get());
             } else if ("weightedMapConnections".equals(key)) {
                 CONTROL.setWeightedMapConnections(((BooleanProperty) properties.get(key)).get());
+            } else if ("mapPointSize".equals(key)) {
+                CONTROL.setMapPointSize(((ObjectProperty<MapPointSize>) properties.get(key)).get());
+            } else if ("mapPointsVisible".equals(key)) {
+                CONTROL.setMapPointsVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("mapPointTextVisible".equals(key)) {
                 CONTROL.setMapPointTextVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("textColor".equals(key)) {

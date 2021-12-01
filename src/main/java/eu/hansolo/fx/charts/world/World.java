@@ -26,6 +26,7 @@ import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
+import eu.hansolo.fx.charts.tools.MapPointSize;
 import eu.hansolo.fx.charts.tools.Mapping;
 import eu.hansolo.fx.charts.tools.Point;
 import javafx.animation.Interpolator;
@@ -112,7 +113,7 @@ public class World extends Region {
     public enum Resolution { HI_RES, LO_RES };
     private static final StyleablePropertyFactory<World> FACTORY          = new StyleablePropertyFactory<>(Region.getClassCssMetaData());
     private static final String                          HIRES_PROPERTIES = "eu/hansolo/fx/charts/world/hires.properties";
-    private static final String                          LORES_PROPERTIES = "eu/hansolo/fx/chaworld/lores.properties";
+    private static final String                          LORES_PROPERTIES = "eu/hansolo/fx/charts/world/lores.properties";
     private static final double                          PREFERRED_WIDTH  = 1009;
     private static final double                          PREFERRED_HEIGHT = 665;
     private static final double                          MINIMUM_WIDTH    = 100;
@@ -174,6 +175,8 @@ public class World extends Region {
     private              boolean                         weightedMapConnections;
     private              boolean                         arrowsVisible;
     private              Optional<MapConnection>         connectionWithMaxValue;
+    private              MapPointSize                    mapPointSize;
+    private              boolean                         mapPointsVisible;
     private              boolean                         mapPointTextVisible;
     private              Color                           textColor;
     private              Image                           image;
@@ -308,6 +311,8 @@ public class World extends Region {
         weightedMapConnections = false;
         arrowsVisible          = false;
         connectionWithMaxValue = Optional.empty();
+        mapPointSize           = MapPointSize.NORMAL;
+        mapPointsVisible       = true;
         mapPointTextVisible    = false;
         textColor              = Color.BLACK;
         image                  = null;
@@ -538,6 +543,18 @@ public class World extends Region {
         redraw();
     }
 
+    public MapPointSize getMapPointSize() { return mapPointSize; }
+    public void setMapPointSize(final MapPointSize SIZE) {
+        this.mapPointSize = SIZE;
+        redraw();
+    }
+
+    public boolean getMapPointsVisible() { return mapPointsVisible; }
+    public void setMapPointsVisible(final boolean VISIBLE) {
+        mapPointsVisible = VISIBLE;
+        redraw();
+    }
+
     public boolean getMapPointTextVisible() { return mapPointTextVisible; }
     public void setMapPointTextVisible(final boolean VISIBLE) {
         mapPointTextVisible = VISIBLE;
@@ -613,6 +630,15 @@ public class World extends Region {
     public void setDrawImagePath(final boolean DRAW_IMAGE_PATH) {
         drawImagePath = DRAW_IMAGE_PATH;
         redrawOverlay();
+    }
+
+    public void setHeatMapToTop(final boolean TO_TOP) {
+        if (TO_TOP) {
+            heatMap.toFront();
+        } else {
+            heatMap.toBack();
+            group.toBack();
+        }
     }
 
     public Timeline getTimeline() { return timeline; }
@@ -981,6 +1007,42 @@ public class World extends Region {
         ctx.clearRect(0, 0, w, h);
 
         Map<MapPoint, Integer> weightedPoints = new HashMap<>();
+        double fontSize = size * 0.01;
+        double dotR;
+        double dotDia;
+        double circleDia;
+        double circleR;
+        switch(mapPointSize) {
+            case TINY -> {
+                fontSize  = size * 0.0025;
+                dotR      = 0.5;
+                dotDia    = 1;
+                circleR   = 1;
+                circleDia = 2;
+            }
+            case SMALL -> {
+                fontSize  = size * 0.005;
+                dotR      = 1;
+                dotDia    = 2;
+                circleR   = 2;
+                circleDia = 4;
+            }
+            case NORMAL -> {
+                fontSize  = size * 0.01;
+                dotR      = 1.5;
+                dotDia    = 3;
+                circleR   = 3;
+                circleDia = 6;
+            }
+            default -> {
+                fontSize  = size * 0.01;
+                dotR      = 1.5;
+                dotDia    = 3;
+                circleR   = 3;
+                circleDia = 6;
+            }
+        }
+
         double maxPointDia = 3;
         double maxAmount   = 0;
         switch(weightedMapPoints) {
@@ -1015,24 +1077,27 @@ public class World extends Region {
                 break;
         }
 
-        double fontSize = size * 0.01;
         ctx.setFont(Fonts.opensansRegular(fontSize));
         ctx.setTextBaseline(VPos.CENTER);
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setLineWidth(1);
         List<MapPoint> pointsDrawn = new ArrayList<>();
-        for (MapPoint point : mapPoints) {
-            pointsDrawn.add(point);
-            double[] xy = latLonToXY(point.getX(), point.getY());
-            ctx.setStroke(point.getFill());
-            ctx.strokeOval(xy[0] - 3, xy[1] - 3, 6, 6);
-            ctx.setFill(point.getFill());
-            ctx.fillOval(xy[0] - maxPointDia / 2.0, xy[1] - maxPointDia / 2.0, maxPointDia, maxPointDia);
-            if (mapPointTextVisible) {
-                ctx.save();
-                ctx.setFill(textColor);
-                ctx.fillText(point.getName(), xy[0], xy[1] + fontSize);
-                ctx.restore();
+        if (getMapPointsVisible()) {
+            for (MapPoint point : mapPoints) {
+                pointsDrawn.add(point);
+                double[] xy = latLonToXY(point.getX(), point.getY());
+                if (MapPointSize.TINY != mapPointSize) {
+                    ctx.setStroke(point.getFill());
+                    ctx.strokeOval(xy[0] - circleR, xy[1] - circleR, circleDia, circleDia);
+                }
+                ctx.setFill(point.getFill());
+                ctx.fillOval(xy[0] - dotR, xy[1] - dotR, dotDia, dotDia);
+                if (mapPointTextVisible) {
+                    ctx.save();
+                    ctx.setFill(textColor);
+                    ctx.fillText(point.getName(), xy[0], xy[1] + fontSize);
+                    ctx.restore();
+                }
             }
         }
         ctx.setLineWidth(connectionWidth);

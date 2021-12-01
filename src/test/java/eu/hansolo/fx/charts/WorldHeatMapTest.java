@@ -73,10 +73,10 @@ public class WorldHeatMapTest extends Application {
                                .hoverEnabled(false)
                                .selectionEnabled(true)
                                .selectedColor(Color.LIGHTBLUE)
-                               .mousePressHandler(e -> {
-                                   //worldMap.setSelectedColor(worldMap.getSelectedCountry().getFill());
-                                   System.out.println(worldMap.getSelectedCountry());
-                               })
+                               //.mousePressHandler(e -> {
+                               //    //worldMap.setSelectedColor(worldMap.getSelectedCountry().getFill());
+                               //    System.out.println(worldMap.getSelectedCountry());
+                               //})
                                //.colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
                                .colorMapping(ChartsColorMapping.BLUE_GREEN_RED)
                                //.colorMapping(ChartsColorMapping.BLACK_WHITE)
