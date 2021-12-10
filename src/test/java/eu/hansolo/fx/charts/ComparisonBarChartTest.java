@@ -62,23 +62,23 @@ public class ComparisonBarChartTest extends Application {
 
 
     @Override public void init() {
-        Category jdk8  = new Category("Option 1");
-        Category jdk11 = new Category("Option 2");
-        Category jdk12 = new Category("Option 3");
-        Category jdk13 = new Category("Option 4");
-        Category jdk14 = new Category("Option 5");
-        Category jdk15 = new Category("Option 6");
-        Category jdk16 = new Category("Option 7");
-        Category jdk17 = new Category("Option 8");
+        Category option1  = new Category("Option 1");
+        Category option2 = new Category("Option 2");
+        Category option3 = new Category("Option 3");
+        Category option4 = new Category("Option 4");
+        Category option5 = new Category("Option 5");
+        Category option6 = new Category("Option 6");
+        Category option7 = new Category("Option 7");
+        Category option8 = new Category("Option 8");
 
-        chart1Data1 = ChartItemBuilder.create().name("Item 1").category(jdk8).build();
-        chart1Data2 = ChartItemBuilder.create().name("Item 2").category(jdk11).build();
-        chart1Data3 = ChartItemBuilder.create().name("Item 3").category(jdk12).build();
-        chart1Data4 = ChartItemBuilder.create().name("Item 4").category(jdk13).build();
-        chart1Data5 = ChartItemBuilder.create().name("Item 5").category(jdk14).build();
-        chart1Data6 = ChartItemBuilder.create().name("Item 6").category(jdk15).build();
-        chart1Data7 = ChartItemBuilder.create().name("Item 7").category(jdk16).build();
-        chart1Data8 = ChartItemBuilder.create().name("Item 8").category(jdk17).build();
+        chart1Data1 = ChartItemBuilder.create().name("Item 1").category(option1).build();
+        chart1Data2 = ChartItemBuilder.create().name("Item 2").category(option2).build();
+        chart1Data3 = ChartItemBuilder.create().name("Item 3").category(option3).build();
+        chart1Data4 = ChartItemBuilder.create().name("Item 4").category(option4).build();
+        chart1Data5 = ChartItemBuilder.create().name("Item 5").category(option5).build();
+        chart1Data6 = ChartItemBuilder.create().name("Item 6").category(option6).build();
+        chart1Data7 = ChartItemBuilder.create().name("Item 7").category(option7).build();
+        chart1Data8 = ChartItemBuilder.create().name("Item 8").category(option8).build();
 
         ChartItemSeries<ChartItem> series1 = ChartItemSeriesBuilder.create()
                                                                    .name("Series 1")
@@ -90,14 +90,14 @@ public class ComparisonBarChartTest extends Application {
                                                                    .animationDuration(1000)
                                                                    .build();
 
-        chart2Data1 = ChartItemBuilder.create().name("Item 1").category(jdk8).build();
-        chart2Data2 = ChartItemBuilder.create().name("Item 2").category(jdk11).build();
-        chart2Data3 = ChartItemBuilder.create().name("Item 3").category(jdk12).build();
-        chart2Data4 = ChartItemBuilder.create().name("Item 4").category(jdk13).build();
-        chart2Data5 = ChartItemBuilder.create().name("Item 5").category(jdk14).build();
-        chart2Data6 = ChartItemBuilder.create().name("Item 6").category(jdk15).build();
-        chart2Data7 = ChartItemBuilder.create().name("Item 7").category(jdk16).build();
-        chart2Data8 = ChartItemBuilder.create().name("Item 8").category(jdk17).build();
+        chart2Data1 = ChartItemBuilder.create().name("Item 1").category(option1).build();
+        chart2Data2 = ChartItemBuilder.create().name("Item 2").category(option2).build();
+        chart2Data3 = ChartItemBuilder.create().name("Item 3").category(option3).build();
+        chart2Data4 = ChartItemBuilder.create().name("Item 4").category(option4).build();
+        chart2Data5 = ChartItemBuilder.create().name("Item 5").category(option5).build();
+        chart2Data6 = ChartItemBuilder.create().name("Item 6").category(option6).build();
+        chart2Data7 = ChartItemBuilder.create().name("Item 7").category(option7).build();
+        chart2Data8 = ChartItemBuilder.create().name("Item 8").category(option8).build();
 
         ChartItemSeries<ChartItem> series2 = ChartItemSeriesBuilder.create()
                                                                    .name("Series 2")
