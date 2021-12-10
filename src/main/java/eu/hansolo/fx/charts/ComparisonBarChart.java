@@ -612,7 +612,7 @@
          double          noOfCategories      = categories.size();
          double          maxBarWidth         = chartWidth * 0.4;
          double          categoryWidth       = chartWidth * 0.2;
-         double          barHeight           = chartHeight * 0.08;
+         double          barHeight           = chartHeight / (noOfCategories + (noOfCategories * 0.4));
          double          cornerRadius        = barHeight * 0.75;
          double          barSpacer           = (chartHeight - (noOfCategories * barHeight)) / (noOfCategories - 1);
          double          maxValue            = Math.max(series1.getMaxValue(), series2.getMaxValue());
