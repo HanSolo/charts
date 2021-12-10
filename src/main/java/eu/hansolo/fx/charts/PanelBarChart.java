@@ -787,7 +787,7 @@ public class PanelBarChart extends Region {
                         if (chartItem.isPresent()) {
                             final ChartItem item      = chartItem.get();
                             final double    itemWidth = item.getValue() * scaleFactorX;
-                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.setFill(useCategoryColor ? category.getFill() : item.getFill());
                             ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
                             itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
                         }
@@ -804,7 +804,7 @@ public class PanelBarChart extends Region {
                         if (chartItem.isPresent()) {
                             final ChartItem item      = chartItem.get();
                             final double    itemWidth = item.getValue() * scaleFactorX;
-                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.setFill(useCategoryColor ? category.getFill() : item.getFill());
                             ctx.fillRect(posX, comparisonPosY + itemOffsetY, itemWidth, itemHeight);
                             itemMap.put(new Rectangle(posX, comparisonPosY + itemOffsetY, itemWidth, itemHeight), item);
                         }
@@ -891,7 +891,7 @@ public class PanelBarChart extends Region {
                         if (chartItem.isPresent()) {
                             final ChartItem item      = chartItem.get();
                             final double    itemWidth = item.getValue() * scaleFactorX;
-                            ctx.setFill(useCategoryColor ? category.getColor() : item.getFill());
+                            ctx.setFill(useCategoryColor ? category.getFill() : item.getFill());
                             ctx.fillRect(posX, posY + itemOffsetY, itemWidth, itemHeight);
                             itemMap.put(new Rectangle(posX, posY + itemOffsetY, itemWidth, itemHeight), item);
                         }

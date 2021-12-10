@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.event.CategoryEvent;
 import eu.hansolo.fx.charts.event.CategoryEventListener;
+import eu.hansolo.fx.charts.event.EventType;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.scene.paint.Color;
@@ -27,17 +28,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Category {
-    private final String                      name;
-    private       Color                       _color;
-    private       ObjectProperty<Color>       color;
-    private       List<CategoryEventListener> listeners;
+    private static final CategoryEvent               UPDATE_EVT = new CategoryEvent(EventType.UPDATE);
+    private        final String                      name;
+    private              Color                       _fill;
+    private              ObjectProperty<Color>       fill;
+    private              Color                       _stroke;
+    private              ObjectProperty<Color>       stroke;
+    private              Color                       _textFill;
+    private              ObjectProperty<Color>       textFill;
+    private              List<CategoryEventListener> listeners;
 
 
     // ******************** Constructors **************************************
-    public Category(final String name) { this(name, Color.LIGHTGRAY); }
-    public Category(final String name, final Color color) {
+    public Category(final String name) { this(name, Color.LIGHTGRAY, Color.TRANSPARENT, Color.BLACK); }
+    public Category(final String name, final Color fill) {
+        this(name, fill, Color.TRANSPARENT, Color.BLACK);
+    }
+    public Category(final String name, final Color fill, final Color stroke, final Color textFill) {
         this.name      = name;
-        this._color    = color;
+        this._fill     = fill;
+        this._stroke   = stroke;
+        this._textFill = textFill;
         this.listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -45,24 +56,67 @@ public class Category {
     // ******************** Methods *******************************************
     public String getName() { return name; }
 
-    public Color getColor() { return null == color ? _color : color.get(); }
-    public void setColor(final Color color) {
-        if (null == this.color) {
-            _color = color;
+    public Color getFill() { return null == fill ? _fill : fill.get(); }
+    public void setFill(final Color fill) {
+        if (null == this.fill) {
+            _fill = fill;
+            fireCategoryEvent(UPDATE_EVT);
         } else {
-            this.color.set(color);
+            this.fill.set(fill);
         }
     }
-    public ObjectProperty<Color> colorProperty() {
-        if (null == color) {
-            color = new ObjectPropertyBase<>(_color) {
-                @Override protected void invalidated() {}
+    public ObjectProperty<Color> fillProperty() {
+        if (null == fill) {
+            fill  = new ObjectPropertyBase<>(_fill) {
+                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
                 @Override public Object getBean() { return Category.this; }
-                @Override public String getName() { return "color"; }
+                @Override public String getName() { return "fill"; }
             };
-            _color = null;
+            _fill = null;
         }
-        return color;
+        return fill;
+    }
+
+    public Color getStroke() { return null == stroke ? _stroke : stroke.get(); }
+    public void setStroke(final Color stroke) {
+        if (null == this.stroke) {
+            _stroke = stroke;
+            fireCategoryEvent(UPDATE_EVT);
+        } else {
+            this.stroke.set(stroke);
+        }
+    }
+    public ObjectProperty<Color> strokeProperty() {
+        if (null == stroke) {
+            stroke = new ObjectPropertyBase<>(_stroke) {
+                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override public Object getBean() { return Category.this; }
+                @Override public String getName() { return "stroke"; }
+            };
+            _stroke = null;
+        }
+        return stroke;
+    }
+
+    public Color getTextFill() { return null == textFill ? _textFill : textFill.get(); }
+    public void setTextFill(final Color textFill) {
+        if (null == this.textFill) {
+            _textFill = textFill;
+            fireCategoryEvent(UPDATE_EVT);
+        } else {
+            this.textFill.set(textFill);
+        }
+    }
+    public ObjectProperty<Color> textFillProperty() {
+        if (null == textFill) {
+            textFill = new ObjectPropertyBase<>(_textFill) {
+                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override public Object getBean() { return Category.this; }
+                @Override public String getName() { return "textFill"; }
+            };
+            _textFill = null;
+        }
+        return textFill;
     }
 
 
