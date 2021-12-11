@@ -43,6 +43,8 @@
  import javafx.scene.Node;
  import javafx.scene.canvas.Canvas;
  import javafx.scene.canvas.GraphicsContext;
+ import javafx.scene.effect.BlurType;
+ import javafx.scene.effect.DropShadow;
  import javafx.scene.input.MouseEvent;
  import javafx.scene.layout.Pane;
  import javafx.scene.layout.Region;
@@ -87,8 +89,12 @@
      private              Pane                                         pane;
      private              ChartItemSeries<ChartItem>                   series1;
      private              ChartItemSeries<ChartItem>                   series2;
-     private              Color                                        _backgroundFill;
-     private              ObjectProperty<Color>                        backgroundFill;
+     private              Paint                                        _backgroundFill;
+     private              ObjectProperty<Paint>                        backgroundFill;
+     private              Paint                                        _categoryBackgroundFill;
+     private              ObjectProperty<Paint>                        categoryBackgroundFill;
+     private              Color                                        _barBackgroundFill;
+     private              ObjectProperty<Color>                        barBackgroundFill;
      private              Color                                        _textFill;
      private              ObjectProperty<Color>                        textFill;
      private              Color                                        _categoryTextFill;
@@ -101,6 +107,10 @@
      private              ObjectProperty<Color>                        poorerDarkerColor;
      private              Color                                        _poorerBrighterColor;
      private              ObjectProperty<Color>                        poorerBrighterColor;
+     private              boolean                                      _barBackgroundVisible;
+     private              BooleanProperty                              barBackgroundVisible;
+     private              boolean                                      _shadowsVisible;
+     private              BooleanProperty                              shadowsVisible;
      private              NumberFormat                                 _numberFormat;
      private              ObjectProperty<NumberFormat>                 numberFormat;
      private              boolean                                      _doCompare;
@@ -131,32 +141,36 @@
          this.series1 = series1;
          this.series2 = series2;
          if (!validate()) { throw new IllegalArgumentException("Please make sure the categories of the items in series 1 and 2 are the same and not null or empty"); }
-         _backgroundFill      = Color.rgb(230, 230, 230);
-         _textFill            = Color.WHITE;
-         _categoryTextFill    = Color.BLACK;
-         _betterDarkerColor   = Color.rgb(51, 178, 75);
-         _betterBrighterColor = Color.rgb(163, 206, 53);
-         _poorerDarkerColor   = Color.rgb(252, 79, 55);
-         _poorerBrighterColor = Color.rgb(252, 132, 36);
-         _numberFormat        = NumberFormat.NUMBER;
-         _doCompare           = false;
-         _useItemTextFill     = false;
-         _useCategoryTextFill = false;
-         _shortenNumbers      = false;
-         _sorted              = false;
-         _order               = Order.DESCENDING;
-         listeners            = new CopyOnWriteArrayList<>();
-         popup                = new InfoPopup();
-         categoryValueMap     = new HashMap<>();
-         rectangleItemMap     = new HashMap<>();
-         itemEventListener    = e -> {
+         _backgroundFill         = Color.TRANSPARENT;
+         _barBackgroundFill      = Color.rgb(230, 230, 230);
+         _categoryBackgroundFill = Color.TRANSPARENT;
+         _textFill               = Color.WHITE;
+         _categoryTextFill       = Color.BLACK;
+         _betterDarkerColor      = Color.rgb(51, 178, 75);
+         _betterBrighterColor    = Color.rgb(163, 206, 53);
+         _poorerDarkerColor      = Color.rgb(252, 79, 55);
+         _poorerBrighterColor    = Color.rgb(252, 132, 36);
+         _barBackgroundVisible   = false;
+         _shadowsVisible         = false;
+         _numberFormat           = NumberFormat.NUMBER;
+         _doCompare              = false;
+         _useItemTextFill        = false;
+         _useCategoryTextFill    = false;
+         _shortenNumbers         = false;
+         _sorted                 = false;
+         _order                  =  Order.DESCENDING;
+         listeners               = new CopyOnWriteArrayList<>();
+         popup                   = new InfoPopup();
+         categoryValueMap        = new HashMap<>();
+         rectangleItemMap        = new HashMap<>();
+         itemEventListener       = e -> {
              final EventType TYPE = e.getEventType();
              switch(TYPE) {
                  case UPDATE  : drawChart(); break;
                  case FINISHED: drawChart(); break;
              }
          };
-         chartItemListener    = c -> {
+         chartItemListener       = c -> {
              while (c.next()) {
                  if (c.wasAdded()) {
                      c.getAddedSubList().forEach(addedItem -> addedItem.addItemEventListener(itemEventListener));
@@ -166,7 +180,7 @@
              }
              drawChart();
          };
-         mouseHandler         = e -> handleMouseEvents(e);
+         mouseHandler            = e -> handleMouseEvents(e);
          prepareSeries(this.series1);
          prepareSeries(this.series2);
          initGraphics();
@@ -227,8 +241,8 @@
 
      @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-     public Color getBackgroundFill() { return null == backgroundFill ? _backgroundFill : backgroundFill.get(); }
-     public void setBackgroundFill(final Color backgroundFill) {
+     public Paint getBackgroundFill() { return null == backgroundFill ? _backgroundFill : backgroundFill.get(); }
+     public void setBackgroundFill(final Paint backgroundFill) {
          if (null == this.backgroundFill) {
              _backgroundFill = backgroundFill;
              redraw();
@@ -236,7 +250,7 @@
              this.backgroundFill.set(backgroundFill);
          }
      }
-     public ObjectProperty<Color> backgroundFillProperty() {
+     public ObjectProperty<Paint> backgroundFillProperty() {
          if (null == backgroundFill) {
              backgroundFill = new ObjectPropertyBase<>(_backgroundFill) {
                  @Override protected void invalidated() { redraw(); }
@@ -246,6 +260,48 @@
              _backgroundFill = null;
          }
          return backgroundFill;
+     }
+
+     public Paint getCategoryBackgroundFill() { return null == categoryBackgroundFill ? _categoryBackgroundFill : categoryBackgroundFill.get(); }
+     public void setCategoryBackgroundFill(final Paint categoryBackgroundFill) {
+         if (null == this.categoryBackgroundFill) {
+             _categoryBackgroundFill = categoryBackgroundFill;
+             redraw();
+         } else {
+             this.categoryBackgroundFill.set(categoryBackgroundFill);
+         }
+     }
+     public ObjectProperty<Paint> categoryBackgroundFillProperty() {
+         if (null == categoryBackgroundFill) {
+             categoryBackgroundFill = new ObjectPropertyBase<>(_categoryBackgroundFill) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return ComparisonBarChart.this; }
+                 @Override public String getName() { return "categoryBackgroundFill"; }
+             };
+             _categoryBackgroundFill = null;
+         }
+         return categoryBackgroundFill;
+     }
+
+     public Color getBarBackgroundFill() { return null == barBackgroundFill ? _barBackgroundFill : barBackgroundFill.get(); }
+     public void setBarBackgroundFill(final Color barBackgroundFill) {
+         if (null == this.barBackgroundFill) {
+             _barBackgroundFill = barBackgroundFill;
+             redraw();
+         } else {
+             this.barBackgroundFill.set(barBackgroundFill);
+         }
+     }
+     public ObjectProperty<Color> barBackgroundFillProperty() {
+         if (null == barBackgroundFill) {
+             barBackgroundFill = new ObjectPropertyBase<>(_barBackgroundFill) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return ComparisonBarChart.this; }
+                 @Override public String getName() { return "barBackgroundFill"; }
+             };
+             _barBackgroundFill = null;
+         }
+         return barBackgroundFill;
      }
 
      public Color getTextFill() { return null == textFill ? _textFill : textFill.get(); }
@@ -372,6 +428,46 @@
              _poorerBrighterColor = null;
          }
          return poorerBrighterColor;
+     }
+
+     public boolean getBarBackgroundVisible() { return null == barBackgroundVisible ? _barBackgroundVisible : barBackgroundVisible.get(); }
+     public void setBarBackgroundVisible(final boolean barBackgroundVisible) {
+         if (null == this.barBackgroundVisible) {
+             _barBackgroundVisible = barBackgroundVisible;
+             redraw();
+         } else {
+             this.barBackgroundVisible.set(barBackgroundVisible);
+         }
+     }
+     public BooleanProperty barBackgroundVisibleProperty() {
+         if (null == barBackgroundVisible) {
+             barBackgroundVisible = new BooleanPropertyBase(_barBackgroundVisible) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return ComparisonBarChart.this; }
+                 @Override public String getName() { return "barBackgroundVisible"; }
+             };
+         }
+         return barBackgroundVisible;
+     }
+
+     public boolean getShadowsVisible() { return null == shadowsVisible ? _shadowsVisible : shadowsVisible.get(); }
+     public void setShadowsVisible(final boolean shadowsVisible) {
+         if (null == this.shadowsVisible) {
+             _shadowsVisible = shadowsVisible;
+             redraw();
+         } else {
+             this.shadowsVisible.set(shadowsVisible);
+         }
+     }
+     public BooleanProperty shadowsVisibleProperty() {
+         if (null == shadowsVisible) {
+             shadowsVisible = new BooleanPropertyBase(_shadowsVisible) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return ComparisonBarChart.this; }
+                 @Override public String getName() { return "shadowsVisible"; }
+             };
+         }
+         return shadowsVisible;
      }
 
      public NumberFormat getNumberFormat() { return null == numberFormat ? _numberFormat : numberFormat.get(); }
@@ -603,28 +699,33 @@
      private void drawChart() {
          categoryValueMap.clear();
          rectangleItemMap.clear();
-         double          inset               = 5;
-         double          chartWidth          = this.width - 2 * inset;
-         double          chartHeight         = this.height - 2 * inset;
-         List<Category>  categories          = series1.getItems().stream().map(item -> item.getCategory()).collect(Collectors.toList());
-         List<ChartItem> items1              = series1.getItems();
-         List<ChartItem> items2              = series2.getItems();
-         double          noOfCategories      = categories.size();
-         double          maxBarWidth         = chartWidth * 0.4;
-         double          categoryWidth       = chartWidth * 0.2;
-         double          barHeight           = chartHeight / (noOfCategories + (noOfCategories * 0.4));
-         double          cornerRadius        = barHeight * 0.75;
-         double          barSpacer           = (chartHeight - (noOfCategories * barHeight)) / (noOfCategories - 1);
-         double          maxValue            = Math.max(series1.getMaxValue(), series2.getMaxValue());
-         NumberFormat    numberFormat        = getNumberFormat();
-         Color           valueTextFill       = getTextFill();
-         Color           categoryTextFill    = getCategoryTextFill();
-         boolean         useItemTextFill     = getUseItemTextFill();
-         boolean         useCategoryTextFill = getUseCategoryTextFill();
-         String          formatString        = numberFormat.formatString();
-         Paint           leftFill            = series1.getFill();
-         Paint           rightFill           = series2.getFill();
-         boolean         shortenNumbers      = getShortenNumbers();
+         double          inset                = 5;
+         double          chartWidth           = this.width - 2 * inset;
+         double          chartHeight          = this.height - 2 * inset;
+         List<Category>  categories           = series1.getItems().stream().map(item -> item.getCategory()).sorted().collect(Collectors.toList());
+         List<ChartItem> items1               = series1.getItems();
+         List<ChartItem> items2               = series2.getItems();
+         double          noOfCategories       = categories.size();
+         double          maxBarWidth          = chartWidth * 0.4;
+         double          categoryWidth        = chartWidth * 0.2;
+         double          barHeight            = chartHeight / (noOfCategories + (noOfCategories * 0.4));
+         double          cornerRadius         = barHeight * 0.75;
+         double          barSpacer            = (chartHeight - (noOfCategories * barHeight)) / (noOfCategories - 1);
+         double          maxValue             = Math.max(series1.getMaxValue(), series2.getMaxValue());
+         NumberFormat    numberFormat         = getNumberFormat();
+         Color           valueTextFill        = getTextFill();
+         Color           categoryTextFill     = getCategoryTextFill();
+         boolean         useItemTextFill      = getUseItemTextFill();
+         boolean         useCategoryTextFill  = getUseCategoryTextFill();
+         String          formatString         = numberFormat.formatString();
+         Paint           leftFill             = series1.getFill();
+         Paint           rightFill            = series2.getFill();
+         boolean         shortenNumbers       = getShortenNumbers();
+         boolean         barBackgroundVisible = getBarBackgroundVisible();
+         Color           barBackgroundFill    = getBarBackgroundFill();
+         boolean         shadowsVisible       = getShadowsVisible();
+         DropShadow      leftShadow           = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barHeight * 0.1, 0.0, -1, barHeight * 0.1);
+         DropShadow      rightShadow          = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barHeight * 0.1, 0.0, 1, barHeight * 0.1);
 
          if (getSorted()) {
              categories.forEach(category -> {
@@ -669,9 +770,22 @@
              double    categoryY     = inset + (i * barHeight) + (i * barSpacer);
 
              // Left Bar
+             if (barBackgroundVisible) {
+                 ctx.setFill(barBackgroundFill);
+                 ctx.beginPath();
+                 ctx.moveTo(inset + maxBarWidth, leftBarY);
+                 ctx.lineTo(inset + maxBarWidth, leftBarY + barHeight);
+                 ctx.lineTo(inset + cornerRadius, leftBarY + barHeight);
+                 ctx.bezierCurveTo(inset, leftBarY + barHeight, inset, leftBarY, inset + cornerRadius, leftBarY);
+                 ctx.lineTo(inset + maxBarWidth, leftBarY);
+                 ctx.closePath();
+                 ctx.fill();
+             }
              if (getDoCompare()) {
                  leftFill = leftValue > rightValue ? leftBetterFill : leftValue < rightValue ? leftPoorerFill : series1.getFill();
              }
+             ctx.save();
+             if (shadowsVisible) { ctx.setEffect(leftShadow); }
              ctx.setFill(leftFill);
              ctx.beginPath();
              ctx.moveTo(leftBarX + leftBarWidth, leftBarY);
@@ -686,6 +800,7 @@
              ctx.lineTo(leftBarX + leftBarWidth, leftBarY);
              ctx.closePath();
              ctx.fill();
+             ctx.restore();
              rectangleItemMap.put(new Rectangle(leftBarX, leftBarY, leftBarWidth, barHeight), leftItem);
 
              // Left Value
@@ -702,9 +817,22 @@
              }
 
              // Right Bar
+             if (barBackgroundVisible) {
+                 ctx.setFill(barBackgroundFill);
+                 ctx.beginPath();
+                 ctx.moveTo(rightBarX, rightBarY);
+                 ctx.lineTo(rightBarX + maxBarWidth - cornerRadius, rightBarY);
+                 ctx.bezierCurveTo(rightBarX + maxBarWidth, rightBarY, rightBarX + maxBarWidth, rightBarY + barHeight, rightBarX + maxBarWidth - cornerRadius, rightBarY + barHeight);
+                 ctx.lineTo(rightBarX, rightBarY + barHeight);
+                 ctx.lineTo(rightBarX, rightBarY);
+                 ctx.closePath();
+                 ctx.fill();
+             }
              if (getDoCompare()) {
                  rightFill = rightValue > leftValue ? rightBetterFill : rightValue < leftValue ? rightPoorerFill : series2.getFill();
              }
+             ctx.save();
+             if (shadowsVisible) { ctx.setEffect(rightShadow); }
              ctx.setFill(rightFill);
              ctx.beginPath();
              ctx.moveTo(rightBarX, rightBarY);
@@ -718,6 +846,7 @@
              ctx.lineTo(rightBarX, rightBarY);
              ctx.closePath();
              ctx.fill();
+             ctx.restore();
              rectangleItemMap.put(new Rectangle(rightBarX, rightBarY, rightBarWidth, barHeight), rightItem);
 
              // Right Value
@@ -738,6 +867,28 @@
              ctx.setTextAlign(TextAlignment.CENTER);
              ctx.setFill(useCategoryTextFill ? category.getTextFill() : categoryTextFill);
              ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);
+         }
+
+         // Draw categories
+         ctx.setFill(getCategoryBackgroundFill());
+         ctx.fillRect(inset + maxBarWidth, inset, categoryWidth, chartHeight);
+
+         for (int i = 0 ; i < noOfCategories ; i++) {
+             Category category  = categories.get(i);
+             double   categoryX = inset + maxBarWidth + (categoryWidth * 0.5);
+             double   categoryY = inset + (i * barHeight) + (i * barSpacer);
+
+             // Draw categories
+             ctx.setTextAlign(TextAlignment.CENTER);
+             ctx.setFill(useCategoryTextFill ? category.getTextFill() : categoryTextFill);
+             ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);
+         }
+
+         if (shadowsVisible) {
+             ctx.setFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.TRANSPARENT), new Stop(1.0, Color.rgb(0, 0, 0, 0.25))));
+             ctx.fillRect(inset + maxBarWidth - 6, inset, 6, chartHeight);
+             ctx.setFill(new LinearGradient(1, 0, 0, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.TRANSPARENT), new Stop(1.0, Color.rgb(0, 0, 0, 0.25))));
+             ctx.fillRect(inset + maxBarWidth + categoryWidth, inset, 6, chartHeight);
          }
      }
 

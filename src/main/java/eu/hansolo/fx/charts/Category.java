@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class Category {
+public class Category implements Comparable<Category> {
     private static final CategoryEvent               UPDATE_EVT = new CategoryEvent(EventType.UPDATE);
     private        final String                      name;
     private              Color                       _fill;
@@ -117,6 +117,10 @@ public class Category {
             _textFill = null;
         }
         return textFill;
+    }
+
+    @Override public int compareTo(final Category other) {
+        return getName().compareTo(other.getName());
     }
 
 

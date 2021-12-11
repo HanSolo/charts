@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import java.util.HashMap;
 
@@ -54,19 +55,29 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
         return new ComparisonBarChartBuilder(series1, series2);
     }
 
-    public final B backgroundColor(final Color backgroundColor) {
-        properties.put("backgroundColor", new SimpleObjectProperty<>(backgroundColor));
-        return (B) this;
+    public final B backgroundFill(final Paint backgroundFill) {
+        properties.put("backgroundFill", new SimpleObjectProperty<>(backgroundFill));
+        return (B)this;
+    }
+
+    public final B categoryBackgroundFill(final Paint categoryBackgroundFill) {
+        properties.put("categoryBackgroundFill", new SimpleObjectProperty<>(categoryBackgroundFill));
+        return (B)this;
+    }
+
+    public final B barBackgroundFill(final Color barBackgroundFill) {
+        properties.put("barBackgroundFill", new SimpleObjectProperty<>(barBackgroundFill));
+        return (B)this;
     }
 
     public final B textFill(final Color textFill) {
         properties.put("textFill", new SimpleObjectProperty<>(textFill));
-        return (B) this;
+        return (B)this;
     }
 
     public final B categoryTextFill(final Color categoryTextFill) {
         properties.put("categoryTextFill", new SimpleObjectProperty<>(categoryTextFill));
-        return (B) this;
+        return (B)this;
     }
 
     public final B betterDarkerColor(final Color betterDarkerColor) {
@@ -86,6 +97,16 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
 
     public final B poorerBrighterColor(final Color poorerBrighterColor) {
         properties.put("poorerBrighterColor", new SimpleObjectProperty<>(poorerBrighterColor));
+        return (B)this;
+    }
+
+    public final B barBackgroundVisible(final boolean barBackgroundVisible) {
+        properties.put("barBackgroundVisible", new SimpleBooleanProperty(barBackgroundVisible));
+        return (B)this;
+    }
+
+    public final B shadowsVisible(final boolean shadowsVisible) {
+        properties.put("shadowsVisible", new SimpleBooleanProperty(shadowsVisible));
         return (B)this;
     }
 
@@ -238,8 +259,12 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
             } else if ("padding".equals(key)) {
                 chart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
             } // Control specific properties
-            else if ("backgroundColor".equals(key)) {
-                chart.setBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
+            else if ("backgroundFill".equals(key)) {
+                chart.setBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
+            } else if ("categoryBackgroundFill".equals(key)) {
+                chart.setCategoryBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
+            } else if ("barBackgroundFill".equals(key)) {
+                chart.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("textFill".equals(key)) {
                 chart.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("categoryTextFill".equals(key)) {
@@ -252,6 +277,10 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
                 chart.setPoorerDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("poorerBrighterColor".equals(key)) {
                 chart.setPoorerBrighterColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("barBackgroundVisible".equals(key)) {
+                chart.setBarBackgroundVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("shadowsVisible".equals(key)) {
+                chart.setShadowsVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("numberFormat".equals(key)) {
                 chart.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
             } else if ("doCompare".equals(key)) {
