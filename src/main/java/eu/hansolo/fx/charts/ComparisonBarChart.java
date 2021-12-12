@@ -54,6 +54,7 @@
  import javafx.scene.paint.Paint;
  import javafx.scene.paint.Stop;
  import javafx.scene.shape.StrokeLineCap;
+ import javafx.scene.text.Font;
  import javafx.scene.text.TextAlignment;
 
  import java.util.Collections;
@@ -111,6 +112,8 @@
      private              BooleanProperty                              barBackgroundVisible;
      private              boolean                                      _shadowsVisible;
      private              BooleanProperty                              shadowsVisible;
+     private              boolean                                      _categorySumVisible;
+     private              BooleanProperty                              categorySumVisible;
      private              NumberFormat                                 _numberFormat;
      private              ObjectProperty<NumberFormat>                 numberFormat;
      private              boolean                                      _doCompare;
@@ -152,6 +155,7 @@
          _poorerBrighterColor    = Color.rgb(252, 132, 36);
          _barBackgroundVisible   = false;
          _shadowsVisible         = false;
+         _categorySumVisible     = false;
          _numberFormat           = NumberFormat.NUMBER;
          _doCompare              = false;
          _useItemTextFill        = false;
@@ -346,6 +350,15 @@
          return categoryTextFill;
      }
 
+     public void setBetterColor(final Color betterColor) {
+         setBetterDarkerColor(betterColor.darker().darker());
+         setBetterBrighterColor(betterColor.brighter().brighter());
+     }
+     public void setPoorerColor(final Color poorerColor) {
+         setPoorerDarkerColor(poorerColor.darker().darker());
+         setPoorerBrighterColor(poorerColor.brighter().brighter());
+     }
+
      public Color getBetterDarkerColor() { return null == betterDarkerColor ? _betterDarkerColor : betterDarkerColor.get(); }
      public void setBetterDarkerColor(final Color betterDarkerColor) {
          if (null == this.betterDarkerColor) {
@@ -468,6 +481,26 @@
              };
          }
          return shadowsVisible;
+     }
+
+     public boolean getCategorySumVisible() { return null == categorySumVisible ? _categorySumVisible : categorySumVisible.get(); }
+     public void setCategorySumVisible(final boolean categorySumVisible) {
+         if (null == this.categorySumVisible) {
+             _categorySumVisible = categorySumVisible;
+             redraw();
+         } else {
+             this.categorySumVisible.set(categorySumVisible);
+         }
+     }
+     public BooleanProperty categorySumVisibleProperty() {
+         if (null == categorySumVisible) {
+             categorySumVisible = new BooleanPropertyBase(_categorySumVisible) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return ComparisonBarChart.this; }
+                 @Override public String getName() { return "categorySumVisible"; }
+             };
+         }
+         return categorySumVisible;
      }
 
      public NumberFormat getNumberFormat() { return null == numberFormat ? _numberFormat : numberFormat.get(); }
@@ -724,6 +757,10 @@
          boolean         barBackgroundVisible = getBarBackgroundVisible();
          Color           barBackgroundFill    = getBarBackgroundFill();
          boolean         shadowsVisible       = getShadowsVisible();
+         boolean         categorySumVisible   = getCategorySumVisible();
+         Font            valueFont            = Fonts.latoRegular(barHeight * 0.5);
+         Font            categoryFont         = categorySumVisible ? Fonts.latoRegular(barHeight * 0.4) : Fonts.latoRegular(barHeight * 0.5);
+         Font            categorySumFont      = Fonts.latoRegular(barHeight * 0.3);
          DropShadow      leftShadow           = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barHeight * 0.1, 0.0, -1, barHeight * 0.1);
          DropShadow      rightShadow          = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barHeight * 0.1, 0.0, 1, barHeight * 0.1);
 
@@ -748,7 +785,7 @@
          ctx.setLineCap(StrokeLineCap.BUTT);
          ctx.setTextAlign(TextAlignment.RIGHT);
          ctx.setTextBaseline(VPos.CENTER);
-         ctx.setFont(Fonts.latoRegular(barHeight * 0.5));
+         ctx.setFont(valueFont);
 
          // Draw bars
          for (int i = 0 ; i < noOfCategories ; i++) {
@@ -768,6 +805,8 @@
 
              double    categoryX     = inset + maxBarWidth + (categoryWidth * 0.5);
              double    categoryY     = inset + (i * barHeight) + (i * barSpacer);
+
+             category.setValue(leftItem.getValue() + rightItem.getValue());
 
              // Left Bar
              if (barBackgroundVisible) {
@@ -881,7 +920,20 @@
              // Draw categories
              ctx.setTextAlign(TextAlignment.CENTER);
              ctx.setFill(useCategoryTextFill ? category.getTextFill() : categoryTextFill);
-             ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);
+             if (categorySumVisible) {
+                 ctx.setFont(categoryFont);
+                 ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.3, categoryWidth);
+                 ctx.setFont(categorySumFont);
+                 if (shortenNumbers) {
+                     ctx.fillText(Helper.shortenNumber((long) category.getValue()), categoryX, categoryY + barHeight * 0.7, categoryWidth);
+                 } else {
+                     ctx.fillText(String.format(Locale.US, "%.0f", category.getValue()), categoryX, categoryY + barHeight * 0.7, categoryWidth);
+                 }
+
+             } else {
+                 ctx.setFont(categoryFont);
+                 ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);
+             }
          }
 
          if (shadowsVisible) {

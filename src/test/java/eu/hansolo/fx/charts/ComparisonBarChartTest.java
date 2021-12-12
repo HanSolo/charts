@@ -111,7 +111,6 @@ public class ComparisonBarChartTest extends Application {
 
         chart = ComparisonBarChartBuilder.create(series1, series2)
                                          .prefSize(600, 300)
-                                         .doCompare(false)
                                          .backgroundFill(Color.rgb(244, 250, 255))
                                          .categoryBackgroundFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(244, 250, 255)), new Stop(0.05, Color.WHITE), new Stop(0.95, Color.WHITE), new Stop(1.0, Color.rgb(244, 250, 255))))
                                          .barBackgroundFill(Color.rgb(232, 240, 252))
@@ -121,6 +120,10 @@ public class ComparisonBarChartTest extends Application {
                                          .categoryTextFill(Color.rgb(64, 66, 100))
                                          .shortenNumbers(false)
                                          .numberFormat(NumberFormat.PERCENTAGE)
+                                         .categorySumVisible(false)
+                                         .doCompare(false)
+                                         .betterColor(Color.BLUE)
+                                         .poorerColor(Color.RED)
                                          .sorted(false)
                                          .build();
 
@@ -174,7 +177,7 @@ public class ComparisonBarChartTest extends Application {
         stage.setScene(scene);
         stage.show();
 
-        timer.start();
+        //timer.start();
     }
 
     @Override public void stop() {

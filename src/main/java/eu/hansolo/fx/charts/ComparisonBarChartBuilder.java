@@ -80,6 +80,16 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
         return (B)this;
     }
 
+    public final B betterColor(final Color betterColor) {
+        properties.put("betterColor", new SimpleObjectProperty<>(betterColor));
+        return (B)this;
+    }
+
+    public final B poorerColor(final Color poorerColor) {
+        properties.put("poorerColor", new SimpleObjectProperty<>(poorerColor));
+        return (B)this;
+    }
+
     public final B betterDarkerColor(final Color betterDarkerColor) {
         properties.put("betterDarkerColor", new SimpleObjectProperty<>(betterDarkerColor));
         return (B)this;
@@ -107,6 +117,11 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
 
     public final B shadowsVisible(final boolean shadowsVisible) {
         properties.put("shadowsVisible", new SimpleBooleanProperty(shadowsVisible));
+        return (B)this;
+    }
+
+    public final B categorySumVisible(final boolean categorySumVisible) {
+        properties.put("categorySumVisible", new SimpleBooleanProperty(categorySumVisible));
         return (B)this;
     }
 
@@ -269,6 +284,10 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
                 chart.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("categoryTextFill".equals(key)) {
                 chart.setCategoryTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("betterColor".equals(key)) {
+                chart.setBetterColor(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("poorer".equals(key)) {
+                chart.setPoorerColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("betterDarkerColor".equals(key)) {
                 chart.setBetterDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("betterBrighterColor".equals(key)) {
@@ -281,6 +300,8 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
                 chart.setBarBackgroundVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("shadowsVisible".equals(key)) {
                 chart.setShadowsVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("categorySumVisible".equals(key)) {
+                chart.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("numberFormat".equals(key)) {
                 chart.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
             } else if ("doCompare".equals(key)) {

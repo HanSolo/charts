@@ -19,6 +19,8 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.event.CategoryEvent;
 import eu.hansolo.fx.charts.event.CategoryEventListener;
 import eu.hansolo.fx.charts.event.EventType;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.scene.paint.Color;
@@ -36,6 +38,8 @@ public class Category implements Comparable<Category> {
     private              ObjectProperty<Color>       stroke;
     private              Color                       _textFill;
     private              ObjectProperty<Color>       textFill;
+    private              double                      _value;
+    private              DoubleProperty              value;
     private              List<CategoryEventListener> listeners;
 
 
@@ -49,6 +53,7 @@ public class Category implements Comparable<Category> {
         this._fill     = fill;
         this._stroke   = stroke;
         this._textFill = textFill;
+        this._value    = 0;
         this.listeners = new CopyOnWriteArrayList<>();
     }
 
@@ -117,6 +122,26 @@ public class Category implements Comparable<Category> {
             _textFill = null;
         }
         return textFill;
+    }
+
+    public double getValue() { return null == value ? _value : value.get(); }
+    public void setValue(final double value) {
+        if (null == this.value) {
+            _value = value;
+            fireCategoryEvent(UPDATE_EVT);
+        } else {
+            this.value.set(value);
+        }
+    }
+    public DoubleProperty valueProperty() {
+        if (null == value) {
+            value = new DoublePropertyBase(_value) {
+                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override public Object getBean() { return Category.this; }
+                @Override public String getName() { return "value"; }
+            };
+        }
+        return value;
     }
 
     @Override public int compareTo(final Category other) {
