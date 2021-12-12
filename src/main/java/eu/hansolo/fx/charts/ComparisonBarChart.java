@@ -756,6 +756,7 @@
          boolean         shortenNumbers       = getShortenNumbers();
          boolean         barBackgroundVisible = getBarBackgroundVisible();
          Color           barBackgroundFill    = getBarBackgroundFill();
+         Paint           categoryBackgroundFill = getCategoryBackgroundFill().equals(Color.TRANSPARENT) ? getBackgroundFill() : getCategoryBackgroundFill();
          boolean         shadowsVisible       = getShadowsVisible();
          boolean         categorySumVisible   = getCategorySumVisible();
          Font            valueFont            = Fonts.latoRegular(barHeight * 0.5);
@@ -909,14 +910,12 @@
          }
 
          // Draw categories
-         ctx.setFill(getCategoryBackgroundFill());
+         ctx.setFill(categoryBackgroundFill);
          ctx.fillRect(inset + maxBarWidth, inset, categoryWidth, chartHeight);
-
          for (int i = 0 ; i < noOfCategories ; i++) {
              Category category  = categories.get(i);
              double   categoryX = inset + maxBarWidth + (categoryWidth * 0.5);
              double   categoryY = inset + (i * barHeight) + (i * barSpacer);
-
              // Draw categories
              ctx.setTextAlign(TextAlignment.CENTER);
              ctx.setFill(useCategoryTextFill ? category.getTextFill() : categoryTextFill);
@@ -929,7 +928,6 @@
                  } else {
                      ctx.fillText(String.format(Locale.US, "%.0f", category.getValue()), categoryX, categoryY + barHeight * 0.7, categoryWidth);
                  }
-
              } else {
                  ctx.setFont(categoryFont);
                  ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);

@@ -24,6 +24,7 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
 import eu.hansolo.fx.charts.tools.NumberFormat;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -119,12 +120,13 @@ public class ComparisonBarChartTest extends Application {
                                          .textFill(Color.WHITE)
                                          .categoryTextFill(Color.rgb(64, 66, 100))
                                          .shortenNumbers(false)
+                                         .sorted(false)
+                                         .order(Order.DESCENDING)
                                          .numberFormat(NumberFormat.PERCENTAGE)
-                                         .categorySumVisible(false)
                                          .doCompare(false)
+                                         .categorySumVisible(false)
                                          .betterColor(Color.BLUE)
                                          .poorerColor(Color.RED)
-                                         .sorted(false)
                                          .build();
 
         AnchorPane.setTopAnchor(chart, 100d);
@@ -177,7 +179,7 @@ public class ComparisonBarChartTest extends Application {
         stage.setScene(scene);
         stage.show();
 
-        //timer.start();
+        timer.start();
     }
 
     @Override public void stop() {
