@@ -113,7 +113,11 @@ public class ComparisonBarChartTest extends Application {
         chart = ComparisonBarChartBuilder.create(series1, series2)
                                          .prefSize(600, 300)
                                          .backgroundFill(Color.rgb(244, 250, 255))
-                                         .categoryBackgroundFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(244, 250, 255)), new Stop(0.05, Color.WHITE), new Stop(0.95, Color.WHITE), new Stop(1.0, Color.rgb(244, 250, 255))))
+                                         .categoryBackgroundFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+                                                                                    new Stop(0.0, Color.rgb(244, 250, 255)),
+                                                                                    new Stop(0.05, Color.WHITE),
+                                                                                    new Stop(0.95, Color.WHITE),
+                                                                                    new Stop(1.0, Color.rgb(244, 250, 255))))
                                          .barBackgroundFill(Color.rgb(232, 240, 252))
                                          .barBackgroundVisible(true)
                                          .shadowsVisible(true)
