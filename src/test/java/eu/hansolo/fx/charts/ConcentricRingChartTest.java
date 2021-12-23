@@ -65,6 +65,7 @@ public class ConcentricRingChartTest extends Application {
                                           //.barBackgroundColor(Color.BLACK)
                                           .numberFormat(NumberFormat.PERCENTAGE_1_DECIMAL)
                                           .itemLabelFill(Color.BLACK)
+                                          //.shortenNumbers(true)
                                           .build();
 
         lastTimerCall = System.nanoTime();

@@ -88,6 +88,11 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
         return (B)this;
     }
 
+    public final B shortenNumbers(final boolean SHORTEN) {
+        properties.put("shortenNumbers", new SimpleBooleanProperty(SHORTEN));
+        return (B)this;
+    }
+
     // General properties
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
@@ -222,6 +227,8 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
                 CONTROL.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
             } else if ("itemLabelFill".equals(key)) {
                 CONTROL.setItemLabelFill(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if ("shortenNumbers".equals(key)) {
+                CONTROL.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

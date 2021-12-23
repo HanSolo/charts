@@ -83,6 +83,8 @@ public class ConcentricRingChart extends Region {
     private              ObjectProperty<NumberFormat>                 numberFormat;
     private              Color                                        _itemLabelFill;
     private              ObjectProperty<Color>                        itemLabelFill;
+    private              boolean                                      _shortenNumbers;
+    private              BooleanProperty                              shortenNumbers;
     private              ListChangeListener<ChartItem>                chartItemListener;
     private              ItemEventListener                            itemEventListener;
     private              EventHandler<MouseEvent>                     mouseHandler;
@@ -92,7 +94,7 @@ public class ConcentricRingChart extends Region {
 
     // ******************** Constructors **************************************
     public ConcentricRingChart() {
-        this(new ArrayList<ChartItem>());
+        this(new ArrayList<>());
     }
     public ConcentricRingChart(final ChartItem... ITEMS) {
         this(Arrays.asList(ITEMS));
@@ -105,6 +107,7 @@ public class ConcentricRingChart extends Region {
         _order             = Order.ASCENDING;
         _numberFormat      = NumberFormat.NUMBER;
         _itemLabelFill     = Color.BLACK;
+        _shortenNumbers    = false;
         listeners          = new CopyOnWriteArrayList<>();
         popup              = new InfoPopup();
         itemEventListener  = e -> {
@@ -332,6 +335,26 @@ public class ConcentricRingChart extends Region {
         }
         return itemLabelFill;
     }
+
+    public boolean getShortenNumbers() { return null == shortenNumbers ? _shortenNumbers : shortenNumbers.get(); }
+    public void setShortenNumbers(final boolean SHORTEN) {
+        if (null == shortenNumbers) {
+            _shortenNumbers = SHORTEN;
+            redraw();
+        } else {
+            shortenNumbers.set(SHORTEN);
+        }
+    }
+    public BooleanProperty shortenNumbersProperty() {
+        if (null == shortenNumbers) {
+            shortenNumbers = new BooleanPropertyBase(_shortenNumbers) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "shortenNumbers"; }
+            };
+        }
+        return shortenNumbers;
+    }
     
     private void handleMouseEvents(final MouseEvent EVT) {
         double x           = EVT.getX();
@@ -408,19 +431,19 @@ public class ConcentricRingChart extends Region {
 
     // ******************** Drawing *******************************************
     private void drawChart() {
-        double          centerX            = size * 0.5;
-        double          centerY            = centerX;
-        double          radius             = size * 0.5;
-        double          innerSpacer        = radius * 0.18;
-        double          barSpacer          = (radius - innerSpacer) * 0.005;
-        int             noOfItems          = items.size();
-        double          barWidth           = (radius - innerSpacer - (noOfItems - 1) * barSpacer) / noOfItems;
-        double          maxValue           = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
-        double          nameX              = radius * 0.975;
-        double          nameWidth          = radius * 0.95;
-        NumberFormat    numberFormat       = getNumberFormat();
+        double          centerX           = size * 0.5;
+        double          centerY           = centerX;
+        double          radius            = size * 0.5;
+        double          innerSpacer       = radius * 0.18;
+        double          barSpacer         = (radius - innerSpacer) * 0.005;
+        int             noOfItems         = items.size();
+        double          barWidth          = (radius - innerSpacer - (noOfItems - 1) * barSpacer) / noOfItems;
+        double          maxValue          = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
+        double          nameX             = radius * 0.975;
+        double          nameWidth         = radius * 0.95;
+        NumberFormat    numberFormat      = getNumberFormat();
         Color           barBackgroundFill = getBarBackgroundFill();
-        Color           itemLabelFill      = getItemLabelFill();
+        Color           itemLabelFill     = getItemLabelFill();
         List<ChartItem> sortedItems;
         if (isSorted()) {
             if (Order.ASCENDING == getOrder()) {
@@ -436,7 +459,7 @@ public class ConcentricRingChart extends Region {
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.RIGHT);
         ctx.setTextBaseline(VPos.CENTER);
-        ctx.setFont(Fonts.latoRegular(barWidth * 0.5));
+        ctx.setFont(Fonts.latoRegular(barWidth * 0.45));
 
         // Draw bars
         for (int i = 0 ; i < noOfItems ; i++) {
@@ -463,10 +486,14 @@ public class ConcentricRingChart extends Region {
             // Value
             ctx.setTextAlign(TextAlignment.LEFT);
             ctx.setFill(item.getTextFill());
-            if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
-                drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue * 100), centerX, centerY, barWH * 0.5, angle);
+            if (getShortenNumbers()) {
+                drawTextAlongArc(ctx, Helper.shortenNumber((long) value), centerX, centerY, barWH * 0.5, angle);
             } else {
-                drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle);
+                if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
+                    drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue * 100), centerX, centerY, barWH * 0.5, angle);
+                } else {
+                    drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle);
+                }
             }
         }
     }
