@@ -85,6 +85,8 @@ public class ConcentricRingChart extends Region {
     private              ObjectProperty<Color>                        itemLabelFill;
     private              boolean                                      _shortenNumbers;
     private              BooleanProperty                              shortenNumbers;
+    private              boolean                                      _valueVisible;
+    private              BooleanProperty                              valueVisible;
     private              ListChangeListener<ChartItem>                chartItemListener;
     private              ItemEventListener                            itemEventListener;
     private              EventHandler<MouseEvent>                     mouseHandler;
@@ -108,6 +110,7 @@ public class ConcentricRingChart extends Region {
         _numberFormat      = NumberFormat.NUMBER;
         _itemLabelFill     = Color.BLACK;
         _shortenNumbers    = false;
+        _valueVisible      = true;
         listeners          = new CopyOnWriteArrayList<>();
         popup              = new InfoPopup();
         itemEventListener  = e -> {
@@ -355,7 +358,26 @@ public class ConcentricRingChart extends Region {
         }
         return shortenNumbers;
     }
-    
+
+    public boolean getValueVisible() { return null == valueVisible ? _valueVisible : valueVisible.get(); }
+    public void setValueVisible(final boolean VISIBLE) {
+        if (null == valueVisible) {
+            _valueVisible = VISIBLE;
+            redraw();
+        } else {
+            valueVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty valueVisibleProperty() {
+        if (null == valueVisible) {
+            valueVisible = new BooleanPropertyBase(_valueVisible) {
+                @Override public Object getBean() { return ConcentricRingChart.this; }
+                @Override public String getName() { return "valueVisible"; }
+            };
+        }
+        return valueVisible;
+    }
+
     private void handleMouseEvents(final MouseEvent EVT) {
         double x           = EVT.getX();
         double y           = EVT.getY();
@@ -441,6 +463,7 @@ public class ConcentricRingChart extends Region {
         double          maxValue          = noOfItems == 0 ? 0 : items.stream().max(Comparator.comparingDouble(ChartItem::getValue)).get().getValue();
         double          nameX             = radius * 0.975;
         double          nameWidth         = radius * 0.95;
+        double          fontSize          = barWidth * 0.45;
         NumberFormat    numberFormat      = getNumberFormat();
         Color           barBackgroundFill = getBarBackgroundFill();
         Color           itemLabelFill     = getItemLabelFill();
@@ -459,7 +482,7 @@ public class ConcentricRingChart extends Region {
         ctx.setLineCap(StrokeLineCap.BUTT);
         ctx.setTextAlign(TextAlignment.RIGHT);
         ctx.setTextBaseline(VPos.CENTER);
-        ctx.setFont(Fonts.latoRegular(barWidth * 0.45));
+        ctx.setFont(Fonts.latoRegular(fontSize));
 
         // Draw bars
         for (int i = 0 ; i < noOfItems ; i++) {
@@ -484,37 +507,39 @@ public class ConcentricRingChart extends Region {
             ctx.fillText(item.getName(), nameX, barXY, nameWidth);
 
             // Value
-            ctx.setTextAlign(TextAlignment.LEFT);
-            ctx.setFill(item.getTextFill());
-            if (getShortenNumbers()) {
-                drawTextAlongArc(ctx, Helper.shortenNumber((long) value), centerX, centerY, barWH * 0.5, angle);
-            } else {
-                if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
-                    drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue * 100), centerX, centerY, barWH * 0.5, angle);
+            if (getValueVisible()) {
+                ctx.setTextAlign(TextAlignment.LEFT);
+                ctx.setFill(item.getTextFill());
+                if (getShortenNumbers()) {
+                    drawTextAlongArc(ctx, Helper.shortenNumber((long) value), fontSize, centerX, centerY, barWH * 0.5, angle);
                 } else {
-                    drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value), centerX, centerY, barWH * 0.5, angle);
+                    if (NumberFormat.PERCENTAGE == numberFormat || NumberFormat.PERCENTAGE_1_DECIMAL == numberFormat) {
+                        drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value / maxValue * 100), fontSize, centerX, centerY, barWH * 0.5, angle);
+                    } else {
+                        drawTextAlongArc(ctx, String.format(Locale.US, numberFormat.formatString(), value), fontSize, centerX, centerY, barWH * 0.5, angle);
+                    }
                 }
             }
         }
     }
 
-    private void drawTextAlongArc(final GraphicsContext CTX, final String TEXT, final double CENTER_X, final double CENTER_Y, final double RADIUS, final double ANGLE){
-        int    length     = TEXT.length();
-        double charSpacer = (7 / RADIUS) * size * 0.13;
+    private void drawTextAlongArc(final GraphicsContext ctx, final String text, final double fontSize, final double centerX, final double centerY, final double radius, final double angle) {
+        int    length     = text.length();
+        double charSpacer = Helper.clamp(2, 0.75 * fontSize, (7 / radius) * size * 0.13);
         double textAngle  = (charSpacer * (length + 0.5));
-        if (ANGLE > textAngle) {
-            CTX.save();
-            CTX.translate(CENTER_X, CENTER_Y);
-            CTX.rotate(ANGLE - (charSpacer * (length + 0.5)));
+        if (angle > textAngle) {
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(angle - (charSpacer * (length + 0.5)));
             for (int i = 0; i < length; i++) {
-                CTX.save();
-                CTX.translate(0, -1 * RADIUS);
-                char c = TEXT.charAt(i);
-                CTX.fillText(Character.toString(c), 0, 0);
-                CTX.restore();
-                CTX.rotate(charSpacer);
+                ctx.save();
+                ctx.translate(0, -1 * radius);
+                char c = text.charAt(i);
+                ctx.fillText(Character.toString(c), 0, 0);
+                ctx.restore();
+                ctx.rotate(charSpacer);
             }
-            CTX.restore();
+            ctx.restore();
         }
     }
 

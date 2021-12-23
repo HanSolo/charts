@@ -93,6 +93,11 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
         return (B)this;
     }
 
+    public final B valueVisible(final boolean VISIBLE) {
+        properties.put("valueVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
     // General properties
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
@@ -229,6 +234,8 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
                 CONTROL.setItemLabelFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("shortenNumbers".equals(key)) {
                 CONTROL.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
+            } else if ("valueVisible".equals(key)) {
+                CONTROL.setValueVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
         return CONTROL;
