@@ -16,9 +16,13 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.ConnectionEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.Evt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -86,9 +90,10 @@ public class CircularPlotTest extends Application {
 
         // Register listeners to click on connections and items
         items.forEach(item -> {
-            item.addItemEventListener(e -> {
-                switch (e.getEventType()) {
-                    case SELECTED: System.out.println("Selected: " + e.getItem().getName()); break;
+            item.addChartEvtObserver(ChartEvt.ANY, e -> {
+                EvtType<? extends Evt> type = e.getEvtType();
+                if (ChartEvt.ITEM_SELECTED.equals(type)) {
+                    System.out.println("Selected: " + ((PlotItem) e.getSource()).getName());
                 }
             });
         });
@@ -102,8 +107,14 @@ public class CircularPlotTest extends Application {
                                           .minorTickMarksVisible(false)
                                           .build();
 
-        ConnectionEventListener connectionListener = e -> System.out.println("From: " + e.getConnection().getOutgoingItem().getName() + " -> to: " + e.getConnection().getIncomingItem().getName() + " -> Value: " + e.getConnection().getValue());
-        circluarPlot.getConnections().forEach(connection -> connection.addConnectionEventListener(connectionListener));
+        EvtObserver<ChartEvt> connectionObserver = e -> {
+            EvtType<? extends Evt> type = e.getEvtType();
+            if (type.equals(ChartEvt.CONNECTION_SELECTED)) {
+                Connection connection = (Connection) e.getSource();
+                System.out.println("From: " + connection.getOutgoingItem().getName() + " -> to: " + connection.getIncomingItem().getName() + " -> Value: " + connection.getValue());
+            }
+        };
+        circluarPlot.getConnections().forEach(connection -> connection.addChartEvtObserver(ChartEvt.ANY, connectionObserver));
 
         if (null != circluarPlot.getConnection(australia, japan)) {
             circluarPlot.getConnection(australia, japan).setFill(Color.BLUE);

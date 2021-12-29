@@ -17,7 +17,7 @@
 package eu.hansolo.fx.geometry.transform;
 
 import eu.hansolo.fx.geometry.tools.NonInvertibleTransformException;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public class Affine extends AffineBase {

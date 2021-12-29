@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -60,7 +61,7 @@ public class NestedBarChartTest extends Application {
 
         chart = new NestedBarChart(q1, q2, q3, q4);
 
-        chart.setOnSelectionEvent(e -> System.out.println(e));
+        chart.addChartEvtObserver(ChartEvt.ANY,  e -> System.out.println(e));
     }
 
     @Override public void start(Stage stage) {

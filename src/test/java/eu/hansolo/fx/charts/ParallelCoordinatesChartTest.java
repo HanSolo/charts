@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataObject;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -27,7 +28,6 @@ import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +65,7 @@ public class ParallelCoordinatesChartTest extends Application {
                                                .selectionRectColor(Color.CRIMSON)
                                                .build();
 
-        chart.setOnChartEvent(e -> chart.getSelectedObjects().forEach(item -> System.out.println(item.getName())));
+        chart.addChartEvtObserver(ChartEvt.SELECTED, e -> chart.getSelectedObjects().forEach(item -> System.out.println(item.getName())));
     }
 
     @Override public void start(Stage stage) {

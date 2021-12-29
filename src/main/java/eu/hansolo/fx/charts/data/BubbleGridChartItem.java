@@ -19,8 +19,10 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
@@ -31,28 +33,31 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class BubbleGridChartItem implements BubbleGridItem {
-    private final ItemEvent                               ITEM_EVENT = new ItemEvent(BubbleGridChartItem.this);
-    private       CopyOnWriteArrayList<ItemEventListener> listeners;
-    private       String                                  _name;
-    private       StringProperty                          name;
-    private       Color                                   _fill;
-    private       ObjectProperty<Color>                   fill;
-    private       Color                                   _stroke;
-    private       ObjectProperty<Color>                   stroke;
-    private       Symbol                                  _symbol;
-    private       ObjectProperty<Symbol>                  symbol;
-    private       ChartItem                               _categoryX;
-    private       ObjectProperty<ChartItem>               categoryX;
-    private       ChartItem                               _categoryY;
-    private       ObjectProperty<ChartItem>               categoryY;
-    private       double                                  _value;
-    private       DoubleProperty                          value;
-    private       boolean                                 _isEmpty;
-    private       BooleanProperty                         isEmpty;
+    private final ChartEvt                                  ITEM_EVENT = new ChartEvt(BubbleGridChartItem.this, ChartEvt.ITEM_UPDATE);
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+    private       String                                    _name;
+    private       StringProperty                            name;
+    private       Color                                     _fill;
+    private       ObjectProperty<Color>                     fill;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Symbol                                    _symbol;
+    private       ObjectProperty<Symbol>                    symbol;
+    private       ChartItem                                 _categoryX;
+    private       ObjectProperty<ChartItem>                 categoryX;
+    private       ChartItem                                 _categoryY;
+    private       ObjectProperty<ChartItem>                 categoryY;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       boolean                                   _isEmpty;
+    private       BooleanProperty                           isEmpty;
 
 
     BubbleGridChartItem() {
@@ -73,14 +78,14 @@ public class BubbleGridChartItem implements BubbleGridItem {
         _categoryY = categoryY;
         _value     = value;
         _isEmpty   = isEmpty;
-        listeners  = new CopyOnWriteArrayList<>();
+        observers  = new ConcurrentHashMap<>();
     }
 
     @Override public String getName() { return null == name ? _name : name.get(); }
     public void setName(final String name) {
         if (null == this.name) {
             _name = name;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.name.set(name);
         }
@@ -88,7 +93,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -101,7 +106,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public void setFill(final Color fill) {
         if (null == this.fill) {
             _fill = fill;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.fill.set(fill);
         }
@@ -109,7 +114,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public ObjectProperty<Color> fillProperty() {
         if (null == fill) {
             fill = new ObjectPropertyBase<>(_fill) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -122,7 +127,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public void setStroke(final Color stroke) {
         if (null == this.stroke) {
             _stroke = stroke;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.stroke.set(stroke);
         }
@@ -130,7 +135,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<>(_stroke) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "stroke"; }
             };
@@ -143,7 +148,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     @Override public void setSymbol(final Symbol symbol) {
         if (null == this.symbol) {
             _symbol = symbol;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.symbol.set(symbol);
         }
@@ -151,7 +156,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "symbol"; }
             };
@@ -164,7 +169,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public void setCategoryX(final ChartItem categoryX) {
         if (null == this.categoryX) {
             _categoryX = categoryX;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.categoryX.set(categoryX);
         }
@@ -172,7 +177,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     @Override public ObjectProperty<ChartItem> categoryXProperty() {
         if (null == categoryX) {
             categoryX = new ObjectPropertyBase<>(_categoryX) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "categoryX"; }
             };
@@ -185,7 +190,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public void setCategoryY(final ChartItem categoryY) {
         if (null == this.categoryY) {
             _categoryY = categoryY;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.categoryY.set(categoryY);
         }
@@ -193,7 +198,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     @Override public ObjectProperty<ChartItem> categoryYProperty() {
         if (null == categoryY) {
             categoryY = new ObjectPropertyBase<>(_categoryY) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "categoryY"; }
             };
@@ -206,7 +211,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     @Override public void setValue(final double value) {
         if (null == this.value) {
             _value = value;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.value.set(value);
         }
@@ -214,7 +219,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     @Override public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -226,7 +231,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public void setIsEmpty(final boolean isEmpty) {
         if (null == this.isEmpty) {
             _isEmpty = isEmpty;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.isEmpty.set(isEmpty);
         }
@@ -234,7 +239,7 @@ public class BubbleGridChartItem implements BubbleGridItem {
     public BooleanProperty isEmptyProperty() {
         if (null == isEmpty) {
             isEmpty = new BooleanPropertyBase(_isEmpty) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return BubbleGridChartItem.this; }
                 @Override public String getName() { return "isEmpty"; }
             };
@@ -244,12 +249,26 @@ public class BubbleGridChartItem implements BubbleGridItem {
 
 
     // ******************** Event handling ************************************
-    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
-    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireItemEvent(final ItemEvent EVENT) {
-        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

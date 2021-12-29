@@ -21,7 +21,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.TreeNodeEvent;
 import eu.hansolo.fx.charts.event.TreeNodeEventListener;
 import eu.hansolo.fx.charts.event.TreeNodeEventType;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.data.TreeNode;
 import javafx.beans.DefaultProperty;

@@ -29,14 +29,12 @@ import java.util.Map;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.ConnectionEvent;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.geometry.Path;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -119,7 +117,7 @@ public class CircularPlot extends Region {
     private              Locale                       _locale;
     private              ObjectProperty<Locale>       locale;
     private              ObservableList<PlotItem>     items;
-    private              ItemEventListener            itemListener;
+    private              EvtObserver<ChartEvt>        itemObserver;
     private              ListChangeListener<PlotItem> itemListListener;
     private              Map<Path, PlotItem>          itemPaths;
     private              Map<Path, Connection>        paths;
@@ -144,13 +142,13 @@ public class CircularPlot extends Region {
         _connectionOpacity                = DEFAULT_CONNECTION_OPACITY;
         _locale                           = Locale.getDefault();
         items                             = FXCollections.observableArrayList();
-        itemListener                      = e -> redraw();
+        itemObserver                      = e -> redraw();
         itemListListener                  = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
             validateData();
@@ -215,7 +213,7 @@ public class CircularPlot extends Region {
                         	
                         	// ConectionEvent with original mouseEvent attached for further information (isCtrlDown ...)
                         	// and plot for redraw plot after connection has been selected and properties may have changed
-                            connection.fireConnectionEvent(new ConnectionEvent(connection, EventType.CONNECTION_SELECTED, e));
+                            connection.fireChartEvt(new ChartEvt(connection, ChartEvt.CONNECTION_SELECTED, e));
                        });
                     }
                 }
@@ -225,7 +223,7 @@ public class CircularPlot extends Region {
                 double eventY = e.getY();
                 if (itemPath.contains(eventX, eventY)) {
                 	// ItemEvent with original mouseEvent attached for further information (isCtrlDown ...)
-                    Platform.runLater(() -> plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED, e)));
+                    Platform.runLater(() -> plotItem.fireChartEvt(new ChartEvt(plotItem, ChartEvt.ITEM_SELECTED, e)));
                 }
             });
         });
@@ -247,7 +245,7 @@ public class CircularPlot extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeItemEventListener(itemListener));
+        items.forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.removeListener(itemListListener);
     }
 

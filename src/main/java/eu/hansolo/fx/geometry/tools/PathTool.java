@@ -21,6 +21,8 @@ import eu.hansolo.fx.geometry.Path.WindingRule;
 import eu.hansolo.fx.geometry.PathIterator;
 import eu.hansolo.fx.geometry.Shape;
 import eu.hansolo.fx.geometry.transform.Affine;
+import eu.hansolo.toolboxfx.HelperFX;
+import eu.hansolo.toolboxfx.geom.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +81,7 @@ public class PathTool {
                     pathIterator.next();
                     break;
                 case PathIterator.LINE_TO:
-                    pathLength += Point.distance(currentX, currentY, seg[0], seg[1]);
+                    pathLength += HelperFX.distance(currentX, currentY, seg[0], seg[1]);
                     segments.add(new PathSegment(segType, seg[0], seg[1], pathLength, origIndex));
                     currentX = seg[0];
                     currentY = seg[1];
@@ -87,7 +89,7 @@ public class PathTool {
                     pathIterator.next();
                     break;
                 case PathIterator.CLOSE:
-                    pathLength += Point.distance(currentX, currentY, lastMoveX, lastMoveY);
+                    pathLength += HelperFX.distance(currentX, currentY, lastMoveX, lastMoveY);
                     segments.add(new PathSegment(PathIterator.LINE_TO, lastMoveX, lastMoveY, pathLength, origIndex));
                     currentX = lastMoveX;
                     currentY = lastMoveY;
@@ -100,7 +102,7 @@ public class PathTool {
                     while (!fpi.isDone()) {
                         segType = fpi.currentSegment(seg);
                         if (segType == PathIterator.LINE_TO) {
-                            pathLength += Point.distance(currentX, currentY, seg[0], seg[1]);
+                            pathLength += HelperFX.distance(currentX, currentY, seg[0], seg[1]);
                             segments.add(new PathSegment(segType, seg[0], seg[1], pathLength, origIndex));
                             currentX = seg[0];
                             currentY = seg[1];
@@ -208,7 +210,7 @@ public class PathTool {
                     if (pathLength > LENGTH) { return new Point(lastX, lastY); }
                     break;
                 case PathIterator.LINE_TO:
-                    double segmentLength = Point.distance(currentX, currentY, seg[0], seg[1]);
+                    double segmentLength = HelperFX.distance(currentX, currentY, seg[0], seg[1]);
                     double angle         = Math.atan2(seg[1] - currentY, seg[0] - currentX);
                     double step          = segmentLength * 0.001;
                     for (double i = 0 ; i < segmentLength ; i += step) {
@@ -228,7 +230,7 @@ public class PathTool {
                     //if (pathLength > LENGTH) { return new Point(lastX, lastY); }
                     break;
                 case PathIterator.CLOSE:
-                    pathLength += Point.distance(currentX, currentY, lastMoveX, lastMoveY);
+                    pathLength += HelperFX.distance(currentX, currentY, lastMoveX, lastMoveY);
                     lastX      = currentX;
                     lastY      = currentY;
                     currentX   = lastMoveX;
@@ -242,7 +244,7 @@ public class PathTool {
                     while (!fpi.isDone()) {
                         segType = fpi.currentSegment(seg);
                         if (segType == PathIterator.LINE_TO) {
-                            pathLength += Point.distance(currentX, currentY, seg[0], seg[1]);
+                            pathLength += HelperFX.distance(currentX, currentY, seg[0], seg[1]);
                             lastX      = currentX;
                             lastY      = currentY;
                             currentX   = seg[0];

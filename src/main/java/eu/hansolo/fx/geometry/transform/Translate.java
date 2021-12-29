@@ -21,7 +21,7 @@ import eu.hansolo.fx.geometry.BaseBounds;
 import eu.hansolo.fx.geometry.Path;
 import eu.hansolo.fx.geometry.Rectangle;
 import eu.hansolo.fx.geometry.Shape;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public class Translate extends BaseTransform {

@@ -19,7 +19,6 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.SankeyPlot.StreamFillMode;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.tools.Pair;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;

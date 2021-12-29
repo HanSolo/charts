@@ -18,17 +18,17 @@ package eu.hansolo.fx.charts.world;
 
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.heatmap.HeatMap;
-import eu.hansolo.fx.charts.heatmap.HeatMapBuilder;
-import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ChartsColorMapping;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Location;
 import eu.hansolo.fx.charts.tools.MapPoint;
 import eu.hansolo.fx.charts.tools.MapPointSize;
-import eu.hansolo.fx.charts.tools.Mapping;
-import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.toolboxfx.geom.Location;
+import eu.hansolo.toolboxfx.geom.Point;
+import eu.hansolo.fx.heatmap.ColorMapping;
+import eu.hansolo.fx.heatmap.HeatMap;
+import eu.hansolo.fx.heatmap.HeatMapBuilder;
+import eu.hansolo.fx.heatmap.Mapping;
+import eu.hansolo.fx.heatmap.OpacityDistribution;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -201,10 +201,10 @@ public class World extends Region {
 
     // ******************** Constructors **************************************
     public World() {
-        this(Resolution.HI_RES, ChartsColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
+        this(Resolution.HI_RES, ColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
     }
     public World(final Resolution RESOLUTION) {
-        this(RESOLUTION, ChartsColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
+        this(RESOLUTION, ColorMapping.INFRARED_3, 5, false, OpacityDistribution.EXPONENTIAL, 0.75);
     }
     public World(final Resolution RESOLUTION, final Mapping COLOR_MAPPING, final double EVENT_RADIUS, final boolean FADE_COLORS, final OpacityDistribution OPACITY_DISTRIBUTION, final double HEAT_MAP_OPACITY) {
         resolutionProperties   = readProperties(Resolution.HI_RES == RESOLUTION ? World.HIRES_PROPERTIES : World.LORES_PROPERTIES);
@@ -246,7 +246,7 @@ public class World extends Region {
         };
         locationColor          = new StyleableObjectProperty<Color>(LOCATION_COLOR.getInitialValue(this)) {
             @Override protected void invalidated() {
-                locations.forEach((location, shape) -> shape.setFill(null == location.getColor() ? get() : location.getColor()));
+                locations.forEach((location, shape) -> shape.setFill(null == location.getFill() ? get() : location.getFill()));
             }
             @Override public Object getBean() { return World.this; }
             @Override public String getName() { return "locationColor"; }
@@ -656,7 +656,7 @@ public class World extends Region {
         double y = (PREFERRED_HEIGHT / 2) - (PREFERRED_WIDTH * (Math.log(Math.tan((Math.PI / 4) + (Math.toRadians(LOCATION.getLatitude()) / 2)))) / (2 * Math.PI)) + MAP_OFFSET_Y;
 
         Circle locationIcon = new Circle(x, y, size * 0.01);
-        locationIcon.setFill(null == LOCATION.getColor() ? getLocationColor() : LOCATION.getColor());
+        locationIcon.setFill(null == LOCATION.getFill() ? getLocationColor() : LOCATION.getFill());
 
         StringBuilder tooltipBuilder = new StringBuilder();
         if (!LOCATION.getName().isEmpty()) tooltipBuilder.append(LOCATION.getName());

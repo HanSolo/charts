@@ -17,8 +17,10 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
@@ -29,24 +31,27 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
-    private final ItemEvent                               ITEM_EVENT = new ItemEvent(ValueChartItem.this);
-    private       CopyOnWriteArrayList<ItemEventListener> listeners;
-    private       double                                  _value;
-    private       DoubleProperty                          value;
-    private       String                                  _name;
-    private       StringProperty                          name;
-    private       Color                                   _fill;
-    private       ObjectProperty<Color>                   fill;
-    private       Color                                   _stroke;
-    private       ObjectProperty<Color>                   stroke;
-    private       Symbol                                  _symbol;
-    private       ObjectProperty<Symbol>                  symbol;
-    private       boolean                                 _isEmpty;
-    private       BooleanProperty                         isEmpty;
+    private final ChartEvt                                  ITEM_EVENT = new ChartEvt(ValueChartItem.this, ChartEvt.ITEM_UPDATE);
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       String                                    _name;
+    private       StringProperty                            name;
+    private       Color                                     _fill;
+    private       ObjectProperty<Color>                     fill;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Symbol                                    _symbol;
+    private       ObjectProperty<Symbol>                    symbol;
+    private       boolean                                   _isEmpty;
+    private       BooleanProperty                           isEmpty;
 
 
     // ******************** Constructors **********************************
@@ -78,7 +83,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
         _stroke   = STROKE;
         _symbol   = SYMBOL;
         _isEmpty  = IS_EMPTY;
-        listeners = new CopyOnWriteArrayList<>();
+        observers = new ConcurrentHashMap<>();
     }
 
 
@@ -87,7 +92,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     @Override public void setValue(final double VALUE) {
         if (null == value) {
             _value = VALUE;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             value.set(VALUE);
         }
@@ -95,7 +100,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     @Override public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -107,7 +112,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -115,7 +120,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -128,7 +133,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public void setFill(final Color FILL) {
         if (null == fill) {
             _fill = FILL;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             fill.set(FILL);
         }
@@ -136,7 +141,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public ObjectProperty<Color> fillProperty() {
         if (null == fill) {
             fill = new ObjectPropertyBase<Color>(_fill) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -149,7 +154,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public void setStroke(final Color STROKE) {
         if (null == stroke) {
             _stroke = STROKE;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             stroke.set(STROKE);
         }
@@ -157,7 +162,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<Color>(_stroke) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "stroke"; }
             };
@@ -170,7 +175,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -178,7 +183,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() {  return ValueChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -191,7 +196,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public void setIsEmpty(final boolean isEmpty) {
         if (null == this.isEmpty) {
             _isEmpty = isEmpty;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.isEmpty.set(isEmpty);
         }
@@ -199,7 +204,7 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
     public BooleanProperty isEmptyProperty() {
         if (null == isEmpty) {
             isEmpty = new BooleanPropertyBase(_isEmpty) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return ValueChartItem.this; }
                 @Override public String getName() { return "isEmpty"; }
             };
@@ -209,12 +214,26 @@ public class ValueChartItem implements ValueItem, Comparable<ValueChartItem> {
 
 
     // ******************** Event handling ************************************
-    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
-    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireItemEvent(final ItemEvent EVENT) {
-        for (ItemEventListener listener : listeners) { listener.onItemEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

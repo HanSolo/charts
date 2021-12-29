@@ -20,6 +20,7 @@ import eu.hansolo.fx.charts.StreamChart.Category;
 import eu.hansolo.fx.charts.StreamChart.Type;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.SortDirection;
 import javafx.application.Application;
@@ -101,8 +102,8 @@ public class StreamChartTest extends Application {
         };
 
         for (ChartItem item : itemsStacked) {
-            item.setOnItemEvent(e -> {
-                ChartItem chartItem = (ChartItem) e.getItem();
+            item.addChartEvtObserver(ChartEvt.ANY,  e -> {
+                ChartItem chartItem = (ChartItem) e.getSource();
                 System.out.println(chartItem.getName() + ": " + chartItem.getValue());
             });
         }

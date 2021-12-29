@@ -16,10 +16,11 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.heatmap.HeatMap;
-import eu.hansolo.fx.charts.heatmap.HeatMapBuilder;
-import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ChartsColorMapping;
+
+import eu.hansolo.fx.heatmap.ColorMapping;
+import eu.hansolo.fx.heatmap.HeatMap;
+import eu.hansolo.fx.heatmap.HeatMapBuilder;
+import eu.hansolo.fx.heatmap.OpacityDistribution;
 import javafx.application.Application;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -33,7 +34,7 @@ public class HeatMapTest extends Application {
     @Override public void init() {
         heatMap = HeatMapBuilder.create()
                                 .prefSize(400, 400)
-                                .colorMapping(ChartsColorMapping.INFRARED_4)
+                                .colorMapping(ColorMapping.INFRARED_4)
                                 .spotRadius(20)
                                 .opacityDistribution(OpacityDistribution.CUSTOM)
                                 .fadeColors(true)

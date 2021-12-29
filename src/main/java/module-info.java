@@ -10,6 +10,11 @@ module eu.hansolo.fx.charts {
     requires javafx.controls;
     requires javafx.swing;
 
+    // 3rd party
+    requires transitive eu.hansolo.toolbox;
+    requires transitive eu.hansolo.toolboxfx;
+    requires transitive eu.hansolo.fx.heatmap;
+
     exports eu.hansolo.fx.geometry;
     exports eu.hansolo.fx.geometry.tools;
     exports eu.hansolo.fx.geometry.transform;
@@ -19,9 +24,7 @@ module eu.hansolo.fx.charts {
     exports eu.hansolo.fx.charts.converter;
     exports eu.hansolo.fx.charts.data;
     exports eu.hansolo.fx.charts.event;
-    exports eu.hansolo.fx.charts.font;
     exports eu.hansolo.fx.charts.forcedirectedgraph;
-    exports eu.hansolo.fx.charts.heatmap;
     exports eu.hansolo.fx.charts.pareto;
     exports eu.hansolo.fx.charts.series;
     exports eu.hansolo.fx.charts.tools;

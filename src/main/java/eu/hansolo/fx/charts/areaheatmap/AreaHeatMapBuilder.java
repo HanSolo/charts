@@ -18,7 +18,7 @@ package eu.hansolo.fx.charts.areaheatmap;
 
 import eu.hansolo.fx.charts.areaheatmap.AreaHeatMap.Quality;
 import eu.hansolo.fx.charts.data.DataPoint;
-import eu.hansolo.fx.charts.tools.Mapping;
+import eu.hansolo.fx.heatmap.Mapping;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;

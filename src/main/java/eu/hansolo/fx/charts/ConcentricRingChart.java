@@ -17,11 +17,13 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.event.SelectionEvent;
-import eu.hansolo.fx.charts.event.SelectionEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.charts.event.SelectionEvt;
+import eu.hansolo.toolbox.evt.Evt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
@@ -54,6 +56,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -88,9 +92,9 @@ public class ConcentricRingChart extends Region {
     private              boolean                                      _valueVisible;
     private              BooleanProperty                              valueVisible;
     private              ListChangeListener<ChartItem>                chartItemListener;
-    private              ItemEventListener                            itemEventListener;
+    private              EvtObserver<ChartEvt>                        itemObserver;
     private              EventHandler<MouseEvent>                     mouseHandler;
-    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>>    observers;
     private              InfoPopup                                    popup;
 
 
@@ -111,26 +115,25 @@ public class ConcentricRingChart extends Region {
         _itemLabelFill     = Color.BLACK;
         _shortenNumbers    = false;
         _valueVisible      = true;
-        listeners          = new CopyOnWriteArrayList<>();
+        observers          = new ConcurrentHashMap<>();
         popup              = new InfoPopup();
-        itemEventListener  = e -> {
-            final EventType TYPE = e.getEventType();
-            switch(TYPE) {
-                case UPDATE  : drawChart(); break;
-                case FINISHED: drawChart(); break;
+        itemObserver       = e -> {
+            final EvtType<? extends Evt> type = e.getEvtType();
+            if (type.equals(ChartEvt.ITEM_UPDATE) || type.equals(ChartEvt.FINISHED)) {
+                drawChart();
             }
         };
-        chartItemListener   = c -> {
+        chartItemListener  = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.addItemEventListener(itemEventListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemEventListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
             drawChart();
         };
-        mouseHandler        = e -> handleMouseEvents(e);
+        mouseHandler       = e -> handleMouseEvents(e);
         initGraphics();
         registerListeners();
     }
@@ -161,12 +164,12 @@ public class ConcentricRingChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
 
-        items.forEach(chartitem -> chartitem.addItemEventListener(itemEventListener));
+        items.forEach(chartitem -> chartitem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.addListener(chartItemListener);
 
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
-        setOnSelectionEvent(e -> {
-            popup.update(e);
+        addChartEvtObserver(SelectionEvt.ANY, e -> {
+            popup.update((SelectionEvt) e);
             popup.animatedShow(getScene().getWindow());
         });
     }
@@ -410,7 +413,7 @@ public class ConcentricRingChart extends Region {
             if (hit) {
                 popup.setX(EVT.getScreenX());
                 popup.setY(EVT.getScreenY() - popup.getHeight());
-                fireSelectionEvent(new SelectionEvent(item));
+                fireChartEvt(new SelectionEvt(item));
                 break;
             }
         }
@@ -441,13 +444,26 @@ public class ConcentricRingChart extends Region {
 
 
     // ******************** Event Handling ************************************
-    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
-    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-    public void removeAllSelectionEventListeners() { listeners.clear(); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireSelectionEvent(final SelectionEvent EVENT) {
-        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

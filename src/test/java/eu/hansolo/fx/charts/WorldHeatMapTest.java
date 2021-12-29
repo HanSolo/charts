@@ -16,13 +16,13 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.heatmap.OpacityDistribution;
-import eu.hansolo.fx.charts.tools.ChartsColorMapping;
-import eu.hansolo.fx.charts.tools.Mapping;
-import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.charts.world.World;
 import eu.hansolo.fx.charts.world.World.Resolution;
 import eu.hansolo.fx.charts.world.WorldBuilder;
+import eu.hansolo.toolboxfx.geom.Point;
+import eu.hansolo.fx.heatmap.ColorMapping;
+import eu.hansolo.fx.heatmap.Mapping;
+import eu.hansolo.fx.heatmap.OpacityDistribution;
 import javafx.application.Application;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -78,7 +78,7 @@ public class WorldHeatMapTest extends Application {
                                //    System.out.println(worldMap.getSelectedCountry());
                                //})
                                //.colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
-                               .colorMapping(ChartsColorMapping.BLUE_GREEN_RED)
+                               .colorMapping(ColorMapping.BLUE_GREEN_RED)
                                //.colorMapping(ChartsColorMapping.BLACK_WHITE)
                                //.colorMapping(customMapping)
                                .fadeColors(true)

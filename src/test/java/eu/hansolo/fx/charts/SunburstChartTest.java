@@ -20,7 +20,6 @@ import eu.hansolo.fx.charts.SunburstChart.TextOrientation;
 import eu.hansolo.fx.charts.SunburstChart.VisibleData;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.TreeNode;
-import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.event.TreeNodeEventType;
 import javafx.application.Application;
 import javafx.collections.ObservableList;

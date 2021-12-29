@@ -19,13 +19,14 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataObject;
-import eu.hansolo.fx.charts.event.ChartEvent;
-import eu.hansolo.fx.charts.event.ChartEventListener;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.CtxBounds;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Order;
+import eu.hansolo.toolboxfx.geom.Bounds;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -62,71 +63,72 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 @DefaultProperty("children")
 public class ParallelCoordinatesChart extends Region {
-    private static final double                                   PREFERRED_WIDTH    = 600;
-    private static final double                                   PREFERRED_HEIGHT   = 400;
-    private static final double                                   MINIMUM_WIDTH      = 50;
-    private static final double                                   MINIMUM_HEIGHT     = 50;
-    private static final double                                   MAXIMUM_WIDTH      = 2048;
-    private static final double                                   MAXIMUM_HEIGHT     = 2048;
-    private static final double                                   HEADER_HEIGHT      = 30;
-    private static final double                                   AXIS_WIDTH         = 10;
-    private static final double                                   MAJOR_TICK_LENGTH  = 6;
-    private static final double                                   MEDIUM_TICK_LENGTH = 4;
-    private        final ChartEvent                               SELECTION_EVENT    = new ChartEvent(eu.hansolo.fx.charts.event.EventType.SELECTED);
-    private              double                                   size;
-    private              double                                   width;
-    private              double                                   height;
-    private              Canvas                                   axisCanvas;
-    private              GraphicsContext                          axisCtx;
-    private              Canvas                                   connectionCanvas;
-    private              GraphicsContext                          connectionCtx;
-    private              Color                                    _axisColor;
-    private              ObjectProperty<Color>                    axisColor;
-    private              Color                                    _headerColor;
-    private              ObjectProperty<Color>                    headerColor;
-    private              Color                                    _unitColor;
-    private              ObjectProperty<Color>                    unitColor;
-    private              Color                                    _tickLabelColor;
-    private              ObjectProperty<Color>                    tickLabelColor;
-    private              Locale                                   _locale;
-    private              ObjectProperty<Locale>                   locale;
-    private              int                                      _decimals;
-    private              IntegerProperty                          decimals;
-    private              boolean                                  _tickMarksVisible;
-    private              BooleanProperty                          tickMarksVisible;
-    private              Color                                    _selectedColor;
-    private              ObjectProperty<Color>                    selectedColor;
-    private              Color                                    _unselectedColor;
-    private              ObjectProperty<Color>                    unselectedColor;
-    private              Color                                    _selectionRectColor;
-    private              ObjectProperty<Color>                    selectionRectColor;
-    private              boolean                                  _smoothConnections;
-    private              BooleanProperty                          smoothConnections;
-    private              String                                   formatString;
-    private              String                                   selectedCategory;
-    private              String                                   selectionRectCategory;
-    private              double                                   selectionStartX;
-    private              double                                   selectionStartY;
-    private              double                                   selectionEndY;
-    private              CtxBounds                                selectionRect;
-    private              Map<String, ChartItem>                   selectedItems;
-    private              Set<DataObject>                          selectedObjects;
-    private              ObservableList<DataObject>               items;
-    private              ArrayList<String>                        categories;
-    private              Map<String, List<DataObject>>            categoryObjectMap;
-    private              Map<Key, ChartItem>                      categoryObjectItemMap;
-    private              ItemEventListener                        itemListener;
-    private              ListChangeListener<DataObject>           objectListListener;
-    private              EventHandler<MouseEvent>                 mouseHandler;
-    private              Rectangle                                rect;
-    private              Text                                     dragText;
-    private              boolean                                  wasDragged;
-    private              CopyOnWriteArrayList<ChartEventListener> listeners;
+    private static final double                                    PREFERRED_WIDTH    = 600;
+    private static final double                                    PREFERRED_HEIGHT   = 400;
+    private static final double                                    MINIMUM_WIDTH      = 50;
+    private static final double                                    MINIMUM_HEIGHT     = 50;
+    private static final double                                    MAXIMUM_WIDTH      = 2048;
+    private static final double                                    MAXIMUM_HEIGHT     = 2048;
+    private static final double                                    HEADER_HEIGHT      = 30;
+    private static final double                                    AXIS_WIDTH         = 10;
+    private static final double                                    MAJOR_TICK_LENGTH  = 6;
+    private static final double                                    MEDIUM_TICK_LENGTH = 4;
+    private final        ChartEvt                                  SELECTION_EVENT    = new ChartEvt(ParallelCoordinatesChart.this, ChartEvt.SELECTED);
+    private              double                                    size;
+    private              double                                    width;
+    private              double                                    height;
+    private              Canvas                                    axisCanvas;
+    private              GraphicsContext                           axisCtx;
+    private              Canvas                                    connectionCanvas;
+    private              GraphicsContext                           connectionCtx;
+    private              Color                                     _axisColor;
+    private              ObjectProperty<Color>                     axisColor;
+    private              Color                                     _headerColor;
+    private              ObjectProperty<Color>                     headerColor;
+    private              Color                                     _unitColor;
+    private              ObjectProperty<Color>                     unitColor;
+    private              Color                                     _tickLabelColor;
+    private              ObjectProperty<Color>                     tickLabelColor;
+    private              Locale                                    _locale;
+    private              ObjectProperty<Locale>                    locale;
+    private              int                                       _decimals;
+    private              IntegerProperty                           decimals;
+    private              boolean                                   _tickMarksVisible;
+    private              BooleanProperty                           tickMarksVisible;
+    private              Color                                     _selectedColor;
+    private              ObjectProperty<Color>                     selectedColor;
+    private              Color                                     _unselectedColor;
+    private              ObjectProperty<Color>                     unselectedColor;
+    private              Color                                     _selectionRectColor;
+    private              ObjectProperty<Color>                     selectionRectColor;
+    private              boolean                                   _smoothConnections;
+    private              BooleanProperty                           smoothConnections;
+    private              String                                    formatString;
+    private              String                                    selectedCategory;
+    private              String                                    selectionRectCategory;
+    private              double                                    selectionStartX;
+    private              double                                    selectionStartY;
+    private              double                                    selectionEndY;
+    private              Bounds                                    selectionRect;
+    private              Map<String, ChartItem>                    selectedItems;
+    private              Set<DataObject>                           selectedObjects;
+    private              ObservableList<DataObject>                items;
+    private              ArrayList<String>                         categories;
+    private              Map<String, List<DataObject>>             categoryObjectMap;
+    private              Map<Key, ChartItem>                       categoryObjectItemMap;
+    private              EvtObserver<ChartEvt>                     itemObserver;
+    private              ListChangeListener<DataObject>            objectListListener;
+    private              EventHandler<MouseEvent>                  mouseHandler;
+    private              Rectangle                                 rect;
+    private              Text                                      dragText;
+    private              boolean                                   wasDragged;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
 
 
     // ******************** Constructors **************************************
@@ -146,15 +148,15 @@ public class ParallelCoordinatesChart extends Region {
         formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
         selectedItems         = new HashMap<>();
         selectedObjects       = new LinkedHashSet<>();
-        selectionRect         = new CtxBounds();
-        items                 = FXCollections.observableArrayList();
-        itemListener          = e -> redraw();
-        objectListListener    = c -> {
+        selectionRect         = new Bounds();
+        items              = FXCollections.observableArrayList();
+        itemObserver       = e -> redraw();
+        objectListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedObject -> addedObject.getProperties().values().forEach(item -> item.setOnItemEvent(itemListener)));
+                    c.getAddedSubList().forEach(addedObject -> addedObject.getProperties().values().forEach(item -> item.addChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver)));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedObject -> removedObject.getProperties().values().forEach(item -> item.removeItemEventListener(itemListener)));
+                    c.getRemoved().forEach(removedObject -> removedObject.getProperties().values().forEach(item -> item.removeChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver)));
                 }
             }
             prepareData();
@@ -165,7 +167,7 @@ public class ParallelCoordinatesChart extends Region {
         categoryObjectItemMap = new HashMap<>();
         wasDragged            = false;
         mouseHandler          = e -> handleMouseEvent(e);
-        listeners             = new CopyOnWriteArrayList<>();
+        observers             = new ConcurrentHashMap<>();
 
         initGraphics();
         registerListeners();
@@ -233,7 +235,7 @@ public class ParallelCoordinatesChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(object -> object.getProperties().values().forEach(item -> item.removeItemEventListener(itemListener)));
+        items.forEach(object -> object.getProperties().values().forEach(item -> item.removeChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver)));
         axisCanvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
         axisCanvas.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseHandler);
         axisCanvas.removeEventHandler(MouseEvent.MOUSE_RELEASED, mouseHandler);
@@ -548,7 +550,7 @@ public class ParallelCoordinatesChart extends Region {
                 selectedObjects.add(obj);
             }
         }));
-        if (!selectedObjects.isEmpty()) { fireChartEvent(SELECTION_EVENT); }
+        if (!selectedObjects.isEmpty()) { fireChartEvt(SELECTION_EVENT); }
 
         if (getSmoothConnections()) {
             drawSmoothConnections();
@@ -679,13 +681,26 @@ public class ParallelCoordinatesChart extends Region {
 
 
     // ******************** Event Handling ************************************
-    public void setOnChartEvent(final ChartEventListener LISTENER) { addChartEventListener(LISTENER); }
-    public void addChartEventListener(final ChartEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeChartEventListener(final ChartEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-    public void removeAllChartEventListeners() { listeners.clear(); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireChartEvent(final ChartEvent EVENT) {
-        for (ChartEventListener listener : listeners) { listener.onChartEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

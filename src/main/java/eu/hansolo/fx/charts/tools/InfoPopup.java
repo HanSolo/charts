@@ -19,8 +19,8 @@ package eu.hansolo.fx.charts.tools;
 import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.Item;
-import eu.hansolo.fx.charts.event.SelectionEvent;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.SelectionEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
@@ -295,7 +295,7 @@ public class InfoPopup extends Popup {
         return unit;
     }
 
-    public void update(final SelectionEvent EVENT) {
+    public void update(final SelectionEvt EVENT) {
         ChartItemSeries series = EVENT.getSeries();
         ChartItem       item   = EVENT.getItem();
         if (null == series && null == item) {

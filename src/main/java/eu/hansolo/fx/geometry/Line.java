@@ -17,7 +17,7 @@
 package eu.hansolo.fx.geometry;
 
 import eu.hansolo.fx.geometry.transform.BaseTransform;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public class Line extends Shape {
@@ -167,7 +167,7 @@ public class Line extends Shape {
     public double ptLineDistSq(final Point POINT) { return ptLineDistSq(x1, y1, x2, y2, POINT.x, POINT.y); }
 
     public double ptLineDist(final double PX, final double PY) { return ptLineDist(x1, y1, x2, y2, PX, PY); }
-    public double ptLineDist(final Point POINT) { return ptLineDist(x1, y1, x2, y2, POINT.x, POINT.y); }
+    public double ptLineDist(final Point POINT)                { return ptLineDist(x1, y1, x2, y2, POINT.x, POINT.y); }
 
     public PathIterator getPathIterator(BaseTransform TRANSFORM) { return new LineIterator(this, TRANSFORM); }
     public PathIterator getPathIterator(BaseTransform TRANSFORM, double FLATNESS) { return new LineIterator(this, TRANSFORM); }

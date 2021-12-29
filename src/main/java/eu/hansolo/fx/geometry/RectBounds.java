@@ -16,7 +16,8 @@
 
 package eu.hansolo.fx.geometry;
 
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
+
 
 public class RectBounds extends BaseBounds {
     private double minX;

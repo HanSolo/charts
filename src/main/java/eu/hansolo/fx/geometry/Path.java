@@ -19,7 +19,7 @@ package eu.hansolo.fx.geometry;
 import eu.hansolo.fx.geometry.transform.Affine;
 import eu.hansolo.fx.geometry.transform.BaseTransform;
 import eu.hansolo.fx.geometry.tools.IllegalPathStateException;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;

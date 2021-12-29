@@ -25,21 +25,14 @@ import eu.hansolo.fx.charts.series.Series;
  */
 public class SeriesEvent<T extends ChartItem> {
     private final Series<T> SERIES;
-    private final EventType TYPE;
 
 
     // ******************** Constructors **************************************
     public SeriesEvent(final Series<T> SERIES) {
-        this(SERIES, EventType.UPDATE);
-    }
-    public SeriesEvent(final Series<T> SERIES, final EventType TYPE) {
         this.SERIES = SERIES;
-        this.TYPE   = TYPE;
     }
 
 
     // ******************** Methods *******************************************
     public Series<T> getSeries() { return SERIES; }
-
-    public EventType getEventType() { return TYPE; }
 }

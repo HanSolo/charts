@@ -23,6 +23,11 @@ import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.toolboxfx.geom.Bounds;
+import eu.hansolo.toolboxfx.geom.CatmullRom;
+import eu.hansolo.toolboxfx.geom.CornerRadii;
+import eu.hansolo.toolboxfx.geom.Dimension;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Orientation;
@@ -630,7 +635,7 @@ public class Helper {
         return angle;
     }
 
-    public static final void drawRoundedRect(final GraphicsContext CTX, final CtxBounds BOUNDS, final CtxCornerRadii RADII) {
+    public static final void drawRoundedRect(final GraphicsContext CTX, final Bounds BOUNDS, final CornerRadii RADII) {
         double x           = BOUNDS.getX();
         double y           = BOUNDS.getY();
         double width       = BOUNDS.getWidth();
@@ -1093,13 +1098,13 @@ public class Helper {
         }
     }
 
-    public static final CtxDimension getTextDimension(final String TEXT, final Font FONT) {
+    public static final Dimension getTextDimension(final String TEXT, final Font FONT) {
         Text text = new Text(TEXT);
         text.setFont(FONT);
         double textWidth  = text.getBoundsInLocal().getWidth();
         double textHeight = text.getBoundsInLocal().getHeight();
         text = null;
-        CtxDimension dim = new CtxDimension(textWidth, textHeight);
+        Dimension dim = new Dimension(textWidth, textHeight);
         return dim;
     }
 
@@ -1140,7 +1145,7 @@ public class Helper {
     }
 
     public static final void drawTextWithBackground(final GraphicsContext CTX, final String TEXT, final Font FONT, final Color TEXT_BACKGROUND, final Color TEXT_FILL, final double X, final double Y) {
-        CtxDimension dim = getTextDimension(TEXT, FONT);
+        Dimension dim = getTextDimension(TEXT, FONT);
         double textWidth  = dim.getWidth() * 1.2;
         double textHeight = dim.getHeight();
         CTX.save();

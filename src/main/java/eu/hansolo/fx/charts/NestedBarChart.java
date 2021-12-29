@@ -17,9 +17,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.SelectionEvent;
-import eu.hansolo.fx.charts.event.SelectionEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.charts.event.SelectionEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
@@ -49,6 +52,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -77,7 +82,7 @@ public class NestedBarChart extends Region implements ChartArea {
     private              Order                                        _order;
     private              ObjectProperty<Order>                        order;
     private              EventHandler<MouseEvent>                     clickHandler;
-    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>>    observers;
     private              InfoPopup                                    popup;
     private              double                                       spacer;
     private              boolean                                      _seriesTitleVisible;
@@ -107,7 +112,7 @@ public class NestedBarChart extends Region implements ChartArea {
         _seriesTitleVisible = false;
         _seriesTitleColor   = null;
         clickHandler        = e -> checkForClick(e);
-        listeners           = new CopyOnWriteArrayList<>();
+        observers           = new ConcurrentHashMap<>();
         initGraphics();
         registerListeners();
     }
@@ -140,8 +145,8 @@ public class NestedBarChart extends Region implements ChartArea {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, clickHandler);
-        setOnSelectionEvent(e -> {
-            popup.update(e);
+        addChartEvtObserver(SelectionEvt.ANY, e -> {
+            popup.update((SelectionEvt) e);
             popup.animatedShow(getScene().getWindow());
         });
     }
@@ -321,13 +326,13 @@ public class NestedBarChart extends Region implements ChartArea {
             for (ChartItem item : s.getItems()) {
                 double innerBarHeight = item.getValue() * stepY;
                 if (Helper.isInRectangle(X, Y, minX, height - innerBarHeight, minX + innerBarWidth, height)) {
-                    fireSelectionEvent(new SelectionEvent(selectedSeries, item));
+                    fireChartEvt(new SelectionEvt(selectedSeries, item));
                     return;
                 }
                 minX += innerBarWidth;
             }
         }
-        if (null != selectedSeries) { fireSelectionEvent(new SelectionEvent(selectedSeries)); }
+        if (null != selectedSeries) { fireChartEvt(new SelectionEvt(selectedSeries)); }
     }
 
     private void sortItems(final List<ChartItem> ITEMS, final Order ORDER) {
@@ -340,13 +345,26 @@ public class NestedBarChart extends Region implements ChartArea {
 
 
     // ******************** Event Handling ************************************
-    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
-    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-    public void removeAllSelectionEventListeners() { listeners.clear(); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireSelectionEvent(final SelectionEvent EVENT) {
-        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

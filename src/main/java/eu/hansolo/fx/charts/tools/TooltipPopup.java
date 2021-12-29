@@ -18,7 +18,7 @@
 
 package eu.hansolo.fx.charts.tools;
 
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.beans.property.LongProperty;

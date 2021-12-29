@@ -20,7 +20,7 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
 import eu.hansolo.fx.charts.tools.NumberFormat;

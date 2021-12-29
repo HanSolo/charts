@@ -17,21 +17,24 @@
 package eu.hansolo.fx.charts.event;
 
 import eu.hansolo.fx.charts.data.MapConnection;
+import eu.hansolo.toolbox.evt.Evt;
+import eu.hansolo.toolbox.evt.EvtType;
 
 
 public class MapConnectionEvent<T extends MapConnection> {
-    private final EventType TYPE;
-    private final T         MAP_CONNECTION;
+
+    private final EvtType<? extends Evt> TYPE;
+    private final T                      MAP_CONNECTION;
 
 
     // ******************** Constructors **************************************
-    public MapConnectionEvent(final EventType TYPE) {
+    public MapConnectionEvent(final EvtType<? extends Evt> TYPE) {
         this(null, TYPE);
     }
     public MapConnectionEvent(final T MAP_CONNECTION) {
-        this(MAP_CONNECTION, EventType.UPDATE);
+        this(MAP_CONNECTION, ChartEvt.UPDATE);
     }
-    public MapConnectionEvent(final T MAP_CONNECTION, final EventType TYPE) {
+    public MapConnectionEvent(final T MAP_CONNECTION, final EvtType<? extends Evt> TYPE) {
         this.MAP_CONNECTION = MAP_CONNECTION;
         this.TYPE           = TYPE;
     }
@@ -40,6 +43,6 @@ public class MapConnectionEvent<T extends MapConnection> {
     // ******************** Methods *******************************************
     public T getMapConnection() { return MAP_CONNECTION; }
 
-    public EventType getEventType() { return TYPE; }
+    public EvtType<? extends Evt> getEventType() { return TYPE; }
 }
 

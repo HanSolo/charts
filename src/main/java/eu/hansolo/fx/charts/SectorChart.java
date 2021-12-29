@@ -19,10 +19,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.event.SelectionEvent;
-import eu.hansolo.fx.charts.event.SelectionEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.charts.event.SelectionEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
@@ -56,6 +58,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static eu.hansolo.fx.charts.tools.Helper.clamp;
@@ -97,12 +100,12 @@ public class SectorChart extends Region {
     private              BooleanProperty                                seriesSumTextVisible;
     private              Color                                          _gridColor;
     private              ObjectProperty<Color>                          gridColor;
-    private              CopyOnWriteArrayList<SelectionEventListener>   listeners;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>>      observers;
     private              InfoPopup                                      popup;
     private              InvalidationListener                           resizeListener;
     private              ListChangeListener<ChartItemSeries<ChartItem>> seriesListener;
     private              ListChangeListener<ChartItem>                  itemListListener;
-    private              ItemEventListener                              itemEventListener;
+    private              EvtObserver<ChartEvt>                          itemObserver;
     private              EventHandler<MouseEvent>                       mouseHandler;
 
     private record Sector(double centerX, double centerY, double radius, double startAngle, double segmentAngle) {}
@@ -125,18 +128,18 @@ public class SectorChart extends Region {
         sectorMap             = new HashMap<>();
         _gridColor            = Color.WHITE;
         _thresholdColor       = Color.RED;
-        listeners             = new CopyOnWriteArrayList<>();
+        observers             = new ConcurrentHashMap<>();
         resizeListener        = o -> resize();
         seriesListener        = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(series -> {
-                        series.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+                        series.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                         series.getItems().addListener(itemListListener);
                     });
                 } else if (c.wasRemoved()) {
                     c.getRemoved().forEach(series -> {
-                        series.getItems().forEach(item -> item.removeItemEventListener(itemEventListener));
+                        series.getItems().forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                         series.getItems().removeListener(itemListListener);
                     });
                 }
@@ -144,17 +147,17 @@ public class SectorChart extends Region {
             angleStep = 360.0 / getNoOfSectors();
             redraw();
         };
-        itemListListener      = c -> {
+        itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(item -> item.addItemEventListener(itemEventListener));
+                    c.getAddedSubList().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(item -> item.removeItemEventListener(itemEventListener));
+                    c.getRemoved().forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
         };
-        itemEventListener     = e -> redraw();
-        mouseHandler          = e -> {
+        itemObserver     = e -> redraw();
+        mouseHandler     = e -> {
             Optional<Entry<Sector, ChartItem>> optionalSector = sectorMap.entrySet()
                                                                          .parallelStream()
                                                                          .filter(entry -> Helper.isInSector(e.getX(), e.getY(), centerX,centerY, entry.getKey().radius, entry.getKey().startAngle, entry.getKey().segmentAngle))
@@ -178,7 +181,7 @@ public class SectorChart extends Region {
             }
         } else {
             allSeries.forEach(series -> {
-                series.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+                series.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 series.getItems().addListener(itemListListener);
             });
         }
@@ -249,7 +252,7 @@ public class SectorChart extends Region {
         heightProperty().removeListener(resizeListener);
         allSeries.removeListener(seriesListener);
         allSeries.forEach(series -> {
-            series.getItems().forEach(item -> item.removeItemEventListener(itemEventListener));
+            series.getItems().forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
             series.getItems().removeListener(itemListListener);
         });
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
@@ -476,13 +479,26 @@ public class SectorChart extends Region {
 
 
     // ******************** Event Handling ************************************
-    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
-    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-    public void removeAllSelectionEventListeners() { listeners.clear(); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireSelectionEvent(final SelectionEvent EVENT) {
-        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

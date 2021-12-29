@@ -16,9 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.event.CategoryEvent;
-import eu.hansolo.fx.charts.event.CategoryEventListener;
-import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -26,21 +27,23 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Category implements Comparable<Category> {
-    private static final CategoryEvent               UPDATE_EVT = new CategoryEvent(EventType.UPDATE);
-    private        final String                      name;
-    private              Color                       _fill;
-    private              ObjectProperty<Color>       fill;
-    private              Color                       _stroke;
-    private              ObjectProperty<Color>       stroke;
-    private              Color                       _textFill;
-    private              ObjectProperty<Color>       textFill;
-    private              double                      _value;
-    private              DoubleProperty              value;
-    private              List<CategoryEventListener> listeners;
+    private final ChartEvt                                  UPDATE_EVT = new ChartEvt(Category.this, ChartEvt.UPDATE);
+    private final String                                    name;
+    private       Color                                     _fill;
+    private       ObjectProperty<Color>                     fill;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Color                                     _textFill;
+    private       ObjectProperty<Color>                     textFill;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
 
 
     // ******************** Constructors **************************************
@@ -54,7 +57,7 @@ public class Category implements Comparable<Category> {
         this._stroke   = stroke;
         this._textFill = textFill;
         this._value    = 0;
-        this.listeners = new CopyOnWriteArrayList<>();
+        this.observers = new ConcurrentHashMap<>();
     }
 
 
@@ -65,7 +68,7 @@ public class Category implements Comparable<Category> {
     public void setFill(final Color fill) {
         if (null == this.fill) {
             _fill = fill;
-            fireCategoryEvent(UPDATE_EVT);
+            fireChartEvt(UPDATE_EVT);
         } else {
             this.fill.set(fill);
         }
@@ -73,7 +76,7 @@ public class Category implements Comparable<Category> {
     public ObjectProperty<Color> fillProperty() {
         if (null == fill) {
             fill  = new ObjectPropertyBase<>(_fill) {
-                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVT); }
                 @Override public Object getBean() { return Category.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -86,7 +89,7 @@ public class Category implements Comparable<Category> {
     public void setStroke(final Color stroke) {
         if (null == this.stroke) {
             _stroke = stroke;
-            fireCategoryEvent(UPDATE_EVT);
+            fireChartEvt(UPDATE_EVT);
         } else {
             this.stroke.set(stroke);
         }
@@ -94,7 +97,7 @@ public class Category implements Comparable<Category> {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<>(_stroke) {
-                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVT); }
                 @Override public Object getBean() { return Category.this; }
                 @Override public String getName() { return "stroke"; }
             };
@@ -107,7 +110,7 @@ public class Category implements Comparable<Category> {
     public void setTextFill(final Color textFill) {
         if (null == this.textFill) {
             _textFill = textFill;
-            fireCategoryEvent(UPDATE_EVT);
+            fireChartEvt(UPDATE_EVT);
         } else {
             this.textFill.set(textFill);
         }
@@ -115,7 +118,7 @@ public class Category implements Comparable<Category> {
     public ObjectProperty<Color> textFillProperty() {
         if (null == textFill) {
             textFill = new ObjectPropertyBase<>(_textFill) {
-                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVT); }
                 @Override public Object getBean() { return Category.this; }
                 @Override public String getName() { return "textFill"; }
             };
@@ -128,7 +131,7 @@ public class Category implements Comparable<Category> {
     public void setValue(final double value) {
         if (null == this.value) {
             _value = value;
-            fireCategoryEvent(UPDATE_EVT);
+            fireChartEvt(UPDATE_EVT);
         } else {
             this.value.set(value);
         }
@@ -136,7 +139,7 @@ public class Category implements Comparable<Category> {
     public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireCategoryEvent(UPDATE_EVT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVT); }
                 @Override public Object getBean() { return Category.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -150,18 +153,25 @@ public class Category implements Comparable<Category> {
 
 
     // ******************** Event handling ************************************
-    public void addCategoryEventListener(final CategoryEventListener listener) {
-        if (listeners.contains(listener)) { return; }
-        listeners.add(listener);
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
     }
-
-    public void removeCategoryEventListener(final CategoryEventListener listener) {
-        if (listeners.contains(listener)) { listeners.remove(listener); }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
     }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void removeAllListeners() { listeners.clear(); }
-
-    public void fireCategoryEvent(CategoryEvent event) {
-        listeners.forEach(listener -> listener.onCategoryEvent(event));
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 }

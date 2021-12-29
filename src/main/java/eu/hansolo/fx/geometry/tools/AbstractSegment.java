@@ -16,6 +16,8 @@
 
 package eu.hansolo.fx.geometry.tools;
 
+import eu.hansolo.toolboxfx.geom.Point;
+
 import java.util.Arrays;
 
 

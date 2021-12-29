@@ -19,17 +19,11 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Category;
-import eu.hansolo.fx.charts.event.CategoryEvent;
-import eu.hansolo.fx.charts.event.CategoryEventListener;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ObjectPropertyBase;
 import javafx.scene.paint.Color;
 
 import java.time.Month;
 import java.time.format.TextStyle;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class MonthCategory extends Category {

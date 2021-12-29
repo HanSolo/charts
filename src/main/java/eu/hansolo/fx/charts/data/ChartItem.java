@@ -18,10 +18,11 @@ package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Category;
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -44,47 +45,49 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ChartItem implements Item, Comparable<ChartItem> {
-    private final ItemEvent                UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
-    private final ItemEvent                FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
-    private       List<ItemEventListener>  listenerList   = new CopyOnWriteArrayList<>();
-    private       int                      _index;
-    private       IntegerProperty          index;
-    private       String                   _name;
-    private       StringProperty           name;
-    private       String                   _unit;
-    private       StringProperty           unit;
-    private       String                   _description;
-    private       StringProperty           description;
-    private       Category                 _category;
-    private       ObjectProperty<Category> category;
-    private       double                   _value;
-    private       DoubleProperty           value;
-    private       double                   oldValue;
-    private       Color                    _fill;
-    private       ObjectProperty<Color>    fill;
-    private       Color                    _stroke;
-    private       ObjectProperty<Color>    stroke;
-    private       Color                    _textFill;
-    private       ObjectProperty<Color>    textFill;
-    private       Instant                  _timestamp;
-    private       ObjectProperty<Instant>  timestamp;
-    private       Symbol                   _symbol;
-    private       ObjectProperty<Symbol>   symbol;
-    private       boolean                  _animated;
-    private       BooleanProperty          animated;
-    private       double                   _x;
-    private       DoubleProperty           x;
-    private       double                   _y;
-    private       DoubleProperty           y;
-    private       boolean                  _isEmpty;
-    private       BooleanProperty          isEmpty;
-    private       long                     animationDuration;
-    private       DoubleProperty           currentValue;
-    private       Timeline                 timeline;
+    private final ChartEvt                                  UPDATE_EVENT   = new ChartEvt(ChartItem.this, ChartEvt.ITEM_UPDATE);
+    private final ChartEvt                                  FINISHED_EVENT = new ChartEvt(ChartItem.this, ChartEvt.FINISHED);
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers      = new ConcurrentHashMap<>();
+    private       int                                       _index;
+    private       IntegerProperty                           index;
+    private       String                                    _name;
+    private       StringProperty                            name;
+    private       String                                    _unit;
+    private       StringProperty                            unit;
+    private       String                                    _description;
+    private       StringProperty                            description;
+    private       Category                                  _category;
+    private       ObjectProperty<Category>                  category;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       double                                    oldValue;
+    private       Color                                     _fill;
+    private       ObjectProperty<Color>                     fill;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Color                                     _textFill;
+    private       ObjectProperty<Color>                     textFill;
+    private       Instant                                   _timestamp;
+    private       ObjectProperty<Instant>                   timestamp;
+    private       Symbol                                    _symbol;
+    private       ObjectProperty<Symbol>                    symbol;
+    private       boolean                                   _animated;
+    private       BooleanProperty                           animated;
+    private       double                                    _x;
+    private       DoubleProperty                            x;
+    private       double                                    _y;
+    private       DoubleProperty                            y;
+    private       boolean                                   _isEmpty;
+    private       BooleanProperty                           isEmpty;
+    private       long                                      animationDuration;
+    private       DoubleProperty                            currentValue;
+    private       Timeline                                  timeline;
 
 
     // ******************** Constructors **************************************
@@ -196,7 +199,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             @Override protected void invalidated() {
                 oldValue = ChartItem.this.getValue();
                 ChartItem.this.setValue(get());
-                fireItemEvent(UPDATE_EVENT);
+                fireChartEvt(UPDATE_EVENT);
             }
             @Override public Object getBean() { return ChartItem.this; }
             @Override public String getName() { return "currentValue"; }
@@ -204,7 +207,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         timeline          = new Timeline();
         animationDuration = ANIMATION_DURATION;
 
-        timeline.setOnFinished(e -> fireItemEvent(FINISHED_EVENT));
+        timeline.setOnFinished(e -> fireChartEvt(FINISHED_EVENT));
     }
 
 
@@ -232,7 +235,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             name.set(NAME);
         }
@@ -240,7 +243,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -253,7 +256,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setUnit(final String UNIT) {
         if (null == unit) {
             _unit = UNIT;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             unit.set(UNIT);
         }
@@ -261,7 +264,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public StringProperty unitProperty() {
         if (null == unit) {
             unit = new StringPropertyBase(_unit) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "unit"; }
             };
@@ -274,7 +277,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setDescription(final String DESCRIPTION) {
         if (null == description) {
             _description = DESCRIPTION;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             description.set(DESCRIPTION);
         }
@@ -282,7 +285,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public StringProperty descriptionProperty() {
         if (null == description) {
             description = new StringPropertyBase(_description) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "description"; }
             };
@@ -295,7 +298,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setCategory(final Category CATEGORY) {
         if (null == category) {
             _category = CATEGORY;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             category.set(CATEGORY);
         }
@@ -303,7 +306,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Category> categoryProperty() {
         if (null == category) {
             category = new ObjectPropertyBase<>(_category) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "category"; }
             };
@@ -335,7 +338,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
             } else {
                 oldValue = _value;
                 _value = VALUE;
-                fireItemEvent(FINISHED_EVENT);
+                fireChartEvt(FINISHED_EVENT);
             }
         } else {
             value.set(VALUE);
@@ -361,7 +364,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
                             timeline.play();
                         }
                     } else {
-                        fireItemEvent(FINISHED_EVENT);
+                        fireChartEvt(FINISHED_EVENT);
                     }
                 }
                 @Override public Object getBean() { return ChartItem.this; }
@@ -377,7 +380,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setFill(final Color FILL) {
         if (null == fill) {
             _fill = FILL;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             fill.set(FILL);
         }
@@ -385,7 +388,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Color> fillProperty() {
         if (null == fill) {
             fill = new ObjectPropertyBase<Color>(_fill) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -398,7 +401,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setStroke(final Color STROKE) {
         if (null == stroke) {
             _stroke = STROKE;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             stroke.set(STROKE);
         }
@@ -406,7 +409,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<Color>(_stroke) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "stroke"; }
             };
@@ -419,7 +422,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setTextFill(final Color COLOR) {
         if (null == textFill) {
             _textFill = COLOR;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             textFill.set(COLOR);
         }
@@ -427,7 +430,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Color> textFillProperty() {
         if (null == textFill) {
             textFill = new ObjectPropertyBase<Color>(_textFill) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "textFill"; }
             };
@@ -440,7 +443,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     @Override public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -448,7 +451,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() {  return ChartItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -462,7 +465,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setTimestamp(final Instant TIMESTAMP) {
         if (null == timestamp) {
             _timestamp = TIMESTAMP;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             timestamp.set(TIMESTAMP);
         }
@@ -470,7 +473,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public ObjectProperty<Instant> timestampProperty() {
         if (null == timestamp) {
             timestamp = new ObjectPropertyBase<Instant>(_timestamp) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "timestamp"; }
             };
@@ -545,7 +548,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public void setIsEmpty(final boolean isEmpty) {
         if (null == this.isEmpty) {
             _isEmpty = isEmpty;
-            fireItemEvent(UPDATE_EVENT);
+            fireChartEvt(UPDATE_EVENT);
         } else {
             this.isEmpty.set(isEmpty);
         }
@@ -553,7 +556,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     public BooleanProperty isEmptyProperty() {
         if (null == isEmpty) {
             isEmpty = new BooleanPropertyBase(_isEmpty) {
-                @Override protected void invalidated() { fireItemEvent(UPDATE_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATE_EVENT); }
                 @Override public Object getBean() { return ChartItem.this; }
                 @Override public String getName() { return "isEmpty"; }
             };
@@ -595,11 +598,25 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
 
     // ******************** Event Handling ************************************
-    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
-    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listenerList.contains(LISTENER)) listenerList.add(LISTENER); }
-    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listenerList.contains(LISTENER)) listenerList.remove(LISTENER); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireItemEvent(final ItemEvent EVENT) {
-        for (ItemEventListener listener : listenerList) { listener.onItemEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 }

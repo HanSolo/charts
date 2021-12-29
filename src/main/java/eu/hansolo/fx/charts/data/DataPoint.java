@@ -16,7 +16,8 @@
 
 package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.tools.Point;
+
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public class DataPoint extends Point {

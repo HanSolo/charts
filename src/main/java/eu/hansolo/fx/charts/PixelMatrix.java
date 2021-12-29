@@ -16,11 +16,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.event.PixelMatrixEvent;
+import eu.hansolo.fx.charts.event.PixelMatrixEvt;
 import eu.hansolo.fx.charts.event.PixelMatrixEventListener;
-import eu.hansolo.fx.charts.tools.CtxBounds;
-import eu.hansolo.fx.charts.tools.CtxCornerRadii;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.toolboxfx.geom.CornerRadii;
 import javafx.beans.DefaultProperty;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
@@ -214,9 +213,9 @@ public class PixelMatrix extends Region {
     public double getMatrixWidth() { return canvas.getWidth(); }
     public double getMatrixHeight() { return canvas.getHeight(); }
 
-    public Bounds getMatrixLayoutBounds() { return canvas.getLayoutBounds(); }
+    public Bounds getMatrixLayoutBounds()   { return canvas.getLayoutBounds(); }
     public Bounds getMatrixBoundsInParent() { return canvas.getBoundsInParent(); }
-    public Bounds getMatrixBoundsInLocal() { return canvas.getBoundsInLocal(); }
+    public Bounds getMatrixBoundsInLocal()  { return canvas.getBoundsInLocal(); }
 
     public int getCols() { return cols; }
     public int getRows() { return rows; }
@@ -312,8 +311,8 @@ public class PixelMatrix extends Region {
         ctx.clearRect(0, 0, width, height);
         switch(pixelShape) {
             case ROUNDED_RECT:
-                CtxBounds      bounds      = new CtxBounds(pixelWidthMinusDoubleSpacer, pixelHeightMinusDoubleSpacer);
-                CtxCornerRadii cornerRadii = new CtxCornerRadii(pixelSize * 0.125);
+                eu.hansolo.toolboxfx.geom.Bounds bounds      = new eu.hansolo.toolboxfx.geom.Bounds(pixelWidthMinusDoubleSpacer, pixelHeightMinusDoubleSpacer);
+                CornerRadii                      cornerRadii = new CornerRadii(pixelSize * 0.125);
                 for (int y = 0; y < rows; y++) {
                     for (int x = 0; x < cols; x++) {
                         ctx.setFill(convertToColor(matrix[x][y]));
@@ -349,7 +348,7 @@ public class PixelMatrix extends Region {
     public void removePixelMatrixEventListener(final PixelMatrixEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
     public void removeAllPixelMatrixEventListeners() { listeners.clear(); }
 
-    public void firePixelMatrixEvent(final PixelMatrixEvent EVENT) {
+    public void firePixelMatrixEvent(final PixelMatrixEvt EVENT) {
         for (PixelMatrixEventListener listener : listeners) { listener.onPixelMatrixEvent(EVENT); }
     }
 
@@ -374,7 +373,7 @@ public class PixelMatrix extends Region {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < cols; x++) {
                 if (Helper.isInRectangle(EVT.getX(), EVT.getY(), x * pixelWidth + spacer, y * pixelHeight + spacer, x * pixelWidth + spacerPlusPixelWidthMinusDoubleSpacer, y * pixelHeight + spacerPlusPixelHeightMinusDoubleSpacer)) {
-                    firePixelMatrixEvent(new PixelMatrixEvent(x, y, EVT.getScreenX(), EVT.getScreenY()));
+                    firePixelMatrixEvent(new PixelMatrixEvt(x, y, EVT.getScreenX(), EVT.getScreenY()));
                     break;
                 }
             }

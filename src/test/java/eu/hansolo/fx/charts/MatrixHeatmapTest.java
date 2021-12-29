@@ -18,8 +18,8 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.MatrixChartItem;
 import eu.hansolo.fx.charts.series.MatrixItemSeries;
-import eu.hansolo.fx.charts.tools.ChartsColorMapping;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.heatmap.ColorMapping;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -77,7 +77,7 @@ public class MatrixHeatmapTest extends Application {
         matrixItemSeries1 = new MatrixItemSeries(matrixData1, ChartType.MATRIX_HEATMAP);
 
         matrixHeatMap1 = new MatrixPane(matrixItemSeries1);
-        matrixHeatMap1.setColorMapping(ChartsColorMapping.INFRARED_1);
+        matrixHeatMap1.setColorMapping(ColorMapping.INFRARED_1);
         matrixHeatMap1.getMatrix().setUseSpacer(false);
         matrixHeatMap1.getMatrix().setColsAndRows(NO_OF_CELLS, NO_OF_CELLS);
         matrixHeatMap1.setPrefSize(400, 400);

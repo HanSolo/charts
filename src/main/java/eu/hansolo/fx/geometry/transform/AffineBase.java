@@ -22,7 +22,7 @@ import eu.hansolo.fx.geometry.RectBounds;
 import eu.hansolo.fx.geometry.Rectangle;
 import eu.hansolo.fx.geometry.Shape;
 import eu.hansolo.fx.geometry.tools.NonInvertibleTransformException;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public abstract class AffineBase extends BaseTransform {

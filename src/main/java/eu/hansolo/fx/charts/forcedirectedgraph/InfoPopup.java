@@ -16,7 +16,7 @@
 
 package eu.hansolo.fx.charts.forcedirectedgraph;
 
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;

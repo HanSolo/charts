@@ -18,10 +18,9 @@ package eu.hansolo.fx.charts.pareto;
 
 import eu.hansolo.fx.charts.Axis;
 import eu.hansolo.fx.charts.Position;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.InfoPopup;
-import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;

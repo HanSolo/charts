@@ -16,8 +16,9 @@
 
 package eu.hansolo.fx.charts.world;
 
-import eu.hansolo.fx.charts.tools.Location;
+import eu.hansolo.toolboxfx.ValueObject;
 import javafx.scene.paint.Color;
+import eu.hansolo.toolboxfx.geom.Location;
 
 import java.util.Arrays;
 import java.util.List;

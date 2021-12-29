@@ -21,9 +21,10 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.FontMetrix;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.FontMetrix;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
@@ -87,7 +88,7 @@ public class BubbleGridChart extends Region {
     private              double                                  sumOfValues;
     private              double                                  minValue;
     private              double                                  maxValue;
-    private              ItemEventListener                       itemListener;
+    private              EvtObserver<ChartEvt>                   itemObserver;
     private              ListChangeListener<BubbleGridChartItem> itemListListener;
     private              InfoPopup                               popup;
     private              Paint                                   _chartBackground;
@@ -152,18 +153,18 @@ public class BubbleGridChart extends Region {
         sortTopicY             = Topic.INDEX;
         sortOrderX             = Order.ASCENDING;
         sortOrderY             = Order.ASCENDING;
-        itemListener           = e -> {
+        itemObserver     = e -> {
             minValue    = items.parallelStream().min(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
             maxValue    = items.parallelStream().max(Comparator.comparingDouble(BubbleGridChartItem::getValue)).map(bgci -> bgci.getValue()).orElse(0d);
             sumOfValues = items.parallelStream().mapToDouble(bgci -> bgci.getValue()).sum();
             sort();
         };
-        itemListListener       = c -> {
+        itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
 
@@ -215,7 +216,7 @@ public class BubbleGridChart extends Region {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
         items.addListener(itemListListener);
-        items.forEach(item -> item.addItemEventListener(itemListener));
+        items.forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
         canvas.setOnMouseClicked(e -> bubbles.forEach(bubble -> {
                 if (Helper.isInCircle(e.getX(), e.getY(), bubble.x, bubble.y, bubble.r)) {
                     popup.setX(e.getScreenX());
@@ -242,7 +243,7 @@ public class BubbleGridChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeItemEventListener(itemListener));
+        items.forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.removeListener(itemListListener);
     }
 
@@ -778,7 +779,7 @@ public class BubbleGridChart extends Region {
                         } else {
                             bubbleText = String.format(Locale.US, "%.0f", bgci.getValue());
                         }
-                        FontMetrix metrix     = new FontMetrix(dataFont);
+                        FontMetrix metrix = new FontMetrix(dataFont);
                         metrix.computeStringWidth(bubbleText);
                         if (metrix.computeStringWidth(bubbleText) < (radius * 2)) {
                             ctx.fillText(bubbleText, cellCenterX, cellCenterY, maxBubbleDiameter);

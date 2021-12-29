@@ -19,11 +19,13 @@
  package eu.hansolo.fx.charts;
 
  import eu.hansolo.fx.charts.data.ChartItem;
- import eu.hansolo.fx.charts.event.EventType;
- import eu.hansolo.fx.charts.event.ItemEventListener;
- import eu.hansolo.fx.charts.event.SelectionEvent;
- import eu.hansolo.fx.charts.event.SelectionEventListener;
- import eu.hansolo.fx.charts.font.Fonts;
+ import eu.hansolo.fx.charts.event.ChartEvt;
+ import eu.hansolo.fx.charts.event.SelectionEvt;
+ import eu.hansolo.toolbox.evt.Evt;
+ import eu.hansolo.toolbox.evt.EvtObserver;
+ import eu.hansolo.toolbox.evt.EvtType;
+ import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+ import eu.hansolo.toolboxfx.font.Fonts;
  import eu.hansolo.fx.charts.series.ChartItemSeries;
  import eu.hansolo.fx.charts.series.Series;
  import eu.hansolo.fx.charts.tools.Helper;
@@ -65,6 +67,7 @@
  import java.util.Map;
  import java.util.Map.Entry;
  import java.util.Optional;
+ import java.util.concurrent.ConcurrentHashMap;
  import java.util.concurrent.CopyOnWriteArrayList;
  import java.util.stream.Collectors;
 
@@ -131,9 +134,9 @@
      private              Map<Category, Double>                        categoryValueMap;
      private              Map<Rectangle, ChartItem>                    rectangleItemMap;
      private              ListChangeListener<ChartItem>                chartItemListener;
-     private              ItemEventListener                            itemEventListener;
+     private              EvtObserver<ChartEvt>                        observer;
      private              EventHandler<MouseEvent>                     mouseHandler;
-     private              CopyOnWriteArrayList<SelectionEventListener> listeners;
+     private              Map<EvtType, List<EvtObserver<ChartEvt>>>    observers;
      private              InfoPopup                                    popup;
 
 
@@ -162,24 +165,23 @@
          _useCategoryTextFill    = false;
          _shortenNumbers         = false;
          _sorted                 = false;
-         _order                  =  Order.DESCENDING;
-         listeners               = new CopyOnWriteArrayList<>();
+         _order                  = Order.DESCENDING;
+         observers               = new ConcurrentHashMap<>();
          popup                   = new InfoPopup();
          categoryValueMap        = new HashMap<>();
          rectangleItemMap        = new HashMap<>();
-         itemEventListener       = e -> {
-             final EventType TYPE = e.getEventType();
-             switch(TYPE) {
-                 case UPDATE  : drawChart(); break;
-                 case FINISHED: drawChart(); break;
-             }
+         observer                = evt -> {
+            EvtType<? extends Evt> type = evt.getEvtType();
+            if (type.equals(ChartEvt.ITEM_UPDATE) || type.equals(ChartEvt.FINISHED)) {
+                drawChart();
+            }
          };
-         chartItemListener       = c -> {
+         chartItemListener = c -> {
              while (c.next()) {
                  if (c.wasAdded()) {
-                     c.getAddedSubList().forEach(addedItem -> addedItem.addItemEventListener(itemEventListener));
+                     c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, observer));
                  } else if (c.wasRemoved()) {
-                     c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemEventListener));
+                     c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, observer));
                  }
              }
              drawChart();
@@ -217,15 +219,15 @@
          widthProperty().addListener(o -> resize());
          heightProperty().addListener(o -> resize());
 
-         series1.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
-         series2.getItems().forEach(item -> item.addItemEventListener(itemEventListener));
+         series1.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, observer));
+         series2.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, observer));
 
          series1.getItems().addListener(chartItemListener);
          series2.getItems().addListener(chartItemListener);
 
          canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
-         setOnSelectionEvent(e -> {
-             popup.update(e);
+         addChartEvtObserver(SelectionEvt.ANY, e -> {
+             popup.update((SelectionEvt) e);
              popup.animatedShow(getScene().getWindow());
          });
      }
@@ -677,9 +679,9 @@
              popup.setY(evt.getScreenY() - popup.getHeight());
              ChartItem selectedItem = opt.get().getValue();
              if (series1.getItems().contains(selectedItem)) {
-                 fireSelectionEvent(new SelectionEvent(series1, opt.get().getValue()));
+                 fireChartEvt(new SelectionEvt(series1, opt.get().getValue()));
              } else {
-                 fireSelectionEvent(new SelectionEvent(series2, opt.get().getValue()));
+                 fireChartEvt(new SelectionEvt(series2, opt.get().getValue()));
              }
          }
      }
@@ -709,13 +711,26 @@
 
 
      // ******************** Event Handling ************************************
-     public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
-     public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-     public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-     public void removeAllSelectionEventListeners() { listeners.clear(); }
+     public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+         if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+         if (observers.get(type).contains(observer)) { return; }
+         observers.get(type).add(observer);
+     }
+     public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+         if (observers.containsKey(type)) {
+             if (observers.get(type).contains(observer)) {
+                 observers.get(type).remove(observer);
+             }
+         }
+     }
+     public void removeAllChartEvtObservers() { observers.clear(); }
 
-     public void fireSelectionEvent(final SelectionEvent EVENT) {
-         for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+     public void fireChartEvt(final ChartEvt evt) {
+         final EvtType type = evt.getEvtType();
+         observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+         if (observers.containsKey(type)) {
+             observers.get(type).forEach(observer -> observer.handle(evt));
+         }
      }
 
 

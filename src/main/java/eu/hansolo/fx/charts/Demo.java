@@ -17,7 +17,7 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

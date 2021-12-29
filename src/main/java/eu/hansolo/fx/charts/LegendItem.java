@@ -16,9 +16,9 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.CtxDimension;
-import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.toolboxfx.HelperFX;
+import eu.hansolo.toolboxfx.font.Fonts;
+import eu.hansolo.toolboxfx.geom.Dimension;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
@@ -67,7 +67,7 @@ public class LegendItem extends Region {
     private              Canvas                 canvas;
     private              GraphicsContext        ctx;
     private              Font                   font;
-    private              CtxDimension           textDim;
+    private              Dimension              textDim;
     private              Pane                   pane;
 
 
@@ -253,7 +253,7 @@ public class LegendItem extends Region {
 
         if (width > 0 && height > 0) {
             font    = Fonts.latoRegular(size * 0.8);
-            textDim = Helper.getTextDimension(getText(), font);
+            textDim = HelperFX.getTextDimension(getText(), font);
             double requiredWidth = height + height * 0.22 + textDim.getWidth();
             pane.setMaxSize(requiredWidth, height);
             pane.setPrefSize(requiredWidth, height);

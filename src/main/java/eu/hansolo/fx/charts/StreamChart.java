@@ -17,17 +17,16 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.CtxBounds;
-import eu.hansolo.fx.charts.tools.FontMetrix;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.FontMetrix;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.charts.tools.SortDirection;
 import eu.hansolo.fx.charts.tools.TooltipPopup;
 import eu.hansolo.fx.geometry.Path;
+import eu.hansolo.toolboxfx.geom.Bounds;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -40,14 +39,12 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
@@ -100,6 +97,8 @@ public class StreamChart extends Region {
     public enum Type {
         STACKED, CENTERED
     }
+
+
     private static final double                            PREFERRED_WIDTH         = 600;
     private static final double                            PREFERRED_HEIGHT        = 400;
     private static final double                            MINIMUM_WIDTH           = 50;
@@ -127,7 +126,7 @@ public class StreamChart extends Region {
     private              Map<LocalDate, List<ChartItem>>   chartItems;
     private              Map<Integer, List<ChartItemData>> itemsPerCategory;
     private              Map<Integer, Double>              sumsPerCategory;
-    private              ItemEventListener                 itemListener;
+    private              EvtObserver<ChartEvt>             itemObserver;
     private              ListChangeListener<ChartItem>     itemListListener;
     private              double                            scaleY;
     private              Color                             _textColor;
@@ -186,14 +185,14 @@ public class StreamChart extends Region {
         items               = FXCollections.observableArrayList();
         chartItems          = new LinkedHashMap<>();
         itemsPerCategory    = new LinkedHashMap<>();
-        sumsPerCategory     = new LinkedHashMap<>();
-        itemListener        = e -> redraw();
-        itemListListener    = c -> {
+        sumsPerCategory  = new LinkedHashMap<>();
+        itemObserver     = e -> redraw();
+        itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver));
                 }
             }
             groupBy(getCategory());
@@ -274,7 +273,7 @@ public class StreamChart extends Region {
                 double eventX = e.getX();
                 double eventY = e.getY();
                 if (path.contains(eventX, eventY)) {
-                    chartItem.fireItemEvent(new ItemEvent(chartItem, EventType.SELECTED));
+                    chartItem.fireChartEvt(new ChartEvt(chartItem, ChartEvt.ITEM_SELECTED, e));
                     selectedPaths.addAll(bezierPaths.entrySet()
                                                     .parallelStream()
                                                     .filter(entry -> entry.getValue().getName().equals(chartItem.getName()))
@@ -321,7 +320,7 @@ public class StreamChart extends Region {
     }
     public ObjectProperty<Category> categoryProperty() {
         if (null == category) {
-            category = new ObjectPropertyBase<Category>(_category) {
+            category = new ObjectPropertyBase<>(_category) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return StreamChart.this; }
                 @Override public String getName() { return "category"; }
@@ -837,7 +836,7 @@ public class StreamChart extends Region {
             // Go through all item data of the current category
             for (ChartItemData itemData : itemDataInCategory) {
                 ChartItem item   = itemData.getChartItem();
-                CtxBounds bounds = itemData.getBounds();
+                Bounds    bounds = itemData.getBounds();
 
                 // Create path if current item is also present in next category
                 if (category < noOfCategories) {
@@ -871,7 +870,7 @@ public class StreamChart extends Region {
                     }
 
                     ChartItemData targetItemData   = nextItemDataOptional.get();
-                    CtxBounds     targetItemBounds = targetItemData.getBounds();
+                    Bounds        targetItemBounds = targetItemData.getBounds();
 
                     // Calculate the offset in x direction for the bezier curve control points
                     double ctrlPointOffsetX = (targetItemBounds.getMinX() - bounds.getMaxX()) * 0.5;
@@ -947,7 +946,7 @@ public class StreamChart extends Region {
             // Go through all item data of the current category
             for (ChartItemData itemData : itemDataInCategory) {
                 ChartItem item   = itemData.getChartItem();
-                CtxBounds bounds = itemData.getBounds();
+                Bounds    bounds = itemData.getBounds();
 
                 // Draw item text
                 if (isItemTextVisible() && item.getValue() > getItemTextThreshold()) {
@@ -983,7 +982,7 @@ public class StreamChart extends Region {
     // ******************** Inner Classes *************************************
     private class ChartItemData {
         private ChartItem chartItem;
-        private CtxBounds bounds;           // bounds of the item rectangle
+        private Bounds    bounds;           // bounds of the item rectangle
         private Point     textPoint;        // point where text will be drawn
         private double    value;
 
@@ -991,7 +990,7 @@ public class StreamChart extends Region {
         // ******************** Constructors **********************************
         public ChartItemData(final ChartItem ITEM) {
             chartItem = ITEM;
-            bounds    = new CtxBounds();
+            bounds    = new Bounds();
             textPoint = new Point();
             value     = 0;
         }
@@ -1002,12 +1001,12 @@ public class StreamChart extends Region {
 
         public LocalDate getLocalDate() { return chartItem.getTimestampAsLocalDate(ZoneId.systemDefault()); }
 
-        public CtxBounds getBounds() { return bounds; }
+        public Bounds getBounds() { return bounds; }
         public void setBounds(final double X, final double Y, final double WIDTH, final double HEIGHT) {
             bounds.set(X, Y, WIDTH, HEIGHT);
         }
 
-        public Point getTextPoint() { return textPoint; }
+        public Point getTextPoint()                              { return textPoint; }
         public void setTextPoint(final double X, final double Y) { textPoint.set(X, Y); }
 
         public double getValue() { return value; }

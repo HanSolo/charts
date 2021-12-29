@@ -18,14 +18,13 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.CtxBounds;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.geometry.Path;
+import eu.hansolo.toolboxfx.geom.Bounds;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -48,7 +47,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -93,7 +91,7 @@ public class SankeyPlot extends Region {
     private              Canvas                           canvas;
     private              GraphicsContext                  ctx;
     private              ObservableList<PlotItem>         items;
-    private              ItemEventListener                itemListener;
+    private              EvtObserver<ChartEvt>            itemObserver;
     private              ListChangeListener<PlotItem>     itemListListener;
     private              Map<Integer, List<PlotItemData>> itemsPerLevel;
     private              int                              minLevel;
@@ -138,14 +136,14 @@ public class SankeyPlot extends Region {
 
     // ******************** Constructors **************************************
     public SankeyPlot() {
-        items                = FXCollections.observableArrayList();
-        itemListener         = e -> redraw();
-        itemListListener     = c -> {
+        items            = FXCollections.observableArrayList();
+        itemObserver     = e -> redraw();
+        itemListListener = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
             prepareData();
@@ -207,7 +205,7 @@ public class SankeyPlot extends Region {
             paths.forEach((path, tooltipText) -> {
                 if (path.contains(eventX, eventY)) {
                     PlotItem[] items = connectionMap.get(path);
-                    items[0].fireItemEvent(new ItemEvent(items[0], items[1], EventType.SELECTED));
+                    items[0].fireChartEvt(new ChartEvt(items[0], items[1], ChartEvt.ITEM_SELECTED, e));
                     selectedConnection = new SankeyPlotConnection(items[0], items[1], items[0].getOutgoingValueTo(items[1]), getSelectionColor(), path);
                     selectedItems.add(items[1]);
                     Integer  startLevel = items[1].getLevel() + 1;
@@ -227,7 +225,7 @@ public class SankeyPlot extends Region {
                 items.forEach(plotItemData -> {
                     if (plotItemData.getBounds().contains(eventX, eventY)) {
                         selectedPlotItemData = plotItemData;
-                        selectedPlotItemData.getPlotItem().fireItemEvent(new ItemEvent(selectedPlotItemData.getPlotItem(), EventType.SELECTED));
+                        selectedPlotItemData.getPlotItem().fireChartEvt(new ChartEvt(selectedPlotItemData.getPlotItem(), ChartEvt.ITEM_SELECTED, e));
                     }
                 });
             });
@@ -762,7 +760,7 @@ public class SankeyPlot extends Region {
             // Go through all item data of the current level
             for (PlotItemData itemData : itemDataInLevel) {
                 PlotItem  item   = itemData.getPlotItem();
-                CtxBounds bounds = itemData.getBounds();
+                Bounds    bounds = itemData.getBounds();
 
                 // Outgoing
                 if (level < maxLevel) {
@@ -772,7 +770,7 @@ public class SankeyPlot extends Region {
                         if (!targetItemDataOptional.isPresent()) { continue; }
 
                         PlotItemData targetItemData   = targetItemDataOptional.get();
-                        CtxBounds    targetItemBounds = targetItemData.getBounds();
+                        Bounds       targetItemBounds = targetItemData.getBounds();
                         PlotItem     targetItem       = targetItemData.getPlotItem();
 
                         // Calculate y start position in target item dependent on item index in target incoming
@@ -863,7 +861,7 @@ public class SankeyPlot extends Region {
             // Go through all item data of the current level
             for (PlotItemData itemData : itemDataInLevel) {
                 PlotItem  item   = itemData.getPlotItem();
-                CtxBounds bounds = itemData.getBounds();
+                Bounds    bounds = itemData.getBounds();
 
                 // Draw item boxes with their labels
                 if (null == selectedConnection) {
@@ -898,7 +896,7 @@ public class SankeyPlot extends Region {
 
         // Draw selected item
         if (null != selectedPlotItemData) {
-            CtxBounds bounds = selectedPlotItemData.getBounds();
+            Bounds bounds = selectedPlotItemData.getBounds();
             ctx.setFill(getSelectionColor());
             ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
             int startLevel = selectedPlotItemData.getPlotItem().getLevel();
@@ -909,7 +907,7 @@ public class SankeyPlot extends Region {
             sItems.add(selectedPlotItemData.getPlotItem());
             for (int i = startLevel ; i <= maxLevel ; i++) {
                 itemsPerLevel.get(i).forEach(plotItemData -> {
-                    CtxBounds b = plotItemData.getBounds();
+                    Bounds b = plotItemData.getBounds();
                     ctx.fillRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
                     sItems.add(plotItemData.getPlotItem());
                 });
@@ -923,18 +921,18 @@ public class SankeyPlot extends Region {
 
     // ******************** Inner Classes *************************************
     private class PlotItemData {
-        private PlotItem  plotItem;
-        private CtxBounds bounds;           // bounds of the item rectangle
-        private Point     textPoint;        // point where text will be drawn
-        private double    incomingOffsetY;  // offset in y direction of already added incoming bezier curves
-        private double    outgoingOffsetY;  // offset in y direction of already added outgoing bezier curves
-        private double    value;
+        private PlotItem plotItem;
+        private Bounds   bounds;           // bounds of the item rectangle
+        private Point    textPoint;        // point where text will be drawn
+        private double   incomingOffsetY;  // offset in y direction of already added incoming bezier curves
+        private double   outgoingOffsetY;  // offset in y direction of already added outgoing bezier curves
+        private double   value;
 
 
         // ******************** Constructors **********************************
         public PlotItemData(final PlotItem ITEM) {
             plotItem       = ITEM;
-            bounds         = new CtxBounds();
+            bounds         = new Bounds();
             textPoint      = new Point();
             incomingOffsetY = 0;
             outgoingOffsetY = 0;
@@ -945,7 +943,7 @@ public class SankeyPlot extends Region {
         // ******************** Methods *******************************************
         public PlotItem getPlotItem() { return plotItem; }
 
-        public CtxBounds getBounds() { return bounds; }
+        public Bounds getBounds() { return bounds; }
         public void setBounds(final double X, final double Y, final double WIDTH, final double HEIGHT) {
             bounds.set(X, Y, WIDTH, HEIGHT);
         }

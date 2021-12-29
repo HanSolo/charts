@@ -17,10 +17,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.event.SelectionEvent;
-import eu.hansolo.fx.charts.event.SelectionEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.charts.event.SelectionEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.Order;
@@ -45,7 +47,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ArcType;
 import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -54,6 +55,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -64,32 +67,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @DefaultProperty("children")
 public class CoxcombChart extends Region {
-    private static final double                                       PREFERRED_WIDTH  = 250;
-    private static final double                                       PREFERRED_HEIGHT = 250;
-    private static final double                                       MINIMUM_WIDTH    = 50;
-    private static final double                                       MINIMUM_HEIGHT   = 50;
-    private static final double                                       MAXIMUM_WIDTH    = 1024;
-    private static final double                                       MAXIMUM_HEIGHT   = 1024;
-    private              double                                       size;
-    private              double                                       width;
-    private              double                                       height;
-    private              Canvas                                       canvas;
-    private              GraphicsContext                              ctx;
-    private              Pane                                         pane;
-    private              ObservableList<ChartItem>                    items;
-    private              Color                                        _textColor;
-    private              ObjectProperty<Color>                        textColor;
-    private              boolean                                      _autoTextColor;
-    private              BooleanProperty                              autoTextColor;
-    private              Order                                        _order;
-    private              ObjectProperty<Order>                        order;
-    private              boolean                                      _equalSegmentAngles;
-    private              BooleanProperty                              equalSegmentAngles;
-    private              ItemEventListener                            itemListener;
-    private              ListChangeListener<ChartItem>                itemListListener;
-    private              EventHandler<MouseEvent>                     mouseHandler;
-    private              CopyOnWriteArrayList<SelectionEventListener> listeners;
-    private              InfoPopup                                    popup;
+    private static final double                                    PREFERRED_WIDTH  = 250;
+    private static final double                                    PREFERRED_HEIGHT = 250;
+    private static final double                                    MINIMUM_WIDTH    = 50;
+    private static final double                                    MINIMUM_HEIGHT   = 50;
+    private static final double                                    MAXIMUM_WIDTH    = 1024;
+    private static final double                                    MAXIMUM_HEIGHT   = 1024;
+    private              double                                    size;
+    private              double                                    width;
+    private              double                                    height;
+    private              Canvas                                    canvas;
+    private              GraphicsContext                           ctx;
+    private              Pane                                      pane;
+    private              ObservableList<ChartItem>                 items;
+    private              Color                                     _textColor;
+    private              ObjectProperty<Color>                     textColor;
+    private              boolean                                   _autoTextColor;
+    private              BooleanProperty                           autoTextColor;
+    private              Order                                     _order;
+    private              ObjectProperty<Order>                     order;
+    private              boolean                                   _equalSegmentAngles;
+    private              BooleanProperty                           equalSegmentAngles;
+    private              EvtObserver<ChartEvt>                     itemObserver;
+    private              ListChangeListener<ChartItem>             itemListListener;
+    private              EventHandler<MouseEvent>                  mouseHandler;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+    private              InfoPopup                                 popup;
 
 
     // ******************** Constructors **************************************
@@ -108,21 +111,21 @@ public class CoxcombChart extends Region {
         _autoTextColor      = true;
         _order              = Order.DESCENDING;
         _equalSegmentAngles = false;
-        itemListener        = e -> reorder(getOrder());
+        itemObserver        = e -> reorder(getOrder());
         itemListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                     reorder(getOrder());
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                     reorder(getOrder());
                 }
             }
             redraw();
         };
         mouseHandler        = e -> handleMouseEvent(e);
-        listeners           = new CopyOnWriteArrayList<>();
+        observers           = new ConcurrentHashMap<>();
         initGraphics();
         registerListeners();
     }
@@ -158,11 +161,11 @@ public class CoxcombChart extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        items.forEach(item -> item.setOnItemEvent(itemListener));
+        items.forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.addListener(itemListListener);
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
-        setOnSelectionEvent(e -> {
-            popup.update(e);
+        addChartEvtObserver(SelectionEvt.ANY, e -> {
+            popup.update((SelectionEvt) e);
             popup.animatedShow(getScene().getWindow());
         });
     }
@@ -183,7 +186,7 @@ public class CoxcombChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeItemEventListener(itemListener));
+        items.forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.removeListener(itemListListener);
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
     }
@@ -354,7 +357,7 @@ public class CoxcombChart extends Region {
 
             // Check if x,y are in segment
             if (Helper.isInRingSegment(X, Y, xy, xy, wh, wh, Math.abs(360 - startAngle), angle, barWidth)) {
-                fireSelectionEvent(new SelectionEvent(item));
+                fireChartEvt(new SelectionEvt(item));
                 break;
             };
         }
@@ -370,13 +373,26 @@ public class CoxcombChart extends Region {
 
 
     // ******************** Event Handling ************************************
-    public void setOnSelectionEvent(final SelectionEventListener LISTENER) { addSelectionEventListener(LISTENER); }
-    public void addSelectionEventListener(final SelectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) listeners.add(LISTENER); }
-    public void removeSelectionEventListener(final SelectionEventListener LISTENER) { if (listeners.contains(LISTENER)) listeners.remove(LISTENER); }
-    public void removeAllSelectionEventListeners() { listeners.clear(); }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireSelectionEvent(final SelectionEvent EVENT) {
-        for (SelectionEventListener listener : listeners) { listener.onSelectionEvent(EVENT); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
     }
 
 

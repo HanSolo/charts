@@ -18,7 +18,8 @@
 
 package eu.hansolo.fx.charts.event;
 
-import eu.hansolo.fx.charts.tools.Point;
+
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public class CursorEvent {

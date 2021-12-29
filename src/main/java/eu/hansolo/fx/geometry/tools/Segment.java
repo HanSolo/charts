@@ -17,6 +17,7 @@
 package eu.hansolo.fx.geometry.tools;
 
 import eu.hansolo.fx.geometry.Rectangle;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public interface Segment extends Cloneable {

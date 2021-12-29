@@ -22,7 +22,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DayOfWeekCategory;
 import eu.hansolo.fx.charts.data.MonthCategory;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -138,12 +138,7 @@ public class PanelBarChart extends Region {
     public PanelBarChart(final List<? extends Category> categories, final List<ChartItemSeries<ChartItem>> series) {
         this.listOfSeries                = FXCollections.observableArrayList(series);
         this.comparisonListOfSeries      = FXCollections.observableArrayList();
-        this.seriesEvtListener           = evt -> {
-            switch(evt.getEventType()) {
-                case UPDATE -> redraw();
-                case FINISHED -> redraw();
-            }
-        };
+        this.seriesEvtListener           = evt -> redraw();
         this.categories                  = FXCollections.observableArrayList(categories);
         this._locale                     = Locale.getDefault();
         this._chartBackground            = Color.TRANSPARENT;

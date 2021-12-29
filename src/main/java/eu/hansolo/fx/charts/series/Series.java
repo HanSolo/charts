@@ -20,11 +20,11 @@ import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.Item;
 import eu.hansolo.fx.charts.data.XYChartItem;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.toolbox.evt.EvtObserver;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
@@ -51,7 +51,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public abstract class Series<T extends Item> {
-    public    final SeriesEvent                               UPDATE_EVENT = new SeriesEvent(Series.this, EventType.UPDATE);
+    public    final SeriesEvent                               UPDATE_EVENT = new SeriesEvent(Series.this);
     protected       String                                    _name;
     protected       StringProperty                            name;
     protected       Paint                                     _fill;
@@ -73,17 +73,17 @@ public abstract class Series<T extends Item> {
     protected       double                                    _strokeWidth;
     protected       DoubleProperty                            strokeWidth;
     protected       boolean                                   _animated;
-    protected       BooleanProperty                           animated;
-    protected       long                                      _animationDuration;
-    protected       LongProperty                              animationDuration;
+    protected BooleanProperty                           animated;
+    protected long                                      _animationDuration;
+    protected LongProperty                              animationDuration;
     //ADDED property to see if wrapping should be used or not by default false. Keeps the previous functionality the same.
-    protected       boolean                                   _withWrapping;
-    protected       BooleanProperty                           withWrapping;
-    protected       ChartType                                 chartType;
-    protected       ObservableList<T>                         items;
-    private         CopyOnWriteArrayList<SeriesEventListener> listeners;
-    private         ListChangeListener<T>                     itemListener;
-    private         ItemEventListener                         itemEventListener;
+    protected boolean                                   _withWrapping;
+    protected BooleanProperty                           withWrapping;
+    protected ChartType                                 chartType;
+    protected ObservableList<T>                         items;
+    private   CopyOnWriteArrayList<SeriesEventListener> listeners;
+    private   ListChangeListener<T>                     itemListener;
+    private   EvtObserver<ChartEvt>                     itemObserver;
 
 
     // ******************** Constructors **************************************
@@ -130,9 +130,9 @@ public abstract class Series<T extends Item> {
         _withWrapping      = false;
         chartType          = TYPE;
         items              = FXCollections.observableArrayList();
-        itemListener       = change -> fireSeriesEvent(UPDATE_EVENT);
-        itemEventListener  = e -> fireSeriesEvent(UPDATE_EVENT);
-        listeners          = new CopyOnWriteArrayList<>();
+        itemListener = change -> fireSeriesEvent(UPDATE_EVENT);
+        itemObserver = e -> fireSeriesEvent(UPDATE_EVENT);
+        listeners    = new CopyOnWriteArrayList<>();
 
         if (null != ITEMS) { items.setAll(ITEMS); }
 
@@ -148,14 +148,14 @@ public abstract class Series<T extends Item> {
                     c.getAddedSubList().forEach(item -> {
                         if (item instanceof XYChartItem) {
                             XYChartItem xyChartItem = (XYChartItem) item;
-                            xyChartItem.addItemEventListener(itemEventListener);
+                            xyChartItem.addChartEvtObserver(ChartEvt.ANY, itemObserver);
                         }
                     });
                 } else if (c.wasRemoved()) {
                     c.getRemoved().forEach(item -> {
                         if (item instanceof XYChartItem) {
                             XYChartItem xyChartItem = (XYChartItem) item;
-                            xyChartItem.removeItemEventListener(itemEventListener);
+                            xyChartItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver);
                         }
                     });
                 }
@@ -245,7 +245,7 @@ public abstract class Series<T extends Item> {
     }
     public ObjectProperty<Color> textFillProperty() {
         if (null == textFill) {
-            textFill = new ObjectPropertyBase<Color>(_textFill) {
+            textFill = new ObjectPropertyBase<>(_textFill) {
                 @Override protected void invalidated() { refresh(); }
                 @Override public Object getBean() { return Series.this; }
                 @Override public String getName() { return "textFill"; }
@@ -266,7 +266,7 @@ public abstract class Series<T extends Item> {
     }
     public ObjectProperty<Color> symbolFillProperty() {
         if (null == symbolFill) {
-            symbolFill = new ObjectPropertyBase<Color>(_symbolFill) {
+            symbolFill = new ObjectPropertyBase<>(_symbolFill) {
                 @Override protected void invalidated() { refresh(); }
                 @Override public Object getBean() { return Series.this; }
                 @Override public String getName() { return "symbolFill"; }
@@ -287,7 +287,7 @@ public abstract class Series<T extends Item> {
     }
     public ObjectProperty<Color> symbolStrokeProperty() {
         if (null == symbolStroke) {
-            symbolStroke = new ObjectPropertyBase<Color>(_symbolStroke) {
+            symbolStroke = new ObjectPropertyBase<>(_symbolStroke) {
                 @Override protected void invalidated() { refresh(); }
                 @Override public Object getBean() {  return Series.this; }
                 @Override public String getName() { return "symbolStroke"; }
@@ -308,7 +308,7 @@ public abstract class Series<T extends Item> {
     }
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
-            symbol = new ObjectPropertyBase<Symbol>(_symbol) {
+            symbol = new ObjectPropertyBase<>(_symbol) {
                 @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
                 @Override public Object getBean() {  return Series.this;  }
                 @Override public String getName() {  return "symbol";  }

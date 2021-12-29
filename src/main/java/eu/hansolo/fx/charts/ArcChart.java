@@ -18,14 +18,13 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Point;
 import eu.hansolo.fx.geometry.Circle;
 import eu.hansolo.fx.geometry.Path;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.application.Platform;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -49,19 +48,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -109,7 +104,7 @@ public class ArcChart extends Region {
     private              boolean                      _weightDots;
     private              BooleanProperty              weightDots;
     private              ObservableList<PlotItem>     items;
-    private              ItemEventListener            itemListener;
+    private              EvtObserver<ChartEvt>        itemObserver;
     private              ListChangeListener<PlotItem> itemListListener;
     private              Map<Circle, PlotItem>        itemPaths;
     private              Map<Path, Connection>        paths;
@@ -137,13 +132,13 @@ public class ArcChart extends Region {
         _weightConnections    = false;
         _weightDots           = false;
         items                 = FXCollections.observableArrayList();
-        itemListener          = e -> redraw();
+        itemObserver          = e -> redraw();
         itemListListener      = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.setOnItemEvent(itemListener));
+                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
                 } else if (c.wasRemoved()) {
-                    c.getRemoved().forEach(removedItem -> removedItem.removeItemEventListener(itemListener));
+                    c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
                 }
             }
             validateData();
@@ -213,7 +208,7 @@ public class ArcChart extends Region {
                 double eventY = e.getY();
                 if (itemPath.contains(eventX, eventY)) {
                     Platform.runLater(() -> {
-                        plotItem.fireItemEvent(new ItemEvent(plotItem, EventType.SELECTED));
+                        plotItem.fireChartEvt(new ChartEvt(plotItem, ChartEvt.ITEM_SELECTED, e));
                         selectedItem = plotItem;
                         redraw();
                     });
@@ -242,7 +237,7 @@ public class ArcChart extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
-        items.forEach(item -> item.removeItemEventListener(itemListener));
+        items.forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, itemObserver));
         items.removeListener(itemListListener);
     }
 

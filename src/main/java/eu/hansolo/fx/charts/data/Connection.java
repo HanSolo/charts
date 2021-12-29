@@ -16,9 +16,10 @@
 
 package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.event.ConnectionEvent;
-import eu.hansolo.fx.charts.event.ConnectionEventListener;
-import eu.hansolo.fx.charts.event.EventType;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -29,29 +30,31 @@ import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Connection {
 //    private final ConnectionEvent         SELECTED_EVENT = new ConnectionEvent(Connection.this, EventType.SELECTED);
-    private List<ConnectionEventListener> listeners;
-    private PlotItem                      _incomingItem;
-    private ObjectProperty<PlotItem>      incomingItem;
-    private PlotItem                      _outgoingItem;
-    private ObjectProperty<PlotItem>      outgoingItem;
-    private Color                         _fill;
-    private ObjectProperty<Color>         fill;
-    private double                        _value;
-    private DoubleProperty                value;
-    private String                        _tooltipText;
-    private StringProperty                tooltipText;
+private Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+private PlotItem                                  _incomingItem;
+private ObjectProperty<PlotItem>                  incomingItem;
+private PlotItem                                  _outgoingItem;
+private ObjectProperty<PlotItem>                  outgoingItem;
+private Color                                     _fill;
+private ObjectProperty<Color>                     fill;
+private double                                    _value;
+private DoubleProperty                            value;
+private String                                    _tooltipText;
+private StringProperty                            tooltipText;
 
 
     public Connection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL) {
         this(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL, "");
     }
     public Connection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL, final String TOOLTIP_TEXT) {
-        listeners     = new CopyOnWriteArrayList<>();
+        observers     = new ConcurrentHashMap<>();
         _incomingItem = INCOMING_ITEM;
         _outgoingItem = OUTGOING_ITEM;
         _value        = VALUE;
@@ -149,9 +152,25 @@ public class Connection {
 
 
     // ******************** Event Handling ************************************
-    public void setOnConnectionEvent(final ConnectionEventListener LISTENER) { addConnectionEventListener(LISTENER); }
-    public void addConnectionEventListener(final ConnectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) { listeners.add(LISTENER); } }
-    public void removeConnectionEventListener(final ConnectionEventListener LISTENER) { if (listeners.contains(LISTENER)) { listeners.remove(LISTENER); } }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireConnectionEvent(final ConnectionEvent EVENT) { listeners.forEach(listener -> listener.onConnectionEvent(EVENT)); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
+    }
 }

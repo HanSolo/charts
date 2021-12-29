@@ -18,25 +18,25 @@ package eu.hansolo.fx.charts.event;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
+import eu.hansolo.toolbox.evt.EvtType;
 
 
-public class SelectionEvent<T extends ChartItem> {
-    private final ChartItemSeries<T> SERIES;
-    private final T                  ITEM;
-    private final EventType          TYPE;
+public class SelectionEvt<T extends ChartItem> extends ChartEvt {
+    private final ChartItemSeries<T>          SERIES;
+    private final T                           ITEM;
+    private final EvtType<? extends ChartEvt> TYPE;
 
 
     // ******************** Constructors **************************************
-    public SelectionEvent(final T ITEM) {
-        this(null, ITEM, EventType.SELECTED);
+    public SelectionEvt(final T ITEM) {
+        this(null, ITEM, ChartEvt.ITEM_SELECTED);
     }
-    public SelectionEvent(final ChartItemSeries<T> SERIES) {
-        this(SERIES, null, EventType.SELECTED);
+    public SelectionEvt(final ChartItemSeries<T> SERIES) {
+        this(SERIES, null, ChartEvt.SERIES_SELECTED);
     }
-    public SelectionEvent(final ChartItemSeries<T> SERIES, final T ITEM) {
-        this(SERIES, ITEM, EventType.SELECTED);
-    }
-    public SelectionEvent(final ChartItemSeries<T> SERIES, final T ITEM, final EventType TYPE) {
+    public SelectionEvt(final ChartItemSeries<T> SERIES, final T ITEM) { this(SERIES, ITEM, ChartEvt.ITEM_AND_SERIES_SELECTED); }
+    public SelectionEvt(final ChartItemSeries<T> SERIES, final T ITEM, final EvtType<? extends ChartEvt> TYPE) {
+        super(null == ITEM ? SERIES : ITEM, TYPE);
         this.SERIES = SERIES;
         this.ITEM   = ITEM;
         this.TYPE   = TYPE;
@@ -48,7 +48,7 @@ public class SelectionEvent<T extends ChartItem> {
 
     public T getItem() { return ITEM; }
 
-    public EventType getEventType() { return TYPE; }
+    public EvtType<? extends ChartEvt> getEventType() { return TYPE; }
 
     @Override public String toString() {
         String ret;

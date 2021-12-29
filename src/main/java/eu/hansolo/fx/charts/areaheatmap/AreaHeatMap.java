@@ -17,10 +17,10 @@
 package eu.hansolo.fx.charts.areaheatmap;
 
 import eu.hansolo.fx.charts.data.DataPoint;
-import eu.hansolo.fx.charts.font.Fonts;
-import eu.hansolo.fx.charts.tools.ChartsColorMapping;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Mapping;
+import eu.hansolo.fx.heatmap.ColorMapping;
+import eu.hansolo.fx.heatmap.Mapping;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -117,7 +117,7 @@ public class AreaHeatMap extends Region {
         _discreteColors           = false;
         _smoothedHull             = false;
 
-        _mapping                  = ChartsColorMapping.BLUE_CYAN_GREEN_YELLOW_RED;
+        _mapping                  = ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED;
 
         _useColorMapping          = true;
         minValue                  = Double.MAX_VALUE;

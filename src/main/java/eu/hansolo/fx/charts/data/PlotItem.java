@@ -18,10 +18,11 @@ package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Cluster;
 import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.event.EventType;
-import eu.hansolo.fx.charts.event.ItemEvent;
-import eu.hansolo.fx.charts.event.ItemEventListener;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -41,36 +42,37 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class PlotItem implements Item, Comparable<PlotItem> {
-    private final ItemEvent               ITEM_EVENT = new ItemEvent(PlotItem.this, EventType.UPDATE);
-    private       String                  _name;
-    private       StringProperty          name;
-    private       double                  _value;
-    private       DoubleProperty          value;
-    private       String                  _description;
-    private       StringProperty          description;
-    private       Color                   _fill;
-    private       ObjectProperty<Color>   fill;
-    private       Color                   _stroke;
-    private       ObjectProperty<Color>   stroke;
-    private       Color                   _connectionFill;
-    private       ObjectProperty<Color>   connectionFill;
-    private       Color                   _textColor;
-    private       ObjectProperty<Color>   textColor;
-    private       Font                    _font;
-    private       ObjectProperty<Font>    font;
-    private       Symbol                  _symbol;
-    private       ObjectProperty<Symbol>  symbol;
-    private       boolean                 _isEmpty;
-    private       BooleanProperty         isEmpty;
-    private       Map<PlotItem, Double>   outgoing;
-    private       Map<PlotItem, Double>   incoming;
-    private       List<ItemEventListener> listeners;
-    private       int                     level;
-    private       Cluster                 cluster;
+    private final ChartEvt                                  ITEM_EVENT = new ChartEvt(PlotItem.this, ChartEvt.ITEM_UPDATE);
+    private       String                                    _name;
+    private       StringProperty                            name;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       String                                    _description;
+    private       StringProperty                            description;
+    private       Color                                     _fill;
+    private       ObjectProperty<Color>                     fill;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Color                                     _connectionFill;
+    private       ObjectProperty<Color>                     connectionFill;
+    private       Color                                     _textColor;
+    private       ObjectProperty<Color>                     textColor;
+    private       Font                                      _font;
+    private       ObjectProperty<Font>                      font;
+    private       Symbol                                    _symbol;
+    private       ObjectProperty<Symbol>                    symbol;
+    private       boolean                                   _isEmpty;
+    private       BooleanProperty                           isEmpty;
+    private       Map<PlotItem, Double>                     outgoing;
+    private       Map<PlotItem, Double>                     incoming;
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+    private       int                                       level;
+    private       Cluster                                   cluster;
 
 
     // ******************** Constructors **************************************
@@ -134,7 +136,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         cluster         = null;
         outgoing        = new LinkedHashMap<>();
         incoming        = new LinkedHashMap<>();
-        listeners       = new CopyOnWriteArrayList<>();
+        observers       = new ConcurrentHashMap<>();
     }
 
 
@@ -143,7 +145,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setName(final String NAME) {
         if (null == name) {
             _name = NAME;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             name.set(NAME);
         }
@@ -151,7 +153,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public StringProperty nameProperty() {
         if (null == name) {
             name = new StringPropertyBase(_name) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "name"; }
             };
@@ -164,7 +166,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setValue(final double VALUE) {
         if (null == value) {
             _value = VALUE;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             value.set(VALUE);
         }
@@ -172,7 +174,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public DoubleProperty valueProperty() {
         if (null == value) {
             value = new DoublePropertyBase(_value) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "value"; }
             };
@@ -184,7 +186,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setDescription(final String DESCRIPTION) {
         if (null == description) {
             _description = DESCRIPTION;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             description.set(DESCRIPTION);
         }
@@ -192,7 +194,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public StringProperty descriptionProperty() {
         if (null == description) {
             description = new StringPropertyBase(_description) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "description"; }
             };
@@ -205,7 +207,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setFill(final Color FILL) {
         if (null == fill) {
             _fill = FILL;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             fill.set(FILL);
         }
@@ -213,7 +215,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ObjectProperty<Color> fillProperty() {
         if (null == fill) {
             fill = new ObjectPropertyBase<Color>(_fill) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -226,7 +228,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setStroke(final Color STROKE) {
         if (null == stroke) {
             _stroke = STROKE;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             stroke.set(STROKE);
         }
@@ -234,7 +236,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<Color>(_stroke) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "stroke"; }
             };
@@ -247,7 +249,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     private void setConnectionFill(final Color FILL) {
         if (null == connectionFill) {
             _connectionFill = FILL;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             connectionFill.set(FILL);
         }
@@ -255,7 +257,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ReadOnlyObjectProperty<Color> connectionFillProperty() {
         if (null == connectionFill) {
             connectionFill = new ObjectPropertyBase<>(_connectionFill) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "connectionFill"; }
             };
@@ -268,7 +270,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setTextColor(final Color TEXT_COLOR) {
         if (null == textColor) {
             _textColor = TEXT_COLOR;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             textColor.set(TEXT_COLOR);
         }
@@ -276,7 +278,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ObjectProperty<Color> textColorProperty() {
         if (null == textColor) {
             textColor = new ObjectPropertyBase<>(_textColor) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "textColor"; }
             };
@@ -289,7 +291,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setFont(final Font FONT) {
         if (null == font) {
             _font = FONT;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             font.set(FONT);
         }
@@ -297,7 +299,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ObjectProperty<Font> fontProperty() {
         if (null == font) {
             font = new ObjectPropertyBase<>(_font) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "font"; }
             };
@@ -310,7 +312,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     @Override public void setSymbol(final Symbol SYMBOL) {
         if (null == symbol) {
             _symbol = SYMBOL;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             symbol.set(SYMBOL);
         }
@@ -318,7 +320,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public ObjectProperty<Symbol> symbolProperty() {
         if (null == symbol) {
             symbol = new ObjectPropertyBase<Symbol>(_symbol) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() {  return PlotItem.this;  }
                 @Override public String getName() {  return "symbol";  }
             };
@@ -331,7 +333,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public void setIsEmpty(final boolean isEmpty) {
         if (null == this.isEmpty) {
             _isEmpty = isEmpty;
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         } else {
             this.isEmpty.set(isEmpty);
         }
@@ -339,7 +341,7 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     public BooleanProperty isEmptyProperty() {
         if (null == isEmpty) {
             isEmpty = new BooleanPropertyBase(_isEmpty) {
-                @Override protected void invalidated() { fireItemEvent(ITEM_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(ITEM_EVENT); }
                 @Override public Object getBean() { return PlotItem.this; }
                 @Override public String getName() { return "isEmpty"; }
             };
@@ -357,26 +359,26 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         outgoing.clear();
         outgoing.putAll(OUTGOING);
         establishConnections();
-        fireItemEvent(ITEM_EVENT);
+        fireChartEvt(ITEM_EVENT);
     }
     public void addToOutgoing(final PlotItem ITEM, final double VALUE) {
         if (!outgoing.containsKey(ITEM)) {
             outgoing.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
             establishConnections();
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         }
     }
     public void removeFromOutgoing(final PlotItem ITEM) {
         if (outgoing.containsKey(ITEM)) {
             ITEM.removeFromIncoming(PlotItem.this);
             outgoing.remove(ITEM);
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         }
     }
     public void clearOutgoing() {
         outgoing.forEach((item, value) -> item.removeFromIncoming(PlotItem.this));
         outgoing.clear();
-        fireItemEvent(ITEM_EVENT);
+        fireChartEvt(ITEM_EVENT);
     }
     public boolean hasOutgoing() { return outgoing.size() > 0; }
 
@@ -384,23 +386,23 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     protected void setIncoming(final Map<PlotItem, Double> INCOMING) {
         incoming.clear();
         incoming.putAll(INCOMING);
-        fireItemEvent(ITEM_EVENT);
+        fireChartEvt(ITEM_EVENT);
     }
     protected void addToIncoming(final PlotItem ITEM, final double VALUE) {
         if (!incoming.containsKey(ITEM)) {
             incoming.put(ITEM, Helper.clamp(0, Double.MAX_VALUE, VALUE));
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         }
     }
     protected void removeFromIncoming(final PlotItem ITEM) {
         if (incoming.containsKey(ITEM)) {
             incoming.remove(ITEM);
-            fireItemEvent(ITEM_EVENT);
+            fireChartEvt(ITEM_EVENT);
         }
     }
     protected void clearIncoming() {
         incoming.clear();
-        fireItemEvent(ITEM_EVENT);
+        fireChartEvt(ITEM_EVENT);
     }
     public boolean hasIncoming() { return incoming.size() > 0 ; }
 
@@ -494,9 +496,25 @@ public class PlotItem implements Item, Comparable<PlotItem> {
 
 
     // ******************** Event Handling ************************************
-    public void setOnItemEvent(final ItemEventListener LISTENER) { addItemEventListener(LISTENER); }
-    public void addItemEventListener(final ItemEventListener LISTENER) { if (!listeners.contains(LISTENER)) { listeners.add(LISTENER); } }
-    public void removeItemEventListener(final ItemEventListener LISTENER) { if (listeners.contains(LISTENER)) { listeners.remove(LISTENER); } }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireItemEvent(final ItemEvent EVENT) { listeners.forEach(listener -> listener.onItemEvent(EVENT)); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
+    }
 }

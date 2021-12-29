@@ -16,9 +16,13 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
-import eu.hansolo.fx.charts.event.ConnectionEventListener;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.Evt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -108,10 +112,9 @@ public class ArcChartTest extends Application {
 
         // Register listeners to click on connections and items
         items.forEach(item -> {
-            item.addItemEventListener(e -> {
-                switch (e.getEventType()) {
-                    case SELECTED: System.out.println("Selected: " + e.getItem().getName()); break;
-                }
+            item.addChartEvtObserver(ChartEvt.ITEM_SELECTED, e -> {
+                PlotItem i = (PlotItem) e.getSource();
+                System.out.println("Selected: " + i.getName());
             });
         });
 
@@ -128,8 +131,16 @@ public class ArcChartTest extends Application {
                                   .weightConnections(true)
                                   .build();
 
-        ConnectionEventListener connectionListener = e -> System.out.println("From: " + e.getConnection().getOutgoingItem().getName() + " -> to: " + e.getConnection().getIncomingItem().getName() + " -> Value: " + e.getConnection().getValue());
-        arcChart.getConnections().forEach(connection -> connection.addConnectionEventListener(connectionListener));
+        EvtObserver<ChartEvt> connectionObserver = e -> {
+            EvtType<? extends Evt> type = e.getEvtType();
+            if (type.equals(ChartEvt.CONNECTION_SELECTED_TO) || type.equals(ChartEvt.CONNECTION_SELECTED_FROM) || type.equals(ChartEvt.CONNECTION_SELECTED)) {
+                if (e.getSource() instanceof Connection) {
+                    Connection connection = (Connection) e.getSource();
+                    System.out.println("From: " + connection.getOutgoingItem().getName() + " -> to: " + connection.getIncomingItem().getName() + " -> Value: " + connection.getValue());
+                }
+            }
+        };
+        arcChart.getConnections().forEach(connection -> connection.addChartEvtObserver(ChartEvt.ANY, connectionObserver));
 
         /* Custom connection colors
         if (null != arcChart.getConnection(australia, japan)) {

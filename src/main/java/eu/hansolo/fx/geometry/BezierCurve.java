@@ -17,7 +17,7 @@
 package eu.hansolo.fx.geometry;
 
 import eu.hansolo.fx.geometry.transform.BaseTransform;
-import eu.hansolo.fx.geometry.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 
 import java.util.Arrays;
 

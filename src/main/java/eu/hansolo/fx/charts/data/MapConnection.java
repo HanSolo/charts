@@ -16,11 +16,13 @@
 
 package eu.hansolo.fx.charts.data;
 
-import eu.hansolo.fx.charts.event.MapConnectionEvent;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.event.MapConnectionEventListener;
-import eu.hansolo.fx.charts.event.EventType;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.MapPoint;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
@@ -33,31 +35,33 @@ import javafx.beans.property.StringPropertyBase;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class MapConnection {
-    private final MapConnectionEvent               SELECTED_EVENT = new MapConnectionEvent(MapConnection.this, EventType.SELECTED);
-    private final MapConnectionEvent               UPDATED_EVENT  = new MapConnectionEvent(MapConnection.this, EventType.UPDATE);
-    private       List<MapConnectionEventListener> listeners;
-    private       MapPoint                         _incomingItem;
-    private       ObjectProperty<MapPoint>         incomingItem;
-    private       MapPoint                         _outgoingItem;
-    private       ObjectProperty<MapPoint>         outgoingItem;
-    private       Color                            _stroke;
-    private       ObjectProperty<Color>            stroke;
-    private       Color                            _startColor;
-    private       ObjectProperty<Color>            startColor;
-    private       Color                            _endColor;
-    private       ObjectProperty<Color>            endColor;
-    private       boolean                          _gradientFill;
-    private       BooleanProperty                  gradientFill;
-    private       double                           _value;
-    private       DoubleProperty                   value;
-    private       double                           _lineWidth;
-    private       DoubleProperty                   lineWidth;
-    private       String                           _tooltipText;
-    private       StringProperty                   tooltipText;
+    private final ChartEvt                                  SELECTED_EVENT = new ChartEvt(MapConnection.this, ChartEvt.CONNECTION_SELECTED);
+    private final ChartEvt                                  UPDATED_EVENT  = new ChartEvt(MapConnection.this, ChartEvt.CONNECTION_UPDATE);
+    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
+    private       MapPoint                                  _incomingItem;
+    private       ObjectProperty<MapPoint>                  incomingItem;
+    private       MapPoint                                  _outgoingItem;
+    private       ObjectProperty<MapPoint>                  outgoingItem;
+    private       Color                                     _stroke;
+    private       ObjectProperty<Color>                     stroke;
+    private       Color                                     _startColor;
+    private       ObjectProperty<Color>                     startColor;
+    private       Color                                     _endColor;
+    private       ObjectProperty<Color>                     endColor;
+    private       boolean                                   _gradientFill;
+    private       BooleanProperty                           gradientFill;
+    private       double                                    _value;
+    private       DoubleProperty                            value;
+    private       double                                    _lineWidth;
+    private       DoubleProperty                            lineWidth;
+    private       String                                    _tooltipText;
+    private       StringProperty                            tooltipText;
 
 
     public MapConnection(final MapPoint OUTGOING_ITEM, final MapPoint INCOMING_ITEM) {
@@ -79,7 +83,7 @@ public class MapConnection {
         this(OUTGOING_ITEM, INCOMING_ITEM, VALUE, STROKE, Color.BLUE, Color.RED, false, 1, TOOLTIP_TEXT);
     }
     public MapConnection(final MapPoint OUTGOING_ITEM, final MapPoint INCOMING_ITEM, final double VALUE, final Color STROKE, final Color START_COLOR, final Color END_COLOR, final boolean GRADIENT_FILL, final double LINE_WIDTH, final String TOOLTIP_TEXT) {
-        listeners     = new CopyOnWriteArrayList<>();
+        observers     = new ConcurrentHashMap<>();
         _outgoingItem = OUTGOING_ITEM;
         _incomingItem = INCOMING_ITEM;
         _value        = VALUE;
@@ -96,7 +100,7 @@ public class MapConnection {
     public void setIncomingItem(final MapPoint ITEM1) {
         if (null == incomingItem) {
             _incomingItem = ITEM1;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             incomingItem.set(ITEM1);
         }
@@ -104,7 +108,7 @@ public class MapConnection {
     public ObjectProperty<MapPoint> incomingItemProperty() {
         if (null == incomingItem) {
             incomingItem = new ObjectPropertyBase<MapPoint>(_incomingItem) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "item1"; }
             };
@@ -117,7 +121,7 @@ public class MapConnection {
     public void setOutgoingItem(final MapPoint ITEM2) {
         if (null == outgoingItem) {
             _outgoingItem = ITEM2;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             outgoingItem.set(ITEM2);
         }
@@ -126,7 +130,7 @@ public class MapConnection {
     public ObjectProperty<MapPoint> outgoingItemProperty() {
         if (null == outgoingItem) {
             outgoingItem = new ObjectPropertyBase<MapPoint>(_outgoingItem) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "item2"; }
             };
@@ -150,7 +154,7 @@ public class MapConnection {
     public void setStroke(final Color FILL) {
         if (null == stroke) {
             _stroke = FILL;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             stroke.set(FILL);
         }
@@ -158,7 +162,7 @@ public class MapConnection {
     public ObjectProperty<Color> strokeProperty() {
         if (null == stroke) {
             stroke = new ObjectPropertyBase<>(_stroke) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "fill"; }
             };
@@ -171,7 +175,7 @@ public class MapConnection {
     public void setStartColor(final Color START_COLOR) {
         if (null == startColor) {
             _startColor = START_COLOR;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             startColor.set(START_COLOR);
         }
@@ -179,7 +183,7 @@ public class MapConnection {
     public ObjectProperty<Color> startColorProperty() {
         if (null == startColor) {
             startColor = new ObjectPropertyBase<>(_startColor) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "startColor"; }
             };
@@ -192,7 +196,7 @@ public class MapConnection {
     public void setEndColor(final Color END_COLOR) {
         if (null == endColor) {
             _endColor = END_COLOR;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             endColor.set(END_COLOR);
         }
@@ -200,7 +204,7 @@ public class MapConnection {
     public ObjectProperty<Color> endColorProperty() {
         if (null == endColor) {
             endColor = new ObjectPropertyBase<>(_endColor) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "endColor"; }
             };
@@ -213,7 +217,7 @@ public class MapConnection {
     public void setGradientFill(final boolean GRADIENT_FILL) {
         if (null == gradientFill) {
             _gradientFill = GRADIENT_FILL;
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             gradientFill.set(GRADIENT_FILL);
         }
@@ -221,7 +225,7 @@ public class MapConnection {
     public BooleanProperty gradientFillProperty() {
         if (null == gradientFill) {
             gradientFill = new BooleanPropertyBase(_gradientFill) {
-                @Override protected void invalidated() { fireMapConnectionEvent(UPDATED_EVENT); }
+                @Override protected void invalidated() { fireChartEvt(UPDATED_EVENT); }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "gradientFill"; }
             };
@@ -233,7 +237,7 @@ public class MapConnection {
     public void setLineWidth(final double LINE_WIDTH) {
         if (null == lineWidth) {
             _lineWidth = Helper.clamp(0.5, 10, LINE_WIDTH);
-            fireMapConnectionEvent(UPDATED_EVENT);
+            fireChartEvt(UPDATED_EVENT);
         } else {
             lineWidth.set(LINE_WIDTH);
         }
@@ -243,7 +247,7 @@ public class MapConnection {
             lineWidth = new DoublePropertyBase(_lineWidth) {
                 @Override protected void invalidated() {
                     set(Helper.clamp(0.5, 10, get()));
-                    fireMapConnectionEvent(UPDATED_EVENT);
+                    fireChartEvt(UPDATED_EVENT);
                 }
                 @Override public Object getBean() { return MapConnection.this; }
                 @Override public String getName() { return "lineWidth"; }
@@ -272,9 +276,25 @@ public class MapConnection {
 
 
     // ******************** Event Handling ************************************
-    public void setOnMapConnectionEvent(final MapConnectionEventListener LISTENER) { addMapConnectionEventListener(LISTENER); }
-    public void addMapConnectionEventListener(final MapConnectionEventListener LISTENER) { if (!listeners.contains(LISTENER)) { listeners.add(LISTENER); } }
-    public void removeMapConnectionEventListener(final MapConnectionEventListener LISTENER) { if (listeners.contains(LISTENER)) { listeners.remove(LISTENER); } }
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
 
-    public void fireMapConnectionEvent(final MapConnectionEvent EVENT) { listeners.forEach(listener -> listener.onMapConnectionEvent(EVENT)); }
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
+    }
 }

@@ -17,10 +17,10 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ValueItem;
-import eu.hansolo.fx.charts.font.Fonts;
+import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.Point;
+import eu.hansolo.toolboxfx.geom.Point;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
@@ -437,7 +437,7 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
                 y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
 
-                Point[] interpolatedPoints = (SERIES.isWithWrapping())?Helper.subdividePointsRadial(points.toArray(new Point[0]), 16):Helper.subdividePoints(points.toArray(new Point[0]), 16);
+                Point[] interpolatedPoints = (SERIES.isWithWrapping()) ? Helper.subdividePointsRadial(points.toArray(new Point[0]), 16) : Helper.subdividePoints(points.toArray(new Point[0]), 16);
 
                 ctx.beginPath();
                 ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());

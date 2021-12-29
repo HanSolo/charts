@@ -18,8 +18,7 @@ package eu.hansolo.fx.geometry;
 
 import eu.hansolo.fx.geometry.transform.BaseTransform;
 import eu.hansolo.fx.geometry.tools.IllegalPathStateException;
-import eu.hansolo.fx.geometry.tools.Point;
-import javafx.scene.canvas.GraphicsContext;
+import eu.hansolo.toolboxfx.geom.Point;
 
 
 public abstract class Shape {
