@@ -44,6 +44,7 @@ dependencies {
     implementation "eu.hansolo:toolbox:17.0.6"
     implementation "eu.hansolo:toolboxfx:17.0.15"
     implementation "eu.hansolo.fx:heatmap:17.0.3"
+    implementation "eu.hansolo.fx:countries:17.0.16"
 }
 
 jar {

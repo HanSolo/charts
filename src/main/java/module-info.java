@@ -14,6 +14,7 @@ module eu.hansolo.fx.charts {
     requires transitive eu.hansolo.toolbox;
     requires transitive eu.hansolo.toolboxfx;
     requires transitive eu.hansolo.fx.heatmap;
+    requires transitive eu.hansolo.fx.countries;
 
     exports eu.hansolo.fx.geometry;
     exports eu.hansolo.fx.geometry.tools;

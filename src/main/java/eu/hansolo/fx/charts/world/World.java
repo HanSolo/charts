@@ -18,6 +18,8 @@ package eu.hansolo.fx.charts.world;
 
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
+import eu.hansolo.fx.countries.Country;
+import eu.hansolo.fx.countries.tools.CRegion;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.MapPoint;
