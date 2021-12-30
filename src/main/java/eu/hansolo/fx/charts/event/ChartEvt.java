@@ -44,11 +44,6 @@ public class ChartEvt extends ChangeEvt {
 
 
     // ******************** Constructors **************************************
-    public ChartEvt(final EvtType<? extends ChartEvt> evtType) {
-        super(evtType);
-        this.target     = null;
-        this.mouseEvent = null;
-    }
     public ChartEvt(final Object src, final EvtType<? extends ChartEvt> evtType) {
         super(src, evtType);
         this.target     = null;
