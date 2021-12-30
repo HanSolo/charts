@@ -7,6 +7,8 @@
 <br>
 A library for scientific charts in JavaFX. 
 
+<b>ATTENTION: Version 17.1.0 will break backwards compatibility !!!</b>
+
 This is still a work in development, but here are some of the charts being worked on so far. 
 
 The charts library can be found over at [maven central](https://search.maven.org/artifact/eu.hansolo.fx/charts)
