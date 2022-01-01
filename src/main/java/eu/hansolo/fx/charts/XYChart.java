@@ -17,6 +17,8 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
 import javafx.beans.DefaultProperty;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -52,7 +54,7 @@ public class XYChart<T extends XYItem> extends Region {
     private              double                    width;
     private              double                    height;
     private              ObservableList<XYPane<T>> xyPanes;
-    private              List<Axis>                axis;
+    private              ObservableList<Axis>      axis;
     private              Axis                      yAxisL;
     private              Axis                      yAxisC;
     private              Axis                      yAxisR;
@@ -76,6 +78,7 @@ public class XYChart<T extends XYItem> extends Region {
     private              StringProperty            subTitle;
     private              AnchorPane                pane;
     private              BooleanBinding            showing;
+    private              EvtObserver<ChartEvt>     axisObserver;
 
 
     // ******************** Constructors **************************************
@@ -92,12 +95,12 @@ public class XYChart<T extends XYItem> extends Region {
         if (null == XY_PANES) { throw new IllegalArgumentException("XYPanes cannot be null"); }
         long noOfPolarCharts = XY_PANES.stream().filter(xyPane -> xyPane.containsPolarChart()).count();
         if (noOfPolarCharts > 0) { throw new IllegalArgumentException("XYPane contains Polar chart type"); }
-        xyPanes = FXCollections.observableList(new LinkedList<>(XY_PANES));
-        axis    = Arrays.asList(AXIS);
-        grid    = GRID;
-        width   = PREFERRED_WIDTH;
-        height  = PREFERRED_HEIGHT;
-
+        xyPanes      = FXCollections.observableList(new LinkedList<>(XY_PANES));
+        axis         = FXCollections.observableList(Arrays.asList(AXIS));
+        grid         = GRID;
+        width        = PREFERRED_WIDTH;
+        height       = PREFERRED_HEIGHT;
+        axisObserver = evt -> adjustChartRange();
         checkReferenceZero();
         initGraphics();
         registerListeners();
@@ -155,6 +158,17 @@ public class XYChart<T extends XYItem> extends Region {
                 }
             });
         }
+
+        axis.addListener((ListChangeListener<Axis>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(axis -> axis.addChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, axisObserver));
+                } else if (c.wasRemoved()) {
+                    c.getAddedSubList().forEach(axis -> axis.removeChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, axisObserver));
+                }
+            }
+        });
+        axis.forEach(axis -> axis.addChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, axisObserver));
     }
 
 
@@ -169,6 +183,7 @@ public class XYChart<T extends XYItem> extends Region {
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
     public void dispose() {
+        axis.forEach(axis -> axis.removeChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, axisObserver));
         xyPanes.forEach(xyPane -> xyPane.dispose());
     }
 

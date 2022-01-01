@@ -51,39 +51,39 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Created by hansolo on 16.07.17.
  */
 public abstract class Series<T extends Item> {
-    public    final SeriesEvent                               UPDATE_EVENT = new SeriesEvent(Series.this);
-    protected       String                                    _name;
-    protected       StringProperty                            name;
-    protected       Paint                                     _fill;
-    protected       ObjectProperty<Paint>                     fill;
-    protected       Paint                                     _stroke;
-    protected       ObjectProperty<Paint>                     stroke;
-    protected       Color                                     _textFill;
-    protected       ObjectProperty<Color>                     textFill;
-    protected       Color                                     _symbolFill;
-    protected       ObjectProperty<Color>                     symbolFill;
-    protected       Color                                     _symbolStroke;
-    protected       ObjectProperty<Color>                     symbolStroke;
-    protected       Symbol                                    _symbol;
-    protected       ObjectProperty<Symbol>                    symbol;
-    protected       boolean                                   _symbolsVisible;
-    protected       BooleanProperty                           symbolsVisible;
-    protected       double                                    _symbolSize;
-    protected       DoubleProperty                            symbolSize;
-    protected       double                                    _strokeWidth;
-    protected       DoubleProperty                            strokeWidth;
-    protected       boolean                                   _animated;
-    protected BooleanProperty                           animated;
-    protected long                                      _animationDuration;
-    protected LongProperty                              animationDuration;
+    public final SeriesEvent                               UPDATE_EVENT = new SeriesEvent(Series.this);
+    protected    String                                    _name;
+    protected    StringProperty                            name;
+    protected    Paint                                     _fill;
+    protected    ObjectProperty<Paint>                     fill;
+    protected    Paint                                     _stroke;
+    protected    ObjectProperty<Paint>                     stroke;
+    protected    Color                                     _textFill;
+    protected    ObjectProperty<Color>                     textFill;
+    protected    Color                                     _symbolFill;
+    protected    ObjectProperty<Color>                     symbolFill;
+    protected    Color                                     _symbolStroke;
+    protected    ObjectProperty<Color>                     symbolStroke;
+    protected    Symbol                                    _symbol;
+    protected    ObjectProperty<Symbol>                    symbol;
+    protected    boolean                                   _symbolsVisible;
+    protected    BooleanProperty                           symbolsVisible;
+    protected    double                                    _symbolSize;
+    protected    DoubleProperty                            symbolSize;
+    protected    double                                    _strokeWidth;
+    protected    DoubleProperty                            strokeWidth;
+    protected    boolean                                   _animated;
+    protected    BooleanProperty                           animated;
+    protected    long                                      _animationDuration;
+    protected    LongProperty                              animationDuration;
     //ADDED property to see if wrapping should be used or not by default false. Keeps the previous functionality the same.
-    protected boolean                                   _withWrapping;
-    protected BooleanProperty                           withWrapping;
-    protected ChartType                                 chartType;
-    protected ObservableList<T>                         items;
-    private   CopyOnWriteArrayList<SeriesEventListener> listeners;
-    private   ListChangeListener<T>                     itemListener;
-    private   EvtObserver<ChartEvt>                     itemObserver;
+    protected    boolean                                   _withWrapping;
+    protected    BooleanProperty                           withWrapping;
+    protected    ChartType                                 chartType;
+    protected    ObservableList<T>                         items;
+    private      CopyOnWriteArrayList<SeriesEventListener> listeners;
+    private      ListChangeListener<T>                     itemListener;
+    private      EvtObserver<ChartEvt>                     itemObserver;
 
 
     // ******************** Constructors **************************************
@@ -130,9 +130,9 @@ public abstract class Series<T extends Item> {
         _withWrapping      = false;
         chartType          = TYPE;
         items              = FXCollections.observableArrayList();
-        itemListener = change -> fireSeriesEvent(UPDATE_EVENT);
-        itemObserver = e -> fireSeriesEvent(UPDATE_EVENT);
-        listeners    = new CopyOnWriteArrayList<>();
+        itemListener       = change -> fireSeriesEvent(UPDATE_EVENT);
+        itemObserver       = e -> fireSeriesEvent(UPDATE_EVENT);
+        listeners          = new CopyOnWriteArrayList<>();
 
         if (null != ITEMS) { items.setAll(ITEMS); }
 

@@ -37,6 +37,7 @@ public class ChartEvt extends ChangeEvt {
     public static final EvtType<ChartEvt> ITEM_SELECTED            = new EvtType<>(ChangeEvt.ANY, "ITEM_SELECTED");
     public static final EvtType<ChartEvt> SERIES_SELECTED          = new EvtType<>(ChangeEvt.ANY, "SERIES_SELECTED");
     public static final EvtType<ChartEvt> ITEM_AND_SERIES_SELECTED = new EvtType<>(ChangeEvt.ANY, "ITEM_AND_SERIES_SELECTED");
+    public static final EvtType<ChartEvt> AXIS_RANGE_CHANGED       = new EvtType<>(ChangeEvt.ANY, "AXIS_RANGE_CHANGED");
 
 
     private final Object     target;

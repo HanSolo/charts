@@ -708,7 +708,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawChart() {
-        if (null == listOfSeries || listOfSeries.isEmpty()) return;
+        if (null == listOfSeries || listOfSeries.isEmpty()) { return; }
 
         ctx.clearRect(0, 0, width, height);
         ctx.setFill(getChartBackground());
@@ -742,34 +742,15 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                 final ChartType TYPE        = series.getChartType();
                 final boolean   SHOW_POINTS = series.getSymbolsVisible();
                 switch (TYPE) {
-                    case LINE:
-                        drawLine(series, SHOW_POINTS);
-                        break;
-                    case SMOOTH_LINE:
-                        drawSmoothLine(series, SHOW_POINTS);
-                        break;
-                    case AREA:
-                        drawArea(series, SHOW_POINTS);
-                        break;
-                    case SMOOTH_AREA:
-                        drawSmoothArea(series, SHOW_POINTS);
-                        break;
-                    case SCATTER:
-                        drawScatter(series);
-                        break;
-                    case HORIZON:
-                        drawHorizon(series, false);
-                        break;
-                    case RIDGE_LINE:
-                        drawRidgeLine(series);
-                        break;
-                    case SMOOTHED_HORIZON:
-                        drawHorizon(series, true);
-                        break;
-                    case POLAR:
-                    case SMOOTH_POLAR:
-                        drawPolar(series);
-                        break;
+                    case LINE                -> drawLine(series, SHOW_POINTS);
+                    case SMOOTH_LINE         -> drawSmoothLine(series, SHOW_POINTS);
+                    case AREA                -> drawArea(series, SHOW_POINTS);
+                    case SMOOTH_AREA         -> drawSmoothArea(series, SHOW_POINTS);
+                    case SCATTER             -> drawScatter(series);
+                    case HORIZON             -> drawHorizon(series, false);
+                    case RIDGE_LINE          -> drawRidgeLine(series);
+                    case SMOOTHED_HORIZON    -> drawHorizon(series, true);
+                    case POLAR, SMOOTH_POLAR -> drawPolar(series);
                 }
             }
         } else {
@@ -810,9 +791,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             double x        = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y        = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             boolean isEmpty = item.isEmptyItem();
-            if (!isEmpty && !wasEmpty) {
-                ctx.strokeLine(oldX, oldY, x, y);
-            }
+            if (!isEmpty && !wasEmpty) { ctx.strokeLine(oldX, oldY, x, y); }
             oldX     = x;
             oldY     = y;
             wasEmpty = isEmpty;

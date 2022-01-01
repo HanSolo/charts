@@ -22,7 +22,6 @@ import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.toolbox.evt.EvtObserver;
 import eu.hansolo.toolbox.evt.EvtType;
-import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -614,8 +613,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
     public void fireChartEvt(final ChartEvt evt) {
         final EvtType type = evt.getEvtType();
-        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
-        if (observers.containsKey(type)) {
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(ChartEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type) && !type.equals(ChartEvt.ANY)) {
             observers.get(type).forEach(observer -> observer.handle(evt));
         }
     }

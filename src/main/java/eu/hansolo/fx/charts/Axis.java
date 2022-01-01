@@ -16,6 +16,9 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Helper.Interval;
@@ -58,6 +61,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static javafx.geometry.Orientation.VERTICAL;
 
@@ -69,94 +75,96 @@ import static javafx.geometry.Orientation.VERTICAL;
  */
 @DefaultProperty("children")
 public class Axis extends Region {
-    private static final double                               MINIMUM_WIDTH         = 0;
-    private static final double                               MINIMUM_HEIGHT        = 0;
-    private static final double                               MAXIMUM_WIDTH         = 4096;
-    private static final double                               MAXIMUM_HEIGHT        = 4096;
-    private static final double                               MIN_MAJOR_LINE_WIDTH  = 1;
-    private static final double                               MIN_MEDIUM_LINE_WIDTH = 0.75;
-    private static final double                               MIN_MINOR_LINE_WIDTH  = 0.5;
-    private              double                               size;
-    private              double                               width;
-    private              double                               height;
-    private              Canvas                               axisCanvas;
-    private              GraphicsContext                      axisCtx;
-    private              Pane                                 pane;
-    private              double                               _minValue;
-    private              DoubleProperty                       minValue;
-    private              LocalDateTime                        _start;
-    private              ObjectProperty<LocalDateTime>        start;
-    private              double                               _maxValue;
-    private              DoubleProperty                       maxValue;
-    private              LocalDateTime                        _end;
-    private              ObjectProperty<LocalDateTime>        end;
-    private              boolean                              _autoScale;
-    private              BooleanProperty                      autoScale;
-    private              double                               stepSize;
-    private              String                               _title;
-    private              StringProperty                       title;
-    private              String                               _unit;
-    private              StringProperty                       unit;
-    private              AxisType                             _type;
-    private              ObjectProperty<AxisType>             type;
-    private              Orientation                          _orientation;
-    private              ObjectProperty<Orientation>          orientation;
-    private              Position                             _position;
-    private              ObjectProperty<Position>             position;
-    private              Color                                _axisBackgroundColor;
-    private              ObjectProperty<Color>                axisBackgroundColor;
-    private              Color                                _axisColor;
-    private              ObjectProperty<Color>                axisColor;
-    private              Color                                _tickLabelColor;
-    private              ObjectProperty<Color>                tickLabelColor;
-    private              Color                                _titleColor;
-    private              ObjectProperty<Color>                titleColor;
-    private              Color                                _minorTickMarkColor;
-    private              ObjectProperty<Color>                minorTickMarkColor;
-    private              Color                                _mediumTickMarkColor;
-    private              ObjectProperty<Color>                mediumTickMarkColor;
-    private              Color                                _majorTickMarkColor;
-    private              ObjectProperty<Color>                majorTickMarkColor;
-    private              Color                                _zeroColor;
-    private              ObjectProperty<Color>                zeroColor;
-    private              double                               _zeroPosition;
-    private              DoubleProperty                       zeroPosition;
-    private              double                               _minorTickSpace;
-    private              double                               _majorTickSpace;
-    private              boolean                              _majorTickMarksVisible;
-    private              BooleanProperty                      majorTickMarksVisible;
-    private              boolean                              _mediumTickMarksVisible;
-    private              BooleanProperty                      mediumTickMarksVisible;
-    private              boolean                              _minorTickMarksVisible;
-    private              BooleanProperty                      minorTickMarksVisible;
-    private              boolean                              _tickLabelsVisible;
-    private              BooleanProperty                      tickLabelsVisible;
-    private              boolean                              _onlyFirstAndLastTickLabelVisible;
-    private              BooleanProperty                      onlyFirstAndLastTickLabelVisible;
-    private              Locale                               _locale;
-    private              ObjectProperty<Locale>               locale;
-    private              int                                  _decimals;
-    private              IntegerProperty                      decimals;
-    private              String                               tickLabelFormatString;
-    private              TickLabelOrientation                 _tickLabelOrientation;
-    private              ObjectProperty<TickLabelOrientation> tickLabelOrientation;
-    private              TickLabelFormat                      _tickLabelFormat;
-    private              ObjectProperty<TickLabelFormat>      tickLabelFormat;
-    private              Font                                 tickLabelFont;
-    private              Font                                 titleFont;
-    private              boolean                              _autoFontSize;
-    private              BooleanProperty                      autoFontSize;
-    private              double                               _tickLabelFontSize;
-    private              DoubleProperty                       tickLabelFontSize;
-    private              double                               _titleFontSize;
-    private              DoubleProperty                       titleFontSize;
-    private              ZoneId                               _zoneId;
-    private              ObjectProperty<ZoneId>               zoneId;
-    private              String                               _dateTimeFormatPattern;
-    private              StringProperty                       dateTimeFormatPattern;
-    private              List<String>                         categories;
-    private              DateTimeFormatter                    dateTimeFormatter;
-    private              Interval                             currentInterval;
+    private static final double                                    MINIMUM_WIDTH          = 0;
+    private static final double                                    MINIMUM_HEIGHT         = 0;
+    private static final double                                    MAXIMUM_WIDTH          = 4096;
+    private static final double                                    MAXIMUM_HEIGHT         = 4096;
+    private static final double                                    MIN_MAJOR_LINE_WIDTH   = 1;
+    private static final double                                    MIN_MEDIUM_LINE_WIDTH  = 0.75;
+    private static final double                                    MIN_MINOR_LINE_WIDTH   = 0.5;
+    private final        ChartEvt                                  AXIS_RANGE_CHANGED_EVT = new ChartEvt(Axis.this, ChartEvt.AXIS_RANGE_CHANGED);
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>> observers              = new ConcurrentHashMap<>();
+    private              double                                    size;
+    private              double                                    width;
+    private              double                                    height;
+    private              Canvas                                    axisCanvas;
+    private              GraphicsContext                           axisCtx;
+    private              Pane                                      pane;
+    private              double                                    _minValue;
+    private              DoubleProperty                            minValue;
+    private              LocalDateTime                             _start;
+    private              ObjectProperty<LocalDateTime>             start;
+    private              double                                    _maxValue;
+    private              DoubleProperty                            maxValue;
+    private              LocalDateTime                             _end;
+    private              ObjectProperty<LocalDateTime>             end;
+    private              boolean                                   _autoScale;
+    private              BooleanProperty                           autoScale;
+    private              double                                    stepSize;
+    private              String                                    _title;
+    private              StringProperty                            title;
+    private              String                                    _unit;
+    private              StringProperty                            unit;
+    private              AxisType                                  _type;
+    private              ObjectProperty<AxisType>                  type;
+    private              Orientation                               _orientation;
+    private              ObjectProperty<Orientation>               orientation;
+    private              Position                                  _position;
+    private              ObjectProperty<Position>                  position;
+    private              Color                                     _axisBackgroundColor;
+    private              ObjectProperty<Color>                     axisBackgroundColor;
+    private              Color                                     _axisColor;
+    private              ObjectProperty<Color>                     axisColor;
+    private              Color                                     _tickLabelColor;
+    private              ObjectProperty<Color>                     tickLabelColor;
+    private              Color                                     _titleColor;
+    private              ObjectProperty<Color>                     titleColor;
+    private              Color                                     _minorTickMarkColor;
+    private              ObjectProperty<Color>                     minorTickMarkColor;
+    private              Color                                     _mediumTickMarkColor;
+    private              ObjectProperty<Color>                     mediumTickMarkColor;
+    private              Color                                     _majorTickMarkColor;
+    private              ObjectProperty<Color>                     majorTickMarkColor;
+    private              Color                                     _zeroColor;
+    private              ObjectProperty<Color>                     zeroColor;
+    private              double                                    _zeroPosition;
+    private              DoubleProperty                            zeroPosition;
+    private              double                                    _minorTickSpace;
+    private              double                                    _majorTickSpace;
+    private              boolean                                   _majorTickMarksVisible;
+    private              BooleanProperty                           majorTickMarksVisible;
+    private              boolean                                   _mediumTickMarksVisible;
+    private              BooleanProperty                           mediumTickMarksVisible;
+    private              boolean                                   _minorTickMarksVisible;
+    private              BooleanProperty                           minorTickMarksVisible;
+    private              boolean                                   _tickLabelsVisible;
+    private              BooleanProperty                           tickLabelsVisible;
+    private              boolean                                   _onlyFirstAndLastTickLabelVisible;
+    private              BooleanProperty                           onlyFirstAndLastTickLabelVisible;
+    private              Locale                                    _locale;
+    private              ObjectProperty<Locale>                    locale;
+    private              int                                       _decimals;
+    private              IntegerProperty                           decimals;
+    private              String                                    tickLabelFormatString;
+    private              TickLabelOrientation                      _tickLabelOrientation;
+    private              ObjectProperty<TickLabelOrientation>      tickLabelOrientation;
+    private              TickLabelFormat                           _tickLabelFormat;
+    private              ObjectProperty<TickLabelFormat>           tickLabelFormat;
+    private              Font                                      tickLabelFont;
+    private              Font                                      titleFont;
+    private              boolean                                   _autoFontSize;
+    private              BooleanProperty                           autoFontSize;
+    private              double                                    _tickLabelFontSize;
+    private              DoubleProperty                            tickLabelFontSize;
+    private              double                                    _titleFontSize;
+    private              DoubleProperty                            titleFontSize;
+    private              ZoneId                                    _zoneId;
+    private              ObjectProperty<ZoneId>                    zoneId;
+    private              String                                    _dateTimeFormatPattern;
+    private              StringProperty                            dateTimeFormatPattern;
+    private              List<String>                              categories;
+    private              DateTimeFormatter                         dateTimeFormatter;
+    private              Interval                                  currentInterval;
 
 
     // ******************** Constructors **************************************
@@ -331,6 +339,7 @@ public class Axis extends Region {
         if (null == minValue) {
             if (VALUE > getMaxValue()) { setMaxValue(VALUE); }
             _minValue = Helper.clamp(-Double.MAX_VALUE, getMaxValue(), VALUE);
+            fireChartEvt(AXIS_RANGE_CHANGED_EVT);
         } else {
             minValue.set(VALUE);
         }
@@ -338,7 +347,10 @@ public class Axis extends Region {
     public DoubleProperty minValueProperty() {
         if (null == minValue) {
             minValue = new DoublePropertyBase(_minValue) {
-                @Override protected void invalidated() { if (getValue() > getMaxValue()) setMaxValue(getValue()); }
+                @Override protected void invalidated() {
+                    if (getValue() > getMaxValue()) setMaxValue(getValue());
+                    fireChartEvt(AXIS_RANGE_CHANGED_EVT);
+                }
                 @Override public Object getBean() {  return Axis.this;  }
                 @Override public String getName() {  return "minValue"; }
             };
@@ -363,19 +375,21 @@ public class Axis extends Region {
         setStart(LocalDateTime.ofInstant(INSTANT, ZONE_ID));
     }
     public void setStart(final LocalDateTime DATE_TIME) {
-        if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
+        if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be TIME"); }
+        if (DATE_TIME.isAfter(getEnd())) { throw new IllegalArgumentException("Start cannot be after end"); }
         if (null == start) {
+            setMinValue(DATE_TIME.toEpochSecond(Helper.getZoneOffset()));
             _start = DATE_TIME;
-            setMinValue(_start.toEpochSecond(Helper.getZoneOffset()));
         } else {
             start.set(DATE_TIME);
         }
     }
     public ObjectProperty<LocalDateTime> startProperty() {
         if (null == start) {
-            start = new ObjectPropertyBase<LocalDateTime>(_start) {
+            start = new ObjectPropertyBase<>(_start) {
                 @Override protected void invalidated() {
-                    if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be DATE"); }
+                    if (AxisType.TIME != getType()) { throw new IllegalArgumentException("Axis type has to be TIME"); }
+                    if (get().isAfter(getEnd())) { throw new IllegalArgumentException("Start cannot be after end"); }
                     setMinValue(get().toEpochSecond(Helper.getZoneOffset()));
                 }
                 @Override public Object getBean() { return Axis.this; }
@@ -394,6 +408,7 @@ public class Axis extends Region {
         if (null == maxValue) {
             if (VALUE < getMinValue()) { setMinValue(VALUE); }
             _maxValue = Helper.clamp(getMinValue(), Double.MAX_VALUE, VALUE);
+            fireChartEvt(AXIS_RANGE_CHANGED_EVT);
         } else {
             maxValue.set(VALUE);
         }
@@ -401,7 +416,10 @@ public class Axis extends Region {
     public DoubleProperty maxValueProperty() {
         if (null == maxValue) {
             maxValue = new DoublePropertyBase(_maxValue) {
-                @Override protected void invalidated() { if (get() < getMinValue()) setMinValue(get()); }
+                @Override protected void invalidated() {
+                    if (get() < getMinValue()) setMinValue(get());
+                    fireChartEvt(AXIS_RANGE_CHANGED_EVT);
+                }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "maxValue"; }
             };
@@ -426,17 +444,21 @@ public class Axis extends Region {
         setEnd(LocalDateTime.ofInstant(INSTANT, ZONE_ID));
     }
     public void setEnd(final LocalDateTime DATE_TIME) {
+        if (DATE_TIME.isBefore(getStart())) { throw new IllegalArgumentException("End cannot be before start"); }
         if (null == end) {
+            setMaxValue(DATE_TIME.toEpochSecond(Helper.getZoneOffset()));
             _end = DATE_TIME;
-            setMaxValue(_end.toEpochSecond(Helper.getZoneOffset()));
         } else {
             end.set(DATE_TIME);
         }
     }
     public ObjectProperty<LocalDateTime> endProperty() {
         if (null == end) {
-            end = new ObjectPropertyBase<LocalDateTime>(_end) {
-                @Override protected void invalidated() { setMaxValue(get().toEpochSecond(Helper.getZoneOffset())); }
+            end = new ObjectPropertyBase<>(_end) {
+                @Override protected void invalidated() {
+                    if (get().isBefore(getStart())) { throw new IllegalArgumentException("End cannot be before start"); }
+                    setMaxValue(get().toEpochSecond(Helper.getZoneOffset()));
+                }
                 @Override public Object getBean() { return Axis.this; }
                 @Override public String getName() { return "end"; }
             };
@@ -1088,7 +1110,31 @@ public class Axis extends Region {
         setMaxValue(MAX_VALUE);
         resize();
     }
-
+    public void setStartEnd(final LocalDateTime start, final LocalDateTime end) {
+        setStart(start);
+        setEnd(end);
+        resize();
+    }
+    public void setStartEnd(final Instant start, final Instant end) {
+        setStart(start);
+        setEnd(end);
+        resize();
+    }
+    public void setStartEnd(final Instant start, final Instant end, final ZoneId zoneId) {
+        setStart(start, zoneId);
+        setEnd(end, zoneId);
+        resize();
+    }
+    public void setStartEnd(final long startEpochSeconds, final long endEpochSeconds, final ZoneId zoneId) {
+        if (startEpochSeconds < Instant.MIN.getEpochSecond()) { throw new IllegalArgumentException("Start cannot be before " + Instant.MIN.getEpochSecond()); }
+        if (endEpochSeconds > Instant.MAX.getEpochSecond()) { throw new IllegalArgumentException("End cannot be after " + Instant.MAX.getEpochSecond()); }
+        if (startEpochSeconds > endEpochSeconds) { throw new IllegalArgumentException("Start cannot be after end"); }
+        if (endEpochSeconds < startEpochSeconds) { throw new IllegalArgumentException("End cannot be before start"); }
+        setStart(startEpochSeconds, zoneId);
+        setEnd(endEpochSeconds, zoneId);
+        resize();
+    }
+    
     public double getRange() { return getMaxValue() - getMinValue(); }
 
     public void setTickMarkColor(final Color COLOR) {
@@ -1287,6 +1333,30 @@ public class Axis extends Region {
             return evenDates;
         } else {
             return dates;
+        }
+    }
+
+
+    // ******************** Event Handling ************************************
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
+
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(ChartEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type) && !type.equals(ChartEvt.ANY)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
         }
     }
 
@@ -2005,7 +2075,7 @@ public class Axis extends Region {
 
 
     // ******************** Resizing ******************************************
-    private void resize() {
+    public void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
         size   = width < height ? width : height;

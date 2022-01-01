@@ -22,7 +22,6 @@ import eu.hansolo.fx.charts.event.SelectionEvt;
 import eu.hansolo.toolbox.evt.Evt;
 import eu.hansolo.toolbox.evt.EvtObserver;
 import eu.hansolo.toolbox.evt.EvtType;
-import eu.hansolo.toolboxfx.evt.type.LocationChangeEvt;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.Series;
@@ -369,8 +368,8 @@ public class ComparisonRingChart extends Region {
 
     public void fireChartEvt(final ChartEvt evt) {
         final EvtType type = evt.getEvtType();
-        observers.entrySet().stream().filter(entry -> entry.getKey().equals(LocationChangeEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
-        if (observers.containsKey(type)) {
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(ChartEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type) && !type.equals(ChartEvt.ANY)) {
             observers.get(type).forEach(observer -> observer.handle(evt));
         }
     }
