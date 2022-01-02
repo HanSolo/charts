@@ -63,6 +63,22 @@ public class DateAxisTest extends Application {
 
         // XYChart
         xAxis = createBottomTimeAxis(start, end, "dd.MM", true);
+        xAxis.setSameTickMarkLength(true);
+        xAxis.setMediumTimeAxisTickLabelsVisible(true);
+
+        xAxis = AxisBuilder.create(Orientation.HORIZONTAL, Position.BOTTOM)
+                           .type(AxisType.TIME)
+                           .dateTimeFormatPattern("dd.MM")
+                           .autoScale(true)
+                           .sameTickMarkLength(true)
+                           .mediumTimeAxisTickLabelsVisible(true)
+                           .start(LocalDateTime.now().minusDays(5))
+                           .end(LocalDateTime.now().plusDays(5))
+                           .rightAnchor(25d)
+                           .bottomAnchor(0d)
+                           .leftAnchor(25d)
+                           .build();
+
         yAxis = createLeftYAxis(0, 20, true);
         chart = new XYChart<>(new XYPane(series), yAxis, xAxis);
         chart.setPrefSize(400, 200);

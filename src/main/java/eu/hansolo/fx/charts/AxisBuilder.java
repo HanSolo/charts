@@ -31,6 +31,7 @@ import javafx.beans.property.StringProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
 import java.time.Instant;
@@ -204,6 +205,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B sameTickMarkLength(final boolean SAME_LENGTH) {
+        properties.put("sameTickMarkLength", new SimpleBooleanProperty(SAME_LENGTH));
+        return (B)this;
+    }
+
     public final B zeroColor(final Color COLOR) {
         properties.put("zeroColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
@@ -221,6 +227,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
 
     public final B tickLabelsVisible(final boolean VISIBLE) {
         properties.put("tickLabelsVisible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
+    public final B mediumTimeAxisTickLabelsVisible(final boolean VISIBLE) {
+        properties.put("mediumTimeAxisTickLabelsVisible", new SimpleBooleanProperty(VISIBLE));
         return (B)this;
     }
 
@@ -358,6 +369,23 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B) this;
     }
 
+    public final B topAnchor(final double VALUE) {
+        properties.put("topAnchor", new SimpleDoubleProperty(VALUE));
+        return (B)this;
+    }
+    public final B rightAnchor(final double VALUE) {
+        properties.put("rightAnchor", new SimpleDoubleProperty(VALUE));
+        return (B)this;
+    }
+    public final B bottomAnchor(final double VALUE) {
+        properties.put("bottomAnchor", new SimpleDoubleProperty(VALUE));
+        return (B)this;
+    }
+    public final B leftAnchor(final double VALUE) {
+        properties.put("leftAnchor", new SimpleDoubleProperty(VALUE));
+        return (B)this;
+    }
+
 
     public final Axis build() {
         final Axis CONTROL = new Axis(orientation, position);
@@ -367,6 +395,24 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         }
         if(properties.keySet().contains("categoriesList")) {
             CONTROL.setCategories(((ObjectProperty<List<String>>) properties.get("categoriesList")).get());
+        }
+
+        if (properties.keySet().contains("axisType")) {
+            AxisType type = ((ObjectProperty<AxisType>) properties.get("axisType")).get();
+            CONTROL.setType(type);
+            if (AxisType.TIME == type) {
+                LocalDateTime start = null;
+                LocalDateTime end   = null;
+                if (properties.keySet().contains("start")) { start = ((ObjectProperty<LocalDateTime>) properties.get("start")).get(); }
+                if (properties.keySet().contains("end"))   { end   = ((ObjectProperty<LocalDateTime>) properties.get("end")).get(); }
+                if (null == start || null == end) {
+                    throw new IllegalArgumentException("Start and end have to be defined for axis type TIME");
+                }
+                if (end.isBefore(start)) { throw new IllegalArgumentException("End cannot be before start"); }
+                if (start.isAfter(end)) { throw new IllegalArgumentException("Start cannot be after end"); }
+                CONTROL.setStart(start);
+                CONTROL.setEnd(end);
+            }
         }
 
         for (String key : properties.keySet()) {
@@ -410,18 +456,12 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setMinValue(((DoubleProperty) properties.get(key)).get());
             } else if ("maxValue".equals(key)) {
                 CONTROL.setMaxValue(((DoubleProperty) properties.get(key)).get());
-            } else if ("start".equals(key)) {
-                CONTROL.setStart(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
-            } else if ("end".equals(key)) {
-                CONTROL.setEnd(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
             } else if ("autoScale".equals(key)) {
                 CONTROL.setAutoScale(((BooleanProperty) properties.get(key)).get());
             } else if ("title".equals(key)) {
                 CONTROL.setTitle(((StringProperty) properties.get(key)).get());
             } else if ("unit".equals(key)) {
                 CONTROL.setUnit(((StringProperty) properties.get(key)).get());
-            } else if ("axisType".equals(key)) {
-                CONTROL.setType(((ObjectProperty<AxisType>) properties.get(key)).get());
             } else if ("axisBackgroundColor".equals(key)) {
                 CONTROL.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("axisColor".equals(key)) {
@@ -446,6 +486,8 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("majorTickMarksVisible".equals(key)) {
                 CONTROL.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("sameTickMarkLength".equals(key)) {
+                  CONTROL.setSameTickMarkLength(((BooleanProperty) properties.get(key)).get());
             } else if ("zeroColor".equals(key)) {
                 CONTROL.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("minorTickSpace".equals(key)) {
@@ -454,6 +496,8 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setMajorTickSpace(((DoubleProperty) properties.get(key)).get());
             } else if ("tickLabelsVisible".equals(key)) {
                 CONTROL.setTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
+            } else if ("mediumTimeAxisTickLabelsVisible".equals(key)) {
+                CONTROL.setMediumTimeAxisTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("onlyFirstAndLastTickLabel".equals(key)) {
                 CONTROL.setOnlyFirstAndLastTickLabelVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("local".equals(key)) {
@@ -474,6 +518,14 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
             } else if ("dateTimeFormatPattern".equals(key)) {
                 CONTROL.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
+            } else if ("topAnchor".equals(key)) {
+                AnchorPane.setTopAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
+            } else if ("rightAnchor".equals(key)) {
+                AnchorPane.setRightAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
+            } else if ("bottomAnchor".equals(key)) {
+                AnchorPane.setBottomAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
+            } else if ("leftAnchor".equals(key)) {
+                AnchorPane.setLeftAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
             }
         }
         return CONTROL;

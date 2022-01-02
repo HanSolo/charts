@@ -87,7 +87,7 @@ public class Helper {
         YEAR(ChronoUnit.YEARS, 1, 31_104_000, 15_552_000, 2_592_000),        // 360 days
         MONTH_6(ChronoUnit.MONTHS, 6, 15_552_000, 2_592_000, 2_592_000),     // 180 days
         MONTH_3(ChronoUnit.MONTHS, 3, 7_776_000, 2_592_000, 864_000),        // 90 days
-        MONTH_1(ChronoUnit.MONTHS, 1, 2_592_000, 864_000, 86_400),           // 30 days
+        MONTH_1(ChronoUnit.MONTHS, 1, 2_592_000, 432_000, 86_400),           // 30 days
         DAY(ChronoUnit.DAYS, 1, 86_400, 43_200, 3_600),
         HOUR_12(ChronoUnit.HOURS, 12, 43_200, 3_600, 1_800),
         HOUR_6(ChronoUnit.HOURS, 6, 21_600, 3_600, 900),
