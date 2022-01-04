@@ -151,3 +151,7 @@ The charts library can be found over at [maven central](https://search.maven.org
 
 ## ComparisonBarChart
 ![ComparisonBarChart](https://i.ibb.co/BLJqkZf/Comparison-Bar-Chart.png)
+
+
+## RadialTidyTree
+![RadialTidyTree](https://i.ibb.co/Gn7TnCC/Radial-Tidy-Tree-2022-01-04-15-47-13.png)
