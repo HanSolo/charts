@@ -18,12 +18,13 @@ package eu.hansolo.fx.charts;
 
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.event.TreeNodeEvent;
-import eu.hansolo.fx.charts.event.TreeNodeEventListener;
-import eu.hansolo.fx.charts.event.TreeNodeEventType;
-import eu.hansolo.toolboxfx.font.Fonts;
-import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.data.TreeNode;
+import eu.hansolo.fx.charts.event.TreeNodeEvt;
+import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.TextOrientation;
+import eu.hansolo.fx.charts.tools.VisibleData;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.beans.DefaultProperty;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -69,22 +70,6 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
 
 @DefaultProperty("children")
 public class SunburstChart<T extends ChartItem> extends Region {
-    public enum TextOrientation {
-        HORIZONTAL(12),
-        TANGENT(8),
-        ORTHOGONAL(12);
-
-        private double maxAngle;
-        TextOrientation(final double MAX_ANGLE) {
-            maxAngle = MAX_ANGLE;
-        }
-
-        public double getMaxAngle() { return maxAngle; }
-    }
-    public enum VisibleData {
-        NONE, NAME, VALUE, NAME_VALUE
-    }
-
     private static final double                          PREFERRED_WIDTH   = 250;
     private static final double                          PREFERRED_HEIGHT  = 250;
     private static final double                          MINIMUM_WIDTH     = 50;
@@ -133,7 +118,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private              int                             maxLevel;
     private              Map<Integer, List<TreeNode<T>>> levelMap;
     private              InvalidationListener            sizeListener;
-    private        final TreeNodeEventListener<T>           treeNodeListener;
+    private final        EvtObserver<TreeNodeEvt<T>>     treeNodeEvtObserver;
 
 
 
@@ -161,10 +146,8 @@ public class SunburstChart<T extends ChartItem> extends Region {
         tree                   = TREE;
         levelMap               = new HashMap<>(8);
         sizeListener           = o -> resize();
-        treeNodeListener       = EVENT -> {
-            if(EVENT.getType()!= TreeNodeEventType.NODE_SELECTED){
-                redraw();
-            }
+        treeNodeEvtObserver    = evt -> {
+            if (evt.getEvtType().equals(TreeNodeEvt.NODE_SELECTED)) { redraw(); }
         };
         initGraphics();
         registerListeners();
@@ -201,7 +184,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     private void registerListeners() {
         widthProperty().addListener(sizeListener);
         heightProperty().addListener(sizeListener);
-        tree.setOnTreeNodeEvent(treeNodeListener);
+        tree.addTreeNodeEvtObserver(TreeNodeEvt.NODE_SELECTED, treeNodeEvtObserver);
     }
 
 
@@ -222,7 +205,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
     public void dispose() {
         widthProperty().removeListener(sizeListener);
         heightProperty().removeListener(sizeListener);
-        tree.removeTreeNodeEventListener(treeNodeListener);
+        tree.removeTreeNodeEvtObserver(TreeNodeEvt.NODE_SELECTED, treeNodeEvtObserver);
     }
 
     /**
@@ -576,10 +559,10 @@ public class SunburstChart<T extends ChartItem> extends Region {
      */
     public void setTree(final TreeNode<T> TREE) {
         if (null != tree) {
-            tree.removeTreeNodeEventListener(treeNodeListener);
+            tree.removeTreeNodeEvtObserver(TreeNodeEvt.NODE_SELECTED, treeNodeEvtObserver);
         }
         tree = TREE;
-        tree.setOnTreeNodeEvent(treeNodeListener);
+        tree.addTreeNodeEvtObserver(TreeNodeEvt.NODE_SELECTED, treeNodeEvtObserver);
         prepareData();
         if (isAutoTextColor()) { adjustTextColors(); }
         drawChart();
@@ -784,7 +767,7 @@ public class SunburstChart<T extends ChartItem> extends Region {
         String tooltipText = new StringBuilder(NODE.getItem().getName()).append("\n").append(String.format(Locale.US, formatString, ((ChartItem) NODE.getItem()).getValue())).toString();
         Tooltip.install(path, new Tooltip(tooltipText));
 
-        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvent(new TreeNodeEvent(NODE, TreeNodeEventType.NODE_SELECTED)));
+        path.setOnMousePressed(e -> NODE.getTreeRoot().fireTreeNodeEvt(new TreeNodeEvt(NODE, TreeNodeEvt.NODE_SELECTED, NODE.getItem())));
 
         return path;
     }

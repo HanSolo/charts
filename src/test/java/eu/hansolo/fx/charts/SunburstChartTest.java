@@ -16,11 +16,11 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.SunburstChart.TextOrientation;
-import eu.hansolo.fx.charts.SunburstChart.VisibleData;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.TreeNode;
-import eu.hansolo.fx.charts.event.TreeNodeEventType;
+import eu.hansolo.fx.charts.event.TreeNodeEvt;
+import eu.hansolo.fx.charts.tools.TextOrientation;
+import eu.hansolo.fx.charts.tools.VisibleData;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
@@ -85,12 +85,9 @@ public class SunburstChartTest extends Application {
 
         TreeNode<ChartItem>week19 = new TreeNode<>(new ChartItem("Week 19", 0.3, PINK_2), may);
 
-        tree.setOnTreeNodeEvent(e -> {
-            TreeNodeEventType type = e.getType();
-            if (TreeNodeEventType.NODE_SELECTED == type) {
-                TreeNode<ChartItem> segment = e.getSource();
-                System.out.println(segment.getItem().getName() + ": " + segment.getItem().getValue());
-            }
+        tree.addTreeNodeEvtObserver(TreeNodeEvt.NODE_SELECTED, evt -> {
+            TreeNode<ChartItem> segment = (TreeNode<ChartItem>) evt.getSource();
+            System.out.println(segment.getItem().getName() + ": " + segment.getItem().getValue());
         });
 
         nonInteractiveSunburstChart = SunburstChartBuilder.create()

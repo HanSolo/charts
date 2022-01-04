@@ -26,18 +26,18 @@ import javafx.scene.input.MouseEvent;
 
 public class ChartEvt extends ChangeEvt {
     public static final EvtType<ChartEvt> ANY                      = new EvtType<>(ChangeEvt.ANY, "ANY");
-    public static final EvtType<ChartEvt> UPDATE                   = new EvtType<>(ChangeEvt.ANY, "UPDATE");
-    public static final EvtType<ChartEvt> FINISHED                 = new EvtType<>(ChangeEvt.ANY, "FINISHED");
-    public static final EvtType<ChartEvt> SELECTED                 = new EvtType<>(ChangeEvt.ANY, "SELECTED");
-    public static final EvtType<ChartEvt> CONNECTION_SELECTED_FROM = new EvtType<>(ChangeEvt.ANY, "CONNECTION_SELECTED_FROM");
-    public static final EvtType<ChartEvt> CONNECTION_SELECTED_TO   = new EvtType<>(ChangeEvt.ANY, "CONNECTION_SELECTED_TO");
-    public static final EvtType<ChartEvt> CONNECTION_SELECTED      = new EvtType<>(ChangeEvt.ANY, "CONNECTION_SELECTED");
-    public static final EvtType<ChartEvt> CONNECTION_UPDATE        = new EvtType<>(ChangeEvt.ANY, "CONNECTION_UPDATE");
-    public static final EvtType<ChartEvt> ITEM_UPDATE              = new EvtType<>(ChangeEvt.ANY, "ITEM_UPDATE");
-    public static final EvtType<ChartEvt> ITEM_SELECTED            = new EvtType<>(ChangeEvt.ANY, "ITEM_SELECTED");
-    public static final EvtType<ChartEvt> SERIES_SELECTED          = new EvtType<>(ChangeEvt.ANY, "SERIES_SELECTED");
-    public static final EvtType<ChartEvt> ITEM_AND_SERIES_SELECTED = new EvtType<>(ChangeEvt.ANY, "ITEM_AND_SERIES_SELECTED");
-    public static final EvtType<ChartEvt> AXIS_RANGE_CHANGED       = new EvtType<>(ChangeEvt.ANY, "AXIS_RANGE_CHANGED");
+    public static final EvtType<ChartEvt> UPDATE                   = new EvtType<>(ChartEvt.ANY, "UPDATE");
+    public static final EvtType<ChartEvt> FINISHED                 = new EvtType<>(ChartEvt.ANY, "FINISHED");
+    public static final EvtType<ChartEvt> SELECTED                 = new EvtType<>(ChartEvt.ANY, "SELECTED");
+    public static final EvtType<ChartEvt> CONNECTION_SELECTED_FROM = new EvtType<>(ChartEvt.ANY, "CONNECTION_SELECTED_FROM");
+    public static final EvtType<ChartEvt> CONNECTION_SELECTED_TO   = new EvtType<>(ChartEvt.ANY, "CONNECTION_SELECTED_TO");
+    public static final EvtType<ChartEvt> CONNECTION_SELECTED      = new EvtType<>(ChartEvt.ANY, "CONNECTION_SELECTED");
+    public static final EvtType<ChartEvt> CONNECTION_UPDATE        = new EvtType<>(ChartEvt.ANY, "CONNECTION_UPDATE");
+    public static final EvtType<ChartEvt> ITEM_UPDATE              = new EvtType<>(ChartEvt.ANY, "ITEM_UPDATE");
+    public static final EvtType<ChartEvt> ITEM_SELECTED            = new EvtType<>(ChartEvt.ANY, "ITEM_SELECTED");
+    public static final EvtType<ChartEvt> SERIES_SELECTED          = new EvtType<>(ChartEvt.ANY, "SERIES_SELECTED");
+    public static final EvtType<ChartEvt> ITEM_AND_SERIES_SELECTED = new EvtType<>(ChartEvt.ANY, "ITEM_AND_SERIES_SELECTED");
+    public static final EvtType<ChartEvt> AXIS_RANGE_CHANGED       = new EvtType<>(ChartEvt.ANY, "AXIS_RANGE_CHANGED");
 
 
     private final Object     target;

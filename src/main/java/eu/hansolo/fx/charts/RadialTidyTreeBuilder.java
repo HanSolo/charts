@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2022 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +18,7 @@
 
 package eu.hansolo.fx.charts;
 
-
 import eu.hansolo.fx.charts.data.TreeNode;
-import eu.hansolo.fx.charts.tools.TextOrientation;
 import eu.hansolo.fx.charts.tools.VisibleData;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -36,17 +36,17 @@ import javafx.scene.paint.Color;
 import java.util.HashMap;
 
 
-public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
+public class RadialTidyTreeBuilder<B extends RadialTidyTreeBuilder<B>> {
     private HashMap<String, Property> properties = new HashMap<>();
 
 
     // ******************** Constructors **************************************
-    protected SunburstChartBuilder() {}
+    protected RadialTidyTreeBuilder() {}
 
 
     // ******************** Methods *******************************************
-    public static final SunburstChartBuilder create() {
-        return new SunburstChartBuilder();
+    public static final RadialTidyTreeBuilder create() {
+        return new RadialTidyTreeBuilder();
     }
 
     public final B tree(final TreeNode TREE) {
@@ -56,11 +56,6 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
 
     public final B visibleData(final VisibleData VISIBLE_DATA) {
         properties.put("visibleData", new SimpleObjectProperty(VISIBLE_DATA));
-        return (B)this;
-    }
-
-    public final B textOrientation(final TextOrientation ORIENTATION) {
-        properties.put("textOrientation", new SimpleObjectProperty(ORIENTATION));
         return (B)this;
     }
 
@@ -81,11 +76,6 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
 
     public final B decimals(final int DECIMALS) {
         properties.put("decimals", new SimpleIntegerProperty(DECIMALS));
-        return (B)this;
-    }
-
-    public final B interactive(final boolean INTERACTIVE) {
-        properties.put("interactive", new SimpleBooleanProperty(INTERACTIVE));
         return (B)this;
     }
 
@@ -181,12 +171,12 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
         return (B)this;
     }
 
-    public final SunburstChart build() {
-        final SunburstChart CONTROL;
+    public final RadialTidyTree build() {
+        final RadialTidyTree CONTROL;
         if (properties.containsKey("tree")) {
-            CONTROL = new SunburstChart(((ObjectProperty<TreeNode>) properties.get("tree")).get());
+            CONTROL = new RadialTidyTree(((ObjectProperty<TreeNode>) properties.get("tree")).get());
         } else {
-            CONTROL = new SunburstChart();
+            CONTROL = new RadialTidyTree();
         }
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {
@@ -226,8 +216,6 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
                 CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
             } else if ("visibleData".equals(key)) {
                 CONTROL.setVisibleData(((ObjectProperty<VisibleData>) properties.get(key)).get());
-            } else if ("textOrientation".equals(key)) {
-                CONTROL.setTextOrientation(((ObjectProperty<TextOrientation>) properties.get(key)).get());
             } else if ("backgroundColor".equals(key)) {
                 CONTROL.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("textColor".equals(key)) {
@@ -236,8 +224,6 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
                 CONTROL.setUseColorFromParent(((BooleanProperty) properties.get(key)).get());
             } else if ("decimals".equals(key)) {
                 CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("interactive".equals(key)) {
-                CONTROL.setInteractive(((BooleanProperty) properties.get(key)).get());
             } else if ("autoTextColor".equals(key)) {
                 CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
             } else if ("brightTextColor".equals(key)) {
