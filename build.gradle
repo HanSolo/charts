@@ -68,6 +68,14 @@ jar {
     }
 }
 
+
+// start the demo from gradle
+task Demo(type: JavaExec) {
+    main = "eu.hansolo.fx.charts.Launcher"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
 // create one jar for the javadoc
 task javadocJar(type: Jar, dependsOn: javadoc) {
     archiveClassifier = 'javadoc'
@@ -146,16 +154,16 @@ publishing {
             name = "OSSRH"
             url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
             credentials {
-                username = null == ciOssrhUsername ? ossrhUsername : ciOssrhUsername
-                password = null == ciOssrhPassword ? ossrhPassword : ciOssrhPassword
+                username = null == ciOssrhUsername ? ossrhUsername : null == ciOssrhUsername ? null : ciOssrhUsername
+                password = null == ciOssrhPassword ? ossrhPassword : null == ciOssrhPassword ? null : ciOssrhPassword
             }
         }
         maven {
             name = "GitHubPackages"
             url = "https://maven.pkg.github.com/HanSolo/charts"
             credentials {
-                username = null == ciGHUser  ? ghUser  : ciGHUser
-                password = null == ciGHToken ? ghToken : ciGHToken
+                username = null == ciGHUser  ? ghUser  : null == ciGHUser  ? null : ciGHUser
+                password = null == ciGHToken ? ghToken : null == ciGHToken ? null : ciGHToken
             }
         }
     }
