@@ -49,11 +49,11 @@ public class RadialTidyTreeTest extends Application {
 
     private static       int           noOfNodes = 0;
 
-    private TreeNode<ChartItem> tree;
     private RadialTidyTree      radialTidyTree;
 
     @Override public void init() {
-        tree = new TreeNode<>(new ChartItem(Year.now().toString(), Color.BLACK));
+        TreeNode<ChartItem> tree = new TreeNode<>(new ChartItem(Year.now().toString(), Color.BLACK));
+
         TreeNode<ChartItem>firstQuarter  = new TreeNode<>(new ChartItem("1st", PETROL_0), tree);
         TreeNode<ChartItem>secondQuarter = new TreeNode<>(new ChartItem("2nd", PINK_0),   tree);
         TreeNode<ChartItem>thirdQuarter  = new TreeNode<>(new ChartItem("3rd", YELLOW_0), tree);
