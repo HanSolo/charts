@@ -41,9 +41,9 @@ dependencies {
     implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-swing:${javafxVersion}:$platform"
-    implementation "eu.hansolo:jdktools:17.0.2"
-    implementation "eu.hansolo:toolbox:17.0.11"
-    implementation "eu.hansolo:toolboxfx:17.0.21"
+    implementation "eu.hansolo:jdktools:17.0.3"
+    implementation "eu.hansolo:toolbox:17.0.12"
+    implementation "eu.hansolo:toolboxfx:17.0.22"
     implementation "eu.hansolo.fx:heatmap:17.0.3"
     implementation "eu.hansolo.fx:countries:17.0.16"
 }

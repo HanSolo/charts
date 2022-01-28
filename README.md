@@ -13,6 +13,12 @@ This is still a work in development, but here are some of the charts being worke
 
 The charts library can be found over at [maven central](https://search.maven.org/artifact/eu.hansolo.fx/charts)
 
+
+## Getting started
+Please take a look at the [gettingstarted](https://github.com/HanSolo/gettingstarted) project to learn how to get started with charts
+related to imports, required modules etc.
+
+
 ## Area heat map
 ![Area heat map](https://i.ibb.co/kM77mrL/Area-Heat-Map-2020-09-04-07-47-41.png)
 
