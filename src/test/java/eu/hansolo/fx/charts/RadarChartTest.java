@@ -44,8 +44,8 @@ import java.util.Random;
  */
 public class RadarChartTest extends Application {
     private static final Random                  RND        = new Random();
-    private static final long                    INTERVAL   = 10_000_000_000l;
-    private static final double                  ANIM_TIME  = INTERVAL / 10_000_000;
+    private static final long                    INTERVAL   = 1_000_000_000l;
+    private static final double                  ANIM_TIME  = INTERVAL / 800_000;
     private static final int                     ELEMENTS   = 30;
     private static final ChartType               CHART_TYPE = ChartType.SMOOTH_RADAR_POLYGON;
     private              YSeries<ValueChartItem> series1;

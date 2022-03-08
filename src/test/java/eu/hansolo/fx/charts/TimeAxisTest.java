@@ -16,9 +16,9 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.converter.Converter;
 import eu.hansolo.fx.charts.data.TYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
+import eu.hansolo.toolbox.unit.Converter;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static eu.hansolo.fx.charts.converter.Converter.Category.TEMPERATURE;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.CELSIUS;
-import static eu.hansolo.fx.charts.converter.Converter.UnitDefinition.FAHRENHEIT;
+import static eu.hansolo.toolbox.unit.Category.TEMPERATURE;
+import static eu.hansolo.toolbox.unit.UnitDefinition.CELSIUS;
+import static eu.hansolo.toolbox.unit.UnitDefinition.FAHRENHEIT;
 
 
 /**
