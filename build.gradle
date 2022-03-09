@@ -39,10 +39,10 @@ dependencies {
     implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-swing:${javafxVersion}:$platform"
-    implementation "eu.hansolo:toolbox:17.0.17"
-    implementation "eu.hansolo:toolboxfx:17.0.24"
-    implementation "eu.hansolo.fx:heatmap:17.0.5"
-    implementation "eu.hansolo.fx:countries:17.0.19"
+    implementation "eu.hansolo:toolbox:17.0.19"
+    implementation "eu.hansolo:toolboxfx:17.0.26"
+    implementation "eu.hansolo.fx:heatmap:17.0.7"
+    implementation "eu.hansolo.fx:countries:17.0.20"
 }
 
 jar {
@@ -63,6 +63,22 @@ jar {
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
                 'Export-Package'        : 'eu.hansolo.fx.charts, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.charts.voronoi, eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform'
         )
+    }
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
     }
 }
 
