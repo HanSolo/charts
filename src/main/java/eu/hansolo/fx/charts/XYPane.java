@@ -776,20 +776,21 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        List<T> items    = SERIES.getItems();
-        double  oldX     = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
-        double  oldY     = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
-        boolean wasEmpty = items.get(0).isEmptyItem();
+        List<T>      items         = SERIES.getItems();
+        double       oldX          = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double       oldY          = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        boolean      wasEmpty      = items.get(0).isEmptyItem();
 
         ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
         ctx.setFill(Color.TRANSPARENT);
 
         for (T item : SERIES.getItems()) {
-            double x        = (item.getX() - LOWER_BOUND_X) * scaleX;
-            double y        = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+            double  x       = (item.getX() - LOWER_BOUND_X) * scaleX;
+            double  y       = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             boolean isEmpty = item.isEmptyItem();
             if (!isEmpty && !wasEmpty) { ctx.strokeLine(oldX, oldY, x, y); }
             oldX     = x;
@@ -801,13 +802,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        List<T> items     = SERIES.getItems();
-        int     noOfItems = items.size();
-        double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
-        double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
-        boolean wasEmpty  = items.get(0).isEmptyItem();
+        List<T>      items         = SERIES.getItems();
+        int          noOfItems     = items.size();
+        double       oldX          = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double       oldY          = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        boolean      wasEmpty      = items.get(0).isEmptyItem();
 
         // Fill Area
         ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
@@ -816,8 +818,8 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.beginPath();
         ctx.moveTo(oldX, oldY);
 
-        for (int i = 1 ; i < noOfItems ; i++) {
-            T item = items.get(i);
+        for (int i = 1; i < noOfItems; i++) {
+            T       item    = items.get(i);
             double  x       = (item.getX() - LOWER_BOUND_X) * scaleX;
             double  y       = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
             boolean isEmpty = item.isEmptyItem();
@@ -857,6 +859,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawScatter(final XYSeries<T> SERIES) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
@@ -881,6 +884,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
 
@@ -894,7 +898,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         Point[] interpolatedPoints = Helper.subdividePoints(points.toArray(new Point[0]), SUB_DIVISIONS);
 
         ctx.beginPath();
-        for(Point p : interpolatedPoints) {
+        for (Point p : interpolatedPoints) {
             if (p.isEmpty()) {
                 ctx.moveTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
             } else {
@@ -907,12 +911,13 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
-        List<T> items     = SERIES.getItems();
-        double  oldX      = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
-        double  oldY      = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
-        boolean wasEmpty  = items.get(0).isEmptyItem();
+        List<T>      items         = SERIES.getItems();
+        double       oldX          = (items.get(0).getX() - LOWER_BOUND_X) * scaleX;
+        double       oldY          = height - (items.get(0).getY() - LOWER_BOUND_Y) * scaleY;
+        boolean      wasEmpty      = items.get(0).isEmptyItem();
 
         ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
@@ -925,7 +930,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
         ctx.beginPath();
         ctx.moveTo(oldX, oldY);
-        for(Point p : interpolatedPoints) {
+        for (Point p : interpolatedPoints) {
             double  x       = (p.getX() - LOWER_BOUND_X) * scaleX;
             double  y       = height - (p.getY() - LOWER_BOUND_Y) * scaleY;
             boolean isEmpty = p.isEmpty();
@@ -950,7 +955,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         ctx.fill();
 
         ctx.beginPath();
-        for(Point p : interpolatedPoints) {
+        for (Point p : interpolatedPoints) {
             if (p.isEmpty()) {
                 ctx.moveTo((p.getX() - LOWER_BOUND_X) * scaleX, height - (p.getY() - LOWER_BOUND_Y) * scaleY);
             } else {
@@ -963,7 +968,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawHorizon(final XYSeries<T> SERIES, final boolean SMOOTHED) {
-        if (null == SERIES || SERIES.getItems().isEmpty()) { return; }
+        if (null == SERIES || SERIES.getItems().isEmpty() || !SERIES.isVisible()) { return; }
 
         Color positiveBaseColor;
         Color negativeBaseColor;
@@ -1028,6 +1033,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawRidgeLine(final XYSeries<T> SERIES) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY() - SERIES.getStrokeWidth();
         List<T> items     = SERIES.getItems();
@@ -1305,6 +1311,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawPolar(final XYSeries<T> SERIES) {
+        if (!SERIES.isVisible()) { return; }
         final double  CENTER_X      = 0.5 * size;
         final double  CENTER_Y      = CENTER_X;
         final double  CIRCLE_SIZE   = 0.9 * size;
@@ -1532,6 +1539,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         }
 
         for (XYSeries<T> SERIES : LIST_OF_SERIES) {
+            if (!SERIES.isVisible()) { continue; }
             if (SERIES.getSymbolsVisible()) { drawSymbols(SERIES); }
         }
 
@@ -1655,6 +1663,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         }
 
         for (XYSeries<T> SERIES : LIST_OF_SERIES) {
+            if (!SERIES.isVisible()) { continue; }
             if (SERIES.getSymbolsVisible()) { drawSymbols(SERIES); }
         }
 
@@ -1800,6 +1809,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSymbols(final XYSeries<T> SERIES) {
+        if (!SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         Symbol       seriesSymbol  = SERIES.getSymbol();

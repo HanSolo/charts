@@ -115,6 +115,11 @@ public class XYZSeriesBuilder<B extends XYZSeriesBuilder<B>> {
         return (B)this;
     }
 
+    public final B visible(final boolean VISIBLE) {
+        properties.put("visible", new SimpleBooleanProperty(VISIBLE));
+        return (B)this;
+    }
+
     public final B animated(final boolean AUTO) {
         properties.put("animated", new SimpleBooleanProperty(AUTO));
         return (B)this;
@@ -161,6 +166,8 @@ public class XYZSeriesBuilder<B extends XYZSeriesBuilder<B>> {
                 SERIES.setSymbolSize(((DoubleProperty) properties.get(key)).get());
             } else if ("strokeWidth".equals(key)) {
                 SERIES.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
+            } else if ("visible".equals(key)) {
+                SERIES.setVisible(((BooleanProperty) properties.get(key)).get());
             } else if("animated".equals(key)) {
                 SERIES.setAnimated(((BooleanProperty) properties.get(key)).get());
             } else if("animationDuration".equals(key)) {

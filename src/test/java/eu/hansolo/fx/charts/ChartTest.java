@@ -270,6 +270,7 @@ public class ChartTest extends Application {
         //timer.start();
 
         //modificationThread.start();
+
     }
 
     @Override public void stop() {

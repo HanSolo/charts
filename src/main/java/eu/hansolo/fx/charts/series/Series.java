@@ -72,6 +72,8 @@ public abstract class Series<T extends Item> {
     protected    DoubleProperty                            symbolSize;
     protected    double                                    _strokeWidth;
     protected    DoubleProperty                            strokeWidth;
+    protected    boolean                                   _visible;
+    protected    BooleanProperty                           visible;
     protected    boolean                                   _animated;
     protected    BooleanProperty                           animated;
     protected    long                                      _animationDuration;
@@ -125,6 +127,7 @@ public abstract class Series<T extends Item> {
         _symbolsVisible    = true;
         _symbolSize        = -1;
         _strokeWidth       = -1;
+        _visible           = true;
         _animated          = false;
         _animationDuration = 800;
         _withWrapping      = false;
@@ -388,6 +391,26 @@ public abstract class Series<T extends Item> {
             };
         }
         return strokeWidth;
+    }
+
+    public boolean isVisible() { return null == visible ? _visible : visible.get(); }
+    public void setVisible(final boolean visible) {
+        if (null == this.visible) {
+            _visible = visible;
+            fireSeriesEvent(UPDATE_EVENT);
+        } else {
+            this.visible.set(visible);
+        }
+    }
+    public BooleanProperty visibleProperty() {
+        if (null == visible) {
+            visible = new BooleanPropertyBase(_visible) {
+                @Override protected void invalidated() { fireSeriesEvent(UPDATE_EVENT); }
+                @Override public Object getBean() { return Series.this; }
+                @Override public String getName() { return "visible"; }
+            };
+        }
+        return visible;
     }
 
     public boolean isAnimated() { return null == animated ? _animated : animated.get(); }
