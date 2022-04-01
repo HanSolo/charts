@@ -37,8 +37,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import javafx.util.StringConverter;
 
 
 /**
@@ -47,7 +49,8 @@ import java.util.Locale;
  * Time: 06:32
  */
 public class AxisBuilder<B extends AxisBuilder<B>> {
-    private HashMap<String, Property> properties = new HashMap<>();
+    // keep insertion order - or otherwise guarantee that "auto" property is set first
+    private HashMap<String, Property> properties = new LinkedHashMap<>();
     private Orientation               orientation;
     private Position                  position;
 
@@ -274,6 +277,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B numberFormatter(final StringConverter<Number> FORMATTER) {
+        properties.put("numberFormatter", new SimpleObjectProperty<>(FORMATTER));
+        return (B) this;
+    }
+
     public final B categories(final String... CATEGORIES) {
         properties.put("categoriesArray", new SimpleObjectProperty<>(CATEGORIES));
         return (B)this;
@@ -370,110 +378,169 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if ("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if ("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if ("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } // Control specific properties
-              else if ("minValue".equals(key)) {
-                CONTROL.setMinValue(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxValue".equals(key)) {
-                CONTROL.setMaxValue(((DoubleProperty) properties.get(key)).get());
-            } else if ("start".equals(key)) {
-                CONTROL.setStart(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
-            } else if ("end".equals(key)) {
-                CONTROL.setEnd(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
-            } else if ("autoScale".equals(key)) {
-                CONTROL.setAutoScale(((BooleanProperty) properties.get(key)).get());
-            } else if ("title".equals(key)) {
-                CONTROL.setTitle(((StringProperty) properties.get(key)).get());
-            } else if ("unit".equals(key)) {
-                CONTROL.setUnit(((StringProperty) properties.get(key)).get());
-            } else if ("axisType".equals(key)) {
-                CONTROL.setType(((ObjectProperty<AxisType>) properties.get(key)).get());
-            } else if ("axisBackgroundColor".equals(key)) {
-                CONTROL.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("axisColor".equals(key)) {
-                CONTROL.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("tickLabelColor".equals(key)) {
-                CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("titleColor".equals(key)) {
-                CONTROL.setTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("tickMarkColor".equals(key)) {
-                CONTROL.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("minorTickMarkColor".equals(key)) {
-                CONTROL.setMinorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("mediumTickMarkColor".equals(key)) {
-                CONTROL.setMediumTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("majorTickMarkColor".equals(key)) {
-                CONTROL.setMajorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("tickMarksVisible".equals(key)) {
-                CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("minorTickMarksVisible".equals(key)) {
-                CONTROL.setMinorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("mediumTickMarksVisible".equals(key)) {
-                CONTROL.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("majorTickMarksVisible".equals(key)) {
-                CONTROL.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("zeroColor".equals(key)) {
-                CONTROL.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("minorTickSpace".equals(key)) {
-                CONTROL.setMinorTickSpace(((DoubleProperty) properties.get(key)).get());
-            } else if ("majorTickSpace".equals(key)) {
-                CONTROL.setMajorTickSpace(((DoubleProperty) properties.get(key)).get());
-            } else if ("tickLabelsVisible".equals(key)) {
-                CONTROL.setTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("onlyFirstAndLastTickLabel".equals(key)) {
-                CONTROL.setOnlyFirstAndLastTickLabelVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("local".equals(key)) {
-                CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("tickLabelOrientation".equals(key)) {
-                CONTROL.setTickLabelOrientation(((ObjectProperty<TickLabelOrientation>) properties.get(key)).get());
-            } else if ("tickLabelFormat".equals(key)) {
-                CONTROL.setTickLabelFormat(((ObjectProperty<TickLabelFormat>) properties.get(key)).get());
-            } else if ("autoFontSize".equals(key)) {
-                CONTROL.setAutoFontSize(((BooleanProperty) properties.get(key)).get());
-            } else if ("tickLabelFontSize".equals(key)) {
-                CONTROL.setTickLabelFontSize(((DoubleProperty) properties.get(key)).get());
-            } else if ("titleFontSize".equals(key)) {
-                CONTROL.setTitleFontSize(((DoubleProperty) properties.get(key)).get());
-            } else if ("zoneId".equals(key)) {
-                CONTROL.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
-            } else if ("dateTimeFormatPattern".equals(key)) {
-                CONTROL.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize":{
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
+                        break;
+                    }
+                case "minSize":{
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
+                        break;
+                    }
+                case "maxSize":{
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
+                        break;
+                    }
+                case "prefWidth":
+                    CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "prefHeight":
+                    CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "minWidth":
+                    CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "minHeight":
+                    CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "maxWidth":
+                    CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "maxHeight":
+                    CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "scaleX":
+                    CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "scaleY":
+                    CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "layoutX":
+                    CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "layoutY":
+                    CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "translateX":
+                    CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "translateY":
+                    CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                    break;
+            // Control specific properties
+                case "padding":
+                    CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                    break;
+                case "minValue":
+                    CONTROL.setMinValue(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "maxValue":
+                    CONTROL.setMaxValue(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "start":
+                    CONTROL.setStart(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
+                    break;
+                case "end":
+                    CONTROL.setEnd(((ObjectProperty<LocalDateTime>) properties.get(key)).get());
+                    break;
+                case "autoScale":
+                    CONTROL.setAutoScale(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "title":
+                    CONTROL.setTitle(((StringProperty) properties.get(key)).get());
+                    break;
+                case "unit":
+                    CONTROL.setUnit(((StringProperty) properties.get(key)).get());
+                    break;
+                case "axisType":
+                    CONTROL.setType(((ObjectProperty<AxisType>) properties.get(key)).get());
+                    break;
+                case "axisBackgroundColor":
+                    CONTROL.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "axisColor":
+                    CONTROL.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "tickLabelColor":
+                    CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "titleColor":
+                    CONTROL.setTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "tickMarkColor":
+                    CONTROL.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "minorTickMarkColor":
+                    CONTROL.setMinorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "mediumTickMarkColor":
+                    CONTROL.setMediumTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "majorTickMarkColor":
+                    CONTROL.setMajorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "tickMarksVisible":
+                    CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "minorTickMarksVisible":
+                    CONTROL.setMinorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "mediumTickMarksVisible":
+                    CONTROL.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "majorTickMarksVisible":
+                    CONTROL.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "zeroColor":
+                    CONTROL.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    break;
+                case "minorTickSpace":
+                    CONTROL.setMinorTickSpace(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "majorTickSpace":
+                    CONTROL.setMajorTickSpace(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "tickLabelsVisible":
+                    CONTROL.setTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "onlyFirstAndLastTickLabel":
+                    CONTROL.setOnlyFirstAndLastTickLabelVisible(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "local":
+                    CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                    break;
+                case "decimals":
+                    CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
+                    break;
+                case "tickLabelOrientation":
+                    CONTROL.setTickLabelOrientation(((ObjectProperty<TickLabelOrientation>) properties.get(key)).get());
+                    break;
+                case "tickLabelFormat":
+                    CONTROL.setTickLabelFormat(((ObjectProperty<TickLabelFormat>) properties.get(key)).get());
+                    break;
+                case "autoFontSize":
+                    CONTROL.setAutoFontSize(((BooleanProperty) properties.get(key)).get());
+                    break;
+                case "tickLabelFontSize":
+                    CONTROL.setTickLabelFontSize(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "titleFontSize":
+                    CONTROL.setTitleFontSize(((DoubleProperty) properties.get(key)).get());
+                    break;
+                case "zoneId":
+                    CONTROL.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
+                    break;
+                case "dateTimeFormatPattern":
+                    CONTROL.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
+                    break;
+                case "numberFormatter":
+                    CONTROL.setNumberFormatter(((ObjectProperty<StringConverter<Number>>) properties.get(key)).get());
+                    break;
+                default:
+                    break;
             }
         }
         return CONTROL;
