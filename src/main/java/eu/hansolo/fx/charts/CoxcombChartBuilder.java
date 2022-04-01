@@ -75,6 +75,11 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B useChartItemTextFill(final boolean USE) {
+        properties.put("useChartItemTextFill", new SimpleBooleanProperty(USE));
+        return (B)this;
+    }
+
     public final B equalSegmentAngles(final boolean EQUAL) {
         properties.put("equalSegmentAngles", new SimpleBooleanProperty(EQUAL));
         return (B)this;
@@ -102,6 +107,11 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
 
     public final B formatString(final String FORMAT_STRING) {
         properties.put("formatString", new SimpleStringProperty(FORMAT_STRING));
+        return (B)this;
+    }
+
+    public final B showItemName(final boolean SHOW) {
+        properties.put("showItemName", new SimpleBooleanProperty(SHOW));
         return (B)this;
     }
 
@@ -234,6 +244,8 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("autoTextColor".equals(key)) {
                 CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+            } else if ("useChartItemTextFill".equals(key)) {
+                CONTROL.setUseChartItemTextFill(((BooleanProperty) properties.get(key)).get());
             } else if ("equalSegmentAngles".equals(key)) {
                 CONTROL.setEqualSegmentAngles(((BooleanProperty) properties.get(key)).get());
             } else if ("onMousePressed".equals(key)) {
@@ -246,6 +258,8 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
                 CONTROL.setShowPopup(((BooleanProperty) properties.get(key)).get());
             } else if ("formatString".equals(key)) {
                 CONTROL.setFormatString(((StringProperty) properties.get(key)).get());
+            } else if ("showItemName".equals(key)) {
+                CONTROL.setShowItemName(((BooleanProperty) properties.get(key)).get());
             } else if ("selectedItemFill".equals(key)) {
                 CONTROL.setSelectedItemFill(((ObjectProperty<Color>) properties.get(key)).get());
             }

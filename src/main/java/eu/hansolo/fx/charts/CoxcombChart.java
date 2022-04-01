@@ -88,6 +88,8 @@ public class CoxcombChart extends Region {
     private              ObjectProperty<Color>                     textColor;
     private              boolean                                   _autoTextColor;
     private              BooleanProperty                           autoTextColor;
+    private              boolean                                   _useChartItemTextFill;
+    private              BooleanProperty                           useChartItemTextFill;
     private              Order                                     _order;
     private              ObjectProperty<Order>                     order;
     private              boolean                                   _equalSegmentAngles;
@@ -96,6 +98,8 @@ public class CoxcombChart extends Region {
     private              BooleanProperty                           showPopup;
     private              String                                    _formatString;
     private              StringProperty                            formatString;
+    private              boolean                                   _showItemName;
+    private              BooleanProperty                           showItemName;
     private              Color                                     _selectedItemFill;
     private              ObjectProperty<Color>                     selectedItemFill;
     private              EvtObserver<ChartEvt>                     itemObserver;
@@ -114,19 +118,21 @@ public class CoxcombChart extends Region {
         this(Arrays.asList(ITEMS));
     }
     public CoxcombChart(final List<ChartItem> ITEMS) {
-        width               = PREFERRED_WIDTH;
-        height              = PREFERRED_HEIGHT;
-        size                = PREFERRED_WIDTH;
-        items               = FXCollections.observableArrayList(ITEMS);
-        _textColor          = Color.WHITE;
-        _autoTextColor      = true;
-        _order              = Order.DESCENDING;
-        _equalSegmentAngles = false;
-        _showPopup          = false;
-        _formatString       = DEFAULT_FORMAT_STRING;
-        _selectedItemFill   = Color.RED;
-        itemObserver        = e -> reorder(getOrder());
-        itemListListener    = c -> {
+        width                 = PREFERRED_WIDTH;
+        height                = PREFERRED_HEIGHT;
+        size                  = PREFERRED_WIDTH;
+        items                 = FXCollections.observableArrayList(ITEMS);
+        _textColor            = Color.WHITE;
+        _autoTextColor        = true;
+        _useChartItemTextFill = false;
+        _order                = Order.DESCENDING;
+        _equalSegmentAngles   = false;
+        _showPopup            = false;
+        _formatString         = DEFAULT_FORMAT_STRING;
+        _showItemName         = false;
+        _selectedItemFill     = Color.RED;
+        itemObserver          = e -> reorder(getOrder());
+        itemListListener      = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
@@ -138,9 +144,9 @@ public class CoxcombChart extends Region {
             }
             redraw();
         };
-        mouseHandler        = e -> handleMouseEvent(e);
-        mouseHandlers       = new ConcurrentHashMap<>();
-        observers           = new ConcurrentHashMap<>();
+        mouseHandler          = e -> handleMouseEvent(e);
+        mouseHandlers         = new ConcurrentHashMap<>();
+        observers             = new ConcurrentHashMap<>();
         initGraphics();
         registerListeners();
     }
@@ -310,6 +316,26 @@ public class CoxcombChart extends Region {
         return autoTextColor;
     }
 
+    public boolean getUseChartItemTextFill() { return null == useChartItemTextFill ? _useChartItemTextFill : useChartItemTextFill.get(); }
+    public void setUseChartItemTextFill(final boolean USE) {
+        if (null == useChartItemTextFill) {
+            _useChartItemTextFill = USE;
+            redraw();
+        } else {
+            useChartItemTextFill.set(USE);
+        }
+    }
+    public BooleanProperty useChartItemTextFillProperty() {
+        if (null == useChartItemTextFill) {
+            useChartItemTextFill = new BooleanPropertyBase(_useChartItemTextFill) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CoxcombChart.this; }
+                @Override public String getName() { return "useChartItemTextFill"; }
+            };
+        }
+        return useChartItemTextFill;
+    }
+
     public boolean getEqualSegmentAngles() { return null == equalSegmentAngles ? _equalSegmentAngles : equalSegmentAngles.get(); }
     public void setEqualSegmentAngles(final boolean SET) {
         if (null == equalSegmentAngles) {
@@ -382,6 +408,26 @@ public class CoxcombChart extends Region {
             };
         }
         return formatString;
+    }
+
+    public boolean getShowItemName() { return null == showItemName ? _showItemName : showItemName.get(); }
+    public void setShowItemName(final boolean SHOW) {
+        if (null == showItemName) {
+            _showItemName = SHOW;
+            redraw();
+        } else {
+            showItemName.set(SHOW);
+        }
+    }
+    public BooleanProperty showItemNameProperty() {
+        if (null == showItemName) {
+            showItemName = new BooleanPropertyBase(_showItemName) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CoxcombChart.this; }
+                @Override public String getName() { return "showItemName"; }
+            };
+        }
+        return showItemName;
     }
 
     public Color getSelectedItemFill() { return null == selectedItemFill ? _selectedItemFill : selectedItemFill.get(); }
@@ -603,6 +649,8 @@ public class CoxcombChart extends Region {
         boolean      isAutoColor     = isAutoTextColor();
         DropShadow   shadow          = new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.75), size * 0.02, 0, 0, 0);
         double       spread          = size * 0.005;
+        double       fontSize        = size * 0.03;
+        double       itemNameOffset  = fontSize * 0.75;
         double       x, y;
         double       tx, ty;
         double       endAngle;
@@ -610,7 +658,7 @@ public class CoxcombChart extends Region {
         double       clippingRadius;
 
         ctx.clearRect(0, 0, size, size);
-        ctx.setFont(Fonts.opensansRegular(size * 0.03));
+        ctx.setFont(Fonts.opensansRegular(fontSize));
         final String formatString = getFormatString();
         for (int i = 0 ; i < noOfChartItems ; i++) {
             ChartItem item       = items.get(i);
@@ -704,12 +752,17 @@ public class CoxcombChart extends Region {
             if (angle > 12 && barWidth > 10) {
                 tx = center + radius * Math.cos(Math.toRadians(endAngle - angle * 0.5));
                 ty = center - radius * Math.sin(Math.toRadians(endAngle - angle * 0.5));
-                if (isAutoColor) {
+                if (getUseChartItemTextFill()) {
+                    ctx.setFill(item.getTextFill());
+                } else if (isAutoColor) {
                     ctx.setFill(Helper.isDark(item.getFill()) ? Color.WHITE : Color.BLACK);
                 } else {
                     ctx.setFill(textColor);
                 }
-                ctx.fillText(String.format(Locale.US, formatString, (value / sum * 100.0)), tx, ty, barWidth);
+                if (getShowItemName()) {
+                    ctx.fillText(item.getName(), tx, ty - itemNameOffset, barWidth);
+                }
+                ctx.fillText(String.format(Locale.US, formatString, (value / sum * 100.0)), tx, getShowItemName() ? ty + itemNameOffset : ty, barWidth);
             }
         }
     }

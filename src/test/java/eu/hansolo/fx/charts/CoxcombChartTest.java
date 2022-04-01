@@ -21,7 +21,9 @@ import eu.hansolo.fx.charts.tools.Order;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
@@ -38,6 +40,7 @@ import java.util.Optional;
  */
 public class CoxcombChartTest extends Application {
     private CoxcombChart chart;
+    private VBox         textPane;
 
     @Override public void init() {
         List<ChartItem> items = List.of(
@@ -67,23 +70,30 @@ public class CoxcombChartTest extends Application {
             System.out.println(opt.get());
         };
 
-
         chart = CoxcombChartBuilder.create()
                                    .items(items)
                                    .textColor(Color.WHITE)
                                    .autoTextColor(false)
+                                   .useChartItemTextFill(false)
                                    .equalSegmentAngles(true)
                                    .order(Order.ASCENDING)
                                    .onMousePressed(onPressedHandler)
                                    .onMouseMoved(onMoveHandler)
                                    .showPopup(false)
+                                   .showItemName(true)
                                    .formatString("%.2f")
                                    .selectedItemFill(Color.MAGENTA)
                                    .build();
+
+        Label row1 = new Label("Main title");
+        Label row2 = new Label("Sub title 1");
+        Label row3 = new Label("Sub title 2");
+        textPane = new VBox(10, row1, row2, row3);
+        textPane.setMouseTransparent(true);
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(chart);
+        StackPane pane = new StackPane(chart, textPane);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(pane);
