@@ -19,11 +19,16 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
+
+import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -35,20 +40,45 @@ public class CoxcombChartTest extends Application {
     private CoxcombChart chart;
 
     @Override public void init() {
-        ChartItem[] items = {
+        List<ChartItem> items = List.of(
             new ChartItem("Item 1", 27, Color.web("#96AA3B")),
             new ChartItem("Item 2", 24, Color.web("#29A783")),
             new ChartItem("Item 3", 16, Color.web("#098AA9")),
             new ChartItem("Item 4", 15, Color.web("#62386F")),
             new ChartItem("Item 5", 13, Color.web("#89447B")),
-            new ChartItem("Item 6", 5, Color.web("#EF5780"))
+            new ChartItem("Item 6", 5, Color.web("#EF5780")));
+
+        EventHandler<MouseEvent> onPressedHandler = e -> {
+            Optional<ChartItem> opt = chart.getSelectedItem(e);
+            if (opt.isEmpty()) { return; }
+            ChartItem selectedItem = opt.get();
+            //System.out.println(selectedItem);
+            if (selectedItem.isSelected()) {
+                selectedItem.setSelected(false);
+            } else {
+                items.forEach(item -> item.setSelected(false));
+                selectedItem.setSelected(true);
+            }
         };
+
+        EventHandler<MouseEvent> onMoveHandler = e -> {
+            Optional<ChartItem> opt = chart.getSelectedItem(e);
+            if (opt.isEmpty()) { return; }
+            System.out.println(opt.get());
+        };
+
+
         chart = CoxcombChartBuilder.create()
                                    .items(items)
                                    .textColor(Color.WHITE)
                                    .autoTextColor(false)
                                    .equalSegmentAngles(true)
                                    .order(Order.ASCENDING)
+                                   .onMousePressed(onPressedHandler)
+                                   .onMouseMoved(onMoveHandler)
+                                   .showPopup(false)
+                                   .formatString("%.2f")
+                                   .selectedItemFill(Color.MAGENTA)
                                    .build();
     }
 
