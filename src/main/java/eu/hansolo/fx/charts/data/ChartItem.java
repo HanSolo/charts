@@ -49,6 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ChartItem implements Item, Comparable<ChartItem> {
     private final ItemEvent               UPDATE_EVENT   = new ItemEvent(ChartItem.this, EventType.UPDATE);
     private final ItemEvent               FINISHED_EVENT = new ItemEvent(ChartItem.this, EventType.FINISHED);
+    private final ItemEvent               SELECTED_EVENT = new ItemEvent(ChartItem.this, EventType.SELECTED);
     private       List<ItemEventListener> listenerList   = new CopyOnWriteArrayList<>();
     private       int                     _index;
     private       IntegerProperty         index;
@@ -79,6 +80,8 @@ public class ChartItem implements Item, Comparable<ChartItem> {
     private       DoubleProperty          y;
     private       boolean                 _isEmpty;
     private       BooleanProperty         isEmpty;
+    private       boolean                 _selected;
+    private       BooleanProperty         selected;
     private       long                    animationDuration;
     private       DoubleProperty          currentValue;
     private       Timeline                timeline;
@@ -188,6 +191,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         _x                = 0;
         _y                = 0;
         _isEmpty          = IS_EMPTY;
+        _selected         = false;
         currentValue      = new DoublePropertyBase(_value) {
             @Override protected void invalidated() {
                 oldValue = ChartItem.this.getValue();
@@ -536,7 +540,27 @@ public class ChartItem implements Item, Comparable<ChartItem> {
         return isEmpty;
     }
 
-    
+    public boolean isSelected() { return null == selected ? _selected : selected.get(); }
+    public void setSelected(final boolean selected) {
+        if (null == this.selected) {
+            _selected = selected;
+            fireItemEvent(SELECTED_EVENT);
+        } else {
+            this.selected.set(selected);
+        }
+    }
+    public BooleanProperty selectedProperty() {
+        if (null == selected) {
+            selected = new BooleanPropertyBase(_selected) {
+                @Override protected void invalidated() { fireItemEvent(SELECTED_EVENT); }
+                @Override public Object getBean() { return ChartItem.this; }
+                @Override public String getName() { return "selected"; }
+            };
+        }
+        return selected;
+    }
+
+
     public long getAnimationDuration() { return animationDuration; }
     public void setAnimationDuration(final long DURATION) { animationDuration = Helper.clamp(10, 10000, DURATION); }
 
