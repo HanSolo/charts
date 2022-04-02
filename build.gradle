@@ -6,13 +6,11 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.google.osdetector'           version '1.7.0'
-    id 'org.javamodularity.moduleplugin' version '1.8.7'
-    id 'org.beryx.jlink'                 version '2.23.2'
-    id 'net.nemerosa.versioning'         version '2.14.0'
-    id 'biz.aQute.bnd.builder'           version '5.3.0'
+    id 'org.javamodularity.moduleplugin' version '1.8.10'
+    id 'org.beryx.jlink'                 version '2.25.0'
+    id 'net.nemerosa.versioning'         version '2.15.1'
 }
 
-apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
@@ -67,7 +65,7 @@ jar {
 
 // start the demo from gradle
 task Demo(type: JavaExec) {
-    main = "eu.hansolo.fx.charts.Launcher"
+    mainClass = "eu.hansolo.fx.charts.Launcher"
     classpath = sourceSets.main.runtimeClasspath
 }
 
