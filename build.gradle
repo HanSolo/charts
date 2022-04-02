@@ -7,7 +7,7 @@ plugins {
     id 'signing'
     id 'com.google.osdetector'           version '1.7.0'
     id 'org.javamodularity.moduleplugin' version '1.8.10'
-    id 'org.beryx.jlink'                 version '2.24.4'
+    id 'org.beryx.jlink'                 version '2.25.0'
     id 'net.nemerosa.versioning'         version '2.15.1'
 }
 
