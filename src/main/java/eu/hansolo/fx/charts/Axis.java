@@ -47,6 +47,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.util.StringConverter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -150,6 +151,7 @@ public class Axis extends Region {
     private              int                                       _decimals;
     private              IntegerProperty                           decimals;
     private              String                                    tickLabelFormatString;
+    private              StringConverter<Number>                   numberFormatter;
     private              TickLabelOrientation                      _tickLabelOrientation;
     private              ObjectProperty<TickLabelOrientation>      tickLabelOrientation;
     private              TickLabelFormat                           _tickLabelFormat;
@@ -1045,6 +1047,12 @@ public class Axis extends Region {
         }
         return dateTimeFormatPattern;
     }
+    
+    public StringConverter<Number> getNumberFormatter() { return numberFormatter; }
+    public void setNumberFormatter(final StringConverter<Number> FORMATTER) {
+        numberFormatter = FORMATTER;
+        redraw();
+    }
 
     public TickLabelFormat getTickLabelFormat() { return null == tickLabelFormat ? _tickLabelFormat : tickLabelFormat.get(); }
     public void setTickLabelFormat(final TickLabelFormat FORMAT) {
@@ -1197,6 +1205,10 @@ public class Axis extends Region {
     public void shift(final double VALUE) {
         setMinMax(getMinValue() + VALUE, getMaxValue() + VALUE);
     }
+    
+    public double getValueForDisplay(final double posInAxis) {
+        return posInAxis / width * Helper.calcNiceNumber((getMaxValue() - getMinValue()), false) + getMinValue();
+    }
 
     private void calcAutoScale() {
         double maxNoOfMajorTicks = 10;
@@ -1213,7 +1225,6 @@ public class Axis extends Region {
     private void calcScale() {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;
-
         setMajorTickSpace(Helper.calcNiceNumber(getRange() / (maxNoOfMajorTicks - 1), false));
         setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), false));
     }
@@ -1381,6 +1392,14 @@ public class Axis extends Region {
         }
     }
 
+    private String formatNumber(final Locale locale, final double number) { 
+        if (numberFormatter == null) {
+            return String.format(locale, tickLabelFormatString, number);
+        } else {
+            return numberFormatter.toString(number);
+        }
+    }
+
 
     // ******************** Event Handling ************************************
     public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
@@ -1480,6 +1499,7 @@ public class Axis extends Region {
         double      textPointY;
         double      maxTextWidth;
 
+        if (Position.RIGHT == position) { anchorX = 0; }
 
         if (AxisType.LINEAR == axisType || AxisType.TEXT == axisType) {
             // ******************** Linear ************************************
@@ -1545,7 +1565,7 @@ public class Axis extends Region {
                         minorPointY  = fixedPosition;
                         outerPointX  = anchorX;
                         outerPointY  = fixedPosition;
-                        textPointX   = anchorXPlusOffset;
+                        textPointX   = width;
                         textPointY   = fixedPosition;
                         maxTextWidth = textPosition;
                     } else {
@@ -1624,9 +1644,9 @@ public class Axis extends Region {
                         String tickLabelString;
                         if (AxisType.LINEAR == axisType) {
                             if (TickLabelFormat.NUMBER == tickLabelFormat) {
-                                tickLabelString = Orientation.HORIZONTAL == orientation ? String.format(locale, tickLabelFormatString, (minValue - i)) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
+                                tickLabelString = Orientation.HORIZONTAL == orientation ? formatNumber(locale, (minValue - i)) : formatNumber(locale, maxValue - counter + minValue);
                             } else {
-                                tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
+                                tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : formatNumber(locale, maxValue - counter + minValue);
                             }
                         } else if (AxisType.TEXT == axisType) {
                             if (tickLabelCounter < noOfCategories) {
@@ -1663,8 +1683,10 @@ public class Axis extends Region {
                     }
 
                     if (isZero) { setZeroPosition(fixedPosition); }
-
-                    drawTickMark((fullRange && isZero) ? zeroColor : minorTickMarkColor, minorLineWidth, innerPointX, innerPointY, outerPointX, outerPointY);
+                    
+                    if (minorTickMarksVisible) {
+                        drawTickMark((fullRange && isZero) ? zeroColor : minorTickMarkColor, minorLineWidth, innerPointX, innerPointY, outerPointX, outerPointY);
+                    }
 
                     // Draw tick labels
                     if (tickLabelsVisible) {
@@ -1677,7 +1699,9 @@ public class Axis extends Region {
                         drawTickLabel(isOnlyFirstAndLastTickLabelVisible, isZero, isMinValue, isMaxValue, fullRange, zeroColor, tickLabelColor, textPointX, textPointY, maxTextWidth, tickLabelString, orientation);
                     }
                 } else if (tickMarkCounter % 1 == 0) {
-                    drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
+                    if (minorTickMarksVisible) {
+                        drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
+                    }
                 }
 
                 counterBD = counterBD.add(minorTickSpaceBD);
@@ -1777,7 +1801,7 @@ public class Axis extends Region {
                             if (VERTICAL == orientation) {
                                 axisCtx.setTextAlign(TextAlignment.RIGHT);
                             }
-                            drawTickLabel(isOnlyFirstAndLastTickLabelVisible, false, isMinValue, isMaxValue, false, zeroColor, tickLabelColor, textPointX, textPointY, maxTextWidth, String.format(locale, tickLabelFormatString, value), orientation);
+                            drawTickLabel(isOnlyFirstAndLastTickLabelVisible, false, isMinValue, isMaxValue, false, zeroColor, tickLabelColor, textPointX, textPointY, maxTextWidth, formatNumber(locale, value.doubleValue()), orientation);
                         }
                     } else {
                         if (minorTickMarksVisible) {
@@ -2120,7 +2144,7 @@ public class Axis extends Region {
 
         if (VERTICAL == ORIENTATION) {
             axisCtx.setTextAlign(TextAlignment.RIGHT);
-            double fontSize = getTitleFontSize();
+            double fontSize = getTickLabelFontSize();
             double textY;
             if (TEXT_Y < fontSize) {
                 textY = fontSize * 0.5;
@@ -2189,7 +2213,7 @@ public class Axis extends Region {
             drawTimeAxis();
         } else {
             if (isAutoScale()) { 
-                calcAutoScale(); 
+                calcAutoScale();
             } else {
                 calcScale();
             }
