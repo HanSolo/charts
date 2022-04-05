@@ -76,6 +76,12 @@ if (JavaVersion.current().isJava8Compatible()) {
 }
 
 
+task Demo(type: JavaExec) {
+    mainClass = 'eu.hansolo.fx.charts.DemoLauncher'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
 // create one jar for the javadoc
 task javadocJar(type: Jar, dependsOn: javadoc) {
     archiveClassifier = 'javadoc'
