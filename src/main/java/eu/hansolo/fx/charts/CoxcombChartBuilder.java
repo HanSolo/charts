@@ -25,8 +25,12 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.event.EventHandler;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
 import java.util.HashMap;
@@ -71,8 +75,48 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B useChartItemTextFill(final boolean USE) {
+        properties.put("useChartItemTextFill", new SimpleBooleanProperty(USE));
+        return (B)this;
+    }
+
     public final B equalSegmentAngles(final boolean EQUAL) {
         properties.put("equalSegmentAngles", new SimpleBooleanProperty(EQUAL));
+        return (B)this;
+    }
+
+    public final B onMousePressed(final EventHandler<MouseEvent> HANDLER) {
+        properties.put("onMousePressed", new SimpleObjectProperty<>(HANDLER));
+        return (B)this;
+    }
+
+    public final B onMouseReleased(final EventHandler<MouseEvent> HANDLER) {
+        properties.put("onMouseReleased", new SimpleObjectProperty<>(HANDLER));
+        return (B)this;
+    }
+
+    public final B onMouseMoved(final EventHandler<MouseEvent> HANDLER) {
+        properties.put("onMouseMoved", new SimpleObjectProperty<>(HANDLER));
+        return (B)this;
+    }
+
+    public final B showPopup(final boolean SHOW) {
+        properties.put("showPopup", new SimpleBooleanProperty(SHOW));
+        return (B)this;
+    }
+
+    public final B formatString(final String FORMAT_STRING) {
+        properties.put("formatString", new SimpleStringProperty(FORMAT_STRING));
+        return (B)this;
+    }
+
+    public final B showItemName(final boolean SHOW) {
+        properties.put("showItemName", new SimpleBooleanProperty(SHOW));
+        return (B)this;
+    }
+
+    public final B selectedItemFill(final Color SELECTED_ITEM_FILL) {
+        properties.put("selectedItemFill", new SimpleObjectProperty<>(SELECTED_ITEM_FILL));
         return (B)this;
     }
 
@@ -200,8 +244,24 @@ public class CoxcombChartBuilder<B extends CoxcombChartBuilder<B>> {
                 CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("autoTextColor".equals(key)) {
                 CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+            } else if ("useChartItemTextFill".equals(key)) {
+                CONTROL.setUseChartItemTextFill(((BooleanProperty) properties.get(key)).get());
             } else if ("equalSegmentAngles".equals(key)) {
                 CONTROL.setEqualSegmentAngles(((BooleanProperty) properties.get(key)).get());
+            } else if ("onMousePressed".equals(key)) {
+                CONTROL.onMousePressed(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+            } else if ("onMouseReleased".equals(key)) {
+                CONTROL.onMouseReleased(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+            } else if ("onMouseMoved".equals(key)) {
+                CONTROL.onMouseMoved(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+            } else if ("showPopup".equals(key)) {
+                CONTROL.setShowPopup(((BooleanProperty) properties.get(key)).get());
+            } else if ("formatString".equals(key)) {
+                CONTROL.setFormatString(((StringProperty) properties.get(key)).get());
+            } else if ("showItemName".equals(key)) {
+                CONTROL.setShowItemName(((BooleanProperty) properties.get(key)).get());
+            } else if ("selectedItemFill".equals(key)) {
+                CONTROL.setSelectedItemFill(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
         return CONTROL;
