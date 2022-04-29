@@ -19,8 +19,6 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.series.XYSeriesBuilder;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -35,7 +33,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 
 import java.util.Random;
-import javafx.util.StringConverter;
 
 
 /**
@@ -138,30 +135,11 @@ public class LineChartTest extends Application {
                                .prefWidth(AXIS_WIDTH)
                                .minValue(0)
                                .maxValue(1000)
-                               //.autoScale(true)
+                               .autoScale(true)
                                .axisColor(Color.web("#85949B"))
                                .tickLabelColor(Color.web("#85949B"))
                                .tickMarkColor(Color.web("#85949B"))
                                //.tickMarksVisible(false)
-                               // test the new numberFormatter as well
-                               .numberFormatter(new StringConverter<Number>() {
-                                    private final DecimalFormat df = new DecimalFormat("##0 m");
-                                    @Override
-                                    public String toString(Number object) {
-                                        if (object == null) {return "";}
-                                        return df.format(object);
-                                    }
-
-                                    @Override
-                                    public Number fromString(String string) {
-                                        try {
-                                            if (string == null) {return null;}
-                                            string = string.trim();
-                                            if (string.length() < 1) {return null;}     
-                                            return df.parse(string).doubleValue();
-                                        } catch (ParseException ex) {throw new RuntimeException(ex);}
-                                    }
-                               })
                                .build();
         AnchorPane.setTopAnchor(yAxisLeft, 0d);
         AnchorPane.setBottomAnchor(yAxisLeft, AXIS_WIDTH);
@@ -196,10 +174,6 @@ public class LineChartTest extends Application {
                     p10.setY(RND.nextDouble() * 300 + 200);
                     p11.setY(RND.nextDouble() * 300 + 200);
                     p12.setY(RND.nextDouble() * 300 + 200);
-
-                    // test the new numberFormatter as well
-                    yAxisLeft.setMinMax(RND.nextDouble() * 300, 1000 - RND.nextDouble() * 300);
-
                     lastTimerCalled = now;
                 }
             }

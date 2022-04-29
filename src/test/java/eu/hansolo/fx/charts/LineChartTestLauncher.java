@@ -16,13 +16,6 @@
 
 package eu.hansolo.fx.charts;
 
-import org.junit.Test;
-
 public class LineChartTestLauncher {
     public static void main(String[] args) { LineChartTest.main(args); }
-    
-    @Test
-    public void run() {
-        LineChartTest.main(null);
-    }
 }
