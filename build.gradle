@@ -39,6 +39,9 @@ dependencies {
     implementation "org.openjfx:javafx-graphics:11:$platform"
     implementation "org.openjfx:javafx-controls:11:$platform"
     implementation "org.openjfx:javafx-swing:11:$platform"
+
+
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 jar {
@@ -88,14 +91,14 @@ artifacts {
     archives sourcesJar
 }
 
-signing {
-    if (gpgkey && gpgpassphrase) {
-        useInMemoryPgpKeys(gpgkey, gpgpassphrase)
-    }
-
-    sign configurations.archives
-    sign publishing.publications
-}
+// signing {
+//     if (gpgkey && gpgpassphrase) {
+//         useInMemoryPgpKeys(gpgkey, gpgpassphrase)
+//     }
+// 
+//     sign configurations.archives
+//     sign publishing.publications
+// }
 
 publishing {
     publications {
@@ -142,22 +145,22 @@ publishing {
         }
     }
 
-    repositories {
-        maven {
-            name = "OSSRH"
-            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-            credentials {
-                username = null == ciOssrhUsername ? null == ossrhUsername ? null : ossrhUsername : ciOssrhUsername
-                password = null == ciOssrhPassword ? null == ossrhPassword ? null : ossrhPassword : ciOssrhPassword
-            }
-        }
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/HanSolo/charts"
-            credentials {
-                username = null == ciGHUser  ? null == ghUser  ? null : ghUser  : ciGHUser
-                password = null == ciGHToken ? null == ghToken ? null : ghToken : ciGHToken
-            }
-        }
-    }
+//    repositories {
+//        maven {
+//            name = "OSSRH"
+//            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+//            credentials {
+//                username = null == ciOssrhUsername ? null == ossrhUsername ? null : ossrhUsername : ciOssrhUsername
+//                password = null == ciOssrhPassword ? null == ossrhPassword ? null : ossrhPassword : ciOssrhPassword
+//            }
+//        }
+//        maven {
+//            name = "GitHubPackages"
+//            url = "https://maven.pkg.github.com/HanSolo/charts"
+//            credentials {
+//                username = null == ciGHUser  ? null == ghUser  ? null : ghUser  : ciGHUser
+//                password = null == ciGHToken ? null == ghToken ? null : ghToken : ciGHToken
+//            }
+//        }
+//    }
 }
