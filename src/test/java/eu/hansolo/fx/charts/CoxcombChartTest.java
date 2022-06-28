@@ -17,8 +17,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.data.Metadata;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.application.Application;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.StringPropertyBase;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -41,15 +45,37 @@ import java.util.Optional;
 public class CoxcombChartTest extends Application {
     private CoxcombChart chart;
     private VBox         textPane;
+    private Metainfo     metainfo1;
+    private Metainfo     metainfo2;
+    private Metainfo     metainfo3;
+    private Metainfo     metainfo4;
+    private Metainfo     metainfo5;
+    private Metainfo     metainfo6;
+
 
     @Override public void init() {
+        metainfo1 = new Metainfo("Text 1");
+        metainfo2 = new Metainfo("Text 2");
+        metainfo3 = new Metainfo("Text 3");
+        metainfo4 = new Metainfo("Text 4");
+        metainfo5 = new Metainfo("Text 5");
+        metainfo6 = new Metainfo("Text 6");
+
+
         List<ChartItem> items = List.of(
-            new ChartItem("Item 1", 27, Color.web("#96AA3B")),
-            new ChartItem("Item 2", 24, Color.web("#29A783")),
-            new ChartItem("Item 3", 16, Color.web("#098AA9")),
-            new ChartItem("Item 4", 15, Color.web("#62386F")),
-            new ChartItem("Item 5", 13, Color.web("#89447B")),
-            new ChartItem("Item 6", 5, Color.web("#EF5780")));
+            ChartItemBuilder.create().name("Item 1").value(27).fill(Color.web("#96AA3B")).metadata(metainfo1).build(),
+            ChartItemBuilder.create().name("Item 2").value(24).fill(Color.web("#29A783")).metadata(metainfo2).build(),
+            ChartItemBuilder.create().name("Item 3").value(16).fill(Color.web("#098AA9")).metadata(metainfo3).build(),
+            ChartItemBuilder.create().name("Item 4").value(15).fill(Color.web("#62386F")).metadata(metainfo4).build(),
+            ChartItemBuilder.create().name("Item 5").value(13).fill(Color.web("#89447B")).metadata(metainfo5).build(),
+            ChartItemBuilder.create().name("Item 6").value(5).fill(Color.web("#EF5780")).metadata(metainfo6).build()
+            //new ChartItem("Item 1", 27, Color.web("#96AA3B")),
+            //new ChartItem("Item 2", 24, Color.web("#29A783")),
+            //new ChartItem("Item 3", 16, Color.web("#098AA9")),
+            //new ChartItem("Item 4", 15, Color.web("#62386F")),
+            //new ChartItem("Item 5", 13, Color.web("#89447B")),
+            //new ChartItem("Item 6", 5, Color.web("#EF5780"))
+            );
 
         EventHandler<MouseEvent> onPressedHandler = e -> {
             Optional<ChartItem> opt = chart.getSelectedItem(e);
@@ -103,6 +129,8 @@ public class CoxcombChartTest extends Application {
         stage.show();
 
         chart.addItem(new ChartItem("New Item", 3, Color.RED));
+
+        metainfo6.setText("Changed Text 6");
     }
 
     @Override public void stop() {
@@ -111,5 +139,25 @@ public class CoxcombChartTest extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+
+    // ******************** Inner Classes *************************************
+    public class Metainfo implements Metadata {
+        private StringProperty text;
+
+        public Metainfo(final String text) {
+            this.text = new StringPropertyBase(text) {
+                @Override protected void invalidated() { super.invalidated(); }
+                @Override public Object getBean() { return Metainfo.this; }
+                @Override public String getName() { return "text"; }
+            };
+        }
+
+        public String getText() { return text.get(); }
+        public void setText(final String text) { this.text.set(text); }
+        public StringProperty textProperty() { return text; }
+
+        @Override public String toString() { return text.get(); }
     }
 }
