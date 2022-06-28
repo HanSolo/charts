@@ -22,6 +22,6 @@ import javafx.beans.property.DoubleProperty;
 public interface ValueItem extends Item {
 
     double getValue();
-    void setValue(double y);
+    void setValue(double value);
     DoubleProperty valueProperty();
 }
