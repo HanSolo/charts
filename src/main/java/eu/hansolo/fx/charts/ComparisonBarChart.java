@@ -915,12 +915,6 @@
                      ctx.fillText(String.format(Locale.US, formatString, rightValue), rightBarX + 5, rightBarY + barHeight * 0.5);
                  }
              }
-
-
-             // Draw categories
-             ctx.setTextAlign(TextAlignment.CENTER);
-             ctx.setFill(useCategoryTextFill ? category.getTextFill() : categoryTextFill);
-             ctx.fillText(category.getName(), categoryX, categoryY + barHeight * 0.5, categoryWidth);
          }
 
          // Draw categories

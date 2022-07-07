@@ -161,3 +161,7 @@ related to imports, required modules etc.
 
 ## RadialTidyTree
 ![RadialTidyTree](https://i.ibb.co/Gn7TnCC/Radial-Tidy-Tree-2022-01-04-15-47-13.png)
+
+
+## BarChart
+![BarChart](https://i.ibb.co/5BT96X6/BarChart.png)
