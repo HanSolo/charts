@@ -843,7 +843,7 @@ public class StreamChart extends Region {
                     List<ChartItemData> previousCategoryItemDataList = previousCategory >= 0 ? itemsPerCategory.get(previousCategory) : new ArrayList<>();
                     List<ChartItemData> nextCategoryItemDataList     = itemsPerCategory.get(nextCategory);
                     if (null == nextCategoryItemDataList) continue;
-                    Optional<ChartItemData> nextItemDataOptional = nextCategoryItemDataList.stream().filter(id -> {
+                    Optional<ChartItemData> nextItemDataOptional     = nextCategoryItemDataList.stream().filter(id -> {
                         if (null == id.getChartItem().getName() || null == item.getName()) { return false; }
                         return id.getChartItem().getName().equals(item.getName());
                     }).findFirst();
