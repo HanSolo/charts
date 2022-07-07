@@ -853,7 +853,7 @@ public class BarChart<T extends ChartItem> extends Region {
             ctx.setTextAlign(TextAlignment.RIGHT);
             ctx.setFill(useNamesTextFill ? namesTextFill : item.getTextFill());
             ctx.setFont(nameFont);
-            ctx.fillText(name, nameX, nameY + barHeight * 0.5, namesWidth);
+            ctx.fillText(name, nameX, nameY + barHeight * 0.5, namesWidth * 0.9);
         }
 
         if (shadowsVisible) {
