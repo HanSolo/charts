@@ -19,15 +19,16 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.NumberFormat;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
@@ -36,22 +37,30 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 public class BarChartBuilder <B extends BarChartBuilder<B>> {
-    private HashMap<String, Property>  properties = new HashMap<>();
-    private ChartItemSeries<ChartItem> series;
+    private HashMap<String, Property> properties = new HashMap<>();
 
 
     // ******************** Constructors **************************************
-    protected BarChartBuilder(final ChartItemSeries<ChartItem> SERIES) {
-        series = SERIES;
-    }
+    protected BarChartBuilder() { }
 
 
     // ******************** Methods *******************************************
-    public static final BarChartBuilder create(final ChartItemSeries<ChartItem> series1) {
-        return new BarChartBuilder(series1);
+    public static final BarChartBuilder create() {
+        return new BarChartBuilder();
+    }
+
+
+    public final B items(final ChartItem... items) {
+        properties.put("itemsArray", new SimpleObjectProperty(items));
+        return (B)this;
+    }
+    public final B items(final List<ChartItem> items) {
+        properties.put("itemsList", new SimpleObjectProperty<>(items));
+        return (B)this;
     }
 
     public final B orientation(final Orientation orientation) {
@@ -71,6 +80,11 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
 
     public final B barBackgroundFill(final Color barBackgroundFill) {
         properties.put("barBackgroundFill", new SimpleObjectProperty<>(barBackgroundFill));
+        return (B)this;
+    }
+
+    public final B seriesFill(final Paint seriesFill) {
+        properties.put("seriesFill", new SimpleObjectProperty<>(seriesFill));
         return (B)this;
     }
 
@@ -126,6 +140,16 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
 
     public final B order(final Order order) {
         properties.put("order", new SimpleObjectProperty<>(order));
+        return (B)this;
+    }
+
+    public final B animated(final boolean animated) {
+        properties.put("animated", new SimpleBooleanProperty(animated));
+        return (B)this;
+    }
+
+    public final B animationDuration(final long animationDuration) {
+        properties.put("animationDuration", new SimpleLongProperty(animationDuration));
         return (B)this;
     }
 
@@ -204,7 +228,14 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
 
 
     public final BarChart build() {
-        final BarChart chart = new BarChart(series);
+        final BarChart chart = new BarChart();
+
+        if (properties.keySet().contains("itemsArray")) {
+            chart.setItems(((ObjectProperty<? extends ChartItem[]>) properties.get("itemsArray")).get());
+        }
+        if(properties.keySet().contains("itemsList")) {
+            chart.setItems(((ObjectProperty<List<? extends ChartItem>>) properties.get("itemsList")).get());
+        }
 
         for (String key : properties.keySet()) {
             if ("prefSize".equals(key)) {
@@ -251,6 +282,8 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
                 chart.setNamesBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
             } else if ("barBackgroundFill".equals(key)) {
                 chart.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
+            } else if("seriesFill".equals(key)) {
+                chart.setSeriesFill(((ObjectProperty<Paint>) properties.get(key)).get());
             } else if ("textFill".equals(key)) {
                 chart.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
             } else if ("namesTextFill".equals(key)) {
@@ -273,6 +306,10 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
                 chart.setSorted(((BooleanProperty) properties.get(key)).get());
             } else if ("order".equals(key)) {
                 chart.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
+            } else if ("animated".equals(key)) {
+                chart.setAnimated(((BooleanProperty) properties.get(key)).get());
+            } else if ("animationDuration".equals(key)) {
+                chart.setAnimationDuration(((LongProperty) properties.get(key)).get());
             }
         }
         return chart;

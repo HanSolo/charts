@@ -18,11 +18,11 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.charts.tools.Order;
 import eu.hansolo.toolbox.evt.EvtObserver;
 import eu.hansolo.toolboxfx.FontMetrix;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.SortDirection;
 import eu.hansolo.fx.charts.tools.TooltipPopup;
 import eu.hansolo.fx.geometry.Path;
 import eu.hansolo.toolboxfx.geom.Bounds;
@@ -153,8 +153,8 @@ public class StreamChart extends Region {
     private              DoubleProperty                    itemTextThreshold;
     private              boolean                           _itemTextVisible;
     private              BooleanProperty                   itemTextVisible;
-    private              SortDirection                     _sortDirection;
-    private              ObjectProperty<SortDirection>     sortDirection;
+    private              Order                             _order;
+    private              ObjectProperty<Order>             order;
     private              boolean                           _sortByName;
     private              BooleanProperty                   sortByName;
     private              boolean                           _categorySumVisible;
@@ -185,9 +185,9 @@ public class StreamChart extends Region {
         items               = FXCollections.observableArrayList();
         chartItems          = new LinkedHashMap<>();
         itemsPerCategory    = new LinkedHashMap<>();
-        sumsPerCategory  = new LinkedHashMap<>();
-        itemObserver     = e -> redraw();
-        itemListListener = c -> {
+        sumsPerCategory     = new LinkedHashMap<>();
+        itemObserver        = e -> redraw();
+        itemListListener    = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver));
@@ -211,7 +211,7 @@ public class StreamChart extends Region {
         _locale             = Locale.getDefault();
         _itemTextThreshold  = 1;
         _itemTextVisible    = true;
-        _sortDirection      = SortDirection.ASCENDING;
+        _order              = Order.ASCENDING;
         _sortByName         = false;
         _categorySumVisible = false;
         itemFont            = Fonts.latoRegular(10);
@@ -615,27 +615,27 @@ public class StreamChart extends Region {
         return itemTextVisible;
     }
 
-    public SortDirection getSortDirection() { return null == sortDirection ? _sortDirection : sortDirection.get(); }
-    public void setSortDirection(final SortDirection DIRECTION) {
-        if (null == sortDirection) {
-            _sortDirection = DIRECTION;
+    public Order getOrder() { return null == order ? _order : order.get(); }
+    public void setOrder(final Order DIRECTION) {
+        if (null == order) {
+            _order = DIRECTION;
             groupBy(getCategory());
         } else {
-            sortDirection.set(DIRECTION);
+            order.set(DIRECTION);
         }
     }
-    public ObjectProperty<SortDirection> sortDirectionProperty() {
-        if (null == sortDirection) {
-            sortDirection = new ObjectPropertyBase<>(_sortDirection) {
+    public ObjectProperty<Order> orderProperty() {
+        if (null == order) {
+            order = new ObjectPropertyBase<>(_order) {
                 @Override protected void invalidated() {
                     groupBy(getCategory());
                 }
                 @Override public Object getBean() { return StreamChart.this; }
-                @Override public String getName() { return "sortDirection"; }
+                @Override public String getName() { return "order"; }
             };
-            _sortDirection = null;
+            _order = null;
         }
-        return sortDirection;
+        return order;
     }
 
     public boolean isSortByName() { return null == sortByName ? _sortByName : sortByName.get(); }
@@ -705,7 +705,7 @@ public class StreamChart extends Region {
                 }
             }
             List<ChartItem> compacted = new ArrayList<>(compactedItems.values());
-            switch (getSortDirection()) {
+            switch (getOrder()) {
                 case ASCENDING -> sortItemsAscending(compacted);
                 case DESCENDING -> sortItemsDescending(compacted);
             }

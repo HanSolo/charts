@@ -22,7 +22,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
 import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.tools.SortDirection;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -119,7 +119,7 @@ public class StreamChartTest extends Application {
                                                //.itemTextThreshold(2)
                                                .itemTextVisible(true)
                                                .categoryTextColor(Color.BLACK)
-                                               .sortDirection(SortDirection.ASCENDING)
+                                               .order(Order.ASCENDING)
                                                .sortByName(true)
                                                .categorySumVisible(true)
                                                .selectionColor(Color.rgb(0, 100, 240, 0.5))
@@ -172,7 +172,7 @@ public class StreamChartTest extends Application {
                                                 //.itemTextThreshold(2)
                                                 .itemTextVisible(false)
                                                 .categoryTextColor(Color.BLACK)
-                                                .sortDirection(SortDirection.DESCENDING)
+                                                .order(Order.DESCENDING)
                                                 .sortByName(true)
                                                 .categorySumVisible(true)
                                                 .selectionColor(Color.rgb(0, 100, 240, 0.5))

@@ -19,7 +19,7 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.StreamChart.Category;
 import eu.hansolo.fx.charts.StreamChart.Type;
 import eu.hansolo.fx.charts.data.ChartItem;
-import eu.hansolo.fx.charts.tools.SortDirection;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -131,8 +131,8 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B sortDirection(final SortDirection DIRECTION) {
-        properties.put("sortDirection", new SimpleObjectProperty<>(DIRECTION));
+    public final B order(final Order ORDER) {
+        properties.put("order", new SimpleObjectProperty<>(ORDER));
         return (B)this;
     }
 
@@ -291,8 +291,8 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
                 CONTROL.setItemTextVisible(((BooleanProperty) properties.get(key)).get());
             } else if ("categoryTextColor".equals(key)) {
                 CONTROL.setCategoryTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("sortDirection".equals(key)) {
-                CONTROL.setSortDirection(((ObjectProperty<SortDirection>) properties.get(key)).get());
+            } else if ("order".equals(key)) {
+                CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             } else if ("sortByName".equals(key)) {
                 CONTROL.setSortByName(((BooleanProperty) properties.get(key)).get());
             } else if ("categorySumVisible".equals(key)) {

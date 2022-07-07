@@ -19,10 +19,13 @@ package eu.hansolo.fx.charts.series;
 import eu.hansolo.fx.charts.ChartType;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.tools.Order;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Paint;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -53,4 +56,11 @@ public class ChartItemSeries<T extends ChartItem> extends Series<T> {
     public double getMaxValue() { return items.stream().mapToDouble(T::getValue).max().orElse(100d); }
 
     public double getSumOfAllItems() { return items.stream().mapToDouble(T::getValue).sum(); }
+
+    public void sort(final Order order) {
+        switch(order) {
+            case ASCENDING  -> Collections.sort(getItems(), Comparator.comparingDouble(ChartItem::getValue));
+            case DESCENDING -> Collections.sort(getItems(), Comparator.comparingDouble(ChartItem::getValue).reversed());
+        }
+    }
 }

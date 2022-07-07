@@ -45,15 +45,15 @@ import java.util.Random;
 
 
 public class BarChartTest extends Application {
-    private static final Random                     RND = new Random();
-    private              BarChart                   chart;
-    private              ChartItemSeries<ChartItem> series;
-    private              long                       lastTimerCall;
-    private              AnimationTimer             timer;
+    private static final Random          RND = new Random();
+    private              BarChart        chart;
+    private              List<ChartItem> items;
+    private              long            lastTimerCall;
+    private              AnimationTimer  timer;
 
 
     @Override public void init() {
-        List<ChartItem> items = new ArrayList<>();
+        items = new ArrayList<>();
         items.add(ChartItemBuilder.create().name("Item 1").value(0).fill(Color.rgb(221, 78, 77)).build());
         items.add(ChartItemBuilder.create().name("Item 2").value(0).fill(Color.rgb(215, 131, 79)).build());
         items.add(ChartItemBuilder.create().name("Item 3").value(0).fill(Color.rgb(236, 165, 57)).build());
@@ -62,35 +62,28 @@ public class BarChartTest extends Application {
         items.add(ChartItemBuilder.create().name("Item 6").value(0).fill(Color.rgb(76, 179, 210)).build());
         items.add(ChartItemBuilder.create().name("Item 7").value(0).fill(Color.rgb(106, 198, 255)).build());
 
-        series = ChartItemSeriesBuilder.create()
-                                       .name("Series 1")
-                                       .items(items)
-                                       .fill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(255, 105, 91)), new Stop(1, Color.rgb(217, 41, 76))))
-                                       .textFill(Color.WHITE)
-                                       .animated(true)
-                                       .animationDuration(1000)
-                                       .build();
-
-
-        chart = BarChartBuilder.create(series)
+        chart = BarChartBuilder.create()
                                .prefSize(600, 300)
+                               .items(items)
                                .orientation(Orientation.HORIZONTAL)
                                .backgroundFill(Color.rgb(48, 48, 48))
                                .namesBackgroundFill(Color.rgb(48, 48, 48))
                                .barBackgroundFill(Color.rgb(62, 62, 62))
                                .barBackgroundVisible(true)
+                               .seriesFill(new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(91, 105, 255)), new Stop(1, Color.rgb(76, 41, 217))))
                                .shadowsVisible(false)
                                .textFill(Color.WHITE)
                                .namesTextFill(Color.rgb(190, 190, 190))
                                .useNamesTextFill(true)
                                .useItemTextFill(false)
-                               .useItemFill(true)
+                               .useItemFill(false)
                                .shortenNumbers(false)
                                .sorted(true)
                                .order(Order.DESCENDING)
                                //.order(Order.ASCENDING)
                                //.numberFormat(NumberFormat.PERCENTAGE)
                                .numberFormat(NumberFormat.NUMBER)
+                               //.animated(false)
                                .build();
 
         AnchorPane.setTopAnchor(chart, 10d);
@@ -102,7 +95,7 @@ public class BarChartTest extends Application {
         timer = new AnimationTimer() {
             @Override public void handle(final long now) {
                 if (now > lastTimerCall + 3_000_000_000l) {
-                    series.getItems().forEach(item -> item.setValue(RND.nextDouble() * 75 + 25));
+                    items.forEach(item -> item.setValue(RND.nextDouble() * 75 + 25));
                     lastTimerCall = now;
                 }
             }

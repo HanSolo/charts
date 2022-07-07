@@ -22,7 +22,7 @@ import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.event.SelectionEvt;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
-import eu.hansolo.fx.charts.series.Series;
+import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.InfoPopup;
 import eu.hansolo.fx.charts.tools.NumberFormat;
@@ -35,6 +35,8 @@ import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.LongPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.ListChangeListener;
@@ -59,8 +61,8 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -72,7 +74,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 @DefaultProperty("children")
-public class BarChart extends Region {
+public class BarChart<T extends ChartItem> extends Region {
     private static final double                                    PREFERRED_WIDTH  = 250;
     private static final double                                    PREFERRED_HEIGHT = 250;
     private static final double                                    MINIMUM_WIDTH    = 50;
@@ -85,7 +87,7 @@ public class BarChart extends Region {
     private              Canvas                                    canvas;
     private              GraphicsContext                           ctx;
     private              Pane                                      pane;
-    private              ChartItemSeries<ChartItem>                series;
+    private              ChartItemSeries<T>                        series;
     private              Orientation                               _orientation;
     private              ObjectProperty<Orientation>               orientation;
     private              Paint                                     _backgroundFill;
@@ -94,6 +96,8 @@ public class BarChart extends Region {
     private              ObjectProperty<Paint>                     namesBackgroundFill;
     private              Color                                     _barBackgroundFill;
     private              ObjectProperty<Color>                     barBackgroundFill;
+    private              Paint                                     _seriesFill;
+    private              ObjectProperty<Paint>                     seriesFill;
     private              Color                                     _textFill;
     private              ObjectProperty<Color>                     textFill;
     private              Color                                     _namesTextFill;
@@ -116,6 +120,10 @@ public class BarChart extends Region {
     private              BooleanProperty                           sorted;
     private              Order                                     _order;
     private              ObjectProperty<Order>                     order;
+    private              boolean                                   _animated;
+    private              BooleanProperty                           animated;
+    private              long                                      _animationDuration;
+    private              LongProperty                              animationDuration;
     private              Map<Rectangle, ChartItem>                 rectangleItemMap;
     private              ListChangeListener<ChartItem>             chartItemListener;
     private              EvtObserver<ChartEvt>                     observer;
@@ -125,14 +133,16 @@ public class BarChart extends Region {
 
 
     // ******************** Constructors **************************************
-    public BarChart(final ChartItemSeries series) {
-        if (null == series || series.getItems().isEmpty()) { throw new IllegalArgumentException("Series cannot be null or empty"); }
-        this.series = series;
-        if (!validate()) { throw new IllegalArgumentException("Please make sure the categories of the items in series 1 and 2 are the same and not null or empty"); }
+    public BarChart() {
+        this(new ArrayList<>());
+    }
+    public BarChart(final List<T> items) {
+        if (null == items) { throw new IllegalArgumentException("Items cannot be null or empty"); }
         _orientation            = Orientation.HORIZONTAL;
         _backgroundFill         = Color.TRANSPARENT;
         _barBackgroundFill      = Color.rgb(230, 230, 230);
         _namesBackgroundFill    = Color.TRANSPARENT;
+        _seriesFill             = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(255, 105, 91)), new Stop(1, Color.rgb(217, 41, 76)));
         _textFill               = Color.WHITE;
         _namesTextFill          = Color.BLACK;
         _barBackgroundVisible   = false;
@@ -144,18 +154,15 @@ public class BarChart extends Region {
         _shortenNumbers         = false;
         _sorted                 = false;
         _order                  = Order.DESCENDING;
+        _animated               = true;
+        _animationDuration      = 1000;
         observers               = new ConcurrentHashMap<>();
         popup                   = new InfoPopup();
         rectangleItemMap        = new HashMap<>();
         observer                = evt -> {
             EvtType<? extends Evt> type = evt.getEvtType();
             if (type.equals(ChartEvt.ITEM_UPDATE) || type.equals(ChartEvt.FINISHED)) {
-                if (getSorted()) {
-                    switch(getOrder()) {
-                        case ASCENDING  -> Collections.sort(series.getItems(), Comparator.comparingDouble(ChartItem::getValue));
-                        case DESCENDING -> Collections.sort(series.getItems(), Comparator.comparingDouble(ChartItem::getValue).reversed());
-                    }
-                }
+                if (getSorted()) { series.sort(getOrder()); }
                 switch(getOrientation()) {
                     case HORIZONTAL -> drawHorizontalChart();
                     case VERTICAL   -> drawVerticalChart();
@@ -163,9 +170,15 @@ public class BarChart extends Region {
             }
         };
         chartItemListener       = c -> {
+            boolean animated          = series.isAnimated();
+            long    animationDuration = series.getAnimationDuration();
             while (c.next()) {
                 if (c.wasAdded()) {
-                    c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, observer));
+                    c.getAddedSubList().forEach(addedItem -> {
+                        addedItem.addChartEvtObserver(ChartEvt.ANY, observer);
+                        if (animated) { addedItem.setAnimated(animated); }
+                        addedItem.setAnimationDuration(animationDuration);
+                    });
                 } else if (c.wasRemoved()) {
                     c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ANY, observer));
                 }
@@ -176,7 +189,17 @@ public class BarChart extends Region {
             }
         };
         mouseHandler            = e -> handleMouseEvents(e);
-        prepareSeries(this.series);
+
+        this.series = ChartItemSeriesBuilder.create()
+                                            .name("Series")
+                                            .items(items)
+                                            .fill(_seriesFill)
+                                            .textFill(_textFill)
+                                            .animated(true)
+                                            .animationDuration(_animationDuration)
+                                            .build();
+
+        prepareSeries();
         initGraphics();
         registerListeners();
     }
@@ -193,7 +216,7 @@ public class BarChart extends Region {
             }
         }
 
-        getStyleClass().add("comparison-ring-chart");
+        getStyleClass().add("bar-chart");
 
         canvas = new Canvas(size * 0.9, 0.9);
         ctx    = canvas.getGraphicsContext2D();
@@ -208,7 +231,6 @@ public class BarChart extends Region {
         heightProperty().addListener(o -> resize());
 
         series.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, observer));
-
         series.getItems().addListener(chartItemListener);
 
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
@@ -232,6 +254,26 @@ public class BarChart extends Region {
     @Override protected double computeMaxHeight(final double width) { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
+
+    public List<T> getItems() { return series.getItems(); }
+    public void setItems(final T... items) {
+        setItems(Arrays.asList(items));
+    }
+    public void setItems(final List<T> items) {
+        this.series.getItems().forEach(item -> item.removeChartEvtObserver(ChartEvt.ANY, observer));
+        this.series.getItems().removeListener(chartItemListener);
+
+        this.series.getItems().clear();
+        this.series.setItems(items);
+        prepareSeries();
+
+        this.series.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, observer));
+        this.series.getItems().addListener(chartItemListener);
+
+        if (getSorted()) { this.series.sort(getOrder()); }
+
+        redraw();
+    }
 
     public Orientation getOrientation() { return null == orientation ? _orientation : orientation.get(); }
     public void setOrientation(final Orientation orientation) {
@@ -317,6 +359,31 @@ public class BarChart extends Region {
         return barBackgroundFill;
     }
 
+    public Paint getSeriesFill() { return null == seriesFill ? _seriesFill : seriesFill.get(); }
+    public void setSeriesFill(final Paint seriesFill) {
+        if (null == this.seriesFill) {
+            _seriesFill = seriesFill;
+            series.setFill(_seriesFill);
+            redraw();
+        } else {
+            this.seriesFill.set(seriesFill);
+        }
+    }
+    public ObjectProperty<Paint> seriesFillProperty() {
+        if (null == seriesFill) {
+            seriesFill = new ObjectPropertyBase<>(_seriesFill) {
+                @Override protected void invalidated() {
+                    series.setFill(get());
+                    redraw();
+                }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "seriesFill"; }
+            };
+            _seriesFill = null;
+        }
+        return seriesFill;
+    }
+
     public Color getTextFill() { return null == textFill ? _textFill : textFill.get(); }
     public void setTextFill(final Color textFill) {
         if (null == this.textFill) {
@@ -400,13 +467,13 @@ public class BarChart extends Region {
     }
 
     public NumberFormat getNumberFormat() { return null == numberFormat ? _numberFormat : numberFormat.get(); }
-    public void setNumberFormat(final NumberFormat FORMAT) {
+    public void setNumberFormat(final NumberFormat format) {
         if (null == numberFormat) {
-            _numberFormat = FORMAT;
+            _numberFormat = format;
             updatePopup();
             redraw();
         } else {
-            numberFormat.set(FORMAT);
+            numberFormat.set(format);
         }
     }
     public ObjectProperty<NumberFormat> numberFormatProperty() {
@@ -485,12 +552,12 @@ public class BarChart extends Region {
     }
 
     public boolean getShortenNumbers() { return null == shortenNumbers ? _shortenNumbers : shortenNumbers.get(); }
-    public void setShortenNumbers(final boolean SHORTEN) {
+    public void setShortenNumbers(final boolean shorten) {
         if (null == shortenNumbers) {
-            _shortenNumbers = SHORTEN;
+            _shortenNumbers = shorten;
             redraw();
         } else {
-            shortenNumbers.set(SHORTEN);
+            shortenNumbers.set(shorten);
         }
     }
     public BooleanProperty shortenNumbersProperty() {
@@ -545,9 +612,54 @@ public class BarChart extends Region {
         return order;
     }
 
-    private boolean validate() {
-        if (series.getItems().isEmpty()) { return false; }
-        return true;
+    public boolean isAnimated() { return null == animated ? _animated : animated.get(); }
+    public void setAnimated(final boolean animated) {
+        if (null == this.animated) {
+            _animated = animated;
+            series.setAnimated(_animated);
+            prepareSeries();
+        } else {
+            this.animated.set(animated);
+        }
+    }
+    public BooleanProperty animatedProperty() {
+        if (null == animated) {
+            animated = new BooleanPropertyBase(_animated) {
+                @Override protected void invalidated() {
+                    series.setAnimated(get());
+                    prepareSeries();
+                }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "animated"; }
+            };
+        }
+        return animated;
+    }
+
+    public long getAnimationDuration() { return null == animationDuration ? _animationDuration : animationDuration.get(); }
+    public void setAnimationDuration(final long animationDuration) {
+        if (null == this.animationDuration) {
+            _animationDuration = Helper.clamp(10, 10000, animationDuration);
+            series.setAnimationDuration(_animationDuration);
+            prepareSeries();
+        } else {
+            this.animationDuration.set(animationDuration);
+        }
+    }
+    public LongProperty animationDurationProperty() {
+        if (null == animationDuration) {
+            animationDuration = new LongPropertyBase(_animationDuration) {
+                @Override protected void invalidated() {
+                    long ad = Helper.clamp(10, 10000, get());
+                    series.setAnimationDuration(ad);
+                    prepareSeries();
+                    set(ad);
+                }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "animationDuration"; }
+            };
+        }
+        return animationDuration;
     }
 
     private void handleMouseEvents(final MouseEvent evt) {
@@ -612,11 +724,11 @@ public class BarChart extends Region {
 
 
     // ******************** Drawing *******************************************
-    private void prepareSeries(final Series<ChartItem> SERIES) {
-        boolean animated          = SERIES.isAnimated();
-        long    animationDuration = SERIES.getAnimationDuration();
-        SERIES.getItems().forEach(item -> {
-            if (animated) { item.setAnimated(animated); }
+    private void prepareSeries() {
+        boolean animated          = this.series.isAnimated();
+        long    animationDuration = this.series.getAnimationDuration();
+        this.series.getItems().forEach(item -> {
+            item.setAnimated(animated);
             item.setAnimationDuration(animationDuration);
         });
     }
@@ -626,7 +738,7 @@ public class BarChart extends Region {
         double          inset                = 5;
         double          chartWidth           = this.width - 2 * inset;
         double          chartHeight          = this.height - 2 * inset;
-        List<ChartItem> items                = series.getItems();
+        List<T>         items                = series.getItems();
         double          noOfItems            = items.size();
         double          namesWidth           = chartWidth * 0.2;
         double          maxBarWidth          = chartWidth - namesWidth;
@@ -757,7 +869,7 @@ public class BarChart extends Region {
         double          inset                = 5;
         double          chartWidth           = this.width - 2 * inset;
         double          chartHeight          = this.height - 2 * inset;
-        List<ChartItem> items                = series.getItems();
+        List<T>         items                = series.getItems();
         double          noOfItems            = items.size();
         double          namesHeight          = chartHeight * 0.1;
         double          maxBarHeight         = chartHeight - namesHeight;
@@ -881,6 +993,7 @@ public class BarChart extends Region {
         }
     }
 
+
     // ******************** Resizing ******************************************
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
@@ -900,12 +1013,7 @@ public class BarChart extends Region {
     }
 
     private void redraw() {
-        if (getSorted()) {
-            switch(getOrder()) {
-                case ASCENDING  -> Collections.sort(series.getItems(), Comparator.comparingDouble(ChartItem::getValue));
-                case DESCENDING -> Collections.sort(series.getItems(), Comparator.comparingDouble(ChartItem::getValue).reversed());
-            }
-        }
+        if (getSorted()) { series.sort(getOrder()); }
         switch(getOrientation()) {
             case HORIZONTAL -> drawHorizontalChart();
             case VERTICAL   -> drawVerticalChart();
