@@ -84,6 +84,8 @@ public class BarChartTest extends Application {
                                //.numberFormat(NumberFormat.PERCENTAGE)
                                .numberFormat(NumberFormat.NUMBER)
                                //.animated(false)
+                               .minNumberOfBars(10)
+                               .useMinNumberOfBars(false)
                                .build();
 
         AnchorPane.setTopAnchor(chart, 10d);

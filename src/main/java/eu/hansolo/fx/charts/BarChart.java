@@ -35,6 +35,8 @@ import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.LongPropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -124,6 +126,10 @@ public class BarChart<T extends ChartItem> extends Region {
     private              BooleanProperty                           animated;
     private              long                                      _animationDuration;
     private              LongProperty                              animationDuration;
+    private              int                                       _minNumberOfBars;
+    private              IntegerProperty                           minNumberOfBars;
+    private              boolean                                   _useMinNumberOfBars;
+    private              BooleanProperty                           useMinNumberOfBars;
     private              Map<Rectangle, ChartItem>                 rectangleItemMap;
     private              ListChangeListener<ChartItem>             chartItemListener;
     private              EvtObserver<ChartEvt>                     observer;
@@ -156,6 +162,8 @@ public class BarChart<T extends ChartItem> extends Region {
         _order                  = Order.DESCENDING;
         _animated               = true;
         _animationDuration      = 1000;
+        _minNumberOfBars        = 5;
+        _useMinNumberOfBars     = false;
         observers               = new ConcurrentHashMap<>();
         popup                   = new InfoPopup();
         rectangleItemMap        = new HashMap<>();
@@ -662,6 +670,49 @@ public class BarChart<T extends ChartItem> extends Region {
         return animationDuration;
     }
 
+    public int getMinNumberOfBars() { return null == minNumberOfBars ? _minNumberOfBars : minNumberOfBars.get(); }
+    public void setMinNumberOfBars(final int minNumberOfBars) {
+        if (null == this.minNumberOfBars) {
+            _minNumberOfBars = Helper.clamp(1, Integer.MAX_VALUE, minNumberOfBars);
+            redraw();
+        } else {
+            this.minNumberOfBars.set(minNumberOfBars);
+        }
+    }
+    public IntegerProperty minNumberOfBarsProperty() {
+        if (null == minNumberOfBars) {
+            minNumberOfBars = new IntegerPropertyBase(_minNumberOfBars) {
+                @Override protected void invalidated() {
+                    set(Helper.clamp(1, Integer.MAX_VALUE, get()));
+                    redraw();
+                }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "minNumberOfBars"; }
+            };
+        }
+        return minNumberOfBars;
+    }
+
+    public boolean getUseMinNumberOfBars() { return null == useMinNumberOfBars ? _useMinNumberOfBars : useMinNumberOfBars.get(); }
+    public void setUseMinNumberOfBars(final boolean useMinNumberOfBars) {
+        if (null == this.useMinNumberOfBars) {
+            _useMinNumberOfBars = useMinNumberOfBars;
+            redraw();
+        } else {
+            this.useMinNumberOfBars.set(useMinNumberOfBars);
+        }
+    }
+    public BooleanProperty useMinNumberOfBarsProperty() {
+        if (null == useMinNumberOfBars) {
+            useMinNumberOfBars = new BooleanPropertyBase(_useMinNumberOfBars) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "useMinNumberOfBars"; }
+            };
+        }
+        return useMinNumberOfBars;
+    }
+
     private void handleMouseEvents(final MouseEvent evt) {
         final double x = evt.getX();
         final double y = evt.getY();
@@ -742,9 +793,10 @@ public class BarChart<T extends ChartItem> extends Region {
         double          noOfItems            = items.size();
         double          namesWidth           = chartWidth * 0.2;
         double          maxBarWidth          = chartWidth - namesWidth;
-        double          barHeight            = chartHeight / (noOfItems + (noOfItems * 0.4));
+        double          minNumberOfBars      = noOfItems > getMinNumberOfBars() ? noOfItems : getMinNumberOfBars();
+        double          barHeight            = getUseMinNumberOfBars() ? chartHeight / (minNumberOfBars + (minNumberOfBars * 0.4)) : chartHeight / (noOfItems + (noOfItems * 0.4));
         double          cornerRadius         = barHeight * 0.75;
-        double          barSpacer            = (chartHeight - (noOfItems * barHeight)) / (noOfItems - 1);
+        double          barSpacer            = getUseMinNumberOfBars() ? (chartHeight - (minNumberOfBars * barHeight)) / (minNumberOfBars - 1) : (chartHeight - (noOfItems * barHeight)) / (noOfItems - 1);
         double          maxValue             = series.getMaxValue();
         NumberFormat    numberFormat         = getNumberFormat();
         Color           valueTextFill        = getTextFill();
@@ -873,9 +925,10 @@ public class BarChart<T extends ChartItem> extends Region {
         double          noOfItems            = items.size();
         double          namesHeight          = chartHeight * 0.1;
         double          maxBarHeight         = chartHeight - namesHeight;
-        double          barWidth             = chartWidth / (noOfItems + (noOfItems * 0.4));
+        double          minNumberOfBars      = noOfItems > getMinNumberOfBars() ? noOfItems : getMinNumberOfBars();
+        double          barWidth             = getUseMinNumberOfBars() ? chartWidth / (minNumberOfBars + (minNumberOfBars * 0.4)) : chartWidth / (noOfItems + (noOfItems * 0.4));
         double          cornerRadius         = barWidth * 0.75;
-        double          barSpacer            = (chartWidth - (noOfItems * barWidth)) / (noOfItems - 1);
+        double          barSpacer            = getUseMinNumberOfBars() ? (chartWidth - (minNumberOfBars * barWidth)) / (minNumberOfBars - 1) : (chartWidth - (noOfItems * barWidth)) / (noOfItems - 1);
         double          maxValue             = series.getMaxValue();
         NumberFormat    numberFormat         = getNumberFormat();
         Color           valueTextFill        = getTextFill();

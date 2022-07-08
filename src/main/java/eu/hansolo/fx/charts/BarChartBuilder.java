@@ -23,11 +23,13 @@ import eu.hansolo.fx.charts.tools.NumberFormat;
 import eu.hansolo.fx.charts.tools.Order;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
@@ -150,6 +152,16 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
 
     public final B animationDuration(final long animationDuration) {
         properties.put("animationDuration", new SimpleLongProperty(animationDuration));
+        return (B)this;
+    }
+
+    public final B minNumberOfBars(final int minNumberOfBars) {
+        properties.put("minNumberOfBars", new SimpleIntegerProperty(minNumberOfBars));
+        return (B)this;
+    }
+
+    public final B useMinNumberOfBars(final boolean useMinNumberOfBars) {
+        properties.put("useMinNumberOfBars", new SimpleBooleanProperty(useMinNumberOfBars));
         return (B)this;
     }
 
@@ -310,6 +322,10 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
                 chart.setAnimated(((BooleanProperty) properties.get(key)).get());
             } else if ("animationDuration".equals(key)) {
                 chart.setAnimationDuration(((LongProperty) properties.get(key)).get());
+            } else if ("minNumberOfBars".equals(key)) {
+                chart.setMinNumberOfBars(((IntegerProperty) properties.get(key)).get());
+            } else if ("useMinNumberOfBars".equals(key)) {
+                chart.setUseMinNumberOfBars(((BooleanProperty) properties.get(key)).get());
             }
         }
         return chart;
