@@ -142,46 +142,29 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
     }
 
     public final ChartItem build() {
-        final ChartItem ITEM = new ChartItem();
+        final ChartItem chartItem = new ChartItem();
         for (String key : properties.keySet()) {
-            if ("index".equals(key)) {
-                ITEM.setIndex(((IntegerProperty) properties.get(key)).get());
-            } else if ("name".equals(key)) {
-                ITEM.setName(((StringProperty) properties.get(key)).get());
-            } else if ("value".equals(key)) {
-                ITEM.setValue(((DoubleProperty) properties.get(key)).get());
-            } else if ("unit".equals(key)) {
-                ITEM.setUnit(((StringProperty) properties.get(key)).get());
-            } else if ("description".equals(key)) {
-                ITEM.setDescription(((StringProperty) properties.get(key)).get());
-            } else if ("category".equals(key)) {
-                ITEM.setCategory(((ObjectProperty<Category>) properties.get(key)).get());
-            } else if("fill".equals(key)) {
-                ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("stroke".equals(key)) {
-                ITEM.setStroke(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("textFill".equals(key)) {
-                ITEM.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("timestamp".equals(key)) {
-                ITEM.setTimestamp(((ObjectProperty<Instant>) properties.get(key)).get());
-            } else if ("timestampDateTime".equals(key)) {
-                ITEM.setTimestamp(((ObjectProperty<ZonedDateTime>) properties.get(key)).get());
-            } else if("symbol".equals(key)) {
-                ITEM.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
-            } else if("animated".equals(key)) {
-                ITEM.setAnimated(((BooleanProperty) properties.get(key)).get());
-            } else if("animationDuration".equals(key)) {
-                ITEM.setAnimationDuration(((LongProperty) properties.get(key)).get());
-            } else if ("x".equals(key)) {
-                ITEM.setX(((DoubleProperty) properties.get(key)).get());
-            } else if ("y".equals(key)) {
-                ITEM.setY(((DoubleProperty) properties.get(key)).get());
-            } else if ("isEmpty".equals(key)) {
-                ITEM.setIsEmpty(((BooleanProperty) properties.get(key)).get());
-            } else if ("metadata".equals(key)) {
-                ITEM.setMetadata(((ObjectProperty<Metadata>) properties.get(key)).get());
+            switch (key) {
+                case "index"             -> chartItem.setIndex(((IntegerProperty) properties.get(key)).get());
+                case "name"              -> chartItem.setName(((StringProperty) properties.get(key)).get());
+                case "value"             -> chartItem.setValue(((DoubleProperty) properties.get(key)).get());
+                case "unit"              -> chartItem.setUnit(((StringProperty) properties.get(key)).get());
+                case "description"       -> chartItem.setDescription(((StringProperty) properties.get(key)).get());
+                case "category"          -> chartItem.setCategory(((ObjectProperty<Category>) properties.get(key)).get());
+                case "fill"              -> chartItem.setFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "stroke"            -> chartItem.setStroke(((ObjectProperty<Color>) properties.get(key)).get());
+                case "textFill"          -> chartItem.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "timestamp"         -> chartItem.setTimestamp(((ObjectProperty<Instant>) properties.get(key)).get());
+                case "timestampDateTime" -> chartItem.setTimestamp(((ObjectProperty<ZonedDateTime>) properties.get(key)).get());
+                case "symbol"            -> chartItem.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
+                case "animated"          -> chartItem.setAnimated(((BooleanProperty) properties.get(key)).get());
+                case "animationDuration" -> chartItem.setAnimationDuration(((LongProperty) properties.get(key)).get());
+                case "x"                 -> chartItem.setX(((DoubleProperty) properties.get(key)).get());
+                case "y"                 -> chartItem.setY(((DoubleProperty) properties.get(key)).get());
+                case "isEmpty"           -> chartItem.setIsEmpty(((BooleanProperty) properties.get(key)).get());
+                case "metadata"          -> chartItem.setMetadata(((ObjectProperty<Metadata>) properties.get(key)).get());
             }
         }
-        return ITEM;
+        return chartItem;
     }
 }

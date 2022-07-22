@@ -105,42 +105,36 @@ public class AreaHeatMapBuilder<B extends AreaHeatMapBuilder<B>> {
         return (B)this;
     }
 
-    public final B noOfCloserInfluentPoints(final int NO_OF_POINTS) {
-        properties.put("noOfCloserInfluentPoints", new SimpleIntegerProperty(NO_OF_POINTS));
+    public final B noOfCloserInfluentialPoints(final int NO_OF_POINTS) {
+        properties.put("noOfCloserInfluentialPoints", new SimpleIntegerProperty(NO_OF_POINTS));
         return (B)this;
     }
 
 
     public final AreaHeatMap build() {
-        final AreaHeatMap CONTROL = new AreaHeatMap();
+        final AreaHeatMap areaHeatMap = new AreaHeatMap();
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if ("colorMapping".equals(key)) {
-                CONTROL.setColorMapping(((ObjectProperty<Mapping>) properties.get(key)).get());
-            } else if("useColorMapping".equals(key)) {
-                CONTROL.setUseColorMapping(((BooleanProperty) properties.get(key)).get());
-            } else if ("quality".equals(key)) {
-                CONTROL.setQuality(((IntegerProperty) properties.get(key)).get());
-            } else if ("heatMapOpacity".equals(key)) {
-                CONTROL.setHeatMapOpacity(((DoubleProperty) properties.get(key)).get());
-            } else if ("dataPointsVisible".equals(key)) {
-                CONTROL.setDataPointsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("smoothedHull".equals(key)) {
-                CONTROL.setSmoothedHull(((BooleanProperty) properties.get(key)).get());
-            } else if ("discreteColors".equals(key)) {
-                CONTROL.setDiscreteColors(((BooleanProperty) properties.get(key)).get());
-            } else if ("noOfCloserInfluentPoints".equals(key)) {
-                CONTROL.setNoOfCloserInfluentPoints(((IntegerProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"                    -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    areaHeatMap.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "colorMapping"                -> areaHeatMap.setColorMapping(((ObjectProperty<Mapping>) properties.get(key)).get());
+                case "useColorMapping"             -> areaHeatMap.setUseColorMapping(((BooleanProperty) properties.get(key)).get());
+                case "quality"                     -> areaHeatMap.setQuality(((IntegerProperty) properties.get(key)).get());
+                case "heatMapOpacity"              -> areaHeatMap.setHeatMapOpacity(((DoubleProperty) properties.get(key)).get());
+                case "dataPointsVisible"           -> areaHeatMap.setDataPointsVisible(((BooleanProperty) properties.get(key)).get());
+                case "smoothedHull"                -> areaHeatMap.setSmoothedHull(((BooleanProperty) properties.get(key)).get());
+                case "discreteColors"              -> areaHeatMap.setDiscreteColors(((BooleanProperty) properties.get(key)).get());
+                case "noOfCloserInfluentialPoints" -> areaHeatMap.setNoOfCloserInfluentialPoints(((IntegerProperty) properties.get(key)).get());
             }
         }
         if (properties.keySet().contains("dataPointsArray")) {
-            CONTROL.setDataPoints(((ObjectProperty<DataPoint[]>) properties.get("dataPointsArray")).get());
+            areaHeatMap.setDataPoints(((ObjectProperty<DataPoint[]>) properties.get("dataPointsArray")).get());
         }
         if(properties.keySet().contains("dataPointsList")) {
-            CONTROL.setDataPoints(((ObjectProperty<List<DataPoint>>) properties.get("dataPointsList")).get());
+            areaHeatMap.setDataPoints(((ObjectProperty<List<DataPoint>>) properties.get("dataPointsList")).get());
         }
-        return CONTROL;
+        return areaHeatMap;
     }
 }

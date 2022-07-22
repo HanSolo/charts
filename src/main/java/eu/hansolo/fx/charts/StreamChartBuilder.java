@@ -218,87 +218,62 @@ public class StreamChartBuilder<B extends StreamChartBuilder<B>> {
         return (B)this;
     }
 
+
     public final StreamChart build() {
-        final StreamChart CONTROL = new StreamChart();
+        final StreamChart streamChart = new StreamChart();
 
         if (properties.keySet().contains("itemsArray")) {
-            CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
+            streamChart.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
         } else if(properties.keySet().contains("itemsList")) {
-            CONTROL.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
+            streamChart.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("category".equals(key)) {
-                CONTROL.setCategory(((ObjectProperty<Category>) properties.get(key)).get());
-            } else if ("type".equals(key)) {
-                CONTROL.setType(((ObjectProperty<Type>) properties.get(key)).get());
-            } else if ("textColor".equals(key)) {
-                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("autoTextColor".equals(key)) {
-                CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
-            } else if ("selectionColor".equals(key)) {
-                CONTROL.setSelectionColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("itemWidth".equals(key)) {
-                CONTROL.setItemWidth(((IntegerProperty) properties.get(key)).get());
-            } else if ("autoItemWidth".equals(key)) {
-                CONTROL.setAutoItemWidth(((BooleanProperty) properties.get(key)).get());
-            } else if ("itemGap".equals(key)) {
-                CONTROL.setItemGap(((IntegerProperty) properties.get(key)).get());
-            } else if ("autoItemGap".equals(key)) {
-                CONTROL.setAutoItemGap(((BooleanProperty) properties.get(key)).get());
-            } else if ("locale".equals(key)) {
-                CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
-            } else if ("itemTextThreshold".equals(key)) {
-                CONTROL.setItemTextThreshold(((DoubleProperty) properties.get(key)).get());
-            } else if ("itemTextVisible".equals(key)) {
-                CONTROL.setItemTextVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("categoryTextColor".equals(key)) {
-                CONTROL.setCategoryTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("order".equals(key)) {
-                CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
-            } else if ("sortByName".equals(key)) {
-                CONTROL.setSortByName(((BooleanProperty) properties.get(key)).get());
-            } else if ("categorySumVisible".equals(key)) {
-                CONTROL.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"           -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    streamChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    streamChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    streamChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"          -> streamChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"         -> streamChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"           -> streamChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"          -> streamChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"           -> streamChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"          -> streamChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"             -> streamChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"             -> streamChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"            -> streamChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"            -> streamChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"         -> streamChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"         -> streamChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"            -> streamChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "category"           -> streamChart.setCategory(((ObjectProperty<Category>) properties.get(key)).get());
+                case "type"               -> streamChart.setType(((ObjectProperty<Type>) properties.get(key)).get());
+                case "textColor"          -> streamChart.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "autoTextColor"      -> streamChart.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+                case "selectionColor"     -> streamChart.setSelectionColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "decimals"           -> streamChart.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "itemWidth"          -> streamChart.setItemWidth(((IntegerProperty) properties.get(key)).get());
+                case "autoItemWidth"      -> streamChart.setAutoItemWidth(((BooleanProperty) properties.get(key)).get());
+                case "itemGap"            -> streamChart.setItemGap(((IntegerProperty) properties.get(key)).get());
+                case "autoItemGap"        -> streamChart.setAutoItemGap(((BooleanProperty) properties.get(key)).get());
+                case "locale"             -> streamChart.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                case "itemTextThreshold"  -> streamChart.setItemTextThreshold(((DoubleProperty) properties.get(key)).get());
+                case "itemTextVisible"    -> streamChart.setItemTextVisible(((BooleanProperty) properties.get(key)).get());
+                case "categoryTextColor"  -> streamChart.setCategoryTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "order"              -> streamChart.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
+                case "sortByName"         -> streamChart.setSortByName(((BooleanProperty) properties.get(key)).get());
+                case "categorySumVisible" -> streamChart.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return streamChart;
     }
 }

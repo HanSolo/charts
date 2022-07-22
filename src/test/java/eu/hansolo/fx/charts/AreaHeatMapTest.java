@@ -60,7 +60,7 @@ public class AreaHeatMapTest extends Application {
                                         .heatMapOpacity(0.5)
                                         .useColorMapping(true)
                                         .dataPointsVisible(true)
-                                        .noOfCloserInfluentPoints(5)
+                                        .noOfCloserInfluentialPoints(5)
                                         .dataPoints(randomPoints)
                                         .build();
     }

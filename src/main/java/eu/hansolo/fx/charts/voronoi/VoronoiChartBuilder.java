@@ -169,71 +169,54 @@ public class VoronoiChartBuilder<B extends VoronoiChartBuilder<B>> {
         return (B)this;
     }
 
+
     public final VoronoiChart build() {
-        final VoronoiChart chart;
+        final VoronoiChart voronoiChart;
 
         if (properties.containsKey("points")) {
-            chart = new VoronoiChart(((ObjectProperty<List<VPoint>>) properties.get("points")).get());
+            voronoiChart = new VoronoiChart(((ObjectProperty<List<VPoint>>) properties.get("points")).get());
         } else {
-            chart = new VoronoiChart();
+            voronoiChart = new VoronoiChart();
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                chart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                chart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                chart.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                chart.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                chart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                chart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                chart.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                chart.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                chart.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                chart.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                chart.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                chart.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                chart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("pointsVisible".equals(key)) {
-                chart.setPointsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("pointColor".equals(key)) {
-                chart.setPointColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("fillRegions".equals(key)) {
-                chart.setFillRegions(((BooleanProperty) properties.get(key)).get());
-            } else if ("borderColor".equals(key)) {
-                chart.setBorderColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("type".equals(key)) {
-                chart.setType(((ObjectProperty<Type>) properties.get(key)).get());
-            } else if ("multiColor".equals(key)) {
-                chart.setMulticolor(((BooleanProperty) properties.get(key)).get());
-            } else if ("voronoiColor".equals(key)) {
-                chart.setVoronoiColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("delaunayColor".equals(key)) {
-                chart.setDelaunayColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("interactive".equals(key)) {
-                chart.setInteractive(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"      -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    voronoiChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"       -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    voronoiChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"       -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    voronoiChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"     -> voronoiChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"    -> voronoiChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"      -> voronoiChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"     -> voronoiChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"      -> voronoiChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"     -> voronoiChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"        -> voronoiChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"        -> voronoiChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"       -> voronoiChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"       -> voronoiChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"    -> voronoiChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"    -> voronoiChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"       -> voronoiChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "pointsVisible" -> voronoiChart.setPointsVisible(((BooleanProperty) properties.get(key)).get());
+                case "pointColor"    -> voronoiChart.setPointColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "fillRegions"   -> voronoiChart.setFillRegions(((BooleanProperty) properties.get(key)).get());
+                case "borderColor"   -> voronoiChart.setBorderColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "type"          -> voronoiChart.setType(((ObjectProperty<Type>) properties.get(key)).get());
+                case "multiColor"    -> voronoiChart.setMulticolor(((BooleanProperty) properties.get(key)).get());
+                case "voronoiColor"  -> voronoiChart.setVoronoiColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "delaunayColor" -> voronoiChart.setDelaunayColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "interactive"   -> voronoiChart.setInteractive(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return chart;
+        return voronoiChart;
     }
 }

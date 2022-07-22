@@ -86,27 +86,21 @@ public class BubbleGridChartItemBuilder<B extends BubbleGridChartItemBuilder<B>>
         return (B)this;
     }
 
+
     public final BubbleGridChartItem build() {
-        final BubbleGridChartItem ITEM = new BubbleGridChartItem();
+        final BubbleGridChartItem bubbleGridChartItem = new BubbleGridChartItem();
         for (String key : properties.keySet()) {
-            if ("name".equals(key)) {
-                ITEM.setName(((StringProperty) properties.get(key)).get());
-            } else if ("value".equals(key)) {
-                ITEM.setValue(((DoubleProperty) properties.get(key)).get());
-            } else if("fill".equals(key)) {
-                ITEM.setFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("stroke".equals(key)) {
-                ITEM.setStroke(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if("symbol".equals(key)) {
-                ITEM.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
-            } else if("categoryX".equals(key)) {
-                ITEM.setCategoryX(((ObjectProperty<ChartItem>) properties.get(key)).get());
-            } else if("categoryY".equals(key)) {
-                ITEM.setCategoryY(((ObjectProperty<ChartItem>) properties.get(key)).get());
-            } else if ("isEmpty".equals(key)) {
-                ITEM.setIsEmpty(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "name"      -> bubbleGridChartItem.setName(((StringProperty) properties.get(key)).get());
+                case "value"     -> bubbleGridChartItem.setValue(((DoubleProperty) properties.get(key)).get());
+                case "fill"      -> bubbleGridChartItem.setFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "stroke"    -> bubbleGridChartItem.setStroke(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbol"    -> bubbleGridChartItem.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
+                case "categoryX" -> bubbleGridChartItem.setCategoryX(((ObjectProperty<ChartItem>) properties.get(key)).get());
+                case "categoryY" -> bubbleGridChartItem.setCategoryY(((ObjectProperty<ChartItem>) properties.get(key)).get());
+                case "isEmpty"   -> bubbleGridChartItem.setIsEmpty(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return ITEM;
+        return bubbleGridChartItem;
     }
 }

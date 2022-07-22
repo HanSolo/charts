@@ -193,76 +193,55 @@ public class ParallelCoordinatesChartBuilder<B extends ParallelCoordinatesChartB
 
 
     public final ParallelCoordinatesChart build() {
-        final ParallelCoordinatesChart CONTROL = new ParallelCoordinatesChart();
+        final ParallelCoordinatesChart parallelCoordinatesChart = new ParallelCoordinatesChart();
 
         if (properties.keySet().contains("itemArray")) {
-            CONTROL.setItems(((ObjectProperty<DataObject[]>) properties.get("itemArray")).get());
+            parallelCoordinatesChart.setItems(((ObjectProperty<DataObject[]>) properties.get("itemArray")).get());
         }
         if (properties.keySet().contains("itemList")) {
-            CONTROL.setItems(((ObjectProperty<List<DataObject>>) properties.get("itemList")).get());
+            parallelCoordinatesChart.setItems(((ObjectProperty<List<DataObject>>) properties.get("itemList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if ("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if ("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if ("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } // Control specific properties
-            else if ("axisColor".equals(key)) {
-                CONTROL.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("headerColor".equals(key)) {
-                CONTROL.setHeaderColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("unitColor".equals(key)) {
-                CONTROL.setUnitColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("tickLabelColor".equals(key)) {
-                CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("locale".equals(key)) {
-                CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("tickMarksVisible".equals(key)) {
-                CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("selectedColor".equals(key)) {
-                CONTROL.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("unselectedColor".equals(key)) {
-                CONTROL.setUnselectedColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("selectionRectColor".equals(key)) {
-                CONTROL.setSelectionRectColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("smoothConnections".equals(key)) {
-                CONTROL.setSmoothConnections(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"           -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    parallelCoordinatesChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    parallelCoordinatesChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    parallelCoordinatesChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"          -> parallelCoordinatesChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"         -> parallelCoordinatesChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"           -> parallelCoordinatesChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"          -> parallelCoordinatesChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"           -> parallelCoordinatesChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"          -> parallelCoordinatesChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"             -> parallelCoordinatesChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"             -> parallelCoordinatesChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"            -> parallelCoordinatesChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"            -> parallelCoordinatesChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"         -> parallelCoordinatesChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"         -> parallelCoordinatesChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"            -> parallelCoordinatesChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "axisColor"          -> parallelCoordinatesChart.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "headerColor"        -> parallelCoordinatesChart.setHeaderColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "unitColor"          -> parallelCoordinatesChart.setUnitColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "tickLabelColor"     -> parallelCoordinatesChart.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "locale"             -> parallelCoordinatesChart.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                case "decimals"           -> parallelCoordinatesChart.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "tickMarksVisible"   -> parallelCoordinatesChart.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                case "selectedColor"      -> parallelCoordinatesChart.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "unselectedColor"    -> parallelCoordinatesChart.setUnselectedColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "selectionRectColor" -> parallelCoordinatesChart.setSelectionRectColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "smoothConnections"  -> parallelCoordinatesChart.setSmoothConnections(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return parallelCoordinatesChart;
     }
 }

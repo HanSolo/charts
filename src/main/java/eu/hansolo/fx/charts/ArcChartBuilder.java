@@ -179,76 +179,57 @@ public class ArcChartBuilder<B extends ArcChartBuilder<B>> {
         return (B)this;
     }
 
+    
     public final ArcChart build() {
-        final ArcChart CONTROL = new ArcChart();
+        final ArcChart arcChart = new ArcChart();
 
         if (properties.keySet().contains("itemsArray")) {
-            CONTROL.setItems(((ObjectProperty<PlotItem[]>) properties.get("itemsArray")).get());
+            arcChart.setItems(((ObjectProperty<PlotItem[]>) properties.get("itemsArray")).get());
         }
         if(properties.keySet().contains("itemsList")) {
-            CONTROL.setItems(((ObjectProperty<List<PlotItem>>) properties.get("itemsList")).get());
+            arcChart.setItems(((ObjectProperty<List<PlotItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("tickMarkColor".equals(key)) {
-                CONTROL.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("textColor".equals(key)) {
-                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("connectionOpactiy".equals(key)) {
-                CONTROL.setConnectionOpacity(((DoubleProperty) properties.get(key)).get());
-            } else if ("coloredConnections".equals(key)) {
-                CONTROL.setColoredConnections(((BooleanProperty) properties.get(key)).get());
-            } else if ("connectionColor".equals(key)) {
-                CONTROL.setConnectionColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("selectionColor".equals(key)) {
-                CONTROL.setSelectionColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("sortByCluster".equals(key)) {
-                CONTROL.setSortByCluster(((BooleanProperty) properties.get(key)).get());
-            } else if ("useFullCircle".equals(key)) {
-                CONTROL.setUseFullCircle(((BooleanProperty) properties.get(key)).get());
-            } else if ("weightConnections".equals(key)) {
-                CONTROL.setWeightConnections(((BooleanProperty) properties.get(key)).get());
-            } else if ("weightDots".equals(key)) {
-                CONTROL.setWeightDots(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"           -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    arcChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    arcChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"            -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    arcChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"          -> arcChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"         -> arcChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"           -> arcChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"          -> arcChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"           -> arcChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"          -> arcChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"             -> arcChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"             -> arcChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"            -> arcChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"            -> arcChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"         -> arcChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"         -> arcChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"            -> arcChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "tickMarkColor"      -> arcChart.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "textColor"          -> arcChart.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "decimals"           -> arcChart.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "connectionOpactiy"  -> arcChart.setConnectionOpacity(((DoubleProperty) properties.get(key)).get());
+                case "coloredConnections" -> arcChart.setColoredConnections(((BooleanProperty) properties.get(key)).get());
+                case "connectionColor"    -> arcChart.setConnectionColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "selectionColor"     -> arcChart.setSelectionColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "sortByCluster"      -> arcChart.setSortByCluster(((BooleanProperty) properties.get(key)).get());
+                case "useFullCircle"      -> arcChart.setUseFullCircle(((BooleanProperty) properties.get(key)).get());
+                case "weightConnections"  -> arcChart.setWeightConnections(((BooleanProperty) properties.get(key)).get());
+                case "weightDots"         -> arcChart.setWeightDots(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return arcChart;
     }
 }

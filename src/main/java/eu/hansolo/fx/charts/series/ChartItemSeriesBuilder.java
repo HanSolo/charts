@@ -127,42 +127,31 @@ public class ChartItemSeriesBuilder<B extends ChartItemSeriesBuilder<B>> {
 
 
     public final ChartItemSeries build() {
-        final ChartItemSeries SERIES = new ChartItemSeries();
+        final ChartItemSeries chartItemSeries = new ChartItemSeries();
 
         if (properties.keySet().contains("itemsArray")) {
-            SERIES.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
+            chartItemSeries.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemsArray")).get());
         }
         if(properties.keySet().contains("itemsList")) {
-            SERIES.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
+            chartItemSeries.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("name".equals(key)) {
-                SERIES.setName(((StringProperty) properties.get(key)).get());
-            } else if ("fill".equals(key)) {
-                SERIES.setFill(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("stroke".equals(key)) {
-                SERIES.setStroke(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("textFill".equals(key)) {
-                SERIES.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbolFill".equals(key)) {
-                SERIES.setSymbolFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbolStroke".equals(key)) {
-                SERIES.setSymbolStroke(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbol".equals(key)) {
-                SERIES.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
-            } else if ("chartType".equals(key)) {
-                SERIES.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
-            } else if ("symbolSize".equals(key)) {
-                SERIES.setSymbolSize(((DoubleProperty) properties.get(key)).get());
-            } else if ("strokeWidth".equals(key)) {
-                SERIES.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("animated".equals(key)) {
-                SERIES.setAnimated(((BooleanProperty) properties.get(key)).get());
-            } else if("animationDuration".equals(key)) {
-                SERIES.setAnimationDuration(((LongProperty) properties.get(key)).get());
+            switch (key) {
+                case "name"              -> chartItemSeries.setName(((StringProperty) properties.get(key)).get());
+                case "fill"              -> chartItemSeries.setFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "stroke"            -> chartItemSeries.setStroke(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "textFill"          -> chartItemSeries.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbolFill"        -> chartItemSeries.setSymbolFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbolStroke"      -> chartItemSeries.setSymbolStroke(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbol"            -> chartItemSeries.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
+                case "chartType"         -> chartItemSeries.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
+                case "symbolSize"        -> chartItemSeries.setSymbolSize(((DoubleProperty) properties.get(key)).get());
+                case "strokeWidth"       -> chartItemSeries.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
+                case "animated"          -> chartItemSeries.setAnimated(((BooleanProperty) properties.get(key)).get());
+                case "animationDuration" -> chartItemSeries.setAnimationDuration(((LongProperty) properties.get(key)).get());
             }
         }
-        return SERIES;
+        return chartItemSeries;
     }
 }

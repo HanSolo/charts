@@ -132,48 +132,33 @@ public class XYZSeriesBuilder<B extends XYZSeriesBuilder<B>> {
 
 
     public final XYZSeries build() {
-        final XYZSeries SERIES = new XYZSeries();
+        final XYZSeries xyzSeries = new XYZSeries();
 
         if (properties.keySet().contains("itemsArray")) {
-            SERIES.setItems(((ObjectProperty<XYZItem[]>) properties.get("itemsArray")).get());
+            xyzSeries.setItems(((ObjectProperty<XYZItem[]>) properties.get("itemsArray")).get());
         }
         if(properties.keySet().contains("itemsList")) {
-            SERIES.setItems(((ObjectProperty<List<XYZItem>>) properties.get("itemsList")).get());
+            xyzSeries.setItems(((ObjectProperty<List<XYZItem>>) properties.get("itemsList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("name".equals(key)) {
-                SERIES.setName(((StringProperty) properties.get(key)).get());
-            } else if ("fill".equals(key)) {
-                SERIES.setFill(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("stroke".equals(key)) {
-                SERIES.setStroke(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("textFill".equals(key)) {
-                SERIES.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbolFill".equals(key)) {
-                SERIES.setSymbolFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbolStroke".equals(key)) {
-                SERIES.setSymbolStroke(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("symbol".equals(key)) {
-                SERIES.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
-            } else if ("chartType".equals(key)) {
-                SERIES.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
-            } else if ("symbolsVisible".equals(key)) {
-                SERIES.setSymbolsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("symbolsVisible".equals(key)) {
-                SERIES.setSymbolsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("symbolSize".equals(key)) {
-                SERIES.setSymbolSize(((DoubleProperty) properties.get(key)).get());
-            } else if ("strokeWidth".equals(key)) {
-                SERIES.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("visible".equals(key)) {
-                SERIES.setVisible(((BooleanProperty) properties.get(key)).get());
-            } else if("animated".equals(key)) {
-                SERIES.setAnimated(((BooleanProperty) properties.get(key)).get());
-            } else if("animationDuration".equals(key)) {
-                SERIES.setAnimationDuration(((LongProperty) properties.get(key)).get());
+            switch (key) {
+                case "name"              -> xyzSeries.setName(((StringProperty) properties.get(key)).get());
+                case "fill"              -> xyzSeries.setFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "stroke"            -> xyzSeries.setStroke(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "textFill"          -> xyzSeries.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbolFill"        -> xyzSeries.setSymbolFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbolStroke"      -> xyzSeries.setSymbolStroke(((ObjectProperty<Color>) properties.get(key)).get());
+                case "symbol"            -> xyzSeries.setSymbol(((ObjectProperty<Symbol>) properties.get(key)).get());
+                case "chartType"         -> xyzSeries.setChartType(((ObjectProperty<ChartType>) properties.get(key)).get());
+                case "symbolsVisible"    -> xyzSeries.setSymbolsVisible(((BooleanProperty) properties.get(key)).get());
+                case "symbolSize"        -> xyzSeries.setSymbolSize(((DoubleProperty) properties.get(key)).get());
+                case "strokeWidth"       -> xyzSeries.setStrokeWidth(((DoubleProperty) properties.get(key)).get());
+                case "visible"           -> xyzSeries.setVisible(((BooleanProperty) properties.get(key)).get());
+                case "animated"          -> xyzSeries.setAnimated(((BooleanProperty) properties.get(key)).get());
+                case "animationDuration" -> xyzSeries.setAnimationDuration(((LongProperty) properties.get(key)).get());
             }
         }
-        return SERIES;
+        return xyzSeries;
     }
 }

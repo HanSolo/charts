@@ -173,71 +173,54 @@ public class ConcentricRingChartBuilder<B extends ConcentricRingChartBuilder<B>>
 
 
     public final ConcentricRingChart build() {
-        final ConcentricRingChart CONTROL = new ConcentricRingChart();
+        final ConcentricRingChart concentricRingChart = new ConcentricRingChart();
 
         if (properties.keySet().contains("series")) {
-            CONTROL.setItems(((ObjectProperty<Series<ChartItem>>) properties.get("series")).get());
+            concentricRingChart.setItems(((ObjectProperty<Series<ChartItem>>) properties.get("series")).get());
         }
         if (properties.keySet().contains("itemArray")) {
-            CONTROL.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemArray")).get());
+            concentricRingChart.setItems(((ObjectProperty<ChartItem[]>) properties.get("itemArray")).get());
         }
         if (properties.keySet().contains("itemList")) {
-            CONTROL.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemList")).get());
+            concentricRingChart.setItems(((ObjectProperty<List<ChartItem>>) properties.get("itemList")).get());
         }
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if ("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if ("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if ("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } // Control specific properties
-            else if ("barBackgroundFill".equals(key)) {
-                CONTROL.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("sorted".equals(key)) {
-                CONTROL.setSorted(((BooleanProperty) properties.get(key)).get());
-            } else if ("order".equals(key)) {
-                CONTROL.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
-            } else if ("numberFormat".equals(key)) {
-                CONTROL.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
-            } else if ("itemLabelFill".equals(key)) {
-                CONTROL.setItemLabelFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("shortenNumbers".equals(key)) {
-                CONTROL.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
-            } else if ("valueVisible".equals(key)) {
-                CONTROL.setValueVisible(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"          -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    concentricRingChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"           -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    concentricRingChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"           -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    concentricRingChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"         -> concentricRingChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"        -> concentricRingChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"          -> concentricRingChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"         -> concentricRingChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"          -> concentricRingChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"         -> concentricRingChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"            -> concentricRingChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"            -> concentricRingChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"           -> concentricRingChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"           -> concentricRingChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"        -> concentricRingChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"        -> concentricRingChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"           -> concentricRingChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "barBackgroundFill" -> concentricRingChart.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "sorted"            -> concentricRingChart.setSorted(((BooleanProperty) properties.get(key)).get());
+                case "order"             -> concentricRingChart.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
+                case "numberFormat"      -> concentricRingChart.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
+                case "itemLabelFill"     -> concentricRingChart.setItemLabelFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "shortenNumbers"    -> concentricRingChart.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
+                case "valueVisible"      -> concentricRingChart.setValueVisible(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return concentricRingChart;
     }
 }

@@ -294,6 +294,7 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
         return (B)this;
     }
 
+
     public final World build() {
         Mapping             colorMapping        = properties.containsKey("colorMapping") ? ((ObjectProperty<Mapping>) properties.get("colorMapping")).get() : ColorMapping.INFRARED_3;
         double              eventRadius         = properties.containsKey("eventRadius") ? ((DoubleProperty) properties.get("eventRadius")).get() : 5;
@@ -301,100 +302,64 @@ public class WorldBuilder<B extends WorldBuilder<B>> {
         double              heatMapOpacity      = properties.containsKey("heatMapOpacity") ? ((DoubleProperty) properties.get("heatMapOpacity")).get() : 0.5;
         OpacityDistribution opacityDistribution = properties.containsKey("opacityDistribution") ? ((ObjectProperty<OpacityDistribution>) properties.get("opacityDistribution")).get() : OpacityDistribution.EXPONENTIAL;
 
-        final World CONTROL = new World(resolution, colorMapping, eventRadius, fadeColors, opacityDistribution, heatMapOpacity);
+        final World world = new World(resolution, colorMapping, eventRadius, fadeColors, opacityDistribution, heatMapOpacity);
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("backgroundColor".equals(key)) {
-                CONTROL.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("fillColor".equals(key)) {
-                CONTROL.setFillColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("strokeColor".equals(key)) {
-                CONTROL.setStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("hoverColor".equals(key)) {
-                CONTROL.setHoverColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("pressedColor".equals(key)) {
-                CONTROL.setPressedColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("selectedColor".equals(key)) {
-                CONTROL.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("locationColor".equals(key)) {
-                CONTROL.setLocationColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("hoverEnabled".equals(key)) {
-                CONTROL.setHoverEnabled(((BooleanProperty) properties.get(key)).get());
-            } else if ("selectionEnabled".equals(key)) {
-                CONTROL.setSelectionEnabled(((BooleanProperty) properties.get(key)).get());
-            } else if ("zoomEnabled".equals(key)) {
-                CONTROL.setZoomEnabled(((BooleanProperty) properties.get(key)).get());
-            } else if ("mouseEnterHandler".equals(key)) {
-                CONTROL.setMouseEnterHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
-            } else if ("mousePressHandler".equals(key)) {
-                CONTROL.setMousePressHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
-            } else if ("mouseReleaseHandler".equals(key)) {
-                CONTROL.setMouseReleaseHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
-            } else if ("mouseExitHandler".equals(key)) {
-                CONTROL.setMouseExitHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
-            } else if ("locations".equals(key)) {
-                CONTROL.addLocations(((ObjectProperty<Location[]>) properties.get(key)).get());
-            } else if ("showLocations".equals(key)) {
-                CONTROL.showLocations(((BooleanProperty) properties.get(key)).get());
-            } else if ("mapPoints".equals(key)) {
-                CONTROL.setMapPoints(((ObjectProperty<List<MapPoint>>) properties.get(key)).get());
-            } else if ("mapConnections".equals(key)) {
-                CONTROL.setMapConnections(((ObjectProperty<List<MapConnection>>) properties.get(key)).get());
-            } else if ("weightedMapPoints".equals(key)) {
-                CONTROL.setWeightedMapPoints(((ObjectProperty<WeightedMapPoints>) properties.get(key)).get());
-            } else if ("weightedMapConnections".equals(key)) {
-                CONTROL.setWeightedMapConnections(((BooleanProperty) properties.get(key)).get());
-            } else if ("mapPointSize".equals(key)) {
-                CONTROL.setMapPointSize(((ObjectProperty<MapPointSize>) properties.get(key)).get());
-            } else if ("mapPointsVisible".equals(key)) {
-                CONTROL.setMapPointsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("mapPointTextVisible".equals(key)) {
-                CONTROL.setMapPointTextVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("textColor".equals(key)) {
-                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("connectionWidth".equals(key)) {
-                CONTROL.setConnectionWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("arrowsVisible".equals(key)) {
-                CONTROL.setArrowsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("drawImagePath".equals(key)) {
-                CONTROL.setDrawImagePath(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    world.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"                -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    world.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"                -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    world.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"              -> world.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"             -> world.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"               -> world.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"              -> world.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"               -> world.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"              -> world.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                 -> world.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                 -> world.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"                -> world.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"                -> world.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"             -> world.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"             -> world.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"                -> world.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "backgroundColor"        -> world.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "fillColor"              -> world.setFillColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "strokeColor"            -> world.setStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "hoverColor"             -> world.setHoverColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "pressedColor"           -> world.setPressedColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "selectedColor"          -> world.setSelectedColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "locationColor"          -> world.setLocationColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "hoverEnabled"           -> world.setHoverEnabled(((BooleanProperty) properties.get(key)).get());
+                case "selectionEnabled"       -> world.setSelectionEnabled(((BooleanProperty) properties.get(key)).get());
+                case "zoomEnabled"            -> world.setZoomEnabled(((BooleanProperty) properties.get(key)).get());
+                case "mouseEnterHandler"      -> world.setMouseEnterHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+                case "mousePressHandler"      -> world.setMousePressHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+                case "mouseReleaseHandler"    -> world.setMouseReleaseHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+                case "mouseExitHandler"       -> world.setMouseExitHandler(((ObjectProperty<EventHandler<MouseEvent>>) properties.get(key)).get());
+                case "locations"              -> world.addLocations(((ObjectProperty<Location[]>) properties.get(key)).get());
+                case "showLocations"          -> world.showLocations(((BooleanProperty) properties.get(key)).get());
+                case "mapPoints"              -> world.setMapPoints(((ObjectProperty<List<MapPoint>>) properties.get(key)).get());
+                case "mapConnections"         -> world.setMapConnections(((ObjectProperty<List<MapConnection>>) properties.get(key)).get());
+                case "weightedMapPoints"      -> world.setWeightedMapPoints(((ObjectProperty<WeightedMapPoints>) properties.get(key)).get());
+                case "weightedMapConnections" -> world.setWeightedMapConnections(((BooleanProperty) properties.get(key)).get());
+                case "mapPointSize"           -> world.setMapPointSize(((ObjectProperty<MapPointSize>) properties.get(key)).get());
+                case "mapPointsVisible"       -> world.setMapPointsVisible(((BooleanProperty) properties.get(key)).get());
+                case "mapPointTextVisible"    -> world.setMapPointTextVisible(((BooleanProperty) properties.get(key)).get());
+                case "textColor"              -> world.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "connectionWidth"        -> world.setConnectionWidth(((DoubleProperty) properties.get(key)).get());
+                case "arrowsVisible"          -> world.setArrowsVisible(((BooleanProperty) properties.get(key)).get());
+                case "drawImagePath"          -> world.setDrawImagePath(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return world;
     }
 }

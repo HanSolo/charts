@@ -395,18 +395,18 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
 
 
     public final Axis build() {
-        final Axis CONTROL = new Axis(orientation, position);
+        final Axis axis = new Axis(orientation, position);
 
         if (properties.keySet().contains("categoriesArray")) {
-            CONTROL.setCategories(((ObjectProperty<String[]>) properties.get("categoriesArray")).get());
+            axis.setCategories(((ObjectProperty<String[]>) properties.get("categoriesArray")).get());
         }
         if(properties.keySet().contains("categoriesList")) {
-            CONTROL.setCategories(((ObjectProperty<List<String>>) properties.get("categoriesList")).get());
+            axis.setCategories(((ObjectProperty<List<String>>) properties.get("categoriesList")).get());
         }
 
         if (properties.keySet().contains("axisType")) {
             AxisType type = ((ObjectProperty<AxisType>) properties.get("axisType")).get();
-            CONTROL.setType(type);
+            axis.setType(type);
             if (AxisType.TIME == type) {
                 LocalDateTime start = null;
                 LocalDateTime end   = null;
@@ -417,79 +417,79 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 }
                 if (end.isBefore(start)) { throw new IllegalArgumentException("End cannot be before start"); }
                 if (start.isAfter(end)) { throw new IllegalArgumentException("Start cannot be after end"); }
-                CONTROL.setStart(start);
-                CONTROL.setEnd(end);
+                axis.setStart(start);
+                axis.setEnd(end);
             }
         }
 
         for (String key : properties.keySet()) {
             switch(key) {
-                case "prefSize" -> {
+                case "prefSize"                        -> {
                     Dimension2D dimPrefSize = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    CONTROL.setPrefSize(dimPrefSize.getWidth(), dimPrefSize.getHeight());
+                    axis.setPrefSize(dimPrefSize.getWidth(), dimPrefSize.getHeight());
                 }
-                case "minSize" -> {
+                case "minSize"                         -> {
                     Dimension2D dimMinSize = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    CONTROL.setMinSize(dimMinSize.getWidth(), dimMinSize.getHeight());
+                    axis.setMinSize(dimMinSize.getWidth(), dimMinSize.getHeight());
                 }
-                case "maxSize" -> {
+                case "maxSize"                         -> {
                     Dimension2D dimMaxSize = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    CONTROL.setMaxSize(dimMaxSize.getWidth(), dimMaxSize.getHeight());
+                    axis.setMaxSize(dimMaxSize.getWidth(), dimMaxSize.getHeight());
                 }
-                case "prefWidth"                       -> CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-                case "prefHeight"                      -> CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-                case "minWidth"                        -> CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-                case "minHeight"                       -> CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-                case "maxWidth"                        -> CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-                case "maxHeight"                       -> CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-                case "scaleX"                          -> CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-                case "scaleY"                          -> CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-                case "layoutX"                         -> CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-                case "layoutY"                         -> CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-                case "translateX"                      -> CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-                case "translateY"                      -> CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-                case "padding"                         -> CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "prefWidth"                       -> axis.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"                      -> axis.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"                        -> axis.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"                       -> axis.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"                        -> axis.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"                       -> axis.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                          -> axis.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                          -> axis.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"                         -> axis.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"                         -> axis.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"                      -> axis.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"                      -> axis.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"                         -> axis.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
                 // Control specific properties
-                case "minValue"                        -> CONTROL.setMinValue(((DoubleProperty) properties.get(key)).get());
-                case "maxValue"                        -> CONTROL.setMaxValue(((DoubleProperty) properties.get(key)).get());
-                case "autoScale"                       -> CONTROL.setAutoScale(((BooleanProperty) properties.get(key)).get());
-                case "title"                           -> CONTROL.setTitle(((StringProperty) properties.get(key)).get());
-                case "unit"                            -> CONTROL.setUnit(((StringProperty) properties.get(key)).get());
-                case "axisBackgroundColor"             -> CONTROL.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "axisColor"                       -> CONTROL.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "tickLabelColor"                  -> CONTROL.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "titleColor"                      -> CONTROL.setTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "tickMarkColor"                   -> CONTROL.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "minorTickMarkColor"              -> CONTROL.setMinorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "mediumTickMarkColor"             -> CONTROL.setMediumTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "majorTickMarkColor"              -> CONTROL.setMajorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "tickMarksVisible"                -> CONTROL.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-                case "minorTickMarksVisible"           -> CONTROL.setMinorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-                case "mediumTickMarksVisible"          -> CONTROL.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-                case "majorTickMarksVisible"           -> CONTROL.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
-                case "sameTickMarkLength"              -> CONTROL.setSameTickMarkLength(((BooleanProperty) properties.get(key)).get());
-                case "zeroColor"                       -> CONTROL.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "minorTickSpace"                  -> CONTROL.setMinorTickSpace(((DoubleProperty) properties.get(key)).get());
-                case "majorTickSpace"                  -> CONTROL.setMajorTickSpace(((DoubleProperty) properties.get(key)).get());
-                case "tickLabelsVisible"               -> CONTROL.setTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
-                case "mediumTimeAxisTickLabelsVisible" -> CONTROL.setMediumTimeAxisTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
-                case "onlyFirstAndLastTickLabel"       -> CONTROL.setOnlyFirstAndLastTickLabelVisible(((BooleanProperty) properties.get(key)).get());
-                case "local"                           -> CONTROL.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
-                case "decimals"                        -> CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-                case "tickLabelOrientation"            -> CONTROL.setTickLabelOrientation(((ObjectProperty<TickLabelOrientation>) properties.get(key)).get());
-                case "tickLabelFormat"                 -> CONTROL.setTickLabelFormat(((ObjectProperty<TickLabelFormat>) properties.get(key)).get());
-                case "autoFontSize"                    -> CONTROL.setAutoFontSize(((BooleanProperty) properties.get(key)).get());
-                case "tickLabelFontSize"               -> CONTROL.setTickLabelFontSize(((DoubleProperty) properties.get(key)).get());
-                case "titleFontSize"                   -> CONTROL.setTitleFontSize(((DoubleProperty) properties.get(key)).get());
-                case "zoneId"                          -> CONTROL.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
-                case "dateTimeFormatPattern"           -> CONTROL.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
-                case "numberFormatter"                 -> CONTROL.setNumberFormatter(((ObjectProperty<StringConverter>) properties.get(key)).get());
-                case "topAnchor"                       -> AnchorPane.setTopAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
-                case "rightAnchor"                     -> AnchorPane.setRightAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
-                case "bottomAnchor"                    -> AnchorPane.setBottomAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
-                case "leftAnchor"                      -> AnchorPane.setLeftAnchor(CONTROL, ((DoubleProperty) properties.get(key)).get());
+                case "minValue"                        -> axis.setMinValue(((DoubleProperty) properties.get(key)).get());
+                case "maxValue"                        -> axis.setMaxValue(((DoubleProperty) properties.get(key)).get());
+                case "autoScale"                       -> axis.setAutoScale(((BooleanProperty) properties.get(key)).get());
+                case "title"                           -> axis.setTitle(((StringProperty) properties.get(key)).get());
+                case "unit"                            -> axis.setUnit(((StringProperty) properties.get(key)).get());
+                case "axisBackgroundColor"             -> axis.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "axisColor"                       -> axis.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "tickLabelColor"                  -> axis.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "titleColor"                      -> axis.setTitleColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "tickMarkColor"                   -> axis.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "minorTickMarkColor"              -> axis.setMinorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "mediumTickMarkColor"             -> axis.setMediumTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "majorTickMarkColor"              -> axis.setMajorTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "tickMarksVisible"                -> axis.setTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                case "minorTickMarksVisible"           -> axis.setMinorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                case "mediumTickMarksVisible"          -> axis.setMediumTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                case "majorTickMarksVisible"           -> axis.setMajorTickMarksVisible(((BooleanProperty) properties.get(key)).get());
+                case "sameTickMarkLength"              -> axis.setSameTickMarkLength(((BooleanProperty) properties.get(key)).get());
+                case "zeroColor"                       -> axis.setZeroColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "minorTickSpace"                  -> axis.setMinorTickSpace(((DoubleProperty) properties.get(key)).get());
+                case "majorTickSpace"                  -> axis.setMajorTickSpace(((DoubleProperty) properties.get(key)).get());
+                case "tickLabelsVisible"               -> axis.setTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
+                case "mediumTimeAxisTickLabelsVisible" -> axis.setMediumTimeAxisTickLabelsVisible(((BooleanProperty) properties.get(key)).get());
+                case "onlyFirstAndLastTickLabel"       -> axis.setOnlyFirstAndLastTickLabelVisible(((BooleanProperty) properties.get(key)).get());
+                case "local"                           -> axis.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                case "decimals"                        -> axis.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "tickLabelOrientation"            -> axis.setTickLabelOrientation(((ObjectProperty<TickLabelOrientation>) properties.get(key)).get());
+                case "tickLabelFormat"                 -> axis.setTickLabelFormat(((ObjectProperty<TickLabelFormat>) properties.get(key)).get());
+                case "autoFontSize"                    -> axis.setAutoFontSize(((BooleanProperty) properties.get(key)).get());
+                case "tickLabelFontSize"               -> axis.setTickLabelFontSize(((DoubleProperty) properties.get(key)).get());
+                case "titleFontSize"                   -> axis.setTitleFontSize(((DoubleProperty) properties.get(key)).get());
+                case "zoneId"                          -> axis.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
+                case "dateTimeFormatPattern"           -> axis.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
+                case "numberFormatter"                 -> axis.setNumberFormatter(((ObjectProperty<StringConverter>) properties.get(key)).get());
+                case "topAnchor"                       -> AnchorPane.setTopAnchor(axis, ((DoubleProperty) properties.get(key)).get());
+                case "rightAnchor"                     -> AnchorPane.setRightAnchor(axis, ((DoubleProperty) properties.get(key)).get());
+                case "bottomAnchor"                    -> AnchorPane.setBottomAnchor(axis, ((DoubleProperty) properties.get(key)).get());
+                case "leftAnchor"                      -> AnchorPane.setLeftAnchor(axis, ((DoubleProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return axis;
     }
 }

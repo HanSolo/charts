@@ -171,69 +171,52 @@ public class RadialTidyTreeBuilder<B extends RadialTidyTreeBuilder<B>> {
         return (B)this;
     }
 
+
     public final RadialTidyTree build() {
-        final RadialTidyTree CONTROL;
+        final RadialTidyTree radialTidyTree;
         if (properties.containsKey("tree")) {
-            CONTROL = new RadialTidyTree(((ObjectProperty<TreeNode>) properties.get("tree")).get());
+            radialTidyTree = new RadialTidyTree(((ObjectProperty<TreeNode>) properties.get("tree")).get());
         } else {
-            CONTROL = new RadialTidyTree();
+            radialTidyTree = new RadialTidyTree();
         }
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("visibleData".equals(key)) {
-                CONTROL.setVisibleData(((ObjectProperty<VisibleData>) properties.get(key)).get());
-            } else if ("backgroundColor".equals(key)) {
-                CONTROL.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("textColor".equals(key)) {
-                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("useColorFromParent".equals(key)) {
-                CONTROL.setUseColorFromParent(((BooleanProperty) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("autoTextColor".equals(key)) {
-                CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
-            } else if ("brightTextColor".equals(key)) {
-                CONTROL.setBrightTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("darkTextColor".equals(key)) {
-                CONTROL.setDarkTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("useChartItemTextColor".equals(key)) {
-                CONTROL.setUseChartItemTextColor(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"              -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    radialTidyTree.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    radialTidyTree.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    radialTidyTree.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"             -> radialTidyTree.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"            -> radialTidyTree.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"              -> radialTidyTree.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"             -> radialTidyTree.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"              -> radialTidyTree.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"             -> radialTidyTree.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                -> radialTidyTree.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                -> radialTidyTree.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"               -> radialTidyTree.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"               -> radialTidyTree.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"            -> radialTidyTree.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"            -> radialTidyTree.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"               -> radialTidyTree.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "visibleData"           -> radialTidyTree.setVisibleData(((ObjectProperty<VisibleData>) properties.get(key)).get());
+                case "backgroundColor"       -> radialTidyTree.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "textColor"             -> radialTidyTree.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "useColorFromParent"    -> radialTidyTree.setUseColorFromParent(((BooleanProperty) properties.get(key)).get());
+                case "decimals"              -> radialTidyTree.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "autoTextColor"         -> radialTidyTree.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+                case "brightTextColor"       -> radialTidyTree.setBrightTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "darkTextColor"         -> radialTidyTree.setDarkTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "useChartItemTextColor" -> radialTidyTree.setUseChartItemTextColor(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return radialTidyTree;
     }
 }

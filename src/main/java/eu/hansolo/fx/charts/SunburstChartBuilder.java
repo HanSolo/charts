@@ -181,73 +181,54 @@ public class SunburstChartBuilder<B extends SunburstChartBuilder<B>> {
         return (B)this;
     }
 
+
     public final SunburstChart build() {
-        final SunburstChart CONTROL;
+        final SunburstChart sunburstChart;
         if (properties.containsKey("tree")) {
-            CONTROL = new SunburstChart(((ObjectProperty<TreeNode>) properties.get("tree")).get());
+            sunburstChart = new SunburstChart(((ObjectProperty<TreeNode>) properties.get("tree")).get());
         } else {
-            CONTROL = new SunburstChart();
+            sunburstChart = new SunburstChart();
         }
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                CONTROL.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                CONTROL.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                CONTROL.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                CONTROL.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                CONTROL.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                CONTROL.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                CONTROL.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                CONTROL.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                CONTROL.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                CONTROL.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                CONTROL.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                CONTROL.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                CONTROL.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                CONTROL.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("visibleData".equals(key)) {
-                CONTROL.setVisibleData(((ObjectProperty<VisibleData>) properties.get(key)).get());
-            } else if ("textOrientation".equals(key)) {
-                CONTROL.setTextOrientation(((ObjectProperty<TextOrientation>) properties.get(key)).get());
-            } else if ("backgroundColor".equals(key)) {
-                CONTROL.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("textColor".equals(key)) {
-                CONTROL.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("useColorFromParent".equals(key)) {
-                CONTROL.setUseColorFromParent(((BooleanProperty) properties.get(key)).get());
-            } else if ("decimals".equals(key)) {
-                CONTROL.setDecimals(((IntegerProperty) properties.get(key)).get());
-            } else if ("interactive".equals(key)) {
-                CONTROL.setInteractive(((BooleanProperty) properties.get(key)).get());
-            } else if ("autoTextColor".equals(key)) {
-                CONTROL.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
-            } else if ("brightTextColor".equals(key)) {
-                CONTROL.setBrightTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("darkTextColor".equals(key)) {
-                CONTROL.setDarkTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("useChartItemTextColor".equals(key)) {
-                CONTROL.setUseChartItemTextColor(((BooleanProperty) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"              -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    sunburstChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    sunburstChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    sunburstChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"             -> sunburstChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"            -> sunburstChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"              -> sunburstChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"             -> sunburstChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"              -> sunburstChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"             -> sunburstChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                -> sunburstChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                -> sunburstChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"               -> sunburstChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"               -> sunburstChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"            -> sunburstChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"            -> sunburstChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"               -> sunburstChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "visibleData"           -> sunburstChart.setVisibleData(((ObjectProperty<VisibleData>) properties.get(key)).get());
+                case "textOrientation"       -> sunburstChart.setTextOrientation(((ObjectProperty<TextOrientation>) properties.get(key)).get());
+                case "backgroundColor"       -> sunburstChart.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "textColor"             -> sunburstChart.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "useColorFromParent"    -> sunburstChart.setUseColorFromParent(((BooleanProperty) properties.get(key)).get());
+                case "decimals"              -> sunburstChart.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "interactive"           -> sunburstChart.setInteractive(((BooleanProperty) properties.get(key)).get());
+                case "autoTextColor"         -> sunburstChart.setAutoTextColor(((BooleanProperty) properties.get(key)).get());
+                case "brightTextColor"       -> sunburstChart.setBrightTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "darkTextColor"         -> sunburstChart.setDarkTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "useChartItemTextColor" -> sunburstChart.setUseChartItemTextColor(((BooleanProperty) properties.get(key)).get());
             }
         }
-        return CONTROL;
+        return sunburstChart;
     }
 }

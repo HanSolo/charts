@@ -186,7 +186,7 @@ public class AreaHeatMap extends Region {
     }
 
     public int getNoOfCloserInfluentPoints() { return null == noOfCloserInfluentPoints ? _noOfCloserInfluentPoints : noOfCloserInfluentPoints.get(); }
-    public void setNoOfCloserInfluentPoints(final int NUMBER_OF_POINTS) {
+    public void setNoOfCloserInfluentialPoints(final int NUMBER_OF_POINTS) {
         if (null == noOfCloserInfluentPoints) {
             _noOfCloserInfluentPoints = Helper.clamp(1, 10, NUMBER_OF_POINTS);
             redraw();

@@ -222,88 +222,65 @@ public class PanelBarChartBuilder<B extends PanelBarChartBuilder<B>> {
         return (B)this;
     }
 
+
     public final PanelBarChart build() {
         List<ChartItemSeries<ChartItem>> listOfSeries = new ArrayList<>();
         if(properties.keySet().contains("chartItemSeriesList")) {
             listOfSeries.addAll(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("chartItemSeriesList")).get());
         }
 
-        final PanelBarChart chart = new PanelBarChart(categories, listOfSeries);
+        final PanelBarChart panelBarChart = new PanelBarChart(categories, listOfSeries);
 
         List<ChartItemSeries<ChartItem>> comparisonListOfSeries = new ArrayList<>();
         if (properties.keySet().contains("comparisonChartItemSeriesList")) {
             comparisonListOfSeries.addAll(((ObjectProperty<List<ChartItemSeries<ChartItem>>>) properties.get("comparisonChartItemSeriesList")).get());
         }
-        chart.setComparisonListOfSeries(comparisonListOfSeries);
+        panelBarChart.setComparisonListOfSeries(comparisonListOfSeries);
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if("prefWidth".equals(key)) {
-                chart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("prefHeight".equals(key)) {
-                chart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("minWidth".equals(key)) {
-                chart.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("minHeight".equals(key)) {
-                chart.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("maxWidth".equals(key)) {
-                chart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if("maxHeight".equals(key)) {
-                chart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleX".equals(key)) {
-                chart.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if("scaleY".equals(key)) {
-                chart.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                chart.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                chart.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                chart.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                chart.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                chart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } else if ("chartBackground".equals(key)) {
-                chart.setChartBackground(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("name".equals(key)) {
-                chart.setName(((StringProperty) properties.get(key)).get());
-            } else if ("nameColor".equals(key)) {
-                chart.setNameColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("categoryNameColor".equals(key)) {
-                chart.setCategoryNameColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("categorySumColor".equals(key)) {
-                chart.setCategorySumColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("seriesNameColor".equals(key)) {
-                chart.setSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("seriesSumColor".equals(key)) {
-                chart.setSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("gridColor".equals(key)) {
-                chart.setGridColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("colorByCategory".equals(key)) {
-                chart.setColorByCategory(((BooleanProperty) properties.get(key)).get());
-            } else if ("comparisonEnabled".equals(key)) {
-                chart.setComparisonEnabled(((BooleanProperty) properties.get(key)).get());
-            } else if ("comparisonName".equals(key)) {
-                chart.setComparisonName(((StringProperty) properties.get(key)).get());
-            } else if ("comparisonNameColor".equals(key)) {
-                chart.setComparisonNameColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("comparisonCategorySumColor".equals(key)) {
-                chart.setComparisonCategorySumColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("comparisonSeriesNameColor".equals(key)) {
-                chart.setComparisonSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("comparisonSeriesSumColor".equals(key)) {
-                chart.setComparisonSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"                   -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    panelBarChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"                    -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    panelBarChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"                    -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    panelBarChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"                  -> panelBarChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"                 -> panelBarChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"                   -> panelBarChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"                  -> panelBarChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"                   -> panelBarChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"                  -> panelBarChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                     -> panelBarChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                     -> panelBarChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"                    -> panelBarChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"                    -> panelBarChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"                 -> panelBarChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"                 -> panelBarChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"                    -> panelBarChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "chartBackground"            -> panelBarChart.setChartBackground(((ObjectProperty<Color>) properties.get(key)).get());
+                case "name"                       -> panelBarChart.setName(((StringProperty) properties.get(key)).get());
+                case "nameColor"                  -> panelBarChart.setNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "categoryNameColor"          -> panelBarChart.setCategoryNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "categorySumColor"           -> panelBarChart.setCategorySumColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "seriesNameColor"            -> panelBarChart.setSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "seriesSumColor"             -> panelBarChart.setSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "gridColor"                  -> panelBarChart.setGridColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "colorByCategory"            -> panelBarChart.setColorByCategory(((BooleanProperty) properties.get(key)).get());
+                case "comparisonEnabled"          -> panelBarChart.setComparisonEnabled(((BooleanProperty) properties.get(key)).get());
+                case "comparisonName"             -> panelBarChart.setComparisonName(((StringProperty) properties.get(key)).get());
+                case "comparisonNameColor"        -> panelBarChart.setComparisonNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "comparisonCategorySumColor" -> panelBarChart.setComparisonCategorySumColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "comparisonSeriesNameColor"  -> panelBarChart.setComparisonSeriesNameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "comparisonSeriesSumColor"   -> panelBarChart.setComparisonSeriesSumColor(((ObjectProperty<Color>) properties.get(key)).get());
             }
         }
-        return chart;
+        return panelBarChart;
     }
 }

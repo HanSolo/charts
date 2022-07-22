@@ -235,89 +235,58 @@ public class ComparisonBarChartBuilder <B extends ComparisonBarChartBuilder<B>> 
 
 
     public final ComparisonBarChart build() {
-        final ComparisonBarChart chart = new ComparisonBarChart(series1, series2);
+        final ComparisonBarChart comparisonBarChart = new ComparisonBarChart(series1, series2);
 
         for (String key : properties.keySet()) {
-            if ("prefSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setPrefSize(dim.getWidth(), dim.getHeight());
-            } else if ("minSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMinSize(dim.getWidth(), dim.getHeight());
-            } else if ("maxSize".equals(key)) {
-                Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                chart.setMaxSize(dim.getWidth(), dim.getHeight());
-            } else if ("prefWidth".equals(key)) {
-                chart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("prefHeight".equals(key)) {
-                chart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("minWidth".equals(key)) {
-                chart.setMinWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("minHeight".equals(key)) {
-                chart.setMinHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxWidth".equals(key)) {
-                chart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-            } else if ("maxHeight".equals(key)) {
-                chart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleX".equals(key)) {
-                chart.setScaleX(((DoubleProperty) properties.get(key)).get());
-            } else if ("scaleY".equals(key)) {
-                chart.setScaleY(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutX".equals(key)) {
-                chart.setLayoutX(((DoubleProperty) properties.get(key)).get());
-            } else if ("layoutY".equals(key)) {
-                chart.setLayoutY(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateX".equals(key)) {
-                chart.setTranslateX(((DoubleProperty) properties.get(key)).get());
-            } else if ("translateY".equals(key)) {
-                chart.setTranslateY(((DoubleProperty) properties.get(key)).get());
-            } else if ("padding".equals(key)) {
-                chart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-            } // Control specific properties
-            else if ("backgroundFill".equals(key)) {
-                chart.setBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("categoryBackgroundFill".equals(key)) {
-                chart.setCategoryBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
-            } else if ("barBackgroundFill".equals(key)) {
-                chart.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("textFill".equals(key)) {
-                chart.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("categoryTextFill".equals(key)) {
-                chart.setCategoryTextFill(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("betterColor".equals(key)) {
-                chart.setBetterColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("poorer".equals(key)) {
-                chart.setPoorerColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("betterDarkerColor".equals(key)) {
-                chart.setBetterDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("betterBrighterColor".equals(key)) {
-                chart.setBetterBrighterColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("poorerDarkerColor".equals(key)) {
-                chart.setPoorerDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("poorerBrighterColor".equals(key)) {
-                chart.setPoorerBrighterColor(((ObjectProperty<Color>) properties.get(key)).get());
-            } else if ("barBackgroundVisible".equals(key)) {
-                chart.setBarBackgroundVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("shadowsVisible".equals(key)) {
-                chart.setShadowsVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("categorySumVisible".equals(key)) {
-                chart.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
-            } else if ("numberFormat".equals(key)) {
-                chart.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
-            } else if ("doCompare".equals(key)) {
-                chart.setDoCompare(((BooleanProperty) properties.get(key)).get());
-            } else if ("useItemTextFill".equals(key)) {
-                chart.setUseItemTextFill(((BooleanProperty) properties.get(key)).get());
-            } else if ("useCategoryTextFill".equals(key)) {
-                chart.setUseCategoryTextFill(((BooleanProperty) properties.get(key)).get());
-            } else if ("shortenNumbers".equals(key)) {
-                chart.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
-            } else if ("sorted".equals(key)) {
-                chart.setSorted(((BooleanProperty) properties.get(key)).get());
-            } else if ("order".equals(key)) {
-                chart.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
+            switch (key) {
+                case "prefSize"               -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    comparisonBarChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                }
+                case "minSize"                -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    comparisonBarChart.setMinSize(dim.getWidth(), dim.getHeight());
+                }
+                case "maxSize"                -> {
+                    Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
+                    comparisonBarChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                }
+                case "prefWidth"              -> comparisonBarChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"             -> comparisonBarChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"               -> comparisonBarChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"              -> comparisonBarChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"               -> comparisonBarChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"              -> comparisonBarChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"                 -> comparisonBarChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"                 -> comparisonBarChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"                -> comparisonBarChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"                -> comparisonBarChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"             -> comparisonBarChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"             -> comparisonBarChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"                -> comparisonBarChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "backgroundFill"         -> comparisonBarChart.setBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "categoryBackgroundFill" -> comparisonBarChart.setCategoryBackgroundFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "barBackgroundFill"      -> comparisonBarChart.setBarBackgroundFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "textFill"               -> comparisonBarChart.setTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "categoryTextFill"       -> comparisonBarChart.setCategoryTextFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "betterColor"            -> comparisonBarChart.setBetterColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "poorer"                 -> comparisonBarChart.setPoorerColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "betterDarkerColor"      -> comparisonBarChart.setBetterDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "betterBrighterColor"    -> comparisonBarChart.setBetterBrighterColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "poorerDarkerColor"      -> comparisonBarChart.setPoorerDarkerColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "poorerBrighterColor"    -> comparisonBarChart.setPoorerBrighterColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "barBackgroundVisible"   -> comparisonBarChart.setBarBackgroundVisible(((BooleanProperty) properties.get(key)).get());
+                case "shadowsVisible"         -> comparisonBarChart.setShadowsVisible(((BooleanProperty) properties.get(key)).get());
+                case "categorySumVisible"     -> comparisonBarChart.setCategorySumVisible(((BooleanProperty) properties.get(key)).get());
+                case "numberFormat"           -> comparisonBarChart.setNumberFormat(((ObjectProperty<NumberFormat>) properties.get(key)).get());
+                case "doCompare"              -> comparisonBarChart.setDoCompare(((BooleanProperty) properties.get(key)).get());
+                case "useItemTextFill"        -> comparisonBarChart.setUseItemTextFill(((BooleanProperty) properties.get(key)).get());
+                case "useCategoryTextFill"    -> comparisonBarChart.setUseCategoryTextFill(((BooleanProperty) properties.get(key)).get());
+                case "shortenNumbers"         -> comparisonBarChart.setShortenNumbers(((BooleanProperty) properties.get(key)).get());
+                case "sorted"                 -> comparisonBarChart.setSorted(((BooleanProperty) properties.get(key)).get());
+                case "order"                  -> comparisonBarChart.setOrder(((ObjectProperty<Order>) properties.get(key)).get());
             }
         }
-        return chart;
+        return comparisonBarChart;
     }
 }
