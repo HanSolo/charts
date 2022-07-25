@@ -212,6 +212,8 @@ public class LineChartTest extends Application {
         pane.setBackground(new Background(new BackgroundFill(Color.web("#293C47"), CornerRadii.EMPTY, Insets.EMPTY)));
 
         Scene scene = new Scene(pane);
+        // test styling of tooltips via css
+        scene.getStylesheets().add(LineChartTest.class.getResource("tooltip.css").toExternalForm());
 
         stage.setTitle("Line Chart");
         stage.setScene(scene);
@@ -228,18 +230,19 @@ public class LineChartTest extends Application {
 
     private XYSeries createSeries() {
         XYSeries xySeries = XYSeriesBuilder.create()
-                                           .items(new XYChartItem(1, 600, "Jan"),
-                                                  new XYChartItem(2, 760, "Feb"),
-                                                  new XYChartItem(3, 585, "Mar"),
-                                                  new XYChartItem(4, 410, "Apr"),
-                                                  new XYChartItem(5, 605, "May"),
-                                                  new XYChartItem(6, 825, "Jun"),
-                                                  new XYChartItem(7, 595, "Jul"),
-                                                  new XYChartItem(8, 300, "Aug"),
-                                                  new XYChartItem(9, 515, "Sep"),
-                                                  new XYChartItem(10, 780, "Oct"),
-                                                  new XYChartItem(11, 570, "Nov"),
-                                                  new XYChartItem(12, 620, "Dec"))
+                                            // add tooltip to chart items to test css styling
+                                           .items(new XYChartItem(1, 600, "Jan", "January"),
+                                                  new XYChartItem(2, 760, "Feb", "February"),
+                                                  new XYChartItem(3, 585, "Mar", "March"),
+                                                  new XYChartItem(4, 410, "Apr", "April"),
+                                                  new XYChartItem(5, 605, "May", "May"),
+                                                  new XYChartItem(6, 825, "Jun", "June"),
+                                                  new XYChartItem(7, 595, "Jul", "July"),
+                                                  new XYChartItem(8, 300, "Aug", "August"),
+                                                  new XYChartItem(9, 515, "Sep", "September"),
+                                                  new XYChartItem(10, 780, "Oct", "October"),
+                                                  new XYChartItem(11, 570, "Nov", "November"),
+                                                  new XYChartItem(12, 620, "Dec", "December"))
                                            .chartType(ChartType.SMOOTH_AREA)
                                            .fill(Color.web("#AE00F520"))
                                            .stroke(Color.web("#AE00F5"))
