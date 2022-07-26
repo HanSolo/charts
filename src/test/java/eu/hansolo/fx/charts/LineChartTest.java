@@ -68,18 +68,18 @@ public class LineChartTest extends Application {
 
 
     @Override public void init() {
-        p1  = new XYChartItem(1, RND.nextDouble() * 300 + 200, "Jan");
-        p2  = new XYChartItem(2, RND.nextDouble() * 300 + 200, "Feb");
-        p3  = new XYChartItem(3, RND.nextDouble() * 300 + 200, "Mar");
-        p4  = new XYChartItem(4, RND.nextDouble() * 300 + 200, "Apr");
-        p5  = new XYChartItem(5, RND.nextDouble() * 300 + 200, "May");
-        p6  = new XYChartItem(6, RND.nextDouble() * 300 + 200, "Jun");
-        p7  = new XYChartItem(7, RND.nextDouble() * 300 + 200, "Jul");
-        p8  = new XYChartItem(8, RND.nextDouble() * 300 + 200, "Aug");
-        p9  = new XYChartItem(9, RND.nextDouble() * 300 + 200, "Sep");
-        p10 = new XYChartItem(10, RND.nextDouble() * 300 + 200, "Oct");
-        p11 = new XYChartItem(11, RND.nextDouble() * 300 + 200, "Nov");
-        p12 = new XYChartItem(12, RND.nextDouble() * 300 + 200, "Dec");
+        p1  = new XYChartItem(1, RND.nextDouble() * 300 + 200, "Jan", "January");
+        p2  = new XYChartItem(2, RND.nextDouble() * 300 + 200, "Feb", "February");
+        p3  = new XYChartItem(3, RND.nextDouble() * 300 + 200, "Mar", "March");
+        p4  = new XYChartItem(4, RND.nextDouble() * 300 + 200, "Apr", "April");
+        p5  = new XYChartItem(5, RND.nextDouble() * 300 + 200, "May", "May");
+        p6  = new XYChartItem(6, RND.nextDouble() * 300 + 200, "Jun", "June");
+        p7  = new XYChartItem(7, RND.nextDouble() * 300 + 200, "Jul", "July");
+        p8  = new XYChartItem(8, RND.nextDouble() * 300 + 200, "Aug", "August");
+        p9  = new XYChartItem(9, RND.nextDouble() * 300 + 200, "Sep", "September");
+        p10 = new XYChartItem(10, RND.nextDouble() * 300 + 200, "Oct", "October");
+        p11 = new XYChartItem(11, RND.nextDouble() * 300 + 200, "Nov", "November");
+        p12 = new XYChartItem(12, RND.nextDouble() * 300 + 200, "Dec", "December");
 
 
         xySeries1 = XYSeriesBuilder.create()
@@ -95,18 +95,18 @@ public class LineChartTest extends Application {
                                    .build();
 
         xySeries2 = XYSeriesBuilder.create()
-                                   .items(new XYChartItem(1, 280, "Jan"),
-                                          new XYChartItem(2, 190, "Feb"),
-                                          new XYChartItem(3, 280, "Mar"),
-                                          new XYChartItem(4, 300, "Apr"),
-                                          new XYChartItem(5, 205, "May"),
-                                          new XYChartItem(6, 430, "Jun"),
-                                          new XYChartItem(7, 380, "Jul"),
-                                          new XYChartItem(8, 180, "Aug"),
-                                          new XYChartItem(9, 300, "Sep"),
-                                          new XYChartItem(10, 440, "Oct"),
-                                          new XYChartItem(11, 300, "Nov"),
-                                          new XYChartItem(12, 390, "Dec"))
+                                   .items(new XYChartItem(1, 280, "Jan", "January"),
+                                          new XYChartItem(2, 190, "Feb", "February"),
+                                          new XYChartItem(3, 280, "Mar", "March"),
+                                          new XYChartItem(4, 300, "Apr", "April"),
+                                          new XYChartItem(5, 205, "May", "May"),
+                                          new XYChartItem(6, 430, "Jun", "June"),
+                                          new XYChartItem(7, 380, "Jul", "July"),
+                                          new XYChartItem(8, 180, "Aug", "August"),
+                                          new XYChartItem(9, 300, "Sep", "September"),
+                                          new XYChartItem(10, 440, "Oct", "October"),
+                                          new XYChartItem(11, 300, "Nov", "November"),
+                                          new XYChartItem(12, 390, "Dec", "December"))
                                    .chartType(ChartType.SMOOTH_AREA)
                                    .fill(Color.web("#4EE29B20"))
                                    .stroke(Color.web("#4EE29B"))
