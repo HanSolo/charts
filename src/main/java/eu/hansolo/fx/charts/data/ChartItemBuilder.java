@@ -125,6 +125,11 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
         return (B)this;
     }
 
+    public final B metadata(final Metadata METADATA) {
+        properties.put("metadata", new SimpleObjectProperty<>(METADATA));
+        return (B)this;
+    }
+
     public final B animationDuration(final long DURATION) {
         properties.put("animationDuration", new SimpleLongProperty(DURATION));
         return (B)this;
@@ -165,6 +170,8 @@ public class ChartItemBuilder<B extends ChartItemBuilder<B>> {
                 ITEM.setY(((DoubleProperty) properties.get(key)).get());
             } else if ("isEmpty".equals(key)) {
                 ITEM.setIsEmpty(((BooleanProperty) properties.get(key)).get());
+            } else if ("metadata".equals(key)) {
+                ITEM.setMetadata(((ObjectProperty<Metadata>) properties.get(key)).get());
             }
         }
         return ITEM;
