@@ -1225,6 +1225,7 @@ public class Axis extends Region {
     private void calcScale() {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;
+        // Only set major and minor tickspace if auto scale!!!
         setMajorTickSpace(Helper.calcNiceNumber(getRange() / (maxNoOfMajorTicks - 1), false));
         setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), false));
     }
@@ -1683,7 +1684,7 @@ public class Axis extends Region {
                     }
 
                     if (isZero) { setZeroPosition(fixedPosition); }
-                    
+
                     if (minorTickMarksVisible) {
                         drawTickMark((fullRange && isZero) ? zeroColor : minorTickMarkColor, minorLineWidth, innerPointX, innerPointY, outerPointX, outerPointY);
                     }
@@ -1692,9 +1693,9 @@ public class Axis extends Region {
                     if (tickLabelsVisible) {
                         String tickLabelString;
                         if (TickLabelFormat.NUMBER == getTickLabelFormat()) {
-                            tickLabelString = Orientation.HORIZONTAL == orientation ? String.format(locale, tickLabelFormatString, (minValue - i)) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
+                            tickLabelString = Orientation.HORIZONTAL == orientation ? formatNumber(locale, (minValue - i)) : formatNumber(locale, maxValue - counter + minValue);
                         } else {
-                            tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : String.format(locale, tickLabelFormatString, maxValue - counter + minValue);
+                            tickLabelString = Orientation.HORIZONTAL == orientation ? Helper.secondsToHHMMString(Helper.toSeconds(Helper.toRealValue(minValue - i), Helper.getZoneOffset())) : formatNumber(locale, maxValue - counter + minValue);
                         }
                         drawTickLabel(isOnlyFirstAndLastTickLabelVisible, isZero, isMinValue, isMaxValue, fullRange, zeroColor, tickLabelColor, textPointX, textPointY, maxTextWidth, tickLabelString, orientation);
                     }

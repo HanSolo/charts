@@ -165,3 +165,7 @@ related to imports, required modules etc.
 
 ## BarChart
 ![BarChart](https://i.ibb.co/5BT96X6/BarChart.png)
+
+
+## CandleChart
+![CandleChart](https://i.ibb.co/1MLzDxd/Xnip2022-08-08-15-42-51.png)

@@ -1285,6 +1285,19 @@ public class Helper {
     }
 
 
+    public static final Axis createBottomTimeAxis(final LocalDateTime START, final LocalDateTime END, final String PATTERN, final boolean AUTO_SCALE, final double AXIS_WIDTH, final double ANCHOR_LEFT, final double ANCHOR_RIGHT) {
+        Axis axis = new Axis(START, END, Orientation.HORIZONTAL, Position.BOTTOM);
+        axis.setDateTimeFormatPattern(PATTERN);
+        axis.setPrefHeight(AXIS_WIDTH);
+
+        AnchorPane.setBottomAnchor(axis, 0d);
+        AnchorPane.setLeftAnchor(axis, ANCHOR_LEFT);
+        AnchorPane.setRightAnchor(axis, ANCHOR_RIGHT);
+
+        return axis;
+    }
+
+
     public static final ColorInput createColorMask(final Image sourceImage, final Color color) { return new ColorInput(0, 0, sourceImage.getWidth(), sourceImage.getHeight(), color); }
     public static final Blend createColorBlend(final Image sourceImage, final Color color) {
         final ColorInput mask  = createColorMask(sourceImage, color);

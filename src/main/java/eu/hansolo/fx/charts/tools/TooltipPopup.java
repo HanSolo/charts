@@ -21,6 +21,8 @@ package eu.hansolo.fx.charts.tools;
 import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.LongPropertyBase;
 import javafx.beans.property.ObjectProperty;
@@ -41,18 +43,23 @@ import javafx.util.Duration;
 
 
 public class TooltipPopup extends Popup {
-    public static long                  MAX_TIMEOUT              = 10_000;
-    public static Color                 DEFAULT_BACKGROUND_COLOR = Color.rgb(0, 0, 0, 0.75);
-    public static Color                 DEFAULT_TEXT_COLOR       = Color.WHITE;
-    private       StackPane             pane;
-    private       Label                 tooltipText;
-    private       FadeTransition        fadeIn;
-    private       FadeTransition        fadeOut;
-    private       PauseTransition       delay;
-    private       Color                 _backgroundColor;
-    private       ObjectProperty<Color> backgroundColor;
-    private       long                  _timeout;
-    private       LongProperty          timeout;
+    public  static       long                  MAX_TIMEOUT              = 10_000;
+    public  static       Color                 DEFAULT_BACKGROUND_COLOR = Color.rgb(0, 0, 0, 0.75);
+    public  static       Color                 DEFAULT_TEXT_COLOR       = Color.WHITE;
+    private static final String                STYLE_CLASS              = "charts-tooltip";
+    private static final Font                  MONO_FONT                = Fonts.cousineRegular(10);
+    private static final Font                  LIGHT_FONT               = Fonts.opensansLight(10);
+    private              StackPane             pane;
+    private              Label                 tooltipText;
+    private              FadeTransition        fadeIn;
+    private              FadeTransition        fadeOut;
+    private              PauseTransition       delay;
+    private              Color                 _backgroundColor;
+    private              ObjectProperty<Color> backgroundColor;
+    private              long                  _timeout;
+    private              LongProperty          timeout;
+    private              boolean               _monoFont;
+    private              BooleanProperty       monoFont;
 
 
     // ******************** Constructors **************************************
@@ -66,9 +73,13 @@ public class TooltipPopup extends Popup {
         this("", timeout);
     }
     public TooltipPopup(final String text, final long timeout) {
+        this(text, timeout, false);
+    }
+    public TooltipPopup(final String text, final long timeout, final boolean monoFont) {
         super();
         _backgroundColor = DEFAULT_BACKGROUND_COLOR;
         _timeout         = timeout;
+        _monoFont        = monoFont;
         tooltipText      = new Label(text);
         init();
         initGraphics();
@@ -94,17 +105,15 @@ public class TooltipPopup extends Popup {
     }
 
     private void initGraphics() {
-        Font regularFont = Fonts.opensansRegular(10);
-        Font lightFont   = Fonts.opensansLight(10);
-
         tooltipText.setTextFill(DEFAULT_TEXT_COLOR);
-        tooltipText.setFont(lightFont);
+        tooltipText.setFont(isMonoFont() ? MONO_FONT : LIGHT_FONT);
         tooltipText.setMouseTransparent(true);
 
         pane = new StackPane(tooltipText);
         pane.setPadding(new Insets(5));
         pane.setBackground(new Background(new BackgroundFill(_backgroundColor, new CornerRadii(3), Insets.EMPTY)));
         pane.setMouseTransparent(true);
+        pane.getStyleClass().add(STYLE_CLASS);
 
         getContent().addAll(pane);
     }
@@ -168,6 +177,26 @@ public class TooltipPopup extends Popup {
             };
         }
         return timeout;
+    }
+
+    public boolean isMonoFont() { return null == monoFont ? _monoFont : monoFont.get(); }
+    public void setMonoFont(final boolean monoFont) {
+        if (null == this.monoFont) {
+            _monoFont = monoFont;
+            tooltipText.setFont(isMonoFont() ? MONO_FONT : LIGHT_FONT);
+        } else {
+            this.monoFont.set(monoFont);
+        }
+    }
+    public BooleanProperty monoFontProperty() {
+        if (null == monoFont) {
+            monoFont = new BooleanPropertyBase(_monoFont) {
+                @Override protected void invalidated() { tooltipText.setFont(get() ? MONO_FONT : LIGHT_FONT); }
+                @Override public Object getBean() { return TooltipPopup.this; }
+                @Override public String getName() { return "monoFont"; }
+            };
+        }
+        return monoFont;
     }
 
     public String getText() { return tooltipText.getText(); }

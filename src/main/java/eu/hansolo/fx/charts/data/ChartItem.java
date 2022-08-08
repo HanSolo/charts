@@ -50,48 +50,48 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ChartItem implements Item, Comparable<ChartItem> {
-    private final ChartEvt                                  UPDATE_EVENT   = new ChartEvt(ChartItem.this, ChartEvt.ITEM_UPDATE);
-    private final ChartEvt                                  FINISHED_EVENT = new ChartEvt(ChartItem.this, ChartEvt.FINISHED);
-    private final ChartEvt                                  SELECTED_EVENT = new ChartEvt(ChartItem.this, ChartEvt.SELECTED);
-    private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers      = new ConcurrentHashMap<>();
-    private       int                                       _index;
-    private       IntegerProperty                           index;
-    private       String                                    _name;
-    private       StringProperty                            name;
-    private       String                                    _unit;
-    private       StringProperty                            unit;
-    private       String                                    _description;
-    private       StringProperty                            description;
-    private       Category                                  _category;
-    private       ObjectProperty<Category>                  category;
-    private       double                                    _value;
-    private       DoubleProperty                            value;
-    private       double                                    oldValue;
-    private       Color                                     _fill;
-    private       ObjectProperty<Color>                     fill;
-    private       Color                                     _stroke;
-    private       ObjectProperty<Color>                     stroke;
-    private       Color                                     _textFill;
-    private       ObjectProperty<Color>                     textFill;
-    private       Instant                                   _timestamp;
-    private       ObjectProperty<Instant>                   timestamp;
-    private       Symbol                                    _symbol;
-    private       ObjectProperty<Symbol>                    symbol;
-    private       boolean                                   _animated;
-    private       BooleanProperty                           animated;
-    private       double                                    _x;
-    private       DoubleProperty                            x;
-    private       double                                    _y;
-    private       DoubleProperty                            y;
-    private       boolean                                   _isEmpty;
-    private       BooleanProperty                           isEmpty;
-    private       boolean                                   _selected;
-    private       BooleanProperty                           selected;
-    private       Metadata                                  _metadata;
-    private       ObjectProperty<Metadata>                  metadata;
-    private       long                                      animationDuration;
-    private       DoubleProperty                            currentValue;
-    private       Timeline                                  timeline;
+    protected final ChartEvt                                  UPDATE_EVENT   = new ChartEvt(ChartItem.this, ChartEvt.ITEM_UPDATE);
+    protected final ChartEvt                                  FINISHED_EVENT = new ChartEvt(ChartItem.this, ChartEvt.FINISHED);
+    protected final ChartEvt                                  SELECTED_EVENT = new ChartEvt(ChartItem.this, ChartEvt.SELECTED);
+    protected       Map<EvtType, List<EvtObserver<ChartEvt>>> observers      = new ConcurrentHashMap<>();
+    private         int                                       _index;
+    private         IntegerProperty                           index;
+    private         String                                    _name;
+    private         StringProperty                            name;
+    private         String                                    _unit;
+    private         StringProperty                            unit;
+    private         String                                    _description;
+    private         StringProperty                            description;
+    private         Category                                  _category;
+    private         ObjectProperty<Category>                  category;
+    private         double                                    _value;
+    private         DoubleProperty                            value;
+    private         double                                    oldValue;
+    private         Color                                     _fill;
+    private         ObjectProperty<Color>                     fill;
+    private         Color                                     _stroke;
+    private         ObjectProperty<Color>                     stroke;
+    private         Color                                     _textFill;
+    private         ObjectProperty<Color>                     textFill;
+    private         Instant                                   _timestamp;
+    private         ObjectProperty<Instant>                   timestamp;
+    private         Symbol                                    _symbol;
+    private         ObjectProperty<Symbol>                    symbol;
+    private         boolean                                   _animated;
+    private         BooleanProperty                           animated;
+    private         double                                    _x;
+    private         DoubleProperty                            x;
+    private         double                                    _y;
+    private         DoubleProperty                            y;
+    private         boolean                                   _isEmpty;
+    private         BooleanProperty                           isEmpty;
+    private         boolean                                   _selected;
+    private         BooleanProperty                           selected;
+    private         Metadata                                  _metadata;
+    private         ObjectProperty<Metadata>                  metadata;
+    private         long                                      animationDuration;
+    private         DoubleProperty                            currentValue;
+    private         Timeline                                  timeline;
 
 
     // ******************** Constructors **************************************
@@ -471,6 +471,7 @@ public class ChartItem implements Item, Comparable<ChartItem> {
 
     public Instant getTimestamp() { return null == timestamp ? _timestamp : timestamp.get(); }
     public void setTimestamp(final ZonedDateTime TIMESTAMP) { setTimestamp(TIMESTAMP.toInstant()); }
+    public void setTimestamp(final long TIMESTAMP_EPOCH_SECOND) { setTimestamp(Instant.ofEpochSecond(TIMESTAMP_EPOCH_SECOND)); }
     public void setTimestamp(final Instant TIMESTAMP) {
         if (null == timestamp) {
             _timestamp = TIMESTAMP;
