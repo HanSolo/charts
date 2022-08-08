@@ -44,6 +44,7 @@ public class TooltipPopup extends Popup {
     public static long                  MAX_TIMEOUT              = 10_000;
     public static Color                 DEFAULT_BACKGROUND_COLOR = Color.rgb(0, 0, 0, 0.75);
     public static Color                 DEFAULT_TEXT_COLOR       = Color.WHITE;
+    private final static String         STYLE_CLASS = "charts-tooltip";
     private       StackPane             pane;
     private       Label                 tooltipText;
     private       FadeTransition        fadeIn;
@@ -105,6 +106,8 @@ public class TooltipPopup extends Popup {
         pane.setPadding(new Insets(5));
         pane.setBackground(new Background(new BackgroundFill(_backgroundColor, new CornerRadii(3), Insets.EMPTY)));
         pane.setMouseTransparent(true);
+        // give users the chance to style things a bit
+        pane.getStyleClass().add(STYLE_CLASS);
 
         getContent().addAll(pane);
     }

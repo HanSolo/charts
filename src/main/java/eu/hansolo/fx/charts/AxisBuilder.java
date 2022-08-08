@@ -37,8 +37,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import javafx.util.StringConverter;
 
 
 /**
@@ -47,7 +49,8 @@ import java.util.Locale;
  * Time: 06:32
  */
 public class AxisBuilder<B extends AxisBuilder<B>> {
-    private HashMap<String, Property> properties = new HashMap<>();
+    // keep insertion order - or otherwise guarantee that "auto" property is set first
+    private HashMap<String, Property> properties = new LinkedHashMap<>();
     private Orientation               orientation;
     private Position                  position;
 
@@ -274,6 +277,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B numberFormatter(final StringConverter<Number> FORMATTER) {
+        properties.put("numberFormatter", new SimpleObjectProperty<>(FORMATTER));
+        return (B) this;
+    }
+
     public final B categories(final String... CATEGORIES) {
         properties.put("categoriesArray", new SimpleObjectProperty<>(CATEGORIES));
         return (B)this;
@@ -474,6 +482,8 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 CONTROL.setZoneId(((ObjectProperty<ZoneId>) properties.get(key)).get());
             } else if ("dateTimeFormatPattern".equals(key)) {
                 CONTROL.setDateTimeFormatPattern(((StringProperty) properties.get(key)).get());
+            } else if ("numberFormatter".equals(key)) {
+                CONTROL.setNumberFormatter(((ObjectProperty<StringConverter<Number>>) properties.get(key)).get());
             }
         }
         return CONTROL;

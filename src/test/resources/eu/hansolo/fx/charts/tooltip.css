@@ -1,0 +1,8 @@
+.charts-tooltip {
+    -fx-background-color: white;
+}
+.charts-tooltip .label {
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Helvetica', Arial, sans-serif;
+}

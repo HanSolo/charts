@@ -304,26 +304,27 @@ public class XYChart<T extends XYItem> extends Region {
 
     private void adjustChartRange() {
         xyPanes.forEach(xyPane -> {
+            // TFE, 2020331: bind properties to keep track of changes to axes
             if (hasBottomXAxis) {
-                xyPane.setLowerBoundX(xAxisB.getMinValue());
-                xyPane.setUpperBoundX(xAxisB.getMaxValue());
+                xyPane.lowerBoundXProperty().bind(xAxisB.minValueProperty());
+                xyPane.upperBoundXProperty().bind(xAxisB.maxValueProperty());
             } else if (hasTopXAxis) {
-                xyPane.setLowerBoundX(xAxisT.getMinValue());
-                xyPane.setUpperBoundX(xAxisT.getMaxValue());
+                xyPane.lowerBoundXProperty().bind(xAxisT.minValueProperty());
+                xyPane.upperBoundXProperty().bind(xAxisT.maxValueProperty());
             } else if (hasCenterXAxis) {
-                xyPane.setLowerBoundX(xAxisC.getMinValue());
-                xyPane.setUpperBoundX(xAxisC.getMaxValue());
+                xyPane.lowerBoundXProperty().bind(xAxisC.minValueProperty());
+                xyPane.upperBoundXProperty().bind(xAxisC.maxValueProperty());
             }
 
             if (hasLeftYAxis) {
-                xyPane.setLowerBoundY(yAxisL.getMinValue());
-                xyPane.setUpperBoundY(yAxisL.getMaxValue());
+                xyPane.lowerBoundYProperty().bind(yAxisL.minValueProperty());
+                xyPane.upperBoundYProperty().bind(yAxisL.maxValueProperty());
             } else if (hasRightYAxis) {
-                xyPane.setLowerBoundY(yAxisR.getMinValue());
-                xyPane.setUpperBoundY(yAxisR.getMaxValue());
+                xyPane.lowerBoundYProperty().bind(yAxisR.minValueProperty());
+                xyPane.upperBoundYProperty().bind(yAxisR.maxValueProperty());
             } else if (hasCenterYAxis) {
-                xyPane.setLowerBoundY(yAxisC.getMinValue());
-                xyPane.setUpperBoundY(yAxisC.getMaxValue());
+                xyPane.lowerBoundYProperty().bind(yAxisC.minValueProperty());
+                xyPane.upperBoundYProperty().bind(yAxisC.maxValueProperty());
             }
         });
     }
