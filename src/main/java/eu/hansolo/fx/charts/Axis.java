@@ -1225,9 +1225,13 @@ public class Axis extends Region {
     private void calcScale() {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;
-        // Only set major and minor tickspace if auto scale!!!
-        setMajorTickSpace(Helper.calcNiceNumber(getRange() / (maxNoOfMajorTicks - 1), false));
-        setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), false));
+        // Only set major and minor tickspace if they are at their default values of 10 and 1
+        if (getMajorTickSpace() == 10) {
+            setMajorTickSpace(Helper.calcNiceNumber(getRange() / (maxNoOfMajorTicks - 1), false));
+        }
+        if (getMinorTickSpace() == 1) {
+            setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), false));
+        }
     }
 
     private double calcTextWidth(final Font FONT, final String TEXT) {
@@ -1704,7 +1708,7 @@ public class Axis extends Region {
                         drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
                     }
                 }
-
+                
                 counterBD = counterBD.add(minorTickSpaceBD);
                 counter = counterBD.doubleValue();
                 if (counter > maxValue) break;
