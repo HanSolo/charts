@@ -57,50 +57,53 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @DefaultProperty("children")
 public class CandleChart extends Region {
-    private static final double                                PREFERRED_WIDTH          = 600;
-    private static final double                                PREFERRED_HEIGHT         = 400;
-    private static final double                                MINIMUM_WIDTH            = 50;
-    private static final double                                MINIMUM_HEIGHT           = 50;
-    private static final double                                MAXIMUM_WIDTH            = 2048;
-    private static final double                                MAXIMUM_HEIGHT           = 2048;
-    private static final Color                                 DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
-    private static final Color                                 DEFAULT_BULLISH_COLOR    = MaterialDesignColors.GREEN_300.get();
-    private static final Color                                 DEFAULT_BEARISH_COLOR    = MaterialDesignColors.RED_300.get();
-    private static final Color                                 DEFAULT_STROKE           = Color.BLACK;
-    private static final DateTimeFormatter                     DTF                      = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.US);
-    private              double                                width;
-    private              double                                height;
-    private              Canvas                                canvas;
-    private              GraphicsContext                       ctx;
-    private              ObservableList<CandleChartItem>       items;
-    private              EvtObserver<ChartEvt>                 itemObserver;
-    private              ListChangeListener<CandleChartItem>   itemListListener;
-    private              int                                   _decimals;
-    private              IntegerProperty                       decimals;
-    private              Locale                                _locale;
-    private              ObjectProperty<Locale>                locale;
-    private              String                                formatString;
-    private              Map<Rectangle, CandleChartItem>       paths;
-    private              TooltipPopup                          popup;
-    private              double                                minValue;
-    private              double                                maxValue;
-    private              Color                                 _backgroundColor;
-    private              ObjectProperty<Color>                 backgroundColor;
-    private              Color                                 _bullishColor;
-    private              ObjectProperty<Color>                 bullishColor;
-    private              Color                                 _bearishColor;
-    private              ObjectProperty<Color>                 bearishColor;
-    private              Color                                 _strokeColor;
-    private              ObjectProperty<Color>                 strokeColor;
-    private              boolean                               _endLinesVisible;
-    private              BooleanProperty                       endLinesVisible;
-    private              boolean                               _useItemColorForStroke;
-    private              BooleanProperty                       useItemColorForStroke;
-    private              int                                   _minNumberOfItems;
-    private              IntegerProperty                       minNumberOfItems;
-    private              boolean                               _useMinNumberOfItems;
-    private              BooleanProperty                       useMinNumberOfItems;
-    private              boolean                               sorted;
+    private static final double                              PREFERRED_WIDTH          = 600;
+    private static final double                              PREFERRED_HEIGHT         = 400;
+    private static final double                              MINIMUM_WIDTH            = 50;
+    private static final double                              MINIMUM_HEIGHT           = 50;
+    private static final double                              MAXIMUM_WIDTH            = 2048;
+    private static final double                              MAXIMUM_HEIGHT           = 2048;
+    private static final Color                               DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
+    private static final Color                               DEFAULT_BULLISH_COLOR    = MaterialDesignColors.GREEN_300.get();
+    private static final Color                               DEFAULT_BEARISH_COLOR    = MaterialDesignColors.RED_300.get();
+    private static final Color                               DEFAULT_STROKE           = Color.BLACK;
+    private static final DateTimeFormatter                   DTF                      = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.US);
+    private              double                              width;
+    private              double                              height;
+    private              Canvas                              canvas;
+    private              GraphicsContext                     ctx;
+    private              ObservableList<CandleChartItem>     items;
+    private              EvtObserver<ChartEvt>               itemObserver;
+    private              ListChangeListener<CandleChartItem> itemListListener;
+    private              int                                 _decimals;
+    private              IntegerProperty                     decimals;
+    private              Locale                              _locale;
+    private              ObjectProperty<Locale>              locale;
+    private              String                              formatString;
+    private              Map<Rectangle, CandleChartItem>     paths;
+    private              TooltipPopup                        popup;
+    private              double                              minValue;
+    private              double                              maxValue;
+    private              double                              calculatedRange;
+    private              Color                               _backgroundColor;
+    private              ObjectProperty<Color>               backgroundColor;
+    private              Color                               _bullishColor;
+    private              ObjectProperty<Color>               bullishColor;
+    private              Color                               _bearishColor;
+    private              ObjectProperty<Color>               bearishColor;
+    private              Color                               _strokeColor;
+    private              ObjectProperty<Color>               strokeColor;
+    private              boolean                             _endLinesVisible;
+    private              BooleanProperty                     endLinesVisible;
+    private              boolean                             _useItemColorForStroke;
+    private              BooleanProperty                     useItemColorForStroke;
+    private              int                                 _minNumberOfItems;
+    private              IntegerProperty                     minNumberOfItems;
+    private              boolean                             _useMinNumberOfItems;
+    private              BooleanProperty                     useMinNumberOfItems;
+    private              Axis                                _yAxis;
+    private              ObjectProperty<Axis>                yAxis;
+    private              boolean                             sorted;
 
 
     // ******************** Constructors **************************************
@@ -118,9 +121,10 @@ public class CandleChart extends Region {
                     c.getRemoved().forEach(removedItem -> removedItem.removeChartEvtObserver(ChartEvt.ITEM_UPDATE, itemObserver));
                 }
             }
-            minValue = items.stream().min(Comparator.comparing(CandleChartItem::getLow)).get().getLow();
-            maxValue = items.stream().max(Comparator.comparing(CandleChartItem::getHigh)).get().getHigh();
-            sorted   = false;
+            minValue        = items.stream().min(Comparator.comparing(CandleChartItem::getLow)).get().getLow();
+            maxValue        = items.stream().max(Comparator.comparing(CandleChartItem::getHigh)).get().getHigh();
+            calculatedRange = maxValue - minValue;
+            sorted          = false;
         };
         _backgroundColor       = DEFAULT_BACKGROUND_COLOR;
         _bullishColor          = DEFAULT_BULLISH_COLOR;
@@ -130,6 +134,7 @@ public class CandleChart extends Region {
         _useItemColorForStroke = false;
         _minNumberOfItems      = 10;
         _useMinNumberOfItems   = false;
+        _yAxis                 = null;
         _decimals              = 0;
         _locale                = Locale.getDefault();
         paths                  = new ConcurrentHashMap<>();
@@ -137,6 +142,7 @@ public class CandleChart extends Region {
         popup                  = new TooltipPopup("", 3500, true);
         minValue               = 100;
         maxValue               = 0;
+        calculatedRange        = 100;
         sorted                 = false;
 
         items.setAll(null == ITEMS ? new ArrayList<>() : ITEMS);
@@ -431,6 +437,34 @@ public class CandleChart extends Region {
         return useMinNumberOfItems;
     }
 
+    public Axis getYAxis() { return null == yAxis ? _yAxis : yAxis.get(); }
+    public void setYAxis(final Axis yAxis) {
+        if (null == this.yAxis) {
+            _yAxis = yAxis;
+            redraw();
+        } else {
+            this.yAxis.set(yAxis);
+        }
+    }
+    public ObjectProperty<Axis> yAxisProperty() {
+        if (null == yAxis) {
+            yAxis = new ObjectPropertyBase<>(_yAxis) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CandleChart.this; }
+                @Override public String getName() { return "yAxis"; }
+            };
+        }
+        return yAxis;
+    }
+
+    public void resetYAxis() {
+        _yAxis = null;
+        yAxis  = null;
+        minValue = items.stream().min(Comparator.comparing(CandleChartItem::getLow)).get().getLow();
+        maxValue = items.stream().max(Comparator.comparing(CandleChartItem::getHigh)).get().getHigh();
+        redraw();
+    }
+
     public void setPopupTimeout(final long milliseconds) { popup.setTimeout(milliseconds); }
 
 
@@ -466,28 +500,36 @@ public class CandleChart extends Region {
             sorted = true;
         }
 
-        int    noOfItems        = items.size();
-        double minNumberOfItems = noOfItems > getMinNumberOfItems() ? noOfItems : getMinNumberOfItems();
-        double itemWidth        = getUseMinNumberOfItems() ? chartWidth / (minNumberOfItems + (minNumberOfItems * 0.2)) : chartWidth / (noOfItems + (noOfItems * 0.2));
-        double halfItemWidth    = itemWidth * 0.5;
-        double quarterItemWidth = halfItemWidth * 0.5;
-        double itemSpacer       = (chartWidth - (noOfItems * itemWidth)) / (noOfItems - 1);
-        double range            = Math.abs(minValue) + Math.abs(Math.abs(maxValue) - Math.abs(minValue));
-        double scaleFactorY     = chartHeight / range;
+        int    noOfItems              = items.size();
+        double minNumberOfItems       = noOfItems > getMinNumberOfItems() ? noOfItems : getMinNumberOfItems();
+        double itemWidth              = getUseMinNumberOfItems() ? chartWidth / (minNumberOfItems + (minNumberOfItems * 0.2)) : chartWidth / (noOfItems + (noOfItems * 0.2));
+        double halfItemWidth          = itemWidth * 0.5;
+        double quarterItemWidth       = halfItemWidth * 0.5;
+        double itemSpacer             = (chartWidth - (noOfItems * itemWidth)) / (noOfItems - 1);
+        Axis   yAxis                  = getYAxis();
+        double rangeY;
+        if (null == yAxis) {
+            rangeY = calculatedRange;
+        } else {
+            rangeY   = yAxis.getMaxValue() - yAxis.getMinValue();
+            minValue = yAxis.getMinValue();
+            maxValue = yAxis.getMaxValue();
+        }
+        double calculatedScaleFactorY = chartHeight / rangeY;
 
         for (int i = 0 ; i < noOfItems ; i++) {
-            CandleChartItem item   = items.get(i);
-            double          high   = item.getHigh();
-            double          low    = item.getLow();
-            double          open   = item.getOpen();
-            double          close  = item.getClose();
-            Color           fill   = open < close ? getBullishColor() : getBearishColor();
-            double          x      = inset + halfItemWidth + (i * itemWidth) + (i * itemSpacer);
-            double          yLow   = low * scaleFactorY;
-            double          yHigh  = high * scaleFactorY;
-            double          yOpen  = open * scaleFactorY;
-            double          yClose = close * scaleFactorY;
-            double          yRange = open < close ? (yClose - yOpen) : (yOpen - yClose);
+            CandleChartItem item      = items.get(i);
+            double          high      = item.getHigh();
+            double          low       = item.getLow();
+            double          open      = item.getOpen();
+            double          close     = item.getClose();
+            Color           fill      = open < close ? getBullishColor() : getBearishColor();
+            double          x         = inset + halfItemWidth + (i * itemWidth) + (i * itemSpacer);
+            double          yLow      = (low - minValue) * calculatedScaleFactorY;
+            double          yHigh     = (high - minValue) * calculatedScaleFactorY;
+            double          yOpen     = (open - minValue) * calculatedScaleFactorY;
+            double          yClose    = (close - minValue) * calculatedScaleFactorY;
+            double          boxHeight = open < close ? (yClose - yOpen) : (yOpen - yClose);
 
             if (getUseItemColorForStroke()) {
                 ctx.setStroke(fill.equals(Color.TRANSPARENT) ? getStrokeColor() : fill);
@@ -501,8 +543,8 @@ public class CandleChart extends Region {
             ctx.strokeLine(x, height - inset - yHigh, x, height - inset - yLow);
             ctx.setFill(fill.equals(Color.TRANSPARENT) ? getBackgroundColor() : fill);
             ctx.setStroke(fill.equals(Color.TRANSPARENT) ? getStrokeColor() : fill);
-            ctx.fillRect(x - halfItemWidth, height - inset - (open < close ? yClose : yOpen), itemWidth, yRange);
-            ctx.strokeRect(x - halfItemWidth, height - inset - (open < close ? yClose : yOpen), itemWidth, yRange);
+            ctx.fillRect(x - halfItemWidth, height - inset - (open < close ? yClose : yOpen), itemWidth, boxHeight);
+            ctx.strokeRect(x - halfItemWidth, height - inset - (open < close ? yClose : yOpen), itemWidth, boxHeight);
             paths.put(new Rectangle(x - halfItemWidth, height - inset - yHigh, itemWidth, (yHigh - yLow)), item);
         }
     }

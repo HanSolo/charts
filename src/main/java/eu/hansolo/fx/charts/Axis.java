@@ -1708,7 +1708,7 @@ public class Axis extends Region {
                         drawTickMark(minorTickMarkColor, minorLineWidth, minorPointX, minorPointY, outerPointX, outerPointY);
                     }
                 }
-                
+
                 counterBD = counterBD.add(minorTickSpaceBD);
                 counter = counterBD.doubleValue();
                 if (counter > maxValue) break;

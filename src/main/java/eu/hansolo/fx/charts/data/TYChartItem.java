@@ -34,6 +34,12 @@ public class TYChartItem extends XYChartItem {
     public TYChartItem() {
         this(LocalDateTime.now(), 0, "", Color.RED, Symbol.NONE);
     }
+    public TYChartItem(final LocalDateTime T, final double Y) {
+        this(T,Y, "", Color.RED, Symbol.NONE);
+    }
+    public TYChartItem(final LocalDateTime T, final double Y, final Color FILL) {
+        this(T,Y, "", FILL, Symbol.NONE);
+    }
     public TYChartItem(final LocalDateTime T, final double Y, final String NAME) {
         this(T, Y, NAME, Color.RED, Symbol.NONE);
     }

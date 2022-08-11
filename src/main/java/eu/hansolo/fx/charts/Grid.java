@@ -108,6 +108,7 @@ public class Grid extends Region {
         _mediumVGridLinesVisible = true;
         _minorVGridLinesVisible  = true;
         dashes                   = new double[]{1};
+        setMouseTransparent(true);
         initGraphics();
         registerListeners();
     }

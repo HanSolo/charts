@@ -118,6 +118,11 @@ public class CandleChartBuilder<B extends CandleChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B yAxis(final Axis Y_AXIS) {
+        properties.put("yAxis", new SimpleObjectProperty<>(Y_AXIS));
+        return (B)this;
+    }
+
 
     public final B prefSize(final double WIDTH, final double HEIGHT) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(WIDTH, HEIGHT)));
@@ -239,6 +244,7 @@ public class CandleChartBuilder<B extends CandleChartBuilder<B>> {
                 case "minNumberOfItems"      -> candleChart.setMinNumberOfItems(((IntegerProperty) properties.get(key)).get());
                 case "useMinNumberOfItems"   -> candleChart.setUseMinNumberOfItems(((BooleanProperty) properties.get(key)).get());
                 case "popupTimeout"          -> candleChart.setPopupTimeout(((LongProperty) properties.get(key)).get());
+                case "yAxis"                 -> candleChart.setYAxis(((ObjectProperty<Axis>) properties.get(key)).get());
             }
         }
         return candleChart;
