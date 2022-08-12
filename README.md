@@ -168,4 +168,4 @@ related to imports, required modules etc.
 
 
 ## CandleChart
-![CandleChart](https://i.ibb.co/1MLzDxd/Xnip2022-08-08-15-42-51.png)
+![CandleChart](https://i.ibb.co/dMfpd36/Candle-Chart.png)
