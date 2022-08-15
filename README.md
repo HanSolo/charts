@@ -169,3 +169,7 @@ related to imports, required modules etc.
 
 ## CandleChart
 ![CandleChart](https://i.ibb.co/dMfpd36/Candle-Chart.png)
+
+
+## BoxPlots
+![BoxPlots](https://i.ibb.co/MSQ54yd/BoxPlots.png)

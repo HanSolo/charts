@@ -18,8 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.data.CandleChartItem;
 import eu.hansolo.fx.charts.data.ChartItem;
+import eu.hansolo.fx.charts.series.ChartItemSeries;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
@@ -40,26 +41,22 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class CandleChartBuilder<B extends CandleChartBuilder<B>> {
+public class BoxPlotsBuilder<B extends BoxPlotsBuilder<B>> {
     private HashMap<String, Property> properties = new HashMap<>();
 
 
     // ******************** Constructors **************************************
-    protected CandleChartBuilder() {}
+    protected BoxPlotsBuilder() {}
 
 
     // ******************** Methods *******************************************
-    public static final CandleChartBuilder create() {
-        return new CandleChartBuilder();
+    public static final BoxPlotsBuilder create() {
+        return new BoxPlotsBuilder();
     }
 
-    public final B items(final ChartItem... ITEMS) {
-        properties.put("itemsArray", new SimpleObjectProperty<>(ITEMS));
-        return (B)this;
-    }
 
-    public final B items(final List<ChartItem> ITEMS) {
-        properties.put("itemsList", new SimpleObjectProperty<>(ITEMS));
+    public final B seriesList(final List<ChartItemSeries<? extends ChartItem>> SERIES_LIST) {
+        properties.put("seriesList", new SimpleObjectProperty<>(SERIES_LIST));
         return (B)this;
     }
 
@@ -78,38 +75,43 @@ public class CandleChartBuilder<B extends CandleChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B bullishColor(final Color BULLISH_COLOR) {
-        properties.put("bullishColor", new SimpleObjectProperty<>(BULLISH_COLOR));
+    public final B whiskerStrokeColor(final Color WHISKER_STROKE_COLOR) {
+        properties.put("whiskerStrokeColor", new SimpleObjectProperty<>(WHISKER_STROKE_COLOR));
         return (B)this;
     }
 
-    public final B bearishColor(final Color BEARISH_COLOR) {
-        properties.put("bearishColor", new SimpleObjectProperty<>(BEARISH_COLOR));
+    public final B iqrFillColor(final Color IQR_FILL_COLOR) {
+        properties.put("iqrFillColor", new SimpleObjectProperty<>(IQR_FILL_COLOR));
         return (B)this;
     }
 
-    public final B strokeColor(final Color STROKE_COLOR) {
-        properties.put("strokeColor", new SimpleObjectProperty<>(STROKE_COLOR));
+    public final B iqrStrokeColor(final Color IQR_STROKE_COLOR) {
+        properties.put("iqrStrokeColor", new SimpleObjectProperty<>(IQR_STROKE_COLOR));
         return (B)this;
     }
 
-    public final B endLinesVisible(final boolean END_LINES_VISIBLE) {
-        properties.put("endLinesVisible", new SimpleBooleanProperty(END_LINES_VISIBLE));
+    public final B medianStrokeColor(final Color MEDIAN_STROKE_COLOR) {
+        properties.put("medianStrokeColor", new SimpleObjectProperty<>(MEDIAN_STROKE_COLOR));
         return (B)this;
     }
 
-    public final B useItemColorForStroke(final boolean USE_ITEM_COLOR_FOR_STROKE) {
-        properties.put("useItemColorForStroke", new SimpleBooleanProperty(USE_ITEM_COLOR_FOR_STROKE));
+    public final B outlierFillColor(final Color OUTLIER_FILL_COLOR) {
+        properties.put("outlierFillColor", new SimpleObjectProperty<>(OUTLIER_FILL_COLOR));
         return (B)this;
     }
 
-    public final B minNumberOfItems(final int MIN_NUMBER_OF_ITEMS) {
-        properties.put("minNumberOfItems", new SimpleIntegerProperty(MIN_NUMBER_OF_ITEMS));
+    public final B outlierStrokeColor(final Color OUTLIER_STROKE_COLOR) {
+        properties.put("outlierStrokeColor", new SimpleObjectProperty<>(OUTLIER_STROKE_COLOR));
         return (B)this;
     }
 
-    public final B useMinNumberOfItems(final boolean USE_MIN_NUMBER_OF_ITEMS) {
-        properties.put("useMinNumberOfItems", new SimpleBooleanProperty(USE_MIN_NUMBER_OF_ITEMS));
+    public final B nameVisible(final boolean NAME_VISIBLE) {
+        properties.put("nameVisible", new SimpleBooleanProperty(NAME_VISIBLE));
+        return (B)this;
+    }
+
+    public final B textFillColor(final Color TEXT_FILL_COLOR) {
+        properties.put("textFillColor", new SimpleObjectProperty<>(TEXT_FILL_COLOR));
         return (B)this;
     }
 
@@ -197,56 +199,57 @@ public class CandleChartBuilder<B extends CandleChartBuilder<B>> {
     }
 
 
-    public final CandleChart build() {
-        final CandleChart candleChart = new CandleChart();
+    public final BoxPlots build() {
+        final BoxPlots boxPlots = new BoxPlots();
 
-        if (properties.keySet().contains("itemsArray")) {
-            candleChart.setItems(((ObjectProperty<CandleChartItem[]>) properties.get("itemsArray")).get());
-        } else if(properties.keySet().contains("itemsList")) {
-            candleChart.setItems(((ObjectProperty<List<CandleChartItem>>) properties.get("itemsList")).get());
+        if (properties.keySet().contains("seriesList")) {
+            List<ChartItemSeries<? extends ChartItem>> seriesList = ((ObjectProperty<List<ChartItemSeries<? extends ChartItem>>>) properties.get("seriesList")).get();
+            boxPlots.setSeriesList(seriesList);
         }
 
         for (String key : properties.keySet()) {
             switch (key) {
-                case "prefSize"            -> {
+                case "prefSize"           -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    candleChart.setPrefSize(dim.getWidth(), dim.getHeight());
+                    boxPlots.setPrefSize(dim.getWidth(), dim.getHeight());
                 }
-                case "minSize"             -> {
+                case "minSize"            -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    candleChart.setMinSize(dim.getWidth(), dim.getHeight());
+                    boxPlots.setMinSize(dim.getWidth(), dim.getHeight());
                 }
-                case "maxSize"             -> {
+                case "maxSize"            -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
-                    candleChart.setMaxSize(dim.getWidth(), dim.getHeight());
+                    boxPlots.setMaxSize(dim.getWidth(), dim.getHeight());
                 }
-                case "prefWidth"             -> candleChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-                case "prefHeight"            -> candleChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-                case "minWidth"              -> candleChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
-                case "minHeight"             -> candleChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
-                case "maxWidth"              -> candleChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-                case "maxHeight"             -> candleChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-                case "scaleX"                -> candleChart.setScaleX(((DoubleProperty) properties.get(key)).get());
-                case "scaleY"                -> candleChart.setScaleY(((DoubleProperty) properties.get(key)).get());
-                case "layoutX"               -> candleChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
-                case "layoutY"               -> candleChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
-                case "translateX"            -> candleChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
-                case "translateY"            -> candleChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
-                case "padding"               -> candleChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-                case "decimals"              -> candleChart.setDecimals(((IntegerProperty) properties.get(key)).get());
-                case "locale"                -> candleChart.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
-                case "backgroundColor"       -> candleChart.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "bullishColor"          -> candleChart.setBullishColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "bearishColor"          -> candleChart.setBearishColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "strokeColor"           -> candleChart.setStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "endLinesVisible"       -> candleChart.setEndLinesVisible(((BooleanProperty) properties.get(key)).get());
-                case "useItemColorForStroke" -> candleChart.setUseItemColorForStroke(((BooleanProperty) properties.get(key)).get());
-                case "minNumberOfItems"      -> candleChart.setMinNumberOfItems(((IntegerProperty) properties.get(key)).get());
-                case "useMinNumberOfItems"   -> candleChart.setUseMinNumberOfItems(((BooleanProperty) properties.get(key)).get());
-                case "popupTimeout"          -> candleChart.setPopupTimeout(((LongProperty) properties.get(key)).get());
+                case "prefWidth"          -> boxPlots.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"         -> boxPlots.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"           -> boxPlots.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"          -> boxPlots.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"           -> boxPlots.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"          -> boxPlots.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"             -> boxPlots.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"             -> boxPlots.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"            -> boxPlots.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"            -> boxPlots.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"         -> boxPlots.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"         -> boxPlots.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"            -> boxPlots.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "decimals"           -> boxPlots.setDecimals(((IntegerProperty) properties.get(key)).get());
+                case "locale"             -> boxPlots.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                case "name"               -> boxPlots.setName(((StringProperty) properties.get(key)).get());
+                case "backgroundColor"    -> boxPlots.setBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "whiskerStrokeColor" -> boxPlots.setWhiskerStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "iqrFillColor"       -> boxPlots.setIqrFillColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "iqrStrokeColor"     -> boxPlots.setIqrStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "medianStrokeColor"  -> boxPlots.setMedianStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "outlierFillColor"   -> boxPlots.setOutlierFillColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "outlierStrokeColor" -> boxPlots.setOutlierStrokeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "nameVisible"        -> boxPlots.setNameVisible(((BooleanProperty) properties.get(key)).get());
+                case "textFillColor"      -> boxPlots.setTextFillColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "popupTimeout"       -> boxPlots.setPopupTimeout(((LongProperty) properties.get(key)).get());
             }
         }
-        if (properties.containsKey("yAxis")) { candleChart.setYAxis(((ObjectProperty<Axis>) properties.get("yAxis")).get()); }
-        return candleChart;
+        if (properties.containsKey("yAxis")) { boxPlots.setYAxis(((ObjectProperty<Axis>) properties.get("yAxis")).get()); }
+        return boxPlots;
     }
 }
