@@ -130,6 +130,9 @@ public class BarChart<T extends ChartItem> extends Region {
     private              IntegerProperty                           minNumberOfBars;
     private              boolean                                   _useMinNumberOfBars;
     private              BooleanProperty                           useMinNumberOfBars;
+    private              boolean                                   _useGivenColors;
+    private              BooleanProperty                           useGivenColors;
+    private              List<Color>                               colors;
     private              Map<Rectangle, ChartItem>                 rectangleItemMap;
     private              ListChangeListener<ChartItem>             chartItemListener;
     private              EvtObserver<ChartEvt>                     observer;
@@ -164,6 +167,8 @@ public class BarChart<T extends ChartItem> extends Region {
         _animationDuration      = 1000;
         _minNumberOfBars        = 5;
         _useMinNumberOfBars     = false;
+        _useGivenColors         = false;
+        colors                  = Arrays.asList(Color.rgb(253, 231, 37), Color.rgb(170, 220, 49), Color.rgb(94, 200, 99), Color.rgb(40, 173, 129), Color.rgb(33, 144, 140), Color.rgb(44, 114, 142), Color.rgb(59, 82, 139), Color.rgb(71, 45, 123), Color.rgb(68, 4, 84));
         observers               = new ConcurrentHashMap<>();
         popup                   = new InfoPopup();
         rectangleItemMap        = new HashMap<>();
@@ -713,6 +718,34 @@ public class BarChart<T extends ChartItem> extends Region {
         return useMinNumberOfBars;
     }
 
+    public boolean useGivenColors() { return null == useGivenColors ? _useGivenColors : useGivenColors.get(); }
+    public void setUseGivenColors(final boolean useGivenColors) {
+        if (null == this.useGivenColors) {
+            _useGivenColors = useGivenColors;
+            redraw();
+        } else {
+            this.useGivenColors.set(useGivenColors);
+        }
+    }
+    public BooleanProperty getUseGivenColorsProperty() {
+        if (null == useGivenColors) {
+            useGivenColors = new BooleanPropertyBase(_useGivenColors) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return BarChart.this; }
+                @Override public String getName() { return "useGivenColors"; }
+            };
+        }
+        return useGivenColors;
+    }
+
+    public List<Color> getColors() { return colors; }
+    public void setColors(final List<Color> colors) {
+        if (colors.isEmpty()) { throw new IllegalArgumentException("colors cannot be empty"); }
+        this.colors.clear();
+        this.colors.addAll(colors);
+        if (useGivenColors()) { redraw(); }
+    }
+
     private void handleMouseEvents(final MouseEvent evt) {
         final double x = evt.getX();
         final double y = evt.getY();
@@ -817,6 +850,7 @@ public class BarChart<T extends ChartItem> extends Region {
         Font            nameFont             = Fonts.latoRegular(nameFontSize);
         DropShadow      shadow               = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barHeight * 0.1, 0.0, 1, barHeight * 0.1);
         double          barX                 = inset + namesWidth;
+        int             givenColorCounter    = 0;
 
         ctx.clearRect(0, 0, width, height);
         ctx.setFill(getBackgroundFill());
@@ -848,7 +882,15 @@ public class BarChart<T extends ChartItem> extends Region {
 
             ctx.save();
             if (shadowsVisible) { ctx.setEffect(shadow); }
-            ctx.setFill(useItemFill ? item.getFill() : barFill);
+
+            if (useGivenColors()) {
+                ctx.setFill(colors.get(givenColorCounter));
+                givenColorCounter++;
+                if (givenColorCounter > colors.size() - 1) { givenColorCounter = 0; }
+            } else {
+                ctx.setFill(useItemFill ? item.getFill() : barFill);
+            }
+
             ctx.beginPath();
             ctx.moveTo(barX, barY);
             if (barWidth < cornerRadius) {
@@ -949,6 +991,7 @@ public class BarChart<T extends ChartItem> extends Region {
         Font            nameFont             = Fonts.latoRegular(nameFontSize);
         DropShadow      shadow               = new DropShadow(BlurType.TWO_PASS_BOX, Color.rgb(0, 0, 0, 0.15), barWidth * 0.1, 0.0, barWidth * 0.1, 1);
         double          barY                 = chartHeight - inset - namesHeight;
+        int             givenColorCounter    = 0;
 
         ctx.clearRect(0, 0, width, height);
         ctx.setFill(getBackgroundFill());
@@ -980,7 +1023,15 @@ public class BarChart<T extends ChartItem> extends Region {
 
             ctx.save();
             if (shadowsVisible) { ctx.setEffect(shadow); }
-            ctx.setFill(useItemFill ? item.getFill() : barFill);
+
+            if (useGivenColors()) {
+                ctx.setFill(colors.get(givenColorCounter));
+                givenColorCounter++;
+                if (givenColorCounter > colors.size() - 1) { givenColorCounter = 0; }
+            } else {
+                ctx.setFill(useItemFill ? item.getFill() : barFill);
+            }
+
             ctx.beginPath();
             ctx.moveTo(barX, barY);
             if (barHeight < cornerRadius) {

@@ -20,7 +20,6 @@ public class GraphEdge {
     private HashMap<String, Double>   nummericAttributes;
 
 
-
     public GraphEdge(GraphNode node1, GraphNode node2, double force, double width, Map<String, Double> nummericAttributes ){
         this.u = new SimpleObjectProperty<>(node1);
         this.v = new SimpleObjectProperty<>(node2);

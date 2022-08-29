@@ -165,6 +165,16 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
         return (B)this;
     }
 
+    public final B useGivenColors(final boolean useGivenColors) {
+        properties.put("useGivenColors", new SimpleBooleanProperty(useGivenColors));
+        return (B)this;
+    }
+
+    public final B colors(final List<Color> colors) {
+        properties.put("colors", new SimpleObjectProperty<>(colors));
+        return (B)this;
+    }
+
     // General properties
     public final B prefSize(final double width, final double height) {
         properties.put("prefSize", new SimpleObjectProperty<>(new Dimension2D(width, height)));
@@ -296,6 +306,8 @@ public class BarChartBuilder <B extends BarChartBuilder<B>> {
                 case "animationDuration"    -> barChart.setAnimationDuration(((LongProperty) properties.get(key)).get());
                 case "minNumberOfBars"      -> barChart.setMinNumberOfBars(((IntegerProperty) properties.get(key)).get());
                 case "useMinNumberOfBars"   -> barChart.setUseMinNumberOfBars(((BooleanProperty) properties.get(key)).get());
+                case "useGivenColors"       -> barChart.setUseGivenColors(((BooleanProperty) properties.get(key)).get());
+                case "colors"               -> barChart.setColors(((ObjectProperty<List<Color>>) properties.get(key)).get());
             }
         }
         return barChart;

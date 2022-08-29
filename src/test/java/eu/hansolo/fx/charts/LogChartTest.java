@@ -74,8 +74,7 @@ public class LogChartTest extends Application {
         // SmoothLineChart
         smoothLineChartXAxisBottom = createBottomXAxis(0, NO_OF_X_VALUES, true);
         smoothLineChartYAxisLeft   = createLeftYAxis(0, 1000, true);
-        smoothLineChart            = new XYChart<>(new XYPane(xySeries1),
-                                                   smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
+        smoothLineChart            = new XYChart<>(new XYPane(xySeries1), smoothLineChartYAxisLeft, smoothLineChartXAxisBottom);
         Grid grid = new Grid(smoothLineChartXAxisBottom, smoothLineChartYAxisLeft);
         smoothLineChart.setGrid(grid);
 

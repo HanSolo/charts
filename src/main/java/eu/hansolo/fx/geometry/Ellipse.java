@@ -42,10 +42,31 @@ public class Ellipse extends RectangularShape {
     @Override public double getHeight() { return height; }
 
     public double getCenterX() { return (x + width) / 2; }
+    public void setCenterX(final double centerX) {
+        x = centerX - width * 0.5;
+    }
+
     public double getCenterY() { return (y + height) / 2; }
+    public void setCenterY(final double centerY) {
+        y = centerY - height * 0.5;
+    }
+
+    public void setCenter(final double centerX, final double centerY) {
+        x = centerX - width * 0.5;
+        y = centerY - height * 0.5;
+    }
 
     public double getRadiusX() { return width / 2; }
+    public void setRadiusX(final double radiusX) {
+        x     +=  (width / 2) - radiusX;
+        width = 2 * radiusX;
+    }
+
     public double getRadiusY() { return height / 2; }
+    public void setRadiusY(final double radiusY) {
+        y     += (height / 2) - radiusY;
+        height = 2 * radiusY;
+    }
 
     @Override public boolean isEmpty() { return (Double.compare(width, 0) <= 0 || Double.compare(height, 0) <= 0); }
 

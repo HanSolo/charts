@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2022 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,17 +16,10 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.geometry;
+package eu.hansolo.fx.charts;
 
-public class Circle extends Ellipse {
-
-    public Circle(final double CENTER_X, final double CENTER_Y, final double RADIUS) {
-        super(CENTER_X - RADIUS, CENTER_Y - RADIUS, RADIUS * 2, RADIUS * 2);
-    }
-
-    public double getRadius() { return getRadiusX(); }
-    public void setRadius(final double radius) {
-        setRadiusX(radius);
-        setRadiusY(radius);
+public class BubbleChartTestLauncher {
+    public static void main(String[] args) {
+        BubbleChartTest.main(args);
     }
 }
