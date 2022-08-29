@@ -168,7 +168,7 @@ public class BarChart<T extends ChartItem> extends Region {
         _minNumberOfBars        = 5;
         _useMinNumberOfBars     = false;
         _useGivenColors         = false;
-        colors                  = Arrays.asList(Color.rgb(253, 231, 37), Color.rgb(170, 220, 49), Color.rgb(94, 200, 99), Color.rgb(40, 173, 129), Color.rgb(33, 144, 140), Color.rgb(44, 114, 142), Color.rgb(59, 82, 139), Color.rgb(71, 45, 123), Color.rgb(68, 4, 84));
+        colors                  = new ArrayList<>(List.of(Color.rgb(253, 231, 37), Color.rgb(170, 220, 49), Color.rgb(94, 200, 99), Color.rgb(40, 173, 129), Color.rgb(33, 144, 140), Color.rgb(44, 114, 142), Color.rgb(59, 82, 139), Color.rgb(71, 45, 123), Color.rgb(68, 4, 84)));
         observers               = new ConcurrentHashMap<>();
         popup                   = new InfoPopup();
         rectangleItemMap        = new HashMap<>();
@@ -741,6 +741,7 @@ public class BarChart<T extends ChartItem> extends Region {
     public List<Color> getColors() { return colors; }
     public void setColors(final List<Color> colors) {
         if (colors.isEmpty()) { throw new IllegalArgumentException("colors cannot be empty"); }
+        System.out.println(this.colors);
         this.colors.clear();
         this.colors.addAll(colors);
         if (useGivenColors()) { redraw(); }

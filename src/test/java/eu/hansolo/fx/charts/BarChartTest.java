@@ -87,7 +87,7 @@ public class BarChartTest extends Application {
                                .minNumberOfBars(10)
                                .useMinNumberOfBars(false)
                                .useGivenColors(true)
-                               //.colors(List.of(Color.RED, Color.BLUE, Color.GREEN))
+                               .colors(List.of(Color.RED, Color.BLUE, Color.GREEN))
                                .build();
 
         AnchorPane.setTopAnchor(chart, 10d);
