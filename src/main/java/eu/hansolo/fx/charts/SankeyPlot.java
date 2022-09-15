@@ -19,7 +19,9 @@ package eu.hansolo.fx.charts;
 import eu.hansolo.fx.charts.data.Connection;
 import eu.hansolo.fx.charts.data.PlotItem;
 import eu.hansolo.fx.charts.event.ChartEvt;
+import eu.hansolo.fx.geometry.Rectangle;
 import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolboxfx.FontMetrix;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.geometry.Path;
@@ -54,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,6 +102,7 @@ public class SankeyPlot extends Region {
     private              int                              maxLevel;
     private              double                           scaleY;
     private              double                           fontSize;
+    private              FontMetrix                       fontMetrix;
     private              StreamFillMode                   _streamFillMode;
     private              ObjectProperty<StreamFillMode>   streamFillMode;
     private              Color                            _streamColor;
@@ -133,6 +137,8 @@ public class SankeyPlot extends Region {
     private              ObjectProperty<Font>             customFont;
     private              boolean                          _useItemTextColor;
     private              BooleanProperty                  useItemTextColor;
+    private              boolean                          _autoAdjustVerticalTextPosition;
+    private              BooleanProperty                  autoAdjustVerticalTextPosition;
     private              String                           formatString;
     private              Map<Path, String>                paths;
     private              Map<Path, PlotItem[]>            connectionMap;
@@ -144,9 +150,9 @@ public class SankeyPlot extends Region {
 
     // ******************** Constructors **************************************
     public SankeyPlot() {
-        items            = FXCollections.observableArrayList();
-        itemObserver     = e -> redraw();
-        itemListListener = c -> {
+        items                           = FXCollections.observableArrayList();
+        itemObserver                    = e -> redraw();
+        itemListListener                = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(addedItem -> addedItem.addChartEvtObserver(ChartEvt.ANY, itemObserver));
@@ -156,31 +162,33 @@ public class SankeyPlot extends Region {
             }
             prepareData();
         };
-        itemsPerLevel        = new LinkedHashMap<>();
-        _streamFillMode      = StreamFillMode.COLOR;
-        _streamColor         = DEFAULT_STREAM_COLOR;
-        _textColor           = Color.BLACK;
-        _itemWidth           = DEFAULT_ITEM_WIDTH;
-        _autoItemWidth       = true;
-        _itemGap             = DEFAULT_NODE_GAP;
-        _autoItemGap         = true;
-        _decimals            = 0;
-        _showFlowDirection   = false;
-        _useItemColor        = true;
-        _itemColor           = DEFAULT_ITEM_COLOR;
-        _selectionColor      = DEFAULT_SELECTION_COLOR;
-        _connectionOpacity   = DEFAULT_OPACITY;
-        _locale              = Locale.getDefault();
-        _useCustomFont       = false;
-        _customFont          = Fonts.cousineRegular(10);
-        _useItemTextColor    = false;
-        fontSize             = 10;
-        formatString         = "%." + _decimals + "f";
-        paths                = new LinkedHashMap<>();
-        connectionMap        = new LinkedHashMap<>();
-        selectedConnection   = null;
-        selectedPlotItemData = null;
-        selectedItems        = new LinkedHashSet<>();
+        itemsPerLevel                   = new LinkedHashMap<>();
+        _streamFillMode                 = StreamFillMode.COLOR;
+        _streamColor                    = DEFAULT_STREAM_COLOR;
+        _textColor                      = Color.BLACK;
+        _itemWidth                      = DEFAULT_ITEM_WIDTH;
+        _autoItemWidth                  = true;
+        _itemGap                        = DEFAULT_NODE_GAP;
+        _autoItemGap                    = true;
+        _decimals                       = 0;
+        _showFlowDirection              = false;
+        _useItemColor                   = true;
+        _itemColor                      = DEFAULT_ITEM_COLOR;
+        _selectionColor                 = DEFAULT_SELECTION_COLOR;
+        _connectionOpacity              = DEFAULT_OPACITY;
+        _locale                         = Locale.getDefault();
+        _useCustomFont                  = false;
+        _customFont                     = Fonts.cousineRegular(10);
+        _useItemTextColor               = false;
+        _autoAdjustVerticalTextPosition = false;
+        fontSize                        = 10;
+        fontMetrix                      = new FontMetrix(Fonts.opensansRegular(10));
+        formatString                    = "%." + _decimals + "f";
+        paths                           = new LinkedHashMap<>();
+        connectionMap                   = new LinkedHashMap<>();
+        selectedConnection              = null;
+        selectedPlotItemData            = null;
+        selectedItems                   = new LinkedHashSet<>();
 
         initGraphics();
         registerListeners();
@@ -655,6 +663,25 @@ public class SankeyPlot extends Region {
         return useItemTextColor;
     }
 
+    public boolean getAutoAdjustVerticalTextPosition() { return null == autoAdjustVerticalTextPosition ? _autoAdjustVerticalTextPosition : autoAdjustVerticalTextPosition.get(); }
+    public void setAutoAdjustVerticalTextPosition(final boolean autoAdjustVerticalTextPosition) {
+        if (null == this.autoAdjustVerticalTextPosition) {
+            _autoAdjustVerticalTextPosition = autoAdjustVerticalTextPosition;
+            redraw();
+        } else {
+            this.autoAdjustVerticalTextPosition.set(autoAdjustVerticalTextPosition);
+        }
+    }
+    public BooleanProperty autoAdjustVerticalTextPositionProperty() {
+        if (null == autoAdjustVerticalTextPosition) {
+            autoAdjustVerticalTextPosition = new BooleanPropertyBase(_autoAdjustVerticalTextPosition) {
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "autoAdjustVerticalTextPosition"; }
+            };
+        }
+        return autoAdjustVerticalTextPosition;
+    }
+
     public List<PlotItem> getItemsWithOnlyOutgoing() {
         //return getItems().stream().filter(PlotItem::hasOutgoing).filter(not(PlotItem::hasIncoming)).collect(Collectors.toList());
         return getItems().stream().filter(item -> item.hasOutgoing() && !item.hasIncoming()).collect(Collectors.toList());
@@ -817,9 +844,13 @@ public class SankeyPlot extends Region {
             fontSize = Helper.clamp(6, 24, size * 0.025);
             ctx.setTextBaseline(VPos.CENTER);
             if (getUseCustomFont() && null != getCustomFont()) {
-                ctx.setFont(getCustomFont());
+                Font cFont = new Font(getCustomFont().getName(), fontSize);
+                fontMetrix = new FontMetrix(cFont);
+                ctx.setFont(cFont);
             } else {
-                ctx.setFont(Fonts.opensansRegular(fontSize));
+                Font font = Fonts.opensansRegular(fontSize);
+                fontMetrix = new FontMetrix(font);
+                ctx.setFont(font);
             }
 
             prepareData();
@@ -921,10 +952,13 @@ public class SankeyPlot extends Region {
 
     private void redraw() {
         ctx.clearRect(0, 0, width, height);
-        boolean useItemColor     = getUseItemColor();
-        boolean useItemTextColor = getUseItemTextColor();
-        Color   itemColor        = null == selectedConnection ? getItemColor() : UNSELECTED_COLOR;
-        Color   textColor        = getTextColor();
+        boolean                  useItemColor     = getUseItemColor();
+        boolean                  useItemTextColor = getUseItemTextColor();
+        Color                    itemColor        = null == selectedConnection ? getItemColor() : UNSELECTED_COLOR;
+        Color                    textColor        = getTextColor();
+        Map<PlotItem, Rectangle> textBoundsMap    = new HashMap<>();
+        double                   verticalGap      = isAutoItemGap() ? size * 0.025 : getItemGap();
+        double                   spacerY;
 
         // Draw bezier curves between items
         if (null == selectedConnection) {
@@ -940,13 +974,14 @@ public class SankeyPlot extends Region {
         // Draw items
         for (int level = minLevel ; level <= maxLevel ; level++) {
             List<PlotItemData> itemDataInLevel = itemsPerLevel.get(level);
-
+            spacerY = 0;
+            double itemHeight = 0;
             // Go through all item data of the current level
             for (PlotItemData itemData : itemDataInLevel) {
                 PlotItem  item   = itemData.getPlotItem();
                 Bounds    bounds = itemData.getBounds();
 
-                // Draw item boxes with their labels
+                // Draw item boxes
                 if (null == selectedConnection) {
                     ctx.setFill(useItemColor ? item.getFill() : itemColor);
                 } else {
@@ -958,6 +993,30 @@ public class SankeyPlot extends Region {
                 }
                 ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
+                // Draw text
+                final String itemName             = item.getName();
+                double       calculatedTextPointY = 0;
+                boolean      overlap              = false;
+                itemHeight = item.getMaxSum() * scaleY;
+                if (getAutoAdjustVerticalTextPosition()) {
+                    if (level >= maxLevel - 1) {
+                        double    textWidth  = fontMetrix.computeStringWidth(itemName);
+                        double    textX      = level == maxLevel ? itemData.getTextPoint().getX() - textWidth : itemData.getTextPoint().getX();
+                        double    textY      = itemData.getTextPoint().getY() - fontSize * 0.5;
+                        Rectangle textBounds = new Rectangle(textX, textY, textWidth, fontSize);
+                        if (level == maxLevel - 1) { textBoundsMap.put(item, textBounds); }
+                        Optional<Entry<PlotItem, Rectangle>> optOverlap = textBoundsMap.entrySet().stream().filter(entry -> !entry.getKey().equals(item)).filter(entry -> entry.getValue().isOverlapping(textBounds)).findFirst();
+                        if (optOverlap.isPresent() && level == maxLevel) {
+                            overlap = true;
+                            switch (item.getVerticalTextPosition()) {
+                                case TOP, BOTTOM -> calculatedTextPointY = (height - itemHeight * 0.5) - spacerY;
+                                default -> calculatedTextPointY = (itemData.getTextPoint().getY() > height * 0.5) ? (height - fontSize * 0.5) - spacerY : (height - itemHeight + fontSize * 0.5) - spacerY;
+                            }
+                        } else {
+                            overlap = false;
+                        }
+                    }
+                }
                 if (useItemTextColor) {
                     if (item.getTextColor().equals(Color.TRANSPARENT)) {
                         ctx.setFill(textColor);
@@ -968,8 +1027,9 @@ public class SankeyPlot extends Region {
                     ctx.setFill(textColor);
                 }
                 ctx.setTextAlign(level == maxLevel ? TextAlignment.RIGHT : TextAlignment.LEFT);
-                ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
+                ctx.fillText(itemName, itemData.getTextPoint().getX(), overlap ? calculatedTextPointY : itemData.getTextPoint().getY());
             }
+            spacerY += itemHeight + verticalGap;
         }
 
         // Draw selected connection
