@@ -79,6 +79,14 @@ public class SankeyPlotTest extends Application {
 
         PlotItem australia   = new PlotItem("Australia", Colors.ORANGE.get(), 4);
 
+        // Setup vertical text positions
+        australia.setVerticalTextPosition(Position.TOP);
+        germany.setVerticalTextPosition(Position.BOTTOM);
+
+        // Setup item text color
+        australia.setTextColor(Color.DARKORANGE);
+        germany.setTextColor(Color.MAGENTA);
+
         // Setup flows
         brazil.addToOutgoing(portugal, 5);
         brazil.addToOutgoing(france, 1);
@@ -156,6 +164,8 @@ public class SankeyPlotTest extends Application {
                                       //.autoItemGap(false)
                                       //.itemGap(10)
                                       //.showFlowDirection(true)
+                                      .useCustomFont(true)
+                                      .useItemTextColor(true)
                                       .build();
         sankeyPlot.getItems().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, e -> {
             if (ChartEvt.ITEM_SELECTED.equals(e.getEvtType())) {
