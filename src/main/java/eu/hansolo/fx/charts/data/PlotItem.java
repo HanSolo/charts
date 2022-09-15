@@ -17,6 +17,7 @@
 package eu.hansolo.fx.charts.data;
 
 import eu.hansolo.fx.charts.Cluster;
+import eu.hansolo.fx.charts.Position;
 import eu.hansolo.fx.charts.Symbol;
 import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.toolbox.evt.EvtObserver;
@@ -67,6 +68,8 @@ public class PlotItem implements Item, Comparable<PlotItem> {
     private       ObjectProperty<Symbol>                    symbol;
     private       boolean                                   _isEmpty;
     private       BooleanProperty                           isEmpty;
+    private       Position                                  _verticalTextPosition;
+    private       ObjectProperty<Position>                  verticalTextPosition;
     private       Map<PlotItem, Double>                     outgoing;
     private       Map<PlotItem, Double>                     incoming;
     private       Map<EvtType, List<EvtObserver<ChartEvt>>> observers;
@@ -121,21 +124,22 @@ public class PlotItem implements Item, Comparable<PlotItem> {
         this(NAME, VALUE, DESCRIPTION, FILL, LEVEL, false);
     }
     public PlotItem(final String NAME, final double VALUE, final String DESCRIPTION, final Color FILL, final int LEVEL, final boolean IS_EMPTY) {
-        _name           = NAME;
-        _value          = VALUE;
-        _description    = DESCRIPTION;
-        _fill           = FILL;
-        _stroke         = Color.TRANSPARENT;
-        _connectionFill = Color.TRANSPARENT;
-        _textColor      = Color.TRANSPARENT;
-        _font           = Fonts.opensansRegular(10);
-        _symbol         = Symbol.NONE;
-        _isEmpty        = IS_EMPTY;
-        level           = LEVEL;
-        cluster         = null;
-        outgoing        = new LinkedHashMap<>();
-        incoming        = new LinkedHashMap<>();
-        observers       = new ConcurrentHashMap<>();
+        _name                 = NAME;
+        _value                = VALUE;
+        _description          = DESCRIPTION;
+        _fill                 = FILL;
+        _stroke               = Color.TRANSPARENT;
+        _connectionFill       = Color.TRANSPARENT;
+        _textColor            = Color.TRANSPARENT;
+        _font                 = Fonts.opensansRegular(10);
+        _symbol               = Symbol.NONE;
+        _isEmpty              = IS_EMPTY;
+        _verticalTextPosition = Position.CENTER;
+        level                 = LEVEL;
+        cluster               = null;
+        outgoing              = new LinkedHashMap<>();
+        incoming              = new LinkedHashMap<>();
+        observers             = new ConcurrentHashMap<>();
     }
 
 
@@ -346,6 +350,33 @@ public class PlotItem implements Item, Comparable<PlotItem> {
             };
         }
         return isEmpty;
+    }
+
+    public Position getVerticalTextPosition() { return null == verticalTextPosition ? _verticalTextPosition : verticalTextPosition.get(); }
+    public void setVerticalTextPosition(final Position verticalTextPosition) {
+        if (null == this.verticalTextPosition) {
+            switch (verticalTextPosition) {
+                case TOP    -> _verticalTextPosition = verticalTextPosition;
+                case BOTTOM -> _verticalTextPosition = verticalTextPosition;
+                default     -> _verticalTextPosition = Position.CENTER;
+            }
+        } else {
+            switch (verticalTextPosition) {
+                case TOP    -> this.verticalTextPosition.set(verticalTextPosition);
+                case BOTTOM -> this.verticalTextPosition.set(verticalTextPosition);
+                default     -> this.verticalTextPosition.set(Position.CENTER);
+            }
+        }
+    }
+    public ObjectProperty<Position> verticalTextPositionProperty() {
+        if (null == verticalTextPosition) {
+            verticalTextPosition = new ObjectPropertyBase<>(_verticalTextPosition) {
+                @Override public Object getBean() { return PlotItem.this; }
+                @Override public String getName() { return "verticalTextPosition"; }
+            };
+            _verticalTextPosition = null;
+        }
+        return verticalTextPosition;
     }
 
     public double getSumOfIncoming() { return incoming.values().stream().mapToDouble(Double::doubleValue).sum(); }
