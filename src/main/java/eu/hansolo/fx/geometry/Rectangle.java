@@ -124,6 +124,14 @@ public class Rectangle {
         return true;
     }
 
+    public boolean isOverlapping(final Rectangle r) {
+        final RectBounds thisBounds  = toRectBounds();
+        final RectBounds otherBounds = r.toRectBounds();
+        if (thisBounds.getMaxY() < otherBounds.getMinY() || thisBounds.getMinY() > otherBounds.getMaxY()) { return false; }
+        if (thisBounds.getMaxX() < otherBounds.getMinX() || thisBounds.getMinX() > otherBounds.getMaxX()) { return false; }
+        return true;
+    }
+
     public Rectangle intersection(Rectangle r) {
         Rectangle ret = new Rectangle(this);
         ret.intersectWith(r);
