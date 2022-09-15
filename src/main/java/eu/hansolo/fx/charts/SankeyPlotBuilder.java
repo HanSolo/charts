@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +128,21 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
 
     public final B locale(final Locale LOCALE) {
         properties.put("locale", new SimpleObjectProperty<>(LOCALE));
+        return (B)this;
+    }
+
+    public final B useCustomFont(final boolean useCustomFont) {
+        properties.put("useCustomFont", new SimpleBooleanProperty(useCustomFont));
+        return (B)this;
+    }
+
+    public final B customFont(final Font customFont) {
+        properties.put("customFont", new SimpleObjectProperty<>(customFont));
+        return (B)this;
+    }
+
+    public final B useItemTextColor(final boolean useItemTextColor) {
+        properties.put("useItemTextColor", new SimpleBooleanProperty(useItemTextColor));
         return (B)this;
     }
 
@@ -254,6 +270,9 @@ public class SankeyPlotBuilder<B extends SankeyPlotBuilder<B>> {
                 case "itemColor"         -> sankeyPlot.setItemColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "connectionOpacity" -> sankeyPlot.setConnectionOpacity(((DoubleProperty) properties.get(key)).get());
                 case "locale"            -> sankeyPlot.setLocale(((ObjectProperty<Locale>) properties.get(key)).get());
+                case "useCustomFont"     -> sankeyPlot.setUseCustomFont(((BooleanProperty) properties.get(key)).get());
+                case "customFont"        -> sankeyPlot.setCustomFont(((ObjectProperty<Font>) properties.get(key)).get());
+                case "useItemTextColor"  -> sankeyPlot.setUseItemTextColor(((BooleanProperty) properties.get(key)).get());
             }
         }
         return sankeyPlot;

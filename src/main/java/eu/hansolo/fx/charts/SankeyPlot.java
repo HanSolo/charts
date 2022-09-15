@@ -47,6 +47,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -97,6 +98,7 @@ public class SankeyPlot extends Region {
     private              int                              minLevel;
     private              int                              maxLevel;
     private              double                           scaleY;
+    private              double                           fontSize;
     private              StreamFillMode                   _streamFillMode;
     private              ObjectProperty<StreamFillMode>   streamFillMode;
     private              Color                            _streamColor;
@@ -125,6 +127,12 @@ public class SankeyPlot extends Region {
     private              DoubleProperty                   connectionOpacity;
     private              Locale                           _locale;
     private              ObjectProperty<Locale>           locale;
+    private              boolean                          _useCustomFont;
+    private              BooleanProperty                  useCustomFont;
+    private              Font                             _customFont;
+    private              ObjectProperty<Font>             customFont;
+    private              boolean                          _useItemTextColor;
+    private              BooleanProperty                  useItemTextColor;
     private              String                           formatString;
     private              Map<Path, String>                paths;
     private              Map<Path, PlotItem[]>            connectionMap;
@@ -163,6 +171,10 @@ public class SankeyPlot extends Region {
         _selectionColor      = DEFAULT_SELECTION_COLOR;
         _connectionOpacity   = DEFAULT_OPACITY;
         _locale              = Locale.getDefault();
+        _useCustomFont       = false;
+        _customFont          = Fonts.cousineRegular(10);
+        _useItemTextColor    = false;
+        fontSize             = 10;
         formatString         = "%." + _decimals + "f";
         paths                = new LinkedHashMap<>();
         connectionMap        = new LinkedHashMap<>();
@@ -582,6 +594,67 @@ public class SankeyPlot extends Region {
         return locale;
     }
 
+    public boolean getUseCustomFont() { return null == useCustomFont ? _useCustomFont : useCustomFont.get(); }
+    public void setUseCustomFont(final boolean useCustomFont) {
+        if (null == this.useCustomFont) {
+            _useCustomFont = useCustomFont;
+            resize();
+        } else {
+            this.useCustomFont.set(useCustomFont);
+        }
+    }
+    public BooleanProperty useCustomFontProperty() {
+        if (null == useCustomFont) {
+            useCustomFont = new BooleanPropertyBase(_useCustomFont) {
+                @Override protected void invalidated() { resize(); }
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "useCustomFont"; }
+            };
+        }
+        return useCustomFont;
+    }
+
+    public Font getCustomFont() { return null == customFont ? _customFont : customFont.get(); }
+    public void setCustomFont(final Font customFont) {
+        if (null == this.customFont) {
+            _customFont = customFont;
+            resize();
+        } else {
+            this.customFont.set(customFont);
+        }
+    }
+    public ObjectProperty<Font> customFontProperty() {
+        if (null == customFont) {
+            customFont = new ObjectPropertyBase<>(_customFont) {
+                @Override protected void invalidated() { resize(); }
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "customFont"; }
+            };
+            _customFont = null;
+        }
+        return customFont;
+    }
+
+    public boolean getUseItemTextColor() { return null == useItemTextColor ? _useItemTextColor : useItemTextColor.get(); }
+    public void setUseItemTextColor(final boolean useItemTextColor) {
+        if (null == this.useItemTextColor) {
+            _useItemTextColor = useItemTextColor;
+            redraw();
+        } else {
+            this.useItemTextColor.set(useItemTextColor);
+        }
+    }
+    public BooleanProperty useItemTextColorProperty() {
+        if (null == useItemTextColor) {
+            useItemTextColor = new BooleanPropertyBase(_useItemTextColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return SankeyPlot.this; }
+                @Override public String getName() { return "useItemTextColor"; }
+            };
+        }
+        return useItemTextColor;
+    }
+
     public List<PlotItem> getItemsWithOnlyOutgoing() {
         //return getItems().stream().filter(PlotItem::hasOutgoing).filter(not(PlotItem::hasIncoming)).collect(Collectors.toList());
         return getItems().stream().filter(item -> item.hasOutgoing() && !item.hasIncoming()).collect(Collectors.toList());
@@ -716,7 +789,11 @@ public class SankeyPlot extends Region {
                 double   itemHeight  = item.getMaxSum() * scaleY;
                 double   textOffsetX = level < maxLevel ? textGap + itemWidth : -textGap;
                 itemData.setBounds(spacerX , (height - itemHeight) - spacerY, itemWidth, itemHeight);
-                itemData.setTextPoint(spacerX + textOffsetX, (height - itemHeight * 0.5) - spacerY);
+                switch (item.getVerticalTextPosition()) {
+                    case TOP    -> itemData.setTextPoint(spacerX + textOffsetX, (height - itemHeight + fontSize * 0.5) - spacerY);
+                    case BOTTOM -> itemData.setTextPoint(spacerX + textOffsetX, (height - fontSize * 0.5) - spacerY);
+                    default     -> itemData.setTextPoint(spacerX + textOffsetX, (height - itemHeight * 0.5) - spacerY);
+                }
                 spacerY += itemHeight + verticalGap;
             }
         }
@@ -737,8 +814,13 @@ public class SankeyPlot extends Region {
             canvas.setHeight(height);
             canvas.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
+            fontSize = Helper.clamp(6, 24, size * 0.025);
             ctx.setTextBaseline(VPos.CENTER);
-            ctx.setFont(Fonts.opensansRegular(Helper.clamp(8, 24, size * 0.025)));
+            if (getUseCustomFont() && null != getCustomFont()) {
+                ctx.setFont(getCustomFont());
+            } else {
+                ctx.setFont(Fonts.opensansRegular(fontSize));
+            }
 
             prepareData();
         }
@@ -839,9 +921,10 @@ public class SankeyPlot extends Region {
 
     private void redraw() {
         ctx.clearRect(0, 0, width, height);
-        boolean useItemColor = getUseItemColor();
-        Color   itemColor    = null == selectedConnection ? getItemColor() : UNSELECTED_COLOR;
-        Color   textColor    = getTextColor();
+        boolean useItemColor     = getUseItemColor();
+        boolean useItemTextColor = getUseItemTextColor();
+        Color   itemColor        = null == selectedConnection ? getItemColor() : UNSELECTED_COLOR;
+        Color   textColor        = getTextColor();
 
         // Draw bezier curves between items
         if (null == selectedConnection) {
@@ -875,7 +958,15 @@ public class SankeyPlot extends Region {
                 }
                 ctx.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
-                ctx.setFill(textColor);
+                if (useItemTextColor) {
+                    if (item.getTextColor().equals(Color.TRANSPARENT)) {
+                        ctx.setFill(textColor);
+                    } else {
+                        ctx.setFill(item.getTextColor());
+                    }
+                } else {
+                    ctx.setFill(textColor);
+                }
                 ctx.setTextAlign(level == maxLevel ? TextAlignment.RIGHT : TextAlignment.LEFT);
                 ctx.fillText(item.getName(), itemData.getTextPoint().getX(), itemData.getTextPoint().getY());
             }
@@ -889,7 +980,8 @@ public class SankeyPlot extends Region {
             path.draw(ctx, true, false);
 
             // Draw all path elements connected to the selected path element
-            connectionMap.entrySet().stream()
+            connectionMap.entrySet()
+                         .stream()
                          .filter(entry -> selectedItems.contains(entry.getValue()[0]) && selectedItems.contains(entry.getValue()[1]))
                          .forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
         }
@@ -912,7 +1004,8 @@ public class SankeyPlot extends Region {
                     sItems.add(plotItemData.getPlotItem());
                 });
             }
-            connectionMap.entrySet().stream()
+            connectionMap.entrySet()
+                         .stream()
                          .filter(entry -> sItems.contains(entry.getValue()[0]) && sItems.contains(entry.getValue()[1]))
                          .forEach(entry -> entry.getKey().draw(ctx, true, getSelectionColor(), false, Color.TRANSPARENT));
         }
@@ -922,18 +1015,18 @@ public class SankeyPlot extends Region {
     // ******************** Inner Classes *************************************
     private class PlotItemData {
         private PlotItem plotItem;
-        private Bounds   bounds;           // bounds of the item rectangle
-        private Point    textPoint;        // point where text will be drawn
-        private double   incomingOffsetY;  // offset in y direction of already added incoming bezier curves
-        private double   outgoingOffsetY;  // offset in y direction of already added outgoing bezier curves
+        private Bounds   bounds;               // bounds of the item rectangle
+        private Point    textPoint;            // point where text will be drawn
+        private double   incomingOffsetY;      // offset in y direction of already added incoming bezier curves
+        private double   outgoingOffsetY;      // offset in y direction of already added outgoing bezier curves
         private double   value;
 
 
         // ******************** Constructors **********************************
         public PlotItemData(final PlotItem ITEM) {
-            plotItem       = ITEM;
-            bounds         = new Bounds();
-            textPoint      = new Point();
+            plotItem        = ITEM;
+            bounds          = new Bounds();
+            textPoint       = new Point();
             incomingOffsetY = 0;
             outgoingOffsetY = 0;
             value           = 0;
@@ -968,6 +1061,7 @@ public class SankeyPlot extends Region {
     private class SankeyPlotConnection extends Connection {
         private Path connectionPath;
 
+        // ******************** Constructors **********************************
         public SankeyPlotConnection(final PlotItem INCOMING_ITEM, final PlotItem OUTGOING_ITEM, final double VALUE, final Color FILL, final Path CONNECTION_PATH) {
             this(INCOMING_ITEM, OUTGOING_ITEM, VALUE, FILL, "", CONNECTION_PATH);
         }
@@ -977,6 +1071,7 @@ public class SankeyPlot extends Region {
         }
 
 
+        // ******************** Methods *******************************************
         public Path getConnectionPath() { return connectionPath; }
     }
 }
