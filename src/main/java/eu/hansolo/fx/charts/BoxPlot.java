@@ -18,13 +18,13 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.BoxPlots.BoxPlotData;
 import eu.hansolo.fx.charts.color.MaterialDesignColors;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.TooltipPopup;
+import eu.hansolo.fx.charts.voronoi.VoronoiChart;
 import eu.hansolo.toolbox.Statistics;
 import eu.hansolo.toolbox.evt.EvtObserver;
 import javafx.beans.DefaultProperty;
@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 
@@ -73,6 +72,7 @@ public class BoxPlot<T extends ChartItem> extends Region {
     private static final double                 MINIMUM_HEIGHT               = 50;
     private static final double                 MAXIMUM_WIDTH                = 2048;
     private static final double                 MAXIMUM_HEIGHT               = 2048;
+    private              String                 userAgentStyleSheet;
     private              double                 width;
     private              double                 height;
     private              Canvas                 canvas;
@@ -210,6 +210,8 @@ public class BoxPlot<T extends ChartItem> extends Region {
                 setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
             }
         }
+
+        getStyleClass().add("box-plot");
 
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
@@ -588,6 +590,11 @@ public class BoxPlot<T extends ChartItem> extends Region {
 
 
     // ******************** Layout ********************************************
+    @Override public String getUserAgentStylesheet() {
+        if (null == userAgentStyleSheet) { userAgentStyleSheet = BoxPlot.class.getResource("chart.css").toExternalForm(); }
+        return userAgentStyleSheet;
+    }
+
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();

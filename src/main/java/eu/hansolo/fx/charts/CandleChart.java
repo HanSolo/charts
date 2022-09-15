@@ -68,6 +68,7 @@ public class CandleChart extends Region {
     private static final Color                               DEFAULT_BEARISH_COLOR    = MaterialDesignColors.RED_300.get();
     private static final Color                               DEFAULT_STROKE           = Color.BLACK;
     private static final DateTimeFormatter                   DTF                      = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.US);
+    private              String                              userAgentStyleSheet;
     private              double                              width;
     private              double                              height;
     private              Canvas                              canvas;
@@ -162,6 +163,8 @@ public class CandleChart extends Region {
                 setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
             }
         }
+
+        getStyleClass().add("candle-chart");
 
         canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         ctx    = canvas.getGraphicsContext2D();
@@ -469,6 +472,12 @@ public class CandleChart extends Region {
 
 
     // ******************** Layout ********************************************
+    @Override public String getUserAgentStylesheet() {
+        if (null == userAgentStyleSheet) { userAgentStyleSheet = CandleChart.class.getResource("chart.css").toExternalForm(); }
+        return userAgentStyleSheet;
+    }
+
+
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
