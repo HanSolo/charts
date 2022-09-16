@@ -262,6 +262,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B autoTitleFontSize(final boolean AUTO) {
+        properties.put("autoTitleFontSize", new SimpleBooleanProperty(AUTO));
+        return (B)this;
+    }
+
     public final B autoFontSize(final boolean AUTO) {
         properties.put("autoFontSize", new SimpleBooleanProperty(AUTO));
         return (B)this;
@@ -478,6 +483,7 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 case "decimals"                        -> axis.setDecimals(((IntegerProperty) properties.get(key)).get());
                 case "tickLabelOrientation"            -> axis.setTickLabelOrientation(((ObjectProperty<TickLabelOrientation>) properties.get(key)).get());
                 case "tickLabelFormat"                 -> axis.setTickLabelFormat(((ObjectProperty<TickLabelFormat>) properties.get(key)).get());
+                case "autoTitleFontSize"               -> axis.setAutoTitleFontSize(((BooleanProperty) properties.get(key)).get());
                 case "autoFontSize"                    -> axis.setAutoFontSize(((BooleanProperty) properties.get(key)).get());
                 case "tickLabelFontSize"               -> axis.setTickLabelFontSize(((DoubleProperty) properties.get(key)).get());
                 case "titleFontSize"                   -> axis.setTitleFontSize(((DoubleProperty) properties.get(key)).get());

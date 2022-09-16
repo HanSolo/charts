@@ -17,12 +17,12 @@
 package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.event.ChartEvt;
-import eu.hansolo.toolbox.evt.EvtObserver;
-import eu.hansolo.toolbox.evt.EvtType;
-import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Helper.Interval;
 import eu.hansolo.fx.charts.tools.TickLabelFormat;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
+import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -158,6 +158,8 @@ public class Axis extends Region {
     private              ObjectProperty<TickLabelFormat>           tickLabelFormat;
     private              Font                                      tickLabelFont;
     private              Font                                      titleFont;
+    private              boolean                                   _autoTitleFontSize;
+    private              BooleanProperty                           autoTitleFontSize;
     private              boolean                                   _autoFontSize;
     private              BooleanProperty                           autoFontSize;
     private              double                                    _tickLabelFontSize;
@@ -232,6 +234,7 @@ public class Axis extends Region {
         _decimals                         = 0;
         _tickLabelOrientation             = TickLabelOrientation.HORIZONTAL;
         _tickLabelFormat                  = TickLabelFormat.NUMBER;
+        _autoTitleFontSize                = true;
         _autoFontSize                     = true;
         _tickLabelFontSize                = 10;
         _titleFontSize                    = 10;
@@ -294,6 +297,7 @@ public class Axis extends Region {
         _decimals                         = 0;
         _tickLabelOrientation             = TickLabelOrientation.HORIZONTAL;
         _tickLabelFormat                  = TickLabelFormat.NUMBER;
+        _autoTitleFontSize                = true;
         _autoFontSize                     = true;
         _tickLabelFontSize                = 10;
         _titleFontSize                    = 10;
@@ -1078,6 +1082,26 @@ public class Axis extends Region {
         return tickLabelFormat;
     }
 
+    public boolean isAutoTitleFontSize() { return null == autoTitleFontSize ? _autoTitleFontSize : autoTitleFontSize.get(); }
+    public void setAutoTitleFontSize(final boolean AUTO) {
+        if (null == autoTitleFontSize) {
+            _autoTitleFontSize = AUTO;
+            redraw();
+        } else {
+            autoTitleFontSize.set(AUTO);
+        }
+    }
+    public BooleanProperty autoTitleFontSizeProperty() {
+        if (null == autoTitleFontSize) {
+            autoTitleFontSize = new BooleanPropertyBase(_autoTitleFontSize) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return Axis.this; }
+                @Override public String getName() { return "autoTitleFontSize"; }
+            };
+        }
+        return autoTitleFontSize;
+    }
+
     public boolean isAutoFontSize() { return null == autoFontSize ? _autoFontSize : autoFontSize.get(); }
     public void setAutoFontSize(final boolean AUTO) {
         if (null == autoFontSize) {
@@ -1126,7 +1150,7 @@ public class Axis extends Region {
     public void setTitleFontSize(final double SIZE) {
         if (null == titleFontSize) {
             _titleFontSize = SIZE;
-            titleFont      = Fonts.latoRegular(getTitleFontSize());
+            titleFont      = Fonts.latoRegular(_titleFontSize);
             redraw();
         } else {
             titleFontSize.set(SIZE);
@@ -2099,28 +2123,23 @@ public class Axis extends Region {
         axisCtx.setFill(getTitleColor());
         axisCtx.setTextAlign(TextAlignment.CENTER);
         axisCtx.setTextBaseline(VPos.CENTER);
-        double titleWidth = calcTextWidth(titleFont, getTitle());
         if (Orientation.HORIZONTAL == ORIENTATION) {
             switch(POSITION) {
-                case TOP:
-                    axisCtx.fillText(getTitle(), (width - titleWidth) * 0.5, titleFontSize * 0.5);
-                    break;
-                case BOTTOM:
-                    axisCtx.fillText(getTitle(), (width - titleWidth) * 0.5, height - titleFontSize * 0.5);
-                    break;
+                case TOP    -> axisCtx.fillText(getTitle(), width * 0.5, titleFontSize * 0.5);
+                case BOTTOM -> axisCtx.fillText(getTitle(), width * 0.5, height - titleFontSize * 0.5);
             }
         } else {
             switch(POSITION) {
                 case LEFT:
                     axisCtx.save();
-                    axisCtx.translate(titleFontSize * 0.5, (height - titleFontSize) * 0.5);
+                    axisCtx.translate(titleFontSize * 0.5, height * 0.5);
                     axisCtx.rotate(270);
                     axisCtx.fillText(getTitle(), 0, 0);
                     axisCtx.restore();
                     break;
                 case RIGHT:
                     axisCtx.save();
-                    axisCtx.translate(width - titleFontSize * 0.5, (height - titleFontSize) * 0.5);
+                    axisCtx.translate(width - titleFontSize * 0.5, height * 0.5);
                     axisCtx.rotate(90);
                     axisCtx.fillText(getTitle(), 0, 0);
                     axisCtx.restore();
@@ -2195,10 +2214,9 @@ public class Axis extends Region {
         double aspectRatio = width / height;
 
         if (width > 0 && height > 0) {
-            if (isAutoFontSize()) {
-                setTickLabelFontSize(Helper.clamp(8, 24, 0.175 * size));
-                setTitleFontSize(Helper.clamp(8, 24, 0.175 * size));
-            }
+            if (isAutoTitleFontSize()) { setTitleFontSize(Helper.clamp(8, 24, 0.175 * size)); }
+
+            if (isAutoFontSize()) { setTickLabelFontSize(Helper.clamp(8, 24, 0.175 * size)); }
 
             if (VERTICAL == getOrientation()) {
                 width    = height * aspectRatio;
