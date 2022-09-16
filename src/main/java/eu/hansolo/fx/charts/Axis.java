@@ -171,6 +171,7 @@ public class Axis extends Region {
     private              List<String>                              categories;
     private              DateTimeFormatter                         dateTimeFormatter;
     private              Interval                                  currentInterval;
+    private              EvtObserver<ChartEvt>                     evtEvtObserver;
 
 
     // ******************** Constructors **************************************
@@ -237,6 +238,7 @@ public class Axis extends Region {
         _zoneId                           = ZoneId.systemDefault();
         _dateTimeFormatPattern            = "dd.MM.YY HH:mm:ss";
         currentInterval                   = Interval.SECOND_1;
+        evtEvtObserver                    = e -> drawAxis();
         dateTimeFormatter                 = DateTimeFormatter.ofPattern(_dateTimeFormatPattern, _locale);
         categories                        = new LinkedList<>();
         tickLabelFormatString             = new StringBuilder("%.").append(Integer.toString(_decimals)).append("f").toString();
@@ -331,6 +333,7 @@ public class Axis extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
+        addChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, evtEvtObserver);
     }
 
 
@@ -361,7 +364,7 @@ public class Axis extends Region {
         if (null == minValue) {
             minValue = new DoublePropertyBase(_minValue) {
                 @Override protected void invalidated() {
-                    if (getValue() > getMaxValue()) setMaxValue(getValue());
+                    if (getValue() > getMaxValue()) { setMaxValue(getValue()); }
                     fireChartEvt(AXIS_RANGE_CHANGED_EVT);
                 }
                 @Override public Object getBean() {  return Axis.this;  }
@@ -418,7 +421,7 @@ public class Axis extends Region {
     public void setMaxValue(final double VALUE) {
         if (null == maxValue) {
             if (VALUE < getMinValue()) { setMinValue(VALUE); }
-            _maxValue = Helper.clamp(getMinValue(), Double.MAX_VALUE, VALUE);
+            _maxValue  = Helper.clamp(getMinValue(), Double.MAX_VALUE, VALUE);
             fireChartEvt(AXIS_RANGE_CHANGED_EVT);
         } else {
             maxValue.set(VALUE);
@@ -1210,6 +1213,10 @@ public class Axis extends Region {
         return posInAxis / width * Helper.calcNiceNumber((getMaxValue() - getMinValue()), false) + getMinValue();
     }
 
+    public void dispose() {
+        removeChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, evtEvtObserver);
+    }
+
     private void calcAutoScale() {
         double maxNoOfMajorTicks = 10;
         double maxNoOfMinorTicks = 10;
@@ -1218,6 +1225,7 @@ public class Axis extends Region {
         setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), true));
         double niceMinValue = (Math.floor(getMinValue() / getMajorTickSpace()) * getMajorTickSpace());
         double niceMaxValue = (Math.ceil(getMaxValue() / getMajorTickSpace()) * getMajorTickSpace());
+
         setMinValue(niceMinValue);
         setMaxValue(niceMaxValue);
     }
@@ -2213,11 +2221,11 @@ public class Axis extends Region {
         }
     }
 
-    private void redraw() {
+    protected void redraw() {
         if (AxisType.TIME == getType()) {
             drawTimeAxis();
         } else {
-            if (isAutoScale()) { 
+            if (isAutoScale()) {
                 calcAutoScale();
             } else {
                 calcScale();
