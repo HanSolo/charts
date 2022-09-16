@@ -776,7 +776,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         List<T>      items         = SERIES.getItems();
@@ -802,7 +802,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         List<T>      items         = SERIES.getItems();
@@ -859,7 +859,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawScatter(final XYSeries<T> SERIES) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
@@ -884,7 +884,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothLine(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
 
@@ -911,7 +911,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothArea(final XYSeries<T> SERIES, final boolean SHOW_POINTS) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
         List<T>      items         = SERIES.getItems();
@@ -1033,7 +1033,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawRidgeLine(final XYSeries<T> SERIES) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || SERIES.getItems().isEmpty() || !SERIES.isVisible()) { return; }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY() - SERIES.getStrokeWidth();
         List<T> items     = SERIES.getItems();
@@ -1070,7 +1070,12 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawLineDelta(final XYSeries<T> SERIES_1, final XYSeries<T> SERIES_2) {
+        if (null == SERIES_1 || SERIES_1.getItems().isEmpty() || !SERIES_1.isVisible() ||
+            null == SERIES_2 || SERIES_2.getItems().isEmpty() || !SERIES_2.isVisible()) {
+            return;
+        }
         if (SERIES_1.getItems().size() != SERIES_2.getItems().size()) { throw new IllegalArgumentException("Both series must have the same number of items!"); }
+
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
 
@@ -1187,6 +1192,10 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothLineDelta(final XYSeries<T> SERIES_1, final XYSeries<T> SERIES_2) {
+        if (null == SERIES_1 || SERIES_1.getItems().isEmpty() || !SERIES_1.isVisible() ||
+            null == SERIES_2 || SERIES_2.getItems().isEmpty() || !SERIES_2.isVisible()) {
+            return;
+        }
         if (SERIES_1.getItems().size() != SERIES_2.getItems().size()) { throw new IllegalArgumentException("Both series must have the same number of items!"); }
         final double LOWER_BOUND_X = getLowerBoundX();
         final double LOWER_BOUND_Y = getLowerBoundY();
@@ -1311,7 +1320,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawPolar(final XYSeries<T> SERIES) {
-        if (!SERIES.isVisible()) { return; }
+        if (null == SERIES || SERIES.getItems().isEmpty() || !SERIES.isVisible()) { return; }
         final double  CENTER_X      = 0.5 * size;
         final double  CENTER_Y      = CENTER_X;
         final double  CIRCLE_SIZE   = 0.9 * size;
@@ -1480,12 +1489,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawMultiTimeSeries(final List<XYSeries<T>> LIST_OF_SERIES) {
+        if (LIST_OF_SERIES.isEmpty()) { return; }
         // Aggregating data
         List<XYItem> minItems    = new LinkedList<>();
         List<XYItem> maxItems    = new LinkedList<>();
         List<XYItem> avgItems    = new LinkedList<>();
         List<XYItem> stdDevItems = new LinkedList<>();
         XYSeries<T> series0 = LIST_OF_SERIES.get(0);
+        if (null == series0.getItems() || series0.getItems().isEmpty()) { return; }
         for (int i = 0 ; i < series0.getItems().size() ; i++) {
             T item = series0.getItems().get(i);
             double x = item.getX();
@@ -1494,6 +1505,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             List<Double> valuesForX = new LinkedList<>();
             for (int j = 0 ; j < LIST_OF_SERIES.size() ; j++) {
                 XYSeries<T> series        = LIST_OF_SERIES.get(j);
+                if (null == series.getItems() || series.getItems().isEmpty()) { continue; }
                 Optional<T> optionalValue = series.getItems().stream().filter(si -> Double.compare(x, si.getX()) == 0).findFirst();
                 if (optionalValue.isPresent()) {
                     minYForX = Math.min(minYForX, optionalValue.get().getY());
@@ -1591,12 +1603,14 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     }
 
     private void drawSmoothedMultiTimeSeries(final List<XYSeries<T>> LIST_OF_SERIES) {
+        if (LIST_OF_SERIES.isEmpty()) { return; }
         // Aggregating data
         List<XYItem> minItems    = new LinkedList<>();
         List<XYItem> maxItems    = new LinkedList<>();
         List<XYItem> avgItems    = new LinkedList<>();
         List<XYItem> stdDevItems = new LinkedList<>();
         XYSeries<T> series0 = LIST_OF_SERIES.get(0);
+        if (null == series0.getItems() || series0.getItems().isEmpty()) { return; }
         for (int i = 0 ; i < series0.getItems().size() ; i++) {
             T item = series0.getItems().get(i);
             double x = item.getX();
@@ -1605,6 +1619,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
             List<Double> valuesForX = new LinkedList<>();
             for (int j = 0 ; j < LIST_OF_SERIES.size() ; j++) {
                 XYSeries<T> series        = LIST_OF_SERIES.get(j);
+                if (null == series.getItems() || series.getItems().isEmpty()) { continue; }
                 Optional<T> optionalValue = series.getItems().stream().filter(si -> Double.compare(x, si.getX()) == 0).findFirst();
                 if (optionalValue.isPresent()) {
                     minYForX = Math.min(minYForX, optionalValue.get().getY());
