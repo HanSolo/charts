@@ -71,6 +71,8 @@ public class AxisTest extends Application {
 
         xAxisTop.setMinValue(50);
         xAxisTop.setMaxValue(150);
+        //xAxisTop.setAutoFontSize(true);
+        //xAxisTop.setTitleFontSize(20);
     }
 
     @Override public void stop() {
