@@ -68,6 +68,9 @@ public class AxisTest extends Application {
         stage.setTitle("Axis Test");
         stage.setScene(scene);
         stage.show();
+
+        xAxisTop.setMinValue(50);
+        xAxisTop.setMaxValue(150);
     }
 
     @Override public void stop() {
