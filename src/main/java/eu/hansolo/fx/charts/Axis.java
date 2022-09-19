@@ -83,7 +83,7 @@ public class Axis extends Region {
     private static final double                                    MIN_MAJOR_LINE_WIDTH   = 1;
     private static final double                                    MIN_MEDIUM_LINE_WIDTH  = 0.75;
     private static final double                                    MIN_MINOR_LINE_WIDTH   = 0.5;
-    private final        ChartEvt                                  AXIS_RANGE_CHANGED_EVT = new ChartEvt(Axis.this, ChartEvt.AXIS_RANGE_CHANGED);
+    private        final ChartEvt                                  AXIS_RANGE_CHANGED_EVT = new ChartEvt(Axis.this, ChartEvt.AXIS_RANGE_CHANGED);
     private              Map<EvtType, List<EvtObserver<ChartEvt>>> observers              = new ConcurrentHashMap<>();
     private              double                                    size;
     private              double                                    width;
@@ -1464,7 +1464,24 @@ public class Axis extends Region {
 
     // ******************** Drawing *******************************************
     private void drawAxis() {
-        if (Double.compare(stepSize, 0) <= 0) return;
+        if (Double.compare(stepSize, 0) <= 0) { return; }
+
+        stepSize = VERTICAL == getOrientation() ? Math.abs(height / getRange()) : Math.abs(width / getRange());
+        double maxNoOfMajorTicks = 10;
+        double maxNoOfMinorTicks = 10;
+        if (isAutoScale()) {
+            double niceRange         = (Helper.calcNiceNumber((getMaxValue() - getMinValue()), false));
+            setMajorTickSpace(Helper.calcNiceNumber(niceRange / (maxNoOfMajorTicks - 1), true));
+            setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), true));
+        } else {
+            // Only set major and minor tickspace if they are at their default values of 10 and 1
+            if (getMajorTickSpace() == 10) {
+                setMajorTickSpace(Helper.calcNiceNumber(getRange() / (maxNoOfMajorTicks - 1), false));
+            }
+            if (getMinorTickSpace() == 1) {
+                setMinorTickSpace(Helper.calcNiceNumber(getMajorTickSpace() / (maxNoOfMinorTicks - 1), false));
+            }
+        }
 
         axisCtx.clearRect(0, 0, width, height);
         axisCtx.setFill(getAxisBackgroundColor());

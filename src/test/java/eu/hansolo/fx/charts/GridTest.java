@@ -42,7 +42,7 @@ public class GridTest extends Application {
         xAxis.setMinorTickMarksVisible(false);
         xAxis.setMajorTickMarkColor(Color.RED);
 
-        yAxis = createLeftYAxis(0, 20, true);
+        yAxis = createLeftYAxis(-50, 50, true);
         yAxis.setMinorTickMarksVisible(false);
         yAxis.setMediumTickMarkColor(Color.MAGENTA);
 
@@ -70,6 +70,12 @@ public class GridTest extends Application {
         stage.setTitle("GridTest");
         stage.setScene(scene);
         stage.show();
+
+        yAxis.setMinValue(-10);
+        yAxis.setMaxValue(10);
+
+        //yAxis.setMinValue(-150);
+        //yAxis.setMaxValue(150);
 
         //Helper.saveAsPng(pane, "/Users/hansolo/Desktop/grid.png");
     }

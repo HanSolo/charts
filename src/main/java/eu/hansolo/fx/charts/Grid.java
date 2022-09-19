@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.tools.Helper;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -30,7 +31,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.math.BigDecimal;
@@ -92,6 +92,7 @@ public class Grid extends Region {
 
     // ******************** Constructors **************************************
     public Grid(final Axis X_AXIS, final Axis Y_AXIS) {
+        if (null == X_AXIS || null == Y_AXIS) { throw new IllegalArgumentException("Axis cannot be null"); }
         xAxis                    = X_AXIS;
         yAxis                    = Y_AXIS;
         _gridOpacity             = 0.25;
@@ -136,8 +137,8 @@ public class Grid extends Region {
     private void registerListeners() {
         widthProperty().addListener(o -> resize());
         heightProperty().addListener(o -> resize());
-        // add listeners to your propertes like
-        //value.addListener(o -> handleControlPropertyChanged("VALUE"));
+        xAxis.addChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, e -> drawGrid());
+        yAxis.addChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, e -> drawGrid());
     }
 
 
