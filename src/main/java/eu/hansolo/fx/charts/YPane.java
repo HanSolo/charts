@@ -74,10 +74,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private              BooleanProperty          thresholdYVisible;
     private              Color                    _thresholdYColor;
     private              ObjectProperty<Color>    thresholdYColor;
-
     private              Color                    _categoryColor;
     private              ObjectProperty<Color>    categoryColor;
-
     private              boolean                  valid;
     private              double                   _lowerBoundY;
     private              DoubleProperty           lowerBoundY;
