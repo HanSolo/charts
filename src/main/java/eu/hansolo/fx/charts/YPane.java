@@ -74,6 +74,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private              BooleanProperty          thresholdYVisible;
     private              Color                    _thresholdYColor;
     private              ObjectProperty<Color>    thresholdYColor;
+    private              Color                    _categoryColor;
+    private              ObjectProperty<Color>    categoryColor;
     private              boolean                  valid;
     private              double                   _lowerBoundY;
     private              DoubleProperty           lowerBoundY;
@@ -101,6 +103,7 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         _thresholdY        = 100;
         _thresholdYVisible = false;
         _thresholdYColor   = Color.RED;
+        _categoryColor     = Color.BLACK;
         _lowerBoundY       = 0;
         _upperBoundY       = 100;
         categories         = FXCollections.observableArrayList(CATEGORIES);
@@ -241,6 +244,27 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         return thresholdYColor;
     }
 
+    public Color getCategoryColor() { return null == categoryColor ? _categoryColor : categoryColor.get(); }
+    public void setCategoryColor(final Color COLOR) {
+        if (null == categoryColor) {
+            _categoryColor = COLOR;
+            redraw();
+        } else {
+            categoryColor.set(COLOR);
+        }
+    }
+    public ObjectProperty<Color> categoryColorProperty() {
+        if (null == categoryColor) {
+            categoryColor = new ObjectPropertyBase<Color>(_categoryColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "categoryColor"; }
+            };
+            _categoryColor = null;
+        }
+        return categoryColor;
+    }
+    
     public double getLowerBoundY() { return null == lowerBoundY ? _lowerBoundY : lowerBoundY.get(); }
     public void setLowerBoundY(final double VALUE) {
         if (null == lowerBoundY) {
@@ -520,7 +544,7 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         ctx.setFont(Fonts.latoRegular(0.025 * size));
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
-        ctx.setFill(Color.BLACK);
+        ctx.setFill(getCategoryColor());
 
         int index = categories.size();
         if (index > NO_OF_SECTORS) {
