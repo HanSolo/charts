@@ -26,6 +26,7 @@ import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.LineStyle;
 import eu.hansolo.fx.charts.tools.Marker;
+import eu.hansolo.fx.charts.tools.MarkerBuilder;
 import eu.hansolo.toolbox.unit.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -181,7 +182,7 @@ public class ChartTest extends Application {
         Marker marker1 = new Marker(lineChartYAxisLeft, 5, Color.RED, 3, LineStyle.SOLID, "Marker 1", Color.RED, "%.0f");
         lineChart.addMarker(marker1);
 
-        Marker marker2 = new Marker(lineChartXAxisBottom, 20, Color.BLUE, 3, LineStyle.DOTTED, "Marker 2", Color.BLUE, "%.0f");
+        Marker marker2 = MarkerBuilder.create(lineChartXAxisBottom, 20).stroke(Color.BLUE).lineWidth(3).lineStyle(LineStyle.DOTTED).text("Marker 2").textFill(Color.BLUE).fromatString("%.0f").build();
         lineChart.addMarker(marker2);
 
         // AreaChart

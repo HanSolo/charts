@@ -43,7 +43,7 @@ public class Marker {
         this.value        = Helper.clamp(axis.getMinValue(), axis.getMaxValue(), value);
         this.stroke       = null == stroke ? Color.RED : stroke;
         this.lineWidth    = Helper.clamp(1, 10, lineWidth);
-        this.text         = text;
+        this.text         = null == text ? "" : text;
         this.textFill     = null == textFill ? Color.RED : textFill;
         this.formatString = null == formatString || formatString.isEmpty() ? "%.0f" : formatString;
         this.lineStyle    = null == lineStyle ? LineStyle.SOLID : lineStyle;
@@ -56,14 +56,20 @@ public class Marker {
     public double getValue() { return value; }
 
     public Color getStroke() { return stroke; }
+    public void setStroke(final Color stroke) { this.stroke = null == stroke ? Color.RED : stroke; }
 
     public double getLineWidth() { return lineWidth; }
+    public void setLineWidth(final double lineWidth) { this.lineWidth = Helper.clamp(1, 10, lineWidth); }
 
     public LineStyle getLineStyle() { return lineStyle; }
+    public void setLineStyle(final LineStyle lineStyle) { this.lineStyle = null == lineStyle ? LineStyle.SOLID : lineStyle; }
 
     public String getText() { return text; }
+    public void setText(final String text) { this.text = null == text ? "" : text; }
 
     public Color getTextFill() { return textFill; }
+    public void setTextFill(final Color textFill) { this.textFill = null == textFill ? Color.RED: textFill; }
 
     public String getFormatString() { return formatString; }
+    public void setFormatString(final String formatString) { this.formatString = null == formatString || formatString.isEmpty() ? "%.0f" : formatString; }
 }
