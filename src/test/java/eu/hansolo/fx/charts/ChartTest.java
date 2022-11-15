@@ -24,6 +24,8 @@ import eu.hansolo.fx.charts.series.XYSeriesBuilder;
 import eu.hansolo.fx.charts.series.XYZSeries;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
+import eu.hansolo.fx.charts.tools.LineStyle;
+import eu.hansolo.fx.charts.tools.Marker;
 import eu.hansolo.toolbox.unit.Converter;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -176,6 +178,11 @@ public class ChartTest extends Application {
         Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
         lineChart.setGrid(grid1);
 
+        Marker marker1 = new Marker(lineChartYAxisLeft, 5, Color.RED, 3, LineStyle.SOLID, "Marker 1", Color.RED, "%.0f");
+        lineChart.addMarker(marker1);
+
+        Marker marker2 = new Marker(lineChartXAxisBottom, 20, Color.BLUE, 3, LineStyle.DOTTED, "Marker 2", Color.BLUE, "%.0f");
+        lineChart.addMarker(marker2);
 
         // AreaChart
         areaChartXAxisBottom = Helper.createBottomAxis(0, NO_OF_X_VALUES, true, AXIS_WIDTH);

@@ -23,6 +23,7 @@ import eu.hansolo.fx.charts.tools.TickLabelFormat;
 import eu.hansolo.toolbox.evt.EvtObserver;
 import eu.hansolo.toolbox.evt.EvtType;
 import eu.hansolo.toolboxfx.font.Fonts;
+import eu.hansolo.toolboxfx.geom.Bounds;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -102,6 +103,7 @@ public class Axis extends Region {
     private              boolean                                   _autoScale;
     private              BooleanProperty                           autoScale;
     private              double                                    stepSize;
+    private              Bounds                                    axisBounds;
     private              String                                    _title;
     private              StringProperty                            title;
     private              String                                    _unit;
@@ -240,6 +242,7 @@ public class Axis extends Region {
         _titleFontSize                    = 10;
         _zoneId                           = ZoneId.systemDefault();
         _dateTimeFormatPattern            = "dd.MM.YY HH:mm:ss";
+        axisBounds                        = new Bounds();
         currentInterval                   = Interval.SECOND_1;
         evtEvtObserver                    = e -> drawAxis();
         dateTimeFormatter                 = DateTimeFormatter.ofPattern(_dateTimeFormatPattern, _locale);
@@ -329,6 +332,7 @@ public class Axis extends Region {
 
         axisCanvas = new Canvas(width, height);
         axisCtx    = axisCanvas.getGraphicsContext2D();
+        axisBounds.set(0, 0, width, height);
 
         pane = new Pane(axisCanvas);
 
@@ -1236,6 +1240,10 @@ public class Axis extends Region {
     public double getValueForDisplay(final double posInAxis) {
         return posInAxis / width * Helper.calcNiceNumber((getMaxValue() - getMinValue()), false) + getMinValue();
     }
+
+    public double getStepSize() { return stepSize; }
+
+    public Bounds getAxisBounds() { return axisBounds; }
 
     public void dispose() {
         removeChartEvtObserver(ChartEvt.AXIS_RANGE_CHANGED, evtEvtObserver);
@@ -2235,6 +2243,8 @@ public class Axis extends Region {
 
             if (isAutoFontSize()) { setTickLabelFontSize(Helper.clamp(8, 24, 0.175 * size)); }
 
+            axisBounds.set(getInsets().getLeft(), getInsets().getTop(), width, height);
+
             if (VERTICAL == getOrientation()) {
                 width    = height * aspectRatio;
                 size     = width < height ? width : height;
@@ -2244,13 +2254,15 @@ public class Axis extends Region {
                 size     = width < height ? width : height;
                 stepSize = Math.abs(width / getRange());
             }
+
             pane.setMaxSize(width, height);
             pane.setMinSize(width, height);
             pane.setPrefSize(width, height);
-            pane.relocate((getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
+            pane.relocate(axisBounds.getX(), axisBounds.getY()); //(getWidth() - width) * 0.5, (getHeight() - height) * 0.5);
 
             axisCanvas.setWidth(width);
             axisCanvas.setHeight(height);
+
 
             redraw();
         }

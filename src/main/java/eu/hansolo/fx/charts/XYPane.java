@@ -18,10 +18,14 @@ package eu.hansolo.fx.charts;
 
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.event.CursorEvent;
 import eu.hansolo.fx.charts.event.CursorEventListener;
+import eu.hansolo.fx.charts.event.SeriesEvent;
 import eu.hansolo.fx.charts.event.SeriesEventListener;
 import eu.hansolo.toolbox.Statistics;
+import eu.hansolo.toolbox.evt.EvtObserver;
+import eu.hansolo.toolbox.evt.EvtType;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.series.Series;
 import eu.hansolo.fx.charts.series.XYSeries;
@@ -37,6 +41,7 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
@@ -61,6 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -72,74 +78,75 @@ import static eu.hansolo.fx.charts.tools.Helper.clamp;
  * Created by hansolo on 16.07.17.
  */
 public class XYPane<T extends XYItem> extends Region implements ChartArea {
-    private static final double                         PREFERRED_WIDTH  = 250;
-    private static final double                         PREFERRED_HEIGHT = 250;
-    private static final double                         MINIMUM_WIDTH    = 0;
-    private static final double                         MINIMUM_HEIGHT   = 0;
-    private static final double                         MAXIMUM_WIDTH    = 4096;
-    private static final double                         MAXIMUM_HEIGHT   = 4096;
-    private static final double                         MIN_SYMBOL_SIZE  = 2;
-    private static final double                         MAX_SYMBOL_SIZE  = 6;
-    private static final int                            SUB_DIVISIONS    = 24;
-    private static       double                         aspectRatio;
-    private              boolean                        keepAspect;
-    private              double                         size;
-    private              double                         width;
-    private              double                         height;
-    private              Paint                          _chartBackground;
-    private              ObjectProperty<Paint>          chartBackground;
-    private              ObservableList<XYSeries<T>>    listOfSeries;
-    private              Canvas                         canvas;
-    private              GraphicsContext                ctx;
-    private              Canvas                         cursorCanvas;
-    private              GraphicsContext                cursorCtx;
-    private              double                         cursorX;
-    private              double                         cursorY;
-    private              double                         scaleX;
-    private              double                         scaleY;
-    private              double                         symbolSize;
-    private              int                            noOfBands;
-    private              double                         _lowerBoundX;
-    private              DoubleProperty                 lowerBoundX;
-    private              double                         _upperBoundX;
-    private              DoubleProperty                 upperBoundX;
-    private              double                         _lowerBoundY;
-    private              DoubleProperty                 lowerBoundY;
-    private              double                         _upperBoundY;
-    private              DoubleProperty                 upperBoundY;
-    private              boolean                        referenceZero;
-    private              double                         _thresholdY;
-    private              DoubleProperty                 thresholdY;
-    private              boolean                        _thresholdYVisible;
-    private              BooleanProperty                thresholdYVisible;
-    private              Color                          _thresholdYColor;
-    private              ObjectProperty<Color>          thresholdYColor;
-    private              PolarTickStep                  _polarTickStep;
-    private              ObjectProperty<PolarTickStep>  polarTickStep;
-    private              Paint                          _envelopeFill;
-    private              ObjectProperty<Paint>          envelopeFill;
-    private              Color                          _envelopeStroke;
-    private              ObjectProperty<Color>          envelopeStroke;
-    private              Color                          _averageStroke;
-    private              ObjectProperty<Color>          averageStroke;
-    private              Paint                          _stdDeviationFill;
-    private              ObjectProperty<Paint>          stdDeviationFill;
-    private              Color                          _stdDeviationStroke;
-    private              ObjectProperty<Color>          stdDeviationStroke;
-    private              boolean                        _envelopeVisible;
-    private              BooleanProperty                envelopeVisible;
-    private              boolean                        _stdDeviationVisible;
-    private              BooleanProperty                stdDeviationVisible;
-    private              double                         _averageStrokeWidth;
-    private              DoubleProperty                 averageStrokeWidth;
-    private              boolean                        _crossHairVisible;
-    private              BooleanProperty                crossHairVisible;
-    private              Color                          _crossHairColor;
-    private              ObjectProperty<Color>          crossHairColor;
-    private              TooltipPopup                   popup;
-    private              SeriesEventListener            seriesListener;
-    private              EventHandler<MouseEvent>       mouseHandler;
-    private              List<CursorEventListener>      cursorEventListeners;
+    private static final double                                    PREFERRED_WIDTH  = 250;
+    private static final double                                    PREFERRED_HEIGHT = 250;
+    private static final double                                    MINIMUM_WIDTH    = 0;
+    private static final double                                    MINIMUM_HEIGHT   = 0;
+    private static final double                                    MAXIMUM_WIDTH    = 4096;
+    private static final double                                    MAXIMUM_HEIGHT   = 4096;
+    private static final double                                    MIN_SYMBOL_SIZE  = 2;
+    private static final double                                    MAX_SYMBOL_SIZE  = 6;
+    private static final int                                       SUB_DIVISIONS    = 24;
+    private static       double                                    aspectRatio;
+    private              boolean                                   keepAspect;
+    private              double                                    size;
+    private              double                                    width;
+    private              double                                    height;
+    private              Paint                                     _chartBackground;
+    private              ObjectProperty<Paint>                     chartBackground;
+    private              ObservableList<XYSeries<T>>               listOfSeries;
+    private              Canvas                                    canvas;
+    private              GraphicsContext                           ctx;
+    private              Canvas                                    cursorCanvas;
+    private              GraphicsContext                           cursorCtx;
+    private              double                                    cursorX;
+    private              double                                    cursorY;
+    private              double                                    scaleX;
+    private              double                                    scaleY;
+    private              double                                    symbolSize;
+    private              int                                       noOfBands;
+    private              double                                    _lowerBoundX;
+    private              DoubleProperty                            lowerBoundX;
+    private              double                                    _upperBoundX;
+    private              DoubleProperty                            upperBoundX;
+    private              double                                    _lowerBoundY;
+    private              DoubleProperty                            lowerBoundY;
+    private              double                                    _upperBoundY;
+    private              DoubleProperty                            upperBoundY;
+    private              boolean                                   referenceZero;
+    private              double                                    _thresholdY;
+    private              DoubleProperty                            thresholdY;
+    private              boolean                                   _thresholdYVisible;
+    private              BooleanProperty                           thresholdYVisible;
+    private              Color                                     _thresholdYColor;
+    private              ObjectProperty<Color>                     thresholdYColor;
+    private              PolarTickStep                             _polarTickStep;
+    private              ObjectProperty<PolarTickStep>             polarTickStep;
+    private              Paint                                     _envelopeFill;
+    private              ObjectProperty<Paint>                     envelopeFill;
+    private              Color                                     _envelopeStroke;
+    private              ObjectProperty<Color>                     envelopeStroke;
+    private              Color                                     _averageStroke;
+    private              ObjectProperty<Color>                     averageStroke;
+    private              Paint                                     _stdDeviationFill;
+    private              ObjectProperty<Paint>                     stdDeviationFill;
+    private              Color                                     _stdDeviationStroke;
+    private              ObjectProperty<Color>                     stdDeviationStroke;
+    private              boolean                                   _envelopeVisible;
+    private              BooleanProperty                           envelopeVisible;
+    private              boolean                                   _stdDeviationVisible;
+    private              BooleanProperty                           stdDeviationVisible;
+    private              double                                    _averageStrokeWidth;
+    private              DoubleProperty                            averageStrokeWidth;
+    private              boolean                                   _crossHairVisible;
+    private              BooleanProperty                           crossHairVisible;
+    private              Color                                     _crossHairColor;
+    private              ObjectProperty<Color>                     crossHairColor;
+    private              TooltipPopup                              popup;
+    private              SeriesEventListener                       seriesListener;
+    private              EventHandler<MouseEvent>                  mouseHandler;
+    private              List<CursorEventListener>                 cursorEventListeners;
+    private              Map<EvtType, List<EvtObserver<ChartEvt>>> observers = new ConcurrentHashMap<>();
 
 
 
@@ -705,6 +712,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     protected void redraw() {
         drawChart();
         drawCursor();
+        fireChartEvt(new ChartEvt(XYPane.this, ChartEvt.UPDATE));
     }
 
     private void drawChart() {
@@ -1909,6 +1917,30 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
     public void fireCursorEvent(final CursorEvent EVT) {
         cursorEventListeners.forEach(listener -> listener.handleCursorEvent(EVT));
     }
+
+
+    public void addChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (!observers.containsKey(type)) { observers.put(type, new CopyOnWriteArrayList<>()); }
+        if (observers.get(type).contains(observer)) { return; }
+        observers.get(type).add(observer);
+    }
+    public void removeChartEvtObserver(final EvtType type, final EvtObserver<ChartEvt> observer) {
+        if (observers.containsKey(type)) {
+            if (observers.get(type).contains(observer)) {
+                observers.get(type).remove(observer);
+            }
+        }
+    }
+    public void removeAllChartEvtObservers() { observers.clear(); }
+
+    public void fireChartEvt(final ChartEvt evt) {
+        final EvtType type = evt.getEvtType();
+        observers.entrySet().stream().filter(entry -> entry.getKey().equals(ChartEvt.ANY)).forEach(entry -> entry.getValue().forEach(observer -> observer.handle(evt)));
+        if (observers.containsKey(type) && !type.equals(ChartEvt.ANY)) {
+            observers.get(type).forEach(observer -> observer.handle(evt));
+        }
+    }
+
 
 
     // ******************** Resizing ******************************************
