@@ -19,6 +19,7 @@
 package eu.hansolo.fx.charts.tools;
 
 import eu.hansolo.fx.charts.Axis;
+import eu.hansolo.fx.charts.Position;
 import javafx.scene.paint.Color;
 
 
@@ -39,6 +40,7 @@ public class Marker {
     }
     public Marker(final Axis axis, final double value, final Color stroke, final double lineWidth, final LineStyle lineStyle, final String text, final Color textFill, final String formatString) {
         if (null == axis) { throw new IllegalArgumentException("Given axis cannot be null"); }
+        if ((Position.LEFT != axis.getPosition() && Position.BOTTOM != axis.getPosition())) { throw new IllegalArgumentException("Marker axis position has to be either LEFT or BOTTOM"); }
         this.axis         = axis;
         this.value        = Helper.clamp(axis.getMinValue(), axis.getMaxValue(), value);
         this.stroke       = null == stroke ? Color.RED : stroke;
