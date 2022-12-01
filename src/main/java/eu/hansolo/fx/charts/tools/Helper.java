@@ -81,6 +81,7 @@ public class Helper {
     public static final double   MAX_TICK_MARK_LENGTH = 0.125;
     public static final double   MAX_TICK_MARK_WIDTH  = 0.02;
     public static final String[] ABBREVIATIONS        = { "k", "M", "G", "T", "P", "E", "Z", "Y" };
+    public static final PMatrix  ISOMETRIC            = new PMatrix(Helper.angleToVector(120), Helper.angleToVector(-120), Helper.angleToVector(0), null, null);
 
     public enum Interval {
         DECADE(ChronoUnit.DECADES, 1, 311_040_000, 155_520_000, 31_104_000), // 10 years
@@ -1353,5 +1354,11 @@ public class Helper {
         formatter.setMinimumFractionDigits(1);
         formatter.setMaximumFractionDigits(1);
         return hasDecimal ? formatter.format(truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
+
+
+    public static final P2d angleToVector(final double deg) { return angleToVector(deg, 1.0); }
+    public static final P2d angleToVector(final double deg, final double len) {
+        return new P2d(Math.cos(Math.toRadians(deg - 90)) * len, Math.sin(Math.toRadians(deg - 90)) * len);
     }
 }
