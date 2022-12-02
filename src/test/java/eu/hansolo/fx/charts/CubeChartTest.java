@@ -26,7 +26,11 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -48,6 +52,8 @@ public class CubeChartTest extends Application {
         chart1 = CubeChartBuilder.create()
                                  .leftFill(CubeChart.RED_ORANGE_LEFT_FILL)
                                  .rightFill(CubeChart.RED_ORANGE_RIGHT_FILL)
+                                 .leftText("OF CODEBASES CONTAINED OPEN SOURCE")
+                                 .rightText("OF CODE IN CODEBASES WAS OPEN SOURCE")
                                  .build();
         chart2 = CubeChartBuilder.create()
                                  .leftFill(CubeChart.ORANGE_GREEN_LEFT_FILL)
@@ -98,7 +104,7 @@ public class CubeChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        HBox pane = new HBox(10, chart1, chart2, chart3, chart4);
+        HBox pane = new HBox(0, chart1, chart2, chart3, chart4);
         pane.setPadding(new Insets(10));
         //pane.setBackground(new Background(new BackgroundFill(Color.rgb(100, 100, 100), CornerRadii.EMPTY, Insets.EMPTY)));
 

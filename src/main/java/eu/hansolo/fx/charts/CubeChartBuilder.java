@@ -23,6 +23,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
@@ -46,6 +48,11 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
 
     public final B chartBackground(final Paint chartBackground) {
         properties.put("chartBackground", new SimpleObjectProperty<>(chartBackground));
+        return (B)this;
+    }
+
+    public final B cubeColor(final Color cubeColor) {
+        properties.put("cubeColor", new SimpleObjectProperty<>(cubeColor));
         return (B)this;
     }
 
@@ -81,6 +88,16 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
 
     public final B rightValue(final double rightValue) {
         properties.put("rightValue", new SimpleDoubleProperty(rightValue));
+        return (B)this;
+    }
+
+    public final B leftText(final String leftText) {
+        properties.put("leftText", new SimpleStringProperty(leftText));
+        return (B)this;
+    }
+
+    public final B rightText(final String rightText) {
+        properties.put("rightText", new SimpleStringProperty(rightText));
         return (B)this;
     }
 
@@ -189,6 +206,7 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
                 case "translateY"        -> cubeChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
                 case "padding"           -> cubeChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
                 case "chartBackground"   -> cubeChart.setChartBackground(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "cubeColor"         -> cubeChart.setCubeColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "cubeFrameColor"    -> cubeChart.setCubeFrameColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "leftFill"          -> cubeChart.setLeftFill(((ObjectProperty<Paint>) properties.get(key)).get());
                 case "rightFill"         -> cubeChart.setRightFill(((ObjectProperty<Paint>) properties.get(key)).get());
@@ -196,6 +214,8 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
                 case "emptyTextColor"    -> cubeChart.setEmptyTextColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "leftValue"         -> cubeChart.setLeftValue(((DoubleProperty) properties.get(key)).get());
                 case "rightValue"        -> cubeChart.setRightValue(((DoubleProperty) properties.get(key)).get());
+                case "leftText"          -> cubeChart.setLeftText(((StringProperty) properties.get(key)).get());
+                case "rightText"         -> cubeChart.setRightText(((StringProperty) properties.get(key)).get());
             }
         }
         return cubeChart;

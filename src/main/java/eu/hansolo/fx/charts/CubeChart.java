@@ -22,12 +22,15 @@ import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.P2d;
 import eu.hansolo.fx.charts.tools.P3d;
 import eu.hansolo.fx.charts.tools.PMatrix;
+import eu.hansolo.toolboxfx.FontMetrix;
 import eu.hansolo.toolboxfx.font.Fonts;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.StringPropertyBase;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -41,6 +44,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -52,6 +56,7 @@ import java.util.stream.Collectors;
 @DefaultProperty("children")
 public class CubeChart extends Region {
     public static final  Color                 DEFAULT_CHART_BACKGROUND   = Color.TRANSPARENT;
+    public static final  Color                 DEFAULT_CUBE_COLOR         = Color.WHITE;
     public static final  Color                 DEFAULT_CUBE_FRAME_COLOR   = Color.rgb(228, 228, 228);
     public static final  LinearGradient        RED_ORANGE_LEFT_FILL       = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(210, 84, 66)), new Stop(1.0, Color.rgb(224, 130, 66)));
     public static final  LinearGradient        RED_ORANGE_RIGHT_FILL      = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(224, 130, 66)), new Stop(1.0, Color.rgb(237, 181, 75)));
@@ -62,7 +67,7 @@ public class CubeChart extends Region {
     public static final  LinearGradient        BLUE_PURPLE_LEFT_FILL      = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(130, 100, 158)), new Stop(1.0, Color.rgb(101, 63, 129)));
     public static final  LinearGradient        BLUE_PURPLE_RIGHT_FILL     = new LinearGradient(0, 0, 1, 0, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(87, 47, 118)), new Stop(1.0, Color.rgb(45, 5, 83)));
     public static final  Color                 DEFAULT_TEXT_COLOR         = Color.WHITE;
-    public static final  Color                 DEFAULT_EMPTY_TEXT_COLOR   = Color.DARKGRAY;
+    public static final  Color                 DEFAULT_EMPTY_TEXT_COLOR   = Color.rgb(128, 128, 128);
     private static final double                PREFERRED_WIDTH            = 400;
     private static final double                PREFERRED_HEIGHT           = 400;
     private static final double                MINIMUM_WIDTH              = 50;
@@ -76,6 +81,8 @@ public class CubeChart extends Region {
     private              GraphicsContext       ctx;
     private              Paint                 _chartBackground;
     private              ObjectProperty<Paint> chartBackground;
+    private              Color                 _cubeColor;
+    private              ObjectProperty<Color> cubeColor;
     private              Color                 _cubeFrameColor;
     private              ObjectProperty<Color> cubeFrameColor;
     private              Paint                 _leftFill;
@@ -88,9 +95,13 @@ public class CubeChart extends Region {
     private              ObjectProperty<Color> emptyTextColor;
     private              DoubleProperty        leftValue;
     private              DoubleProperty        rightValue;
+    private              StringProperty        leftText;
+    private              StringProperty        rightText;
     private              double                lineWidth;
     private              double                cubeSize;
     private              double                dataAreaSize;
+    private              Font                  valueFont;
+    private              Font                  textFont;
     private              PMatrix               pMatrix;
     private              List<P3d>             cubePoints;
     private              List<P3d>             leftPoints;
@@ -101,6 +112,7 @@ public class CubeChart extends Region {
     // ******************** Constructors **************************************
     public CubeChart() {
         _chartBackground  = DEFAULT_CHART_BACKGROUND;
+        _cubeColor        = DEFAULT_CUBE_COLOR;
         _cubeFrameColor   = DEFAULT_CUBE_FRAME_COLOR;
         _leftFill         = RED_ORANGE_LEFT_FILL;
         _rightFill        = RED_ORANGE_RIGHT_FILL;
@@ -122,9 +134,21 @@ public class CubeChart extends Region {
             @Override public Object getBean() { return CubeChart.this; }
             @Override public String getName() { return "leftValue"; }
         };
+        leftText          = new StringPropertyBase("") {
+            @Override protected void invalidated() { redraw(); }
+            @Override public Object getBean() { return CubeChart.this; }
+            @Override public String getName() { return "leftText"; }
+        };
+        rightText         = new StringPropertyBase("") {
+            @Override protected void invalidated() { redraw(); }
+            @Override public Object getBean() { return CubeChart.this; }
+            @Override public String getName() { return "rightText"; }
+        };
         lineWidth         = 10;
         cubeSize          = 100;
         dataAreaSize      = cubeSize *  0.4;
+        valueFont         = Fonts.mazzardsoftlBoldName(44);
+        textFont          = Fonts.mazzardsoftlBoldName(12);
 
         cubePoints = new ArrayList<>();
         cubePoints.add(new P3d(-cubeSize, -cubeSize, -cubeSize)); // lower top left     index 0
@@ -226,6 +250,27 @@ public class CubeChart extends Region {
             _chartBackground = null;
         }
         return chartBackground;
+    }
+
+    public Color getCubeColor() { return null == cubeColor ? _cubeColor : cubeColor.get(); }
+    public void setCubeColor(final Color cubeColor) {
+        if (null == this.cubeColor) {
+            _cubeColor = cubeColor;
+            redraw();
+        } else {
+            this.cubeColor.set(cubeColor);
+        }
+    }
+    public ObjectProperty<Color> cubeColorProperty() {
+        if (null == cubeColor) {
+            cubeColor = new ObjectPropertyBase<>(_cubeColor) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return CubeChart.this; }
+                @Override public String getName() { return "cubeColor"; }
+            };
+            _cubeColor = null;
+        }
+        return cubeColor;
     }
 
     public Color getCubeFrameColor() { return null == cubeFrameColor ? _cubeFrameColor : cubeFrameColor.get(); }
@@ -343,6 +388,39 @@ public class CubeChart extends Region {
     public void setRightValue(final double rightValue) { this.rightValue.set(Helper.clamp(0.0, 1.0, rightValue)); }
     public DoubleProperty rightValueProperty() { return rightValue; }
 
+    public String getLeftText() { return leftText.get(); }
+    public void setLeftText(final String leftText) { this.leftText.set(leftText); }
+    public StringProperty leftTextProperty() { return leftText; }
+
+    public String getRightText() { return rightText.get(); }
+    public void setRightText(final String rightText) { this.rightText.set(rightText); }
+    public StringProperty rightTextProperty() { return rightText; }
+
+
+    private void wrapText(final GraphicsContext ctx, final String text, final double x, final double y, final double maxWidth, final double lineHeight, final int maxNoOfLines) {
+        double        tx          = x;
+        double        ty          = y;
+        double        noOfLines   = 1;
+        String[]      words       = text.split(" ");
+        String        line        = "";
+        FontMetrix    metrix      = new FontMetrix(textFont);
+        for(int n = 0 ; n < words.length ; n++) {
+            var testLine = line + words[n] + " ";
+            var testWidth = metrix.computeStringWidth(testLine);
+            if (testWidth > maxWidth && n > 0) {
+                ctx.fillText(line, tx, ty);
+                line = words[n] + ' ';
+                if (noOfLines == maxNoOfLines) { break; }
+                ty += lineHeight;
+                noOfLines++;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, tx, ty);
+    }
+
+
 
     // ******************** Drawing *******************************************
     /**
@@ -422,9 +500,9 @@ public class CubeChart extends Region {
         ctx.setLineJoin(StrokeLineJoin.ROUND);
         ctx.setStroke(getCubeFrameColor());
 
-        /* Areas
+        // Areas
         // top 4 5 6 7 4
-        ctx.setFill(Color.WHITE);
+        ctx.setFill(getCubeColor());
         ctx.beginPath();
         ctx.moveTo(projectedPoints.get(4).x, projectedPoints.get(4).y);
         ctx.lineTo(projectedPoints.get(5).x, projectedPoints.get(5).y);
@@ -448,7 +526,6 @@ public class CubeChart extends Region {
         ctx.lineTo(projectedPoints.get(2).x, projectedPoints.get(2).y);
         ctx.closePath();
         ctx.fill();
-        */
 
         // Stroke border
         // top 4 5 6 7 4
@@ -493,22 +570,31 @@ public class CubeChart extends Region {
 
         // Text
         double ty;
-        ctx.setTextBaseline(VPos.BOTTOM);
+        ctx.setTextBaseline(VPos.TOP);
         ctx.setTextAlign(TextAlignment.CENTER);
-        ctx.setFont(Fonts.opensansBold(size * 0.115));
         // Left Text
         ctx.save();
+        ctx.setFont(valueFont);
         ctx.setFill(leftValue < 0.16 ? getEmptyTextColor() : getTextColor());
-        ctx.setTransform(1,0.6,0.025,0.5,0,0);
-        ty = leftValue < 0.25 ? size * 1.26 : size * 1.45 - (size * 0.75 * leftValue);
-        ctx.fillText(String.format(Locale.US, "%.0f%%", leftValue * 100), size * 0.275, ty);
+        ctx.setTransform(1,0.6,0.025,1,0,0);
+        ty = (leftValue < 0.29 || getLeftText().isEmpty()) ? size * 0.525 : size * 0.63 - (dataAreaSize * 2 * leftValue);
+        ctx.fillText(String.format(Locale.US, "%.0f%%", leftValue * 100), size * 0.3, ty);
+        if (leftValue > 0.69) {
+            ctx.setFont(textFont);
+            wrapText(ctx, getLeftText(), size * 0.29, ty + valueFont.getSize(), dataAreaSize * 1.7, textFont.getSize() * 1.25, 3);
+        }
         ctx.restore();
         // Right Text
         ctx.save();
+        ctx.setFont(valueFont);
         ctx.setFill(rightValue < 0.16 ? getEmptyTextColor() : getTextColor());
-        ctx.setTransform(1,-0.61,0.025,0.5,0,0);
-        ty = rightValue < 0.25 ? size * 2.35 : size * 2.54 - (size * 0.75 * rightValue);
-        ctx.fillText(String.format(Locale.US, "%.0f%%", rightValue * 100), size * 0.64, ty);
+        ctx.setTransform(1,-0.6,0.025,1,0,0);
+        ty = (rightValue < 0.29 || getRightText().isEmpty()) ? size * 1.1 : size * 1.205 - (dataAreaSize * 2 * rightValue);
+        ctx.fillText(String.format(Locale.US, "%.0f%%", rightValue * 100), size * 0.67, ty);
+        if (rightValue > 0.69) {
+            ctx.setFont(textFont);
+            wrapText(ctx, getRightText(), size * 0.67, ty + valueFont.getSize(), dataAreaSize * 1.7, textFont.getSize() * 1.25, 3);
+        }
         ctx.restore();
     }
 
@@ -525,6 +611,8 @@ public class CubeChart extends Region {
             lineWidth        = size * 0.03;
             cubeSize         = size * 0.225;
             dataAreaSize     = cubeSize * 0.8;
+            valueFont        = Fonts.mazzardsoftlBoldName(size * 0.12);
+            textFont         = Fonts.mazzardsoftlSemiBoldName(size * 0.035);
             pMatrix.origin.x = width * 0.5;
             pMatrix.origin.y = height * 0.5;
 
