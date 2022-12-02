@@ -71,13 +71,23 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
         return (B)this;
     }
 
-    public final B textColor(final Color textColor) {
-        properties.put("textColor", new SimpleObjectProperty(textColor));
+    public final B leftTextColor(final Color leftTextColor) {
+        properties.put("leftTextColor", new SimpleObjectProperty(leftTextColor));
         return (B)this;
     }
 
-    public final B emptyTextColor(final Color emptyTextColor) {
-        properties.put("emptyTextColor", new SimpleObjectProperty(emptyTextColor));
+    public final B leftEmptyTextColor(final Color leftEmptyTextColor) {
+        properties.put("leftEmptyTextColor", new SimpleObjectProperty(leftEmptyTextColor));
+        return (B)this;
+    }
+
+    public final B rightTextColor(final Color rightTextColor) {
+        properties.put("rightTextColor", new SimpleObjectProperty(rightTextColor));
+        return (B)this;
+    }
+
+    public final B rightEmptyTextColor(final Color rightEmptyTextColor) {
+        properties.put("rightEmptyTextColor", new SimpleObjectProperty(rightEmptyTextColor));
         return (B)this;
     }
 
@@ -180,42 +190,44 @@ public class CubeChartBuilder<B extends CubeChartBuilder<B>> {
 
         for (String key : properties.keySet()) {
             switch (key) {
-                case "prefSize"          -> {
+                case "prefSize"            -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
                     cubeChart.setPrefSize(dim.getWidth(), dim.getHeight());
                 }
-                case "minSize"           -> {
+                case "minSize"             -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
                     cubeChart.setMinSize(dim.getWidth(), dim.getHeight());
                 }
-                case "maxSize"           -> {
+                case "maxSize"             -> {
                     Dimension2D dim = ((ObjectProperty<Dimension2D>) properties.get(key)).get();
                     cubeChart.setMaxSize(dim.getWidth(), dim.getHeight());
                 }
-                case "prefWidth"         -> cubeChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
-                case "prefHeight"        -> cubeChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
-                case "minWidth"          -> cubeChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
-                case "minHeight"         -> cubeChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
-                case "maxWidth"          -> cubeChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
-                case "maxHeight"         -> cubeChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
-                case "scaleX"            -> cubeChart.setScaleX(((DoubleProperty) properties.get(key)).get());
-                case "scaleY"            -> cubeChart.setScaleY(((DoubleProperty) properties.get(key)).get());
-                case "layoutX"           -> cubeChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
-                case "layoutY"           -> cubeChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
-                case "translateX"        -> cubeChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
-                case "translateY"        -> cubeChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
-                case "padding"           -> cubeChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
-                case "chartBackground"   -> cubeChart.setChartBackground(((ObjectProperty<Paint>) properties.get(key)).get());
-                case "cubeColor"         -> cubeChart.setCubeColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "cubeFrameColor"    -> cubeChart.setCubeFrameColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "leftFill"          -> cubeChart.setLeftFill(((ObjectProperty<Paint>) properties.get(key)).get());
-                case "rightFill"         -> cubeChart.setRightFill(((ObjectProperty<Paint>) properties.get(key)).get());
-                case "textColor"         -> cubeChart.setTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "emptyTextColor"    -> cubeChart.setEmptyTextColor(((ObjectProperty<Color>) properties.get(key)).get());
-                case "leftValue"         -> cubeChart.setLeftValue(((DoubleProperty) properties.get(key)).get());
-                case "rightValue"        -> cubeChart.setRightValue(((DoubleProperty) properties.get(key)).get());
-                case "leftText"          -> cubeChart.setLeftText(((StringProperty) properties.get(key)).get());
-                case "rightText"         -> cubeChart.setRightText(((StringProperty) properties.get(key)).get());
+                case "prefWidth"           -> cubeChart.setPrefWidth(((DoubleProperty) properties.get(key)).get());
+                case "prefHeight"          -> cubeChart.setPrefHeight(((DoubleProperty) properties.get(key)).get());
+                case "minWidth"            -> cubeChart.setMinWidth(((DoubleProperty) properties.get(key)).get());
+                case "minHeight"           -> cubeChart.setMinHeight(((DoubleProperty) properties.get(key)).get());
+                case "maxWidth"            -> cubeChart.setMaxWidth(((DoubleProperty) properties.get(key)).get());
+                case "maxHeight"           -> cubeChart.setMaxHeight(((DoubleProperty) properties.get(key)).get());
+                case "scaleX"              -> cubeChart.setScaleX(((DoubleProperty) properties.get(key)).get());
+                case "scaleY"              -> cubeChart.setScaleY(((DoubleProperty) properties.get(key)).get());
+                case "layoutX"             -> cubeChart.setLayoutX(((DoubleProperty) properties.get(key)).get());
+                case "layoutY"             -> cubeChart.setLayoutY(((DoubleProperty) properties.get(key)).get());
+                case "translateX"          -> cubeChart.setTranslateX(((DoubleProperty) properties.get(key)).get());
+                case "translateY"          -> cubeChart.setTranslateY(((DoubleProperty) properties.get(key)).get());
+                case "padding"             -> cubeChart.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
+                case "chartBackground"     -> cubeChart.setChartBackground(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "cubeColor"           -> cubeChart.setCubeColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "cubeFrameColor"      -> cubeChart.setCubeFrameColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "leftFill"            -> cubeChart.setLeftFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "rightFill"           -> cubeChart.setRightFill(((ObjectProperty<Paint>) properties.get(key)).get());
+                case "leftTextColor"       -> cubeChart.setLeftTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "leftEmptyTextColor"  -> cubeChart.setLeftEmptyTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "rightTextColor"      -> cubeChart.setLeftTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "rightEmptyTextColor" -> cubeChart.setLeftEmptyTextColor(((ObjectProperty<Color>) properties.get(key)).get());
+                case "leftValue"           -> cubeChart.setLeftValue(((DoubleProperty) properties.get(key)).get());
+                case "rightValue"          -> cubeChart.setRightValue(((DoubleProperty) properties.get(key)).get());
+                case "leftText"            -> cubeChart.setLeftText(((StringProperty) properties.get(key)).get());
+                case "rightText"           -> cubeChart.setRightText(((StringProperty) properties.get(key)).get());
             }
         }
         return cubeChart;
