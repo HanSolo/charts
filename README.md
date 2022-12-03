@@ -173,3 +173,7 @@ related to imports, required modules etc.
 
 ## BoxPlots
 ![BoxPlots](https://i.ibb.co/MSQ54yd/BoxPlots.png)
+
+
+## CubeCharts
+![CubeChart](https://i.ibb.co/7zQF494/Cube-Chart.png)
