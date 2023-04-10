@@ -92,6 +92,10 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private              double                   _offset;
     private              DoubleProperty           offset;
 
+    private              double                   _originAngle;
+    private              DoubleProperty           originAngle;
+
+
     // ******************** Constructors **************************************
     public YPane(final YSeries<T>... SERIES) {
         this(Color.TRANSPARENT, new ArrayList<>(), SERIES);
@@ -114,6 +118,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         _categoryColor     = Color.BLACK;
         _lowerBoundY       = 0;
         _upperBoundY       = 100;
+        _offset            = 10;
+        _originAngle       = 0;
         categories         = FXCollections.observableArrayList(CATEGORIES);
         valid              = isChartTypeValid();
         initGraphics();
@@ -182,10 +188,32 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
             offset = new DoublePropertyBase(_offset) {
                 @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return YPane.this; }
-                @Override public String getName() { return "thresholdY"; }
+                @Override public String getName() { return "offset"; }
             };
         }
         return offset;
+    }
+
+    public double getOriginAngle() { return _originAngle; }
+
+    public void setOriginAngle(final double originAngle) {
+        _originAngle = originAngle;
+        redraw();
+    }
+
+    public DoubleProperty originAngleProperty() {
+        if (null == originAngle) {
+            originAngle = new DoublePropertyBase(_originAngle) {
+
+                @Override protected void invalidated() { redraw(); }
+                @Override
+                public Object getBean() { return YPane.this; }
+
+                @Override
+                public String getName() { return "originAngle"; }
+            };
+        }
+        return originAngle;
     }
 
     public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
@@ -438,6 +466,7 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
         // draw the chart data
         ctx.save();
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
         if (SERIES.getFill() instanceof RadialGradient) {
             ctx.setFill(new RadialGradient(0, 0, size  * 0.5, size * 0.5, size * 0.45, false, CycleMethod.NO_CYCLE, ((RadialGradient) SERIES.getFill()).getStops()));
         } else {
@@ -521,6 +550,7 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
                 });
             }
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
         ctx.restore();
     }
 
@@ -549,10 +579,12 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
         // draw star lines
         ctx.save();
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
             ctx.strokeLine(CENTER_X, 0.05 * size, CENTER_X, 0.5 * size);
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
         ctx.restore();
 
         // draw threshold line
@@ -566,6 +598,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
         // prerotate if sectormode
         ctx.save();
+
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
 
         if (ChartType.RADAR_SECTOR == TYPE) {
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep * 0.5);
@@ -583,10 +617,13 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
             index = NO_OF_SECTORS;
         }
 
+
         for (int i = 0 ; i < index ; i++) {
             ctx.fillText(categories.get(i).getName(), CENTER_X, size * 0.03);
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
+
         ctx.restore();
 
         ctx.restore();
