@@ -18,6 +18,9 @@
 
 package eu.hansolo.fx.charts.voronoi;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +32,7 @@ import java.util.Set;
 
 
 public class Triangulation extends AbstractSet<Triangle> {
+    private static Logger   logger = LoggerFactory.getLogger(Triangulation.class);
     private Triangle        mostRecent;
     private Graph<Triangle> triGraph;
 
@@ -78,7 +82,7 @@ public class Triangulation extends AbstractSet<Triangle> {
         Set<Triangle> visited = new HashSet<>();
         while (triangle != null) {
             if (visited.contains(triangle)) { // This should never happen
-                System.out.println("Warning: Caught in a locate loop");
+                logger.debug("Warning: Caught in a locate loop");
                 break;
             }
             visited.add(triangle);
@@ -88,12 +92,12 @@ public class Triangulation extends AbstractSet<Triangle> {
             triangle = this.neighborOpposite(corner, triangle);
         }
         // No luck; try brute force
-        System.out.println("Warning: Checking all triangles for " + point);
+        logger.debug("Warning: Checking all triangles for " + point);
         for (Triangle tri : this) {
             if (point.isOutside(tri.toArray(new VPoint[0])) == null) { return tri; }
         }
         // No such triangle
-        System.out.println("Warning: No triangle holds " + point);
+        logger.debug("Warning: No triangle holds " + point);
         return null;
     }
 
