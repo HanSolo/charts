@@ -741,7 +741,6 @@ public class BarChart<T extends ChartItem> extends Region {
     public List<Color> getColors() { return colors; }
     public void setColors(final List<Color> colors) {
         if (colors.isEmpty()) { throw new IllegalArgumentException("colors cannot be empty"); }
-        System.out.println(this.colors);
         this.colors.clear();
         this.colors.addAll(colors);
         if (useGivenColors()) { redraw(); }
