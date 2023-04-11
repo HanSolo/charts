@@ -2,6 +2,7 @@ module eu.hansolo.fx.charts {
 
     // Java
     requires java.base;
+    requires java.logging;
 
     // Java-FX
     requires transitive javafx.base;
@@ -10,6 +11,8 @@ module eu.hansolo.fx.charts {
     requires transitive javafx.swing;
 
     // 3rd party
+    requires logback.classic;
+    requires org.slf4j;
     requires transitive eu.hansolo.toolbox;
     requires transitive eu.hansolo.toolboxfx;
     requires transitive eu.hansolo.fx.heatmap;
