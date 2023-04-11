@@ -553,7 +553,6 @@ public class BubbleGridChart extends Region {
                     }
                     case DESCENDING -> {
                         List<ChartItem> sorted = xCategoryItems.stream().sorted(Comparator.comparing(ChartItem::getName).reversed()).collect(Collectors.toList());
-                        System.out.println(sorted);
                         xCategoryItems.clear();
                         xCategoryItems.addAll(sorted);
                     }
