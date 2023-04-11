@@ -151,6 +151,8 @@ public class XYChart<T extends XYItem> extends Region {
         markerCanvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
         markerCtx    = markerCanvas.getGraphicsContext2D();
 
+        markerCanvas.setMouseTransparent(true);
+
         pane.getChildren().add(markerCanvas);
 
         getChildren().setAll(pane);
