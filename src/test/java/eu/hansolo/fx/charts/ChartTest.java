@@ -175,6 +175,8 @@ public class ChartTest extends Application {
         lineChartYAxisLeft.setZeroColor(Color.BLACK);
 
         lineChart = new XYChart<>(new XYPane(xySeries2, xySeries1), lineChartYAxisLeft, lineChartYAxisRight, lineChartXAxisBottom);
+        lineChart.getXYPane().setCrossHairVisible(true);
+
 
         Grid grid1 = new Grid(lineChartXAxisBottom, lineChartYAxisLeft);
         lineChart.setGrid(grid1);
@@ -189,6 +191,7 @@ public class ChartTest extends Application {
         areaChartXAxisBottom = Helper.createBottomAxis(0, NO_OF_X_VALUES, true, AXIS_WIDTH);
         areaChartYAxisLeft   = Helper.createLeftAxis(0, 20, true, AXIS_WIDTH);
         areaChart            = new XYChart<>(new XYPane(xySeries2), areaChartXAxisBottom, areaChartYAxisLeft);
+        areaChart.getXYPane().setCrossHairVisible(true);
 
         xySeries2.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 0.75)), new Stop(1.0, Color.rgb(0, 255, 255, 0.25))));
         xySeries2.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 0, 255, 1.0)), new Stop(1.0, Color.rgb(0, 255, 255, 1.0))));
@@ -210,6 +213,7 @@ public class ChartTest extends Application {
         xySeries4.setFill(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 0.6)), new Stop(1.0, Color.TRANSPARENT)));
         xySeries4.setStroke(new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 255, 255, 1.0)), new Stop(1.0, Color.TRANSPARENT)));
         smoothAreaChart.getXYPane().setChartBackground(Color.rgb(25, 25, 25, 0.8));
+        smoothAreaChart.getXYPane().setCrossHairVisible(true);
 
 
         // ScatterChart
@@ -218,6 +222,7 @@ public class ChartTest extends Application {
         scatterChartYAxisLeft   = Helper.createAxis(-20, 20, true, AXIS_WIDTH, Orientation.VERTICAL, Position.LEFT);
         scatterChartYAxisCenter = Helper.createCenterYAxis(-20, 20, true, AXIS_WIDTH);
         scatterChart            = new XYChart<>(new XYPane(xySeries5), scatterChartYAxisCenter, scatterChartXAxisCenter);
+        scatterChart.getXYPane().setCrossHairVisible(true);
 
         scatterChartXAxisCenter.setAxisColor(Color.CRIMSON);
         scatterChartYAxisCenter.setAxisColor(Color.CRIMSON);
