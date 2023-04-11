@@ -97,6 +97,10 @@ public class SectorChart extends Region {
     private              BooleanProperty                                seriesTextVisible;
     private              boolean                                        _seriesSumTextVisible;
     private              BooleanProperty                                seriesSumTextVisible;
+    private              boolean                                        _seriesBackgroundVisible;
+    private              BooleanProperty                                seriesBackgroundVisible;
+    private              boolean                                        _radialBarChartMode;
+    private              BooleanProperty                                radialBarChartMode;
     private              Color                                          _gridColor;
     private              ObjectProperty<Color>                          gridColor;
     private              Map<EvtType, List<EvtObserver<ChartEvt>>>      observers;
@@ -113,23 +117,25 @@ public class SectorChart extends Region {
     // ******************** Constructors **************************************
     public SectorChart() { this(null); }
     public SectorChart(final List<ChartItemSeries<ChartItem>> ALL_SERIES) {
-        centerX               = PREFERRED_WIDTH * 0.5;
-        centerY               = PREFERRED_HEIGHT * 0.5;
-        originalThreshold     = 100;
-        _threshold            = 100;
-        _thresholdVisible     = false;
-        _itemTextVisible      = true;
-        _seriesTextVisible    = true;
-        _seriesSumTextVisible = true;
-        _decimals             = 0;
-        formatString          = new StringBuilder("%.").append(_decimals).append("f").toString();
-        allSeries             = null == ALL_SERIES ? FXCollections.observableArrayList() : FXCollections.observableArrayList(ALL_SERIES);
-        sectorMap             = new HashMap<>();
-        _gridColor            = Color.WHITE;
-        _thresholdColor       = Color.RED;
-        observers             = new ConcurrentHashMap<>();
-        resizeListener        = o -> resize();
-        seriesListener        = c -> {
+        centerX                  = PREFERRED_WIDTH * 0.5;
+        centerY                  = PREFERRED_HEIGHT * 0.5;
+        originalThreshold        = 100;
+        _threshold               = 100;
+        _thresholdVisible        = false;
+        _itemTextVisible         = true;
+        _seriesTextVisible       = true;
+        _seriesSumTextVisible    = true;
+        _seriesBackgroundVisible = true;
+        _radialBarChartMode      = false;
+        _decimals                = 0;
+        formatString             = new StringBuilder("%.").append(_decimals).append("f").toString();
+        allSeries                = null == ALL_SERIES ? FXCollections.observableArrayList() : FXCollections.observableArrayList(ALL_SERIES);
+        sectorMap                = new HashMap<>();
+        _gridColor               = Color.WHITE;
+        _thresholdColor          = Color.RED;
+        observers                = new ConcurrentHashMap<>();
+        resizeListener           = o -> resize();
+        seriesListener           = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(series -> {
@@ -408,6 +414,47 @@ public class SectorChart extends Region {
         return seriesSumTextVisible;
     }
 
+    public boolean getSeriesBackgroundVisible() { return null == seriesBackgroundVisible ? _seriesBackgroundVisible : seriesBackgroundVisible.get(); }
+    public void setSeriesBackgroundVisible(final boolean VISIBLE) {
+        if (null == seriesBackgroundVisible) {
+            _seriesBackgroundVisible = VISIBLE;
+            redraw();
+        } else {
+            this.seriesBackgroundVisible.set(VISIBLE);
+        }
+    }
+    public BooleanProperty seriesBackgroundVisibleProperty() {
+        if (null == seriesBackgroundVisible) {
+            seriesBackgroundVisible = new BooleanPropertyBase(_seriesBackgroundVisible) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return SectorChart.this; }
+                @Override public String getName() { return "seriesBackgroundVisible"; }
+            };
+        }
+        return seriesBackgroundVisible;
+    }
+
+    public boolean getRadialBarChartMode() { return null == radialBarChartMode ? _radialBarChartMode : radialBarChartMode.get(); }
+    public void setRadialBarChartMode(final boolean BAR_CHART_MODE) {
+        if (null == radialBarChartMode) {
+            _radialBarChartMode = BAR_CHART_MODE;
+            redraw();
+        } else {
+            this.radialBarChartMode.set(BAR_CHART_MODE);
+        }
+    }
+    public BooleanProperty radialBarChartModeProperty() {
+        if (null == radialBarChartMode) {
+            radialBarChartMode = new BooleanPropertyBase(_radialBarChartMode) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return SectorChart.this; }
+                @Override public String getName() { return "radialBarChartMode"; }
+            };
+        }
+        return radialBarChartMode;
+    }
+
+
     public ObservableList<ChartItemSeries<ChartItem>> getAllSeries() { return allSeries; }
     public void setAllSeries(final List<ChartItemSeries<ChartItem>> ALL_SERIES) {
         int noOfSectors = allSeries.stream().mapToInt(l -> l.getItems().size()).sum();
@@ -531,14 +578,18 @@ public class SectorChart extends Region {
 
     private void drawChart() {
         if (null == ctx) { return; }
-        final double CENTER_X      = 0.5 * size;
-        final double CENTER_Y      = CENTER_X;
-        final double CIRCLE_SIZE   = 0.95 * size;
-        final double CIRCLE_RADIUS = 0.475 * CIRCLE_SIZE;
-        final double MIN_VALUE     = getMinValue();
-        final double MAX_VALUE     = getMaxValue();
-        final double DATA_RANGE    = MAX_VALUE - MIN_VALUE;
-        final int    NO_OF_SECTORS = getNoOfSectors();
+        final double  centerX            = 0.5 * size;
+        final double  centerY            = centerX;
+        final double  circleSize         = 0.95 * size;
+        final double  circleOuterRadius  = 0.475 * circleSize;
+        final double  circleInnerRadius  = 0.1 * size;
+        final double  deltaRadius        = circleOuterRadius - circleInnerRadius;
+        final double  range              = getRange();
+        final int     noOfSectors        = getNoOfSectors();
+        final double  halfAngleStepRad   = Math.toRadians(angleStep * 0.5);
+        final double  itemWidthFactor    = 0.75;
+        final boolean radialBarChartMode = getRadialBarChartMode();
+
 
         // clear the canvas
         ctx.clearRect(0, 0, size, size);
@@ -546,47 +597,71 @@ public class SectorChart extends Region {
         // draw the chart data
         ctx.save();
 
-        ctx.translate(CENTER_X, CENTER_Y);
-        ctx.rotate(-90);
-        ctx.translate(-CENTER_X, -CENTER_Y);
-
         double radiusFactor;
         double radius;
 
+        // Pre-Rotate for background etc.
+        ctx.translate(centerX, centerY);
+        ctx.rotate(-90);
+        ctx.translate(-centerX, -centerY);
+
         // draw series sectors
-        ctx.save();
-        for (int i = 0 ; i < allSeries.size() ; i++) {
-            ChartItemSeries<ChartItem> series = allSeries.get(i);
-            ctx.beginPath();
-            ctx.moveTo(CENTER_X, CENTER_Y);
-            ctx.arc(CENTER_X, CENTER_Y, CIRCLE_RADIUS, CIRCLE_RADIUS, 0, -angleStep * series.getItems().size());
-            ctx.closePath();
-            ctx.setFill(series.getFill());
-            ctx.fill();
-            ctx.translate(CENTER_X, CENTER_Y);
-            ctx.rotate(angleStep * series.getItems().size());
-            ctx.translate(-CENTER_X, -CENTER_Y);
+        if (getSeriesBackgroundVisible()) {
+            ctx.save();
+            for (int i = 0; i < allSeries.size(); i++) {
+                ChartItemSeries<ChartItem> series = allSeries.get(i);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, circleOuterRadius, circleOuterRadius, 0, -angleStep * series.getItems().size());
+                ctx.closePath();
+                ctx.setFill(series.getFill());
+                ctx.fill();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angleStep * series.getItems().size());
+                ctx.translate(-centerX, -centerY);
+            }
+            ctx.restore();
         }
-        ctx.restore();
+
+
+        // Pre-Rotate for actual item sectors
+        ctx.translate(centerX, centerY);
+        //ctx.rotate(90 + angleStep * 0.5);
+        ctx.rotate(radialBarChartMode ? 90 + angleStep * 0.5 : 0);
+        ctx.translate(-centerX, -centerY);
 
         // draw item sectors
+        double dxi = Math.tan(halfAngleStepRad) * circleInnerRadius * itemWidthFactor / Math.PI * 2;
+        double dxiQuarter = dxi / 4;
         double currentAngle = 0;
         for (int i = 0 ; i < allSeries.size() ; i++) {
             ChartItemSeries<ChartItem> series = allSeries.get(i);
             for (int j = 0 ; j < series.getItems().size() ; j++) {
                 ChartItem item = series.getItems().get(j);
-                radiusFactor = clamp(MIN_VALUE, MAX_VALUE, (item.getValue() - MIN_VALUE)) / DATA_RANGE;
-                radius = clamp(0, CIRCLE_RADIUS, radiusFactor * CIRCLE_RADIUS);
-                ctx.beginPath();
-                ctx.moveTo(CENTER_X, CENTER_Y);
-                ctx.arc(CENTER_X, CENTER_Y, radius, radius, 0, -angleStep);
-                ctx.closePath();
+                radiusFactor = clamp(0.0, 1.0, (item.getValue() / range));
+                radius       = clamp(circleInnerRadius, circleOuterRadius, circleInnerRadius + (radiusFactor * deltaRadius));
+
+                if (radialBarChartMode) {
+                    double dxo = Math.tan(halfAngleStepRad) * radius * itemWidthFactor * 0.75;
+
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - dxi, centerY - circleInnerRadius);
+                    ctx.bezierCurveTo(centerX - dxi, centerY - circleInnerRadius - dxiQuarter, centerX + dxi, centerY - circleInnerRadius - dxiQuarter, centerX + dxi, centerY - circleInnerRadius);
+                    ctx.lineTo(centerX + dxo, centerY - radius + dxo);
+                    ctx.bezierCurveTo(centerX + dxo, centerY - radius, centerX - dxo, centerY - radius, centerX - dxo, centerY - radius + dxo);
+                    ctx.closePath();
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, radius, 0, -angleStep);
+                    ctx.closePath();
+                }
                 ctx.setFill(item.getFill());
                 ctx.fill();
-                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.translate(centerX, centerY);
                 ctx.rotate(angleStep);
-                ctx.translate(-CENTER_X, -CENTER_Y);
-                sectorMap.put(new Sector(centerX, centerY, radius, currentAngle, angleStep), item);
+                ctx.translate(-centerX, -centerY);
+                sectorMap.put(new Sector(this.centerX, this.centerY, radius, currentAngle, angleStep), item);
                 currentAngle += angleStep;
             }
         }
@@ -597,19 +672,19 @@ public class SectorChart extends Region {
 
         // draw star lines
         ctx.save();
-        for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
-            ctx.strokeLine(CENTER_X, CENTER_Y, CENTER_X, CENTER_Y - CIRCLE_RADIUS);
-            ctx.translate(CENTER_X, CENTER_Y);
+        for (int i = 0 ; i < noOfSectors ; i++) {
+            ctx.strokeLine(centerX, centerY, centerX, centerY - circleOuterRadius);
+            ctx.translate(centerX, centerY);
             ctx.rotate(angleStep);
-            ctx.translate(-CENTER_X, -CENTER_Y);
+            ctx.translate(-centerX, -centerY);
         }
         ctx.restore();
 
         // draw threshold line
         if (isThresholdVisible()) {
             ctx.save();
-            radiusFactor = (clamp(MIN_VALUE, MAX_VALUE, (getThreshold() - MIN_VALUE)) / DATA_RANGE);
-            radius       = clamp(0, CIRCLE_RADIUS, radiusFactor * CIRCLE_RADIUS);
+            radiusFactor = (clamp(0.0, 1.0, (getThreshold() / range)));
+            radius       = clamp(circleInnerRadius, circleOuterRadius, radiusFactor * deltaRadius);
             ctx.setLineWidth(clamp(0.75d, 1d, size * 0.005));
             ctx.setLineDashes(new double[] {6, 3});
             ctx.setStroke(getThresholdColor());
@@ -620,9 +695,9 @@ public class SectorChart extends Region {
         // prerotate
         ctx.save();
 
-        ctx.translate(CENTER_X, CENTER_Y);
+        ctx.translate(centerX, centerY);
         ctx.rotate(angleStep * 0.5);
-        ctx.translate(-CENTER_X, -CENTER_Y);
+        ctx.translate(-centerX, -centerY);
 
         // draw item text
         if (getItemTextVisible()) {
@@ -640,15 +715,15 @@ public class SectorChart extends Region {
 
                     ctx.save();
                     ctx.setTextAlign(currentAngle < 180 ? TextAlignment.RIGHT : TextAlignment.LEFT);
-                    ctx.translate(CENTER_X, size * 0.06);
+                    ctx.translate(centerX, size * 0.06);
                     ctx.rotate(currentAngle < 180 ? 270 : 90);
-                    ctx.translate(-CENTER_X, -size * 0.06);
-                    ctx.fillText(item.getName(), CENTER_X, size * 0.06);
+                    ctx.translate(-centerX, -size * 0.06);
+                    ctx.fillText(item.getName(), centerX, size * 0.06);
                     ctx.restore();
 
-                    ctx.translate(CENTER_X, CENTER_Y);
+                    ctx.translate(centerX, centerY);
                     ctx.rotate(angleStep);
-                    ctx.translate(-CENTER_X, -CENTER_Y);
+                    ctx.translate(-centerX, -centerY);
                     currentAngle += angleStep;
                 }
             }
@@ -667,26 +742,26 @@ public class SectorChart extends Region {
             currentAngle = 0;
             for (int i = 0; i < allSeries.size(); i++) {
                 ChartItemSeries<ChartItem> series = allSeries.get(i);
-                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.translate(centerX, centerY);
                 ctx.rotate(angleStep * series.getItems().size() * 0.5 - angleStep * 0.5);
-                ctx.translate(-CENTER_X, -CENTER_Y);
+                ctx.translate(-centerX, -centerY);
                 currentAngle += angleStep * series.getItems().size() * 0.5 - angleStep * 0.5;
 
                 ctx.save();
-                ctx.translate(CENTER_X, size * 0.035);
+                ctx.translate(centerX, size * 0.035);
                 ctx.rotate(currentAngle > 135 && currentAngle < 225 ? 180 : 0);
-                ctx.translate(-CENTER_X, -size * 0.035);
+                ctx.translate(-centerX, -size * 0.035);
                 ctx.setFill(series.getTextFill());
                 if (sumVisible) {
-                    ctx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", CENTER_X, size * 0.035);
+                    ctx.fillText(series.getName() + " (" + String.format(Locale.US, formatString, series.getSumOfAllItems()) + ")", centerX, size * 0.035);
                 } else {
-                    ctx.fillText(series.getName(), CENTER_X, size * 0.035);
+                    ctx.fillText(series.getName(), centerX, size * 0.035);
                 }
                 ctx.restore();
 
-                ctx.translate(CENTER_X, CENTER_Y);
+                ctx.translate(centerX, centerY);
                 ctx.rotate(angleStep * series.getItems().size() * 0.5 + angleStep * 0.5);
-                ctx.translate(-CENTER_X, -CENTER_Y);
+                ctx.translate(-centerX, -centerY);
 
                 currentAngle += angleStep * series.getItems().size() * 0.5 + angleStep * 0.5;
             }
