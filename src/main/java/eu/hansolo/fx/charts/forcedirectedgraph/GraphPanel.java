@@ -228,9 +228,8 @@ public class GraphPanel extends Region {
     @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
 
     public void restart() {
-        System.out.println("Restarting simulation");
-        lastTimerCall      = System.nanoTime();
-        temp                  = BASE_TEMPERATURE;
+        lastTimerCall = System.nanoTime();
+        temp          = BASE_TEMPERATURE;
         setInitialPosition((int)width,(int)height);
 
         timer.start();
@@ -603,7 +602,6 @@ public class GraphPanel extends Region {
                 this.nodeEdgeModel.isModifiedProperty().setValue(false);
             }
         }));
-        System.out.println("The handler is: "+canvas.getOnKeyReleased());
     }
 
     public void setInitialPosition(int width, int height){
