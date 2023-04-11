@@ -18,6 +18,7 @@ package eu.hansolo.fx.charts.world;
 
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
+import eu.hansolo.fx.charts.voronoi.Triangulation;
 import eu.hansolo.fx.countries.Country;
 import eu.hansolo.fx.countries.tools.CRegion;
 import eu.hansolo.toolboxfx.font.Fonts;
@@ -84,6 +85,8 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,6 +125,7 @@ public class World extends Region {
     private static final double                          MINIMUM_HEIGHT    = 66;
     private static final double                          MAXIMUM_WIDTH    = 2018;
     private static final double                          MAXIMUM_HEIGHT   = 1330;
+    private static       Logger                          logger           = LoggerFactory.getLogger(World.class);
     private static       double                          MAP_OFFSET_X     = -PREFERRED_WIDTH * 0.0285;
     private static       double                          MAP_OFFSET_Y     = PREFERRED_HEIGHT * 0.195;
     private static final double                          ASPECT_RATIO     = PREFERRED_HEIGHT / PREFERRED_WIDTH;
@@ -984,7 +988,7 @@ public class World extends Region {
         try(InputStream resourceStream = LOADER.getResourceAsStream(FILE_NAME)) {
             PROPERTIES.load(resourceStream);
         } catch (IOException exception) {
-            System.out.println(exception);
+            logger.error(exception.getMessage());
         }
         return PROPERTIES;
     }
