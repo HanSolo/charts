@@ -21,12 +21,15 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -58,6 +61,9 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private static final double                   MINIMUM_HEIGHT   = 0;
     private static final double                   MAXIMUM_WIDTH    = 4096;
     private static final double                   MAXIMUM_HEIGHT   = 4096;
+
+    private static final double                   FONTSCALE        = 0.67;
+    private static final double                   MAXIMUM_OFFSET   = 0.3;
     private static       double                   aspectRatio;
     private              boolean                  keepAspect;
     private              double                   size;
@@ -83,6 +89,12 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     private              DoubleProperty           upperBoundY;
     private              ObservableList<Category> categories;
 
+    private              double                   _offset;
+    private              DoubleProperty           offset;
+
+    private              double                   _originAngle;
+    private              DoubleProperty           originAngle;
+
 
     // ******************** Constructors **************************************
     public YPane(final YSeries<T>... SERIES) {
@@ -106,6 +118,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         _categoryColor     = Color.BLACK;
         _lowerBoundY       = 0;
         _upperBoundY       = 100;
+        _offset            = 10;
+        _originAngle       = 0;
         categories         = FXCollections.observableArrayList(CATEGORIES);
         valid              = isChartTypeValid();
         initGraphics();
@@ -161,6 +175,46 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
     @Override protected double computeMaxHeight(final double WIDTH)  { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
+
+    public double getOffset() { return _offset; }
+
+    public void setOffset(final double offset) {
+        _offset = (offset < 0.0) ? 0.0 : Math.min(offset, MAXIMUM_OFFSET);
+        redraw();
+    }
+
+    public DoubleProperty offsetProperty() {
+        if (null == offset) {
+            offset = new DoublePropertyBase(_offset) {
+                @Override protected void invalidated() { redraw(); }
+                @Override public Object getBean() { return YPane.this; }
+                @Override public String getName() { return "offset"; }
+            };
+        }
+        return offset;
+    }
+
+    public double getOriginAngle() { return _originAngle; }
+
+    public void setOriginAngle(final double originAngle) {
+        _originAngle = originAngle;
+        redraw();
+    }
+
+    public DoubleProperty originAngleProperty() {
+        if (null == originAngle) {
+            originAngle = new DoublePropertyBase(_originAngle) {
+
+                @Override protected void invalidated() { redraw(); }
+                @Override
+                public Object getBean() { return YPane.this; }
+
+                @Override
+                public String getName() { return "originAngle"; }
+            };
+        }
+        return originAngle;
+    }
 
     public Paint getChartBackground() { return null == chartBackground ? _chartBackground : chartBackground.get(); }
     public void setChartBackground(final Paint PAINT) {
@@ -405,13 +459,14 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         final double CIRCLE_SIZE   = 0.9 * size;
         final double LOWER_BOUND_Y = getLowerBoundY();
         final double DATA_RANGE    = getRangeY();
-        final double RANGE         = 0.35714 * CIRCLE_SIZE;
-        final double OFFSET        = 0.14286 * CIRCLE_SIZE;
+        final double RANGE         = (0.5 - _offset) * CIRCLE_SIZE;
+        final double OFFSET        = _offset * CIRCLE_SIZE;
         final int    NO_OF_SECTORS = SERIES.getItems().size();
         final double angleStep     = 360.0 / NO_OF_SECTORS;
 
         // draw the chart data
         ctx.save();
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
         if (SERIES.getFill() instanceof RadialGradient) {
             ctx.setFill(new RadialGradient(0, 0, size  * 0.5, size * 0.5, size * 0.45, false, CycleMethod.NO_CYCLE, ((RadialGradient) SERIES.getFill()).getStops()));
         } else {
@@ -420,13 +475,14 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         ctx.setLineWidth(SERIES.getStrokeWidth() > -1 ? SERIES.getStrokeWidth() : size * 0.0025);
         ctx.setStroke(SERIES.getStroke());
 
-        switch(SERIES.getChartType()) {
-            case RADAR_POLYGON:
+        switch (SERIES.getChartType()) {
+            case RADAR_POLYGON -> {
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(CENTER_X, 0.36239 * size);
                 SERIES.getItems().forEach(item -> {
                     double r1 = (item.getValue() - LOWER_BOUND_Y) / DATA_RANGE;
+                    r1 = Math.max(0.0, r1);
                     ctx.lineTo(CENTER_X, CENTER_Y - OFFSET - r1 * RANGE);
                     Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
@@ -437,45 +493,49 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
                 ctx.fill();
                 ctx.stroke();
                 ctx.restore();
-                break;
-            case SMOOTH_RADAR_POLYGON:
-                double      radAngle     = Math.toRadians(180);
-                double      radAngleStep = Math.toRadians(angleStep);
-                List<Point> points       = new ArrayList<>();
-
-                double x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (0.36239 * size)));
-                double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.36239 * size)));
-                if(!SERIES.isWithWrapping()){
+            }
+            case SMOOTH_RADAR_POLYGON -> {
+                double radAngle = Math.toRadians(180);
+                double radAngleStep = Math.toRadians(angleStep);
+                List<Point> points = new ArrayList<>();
+                double x = CENTER_X + (-Math.sin(radAngle) * (CENTER_Y - (0.5 - _offset) * size));
+                double y = CENTER_Y + (+Math.cos(radAngle) * (CENTER_Y - (0.5 - _offset) * size));
+                if (!SERIES.isWithWrapping()) {
                     points.add(new Point(x, y));
                 }
-
                 for (T item : SERIES.getItems()) {
-                    double r1 = (CENTER_Y - (CENTER_Y - OFFSET - ((item.getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                    double r1 = (item.getValue() - LOWER_BOUND_Y) / DATA_RANGE;
+                    r1 = Math.max(0.0, r1);
+                    r1 = (CENTER_Y - (CENTER_Y - OFFSET - r1 * RANGE));
                     x = CENTER_X + (-Math.sin(radAngle) * r1);
                     y = CENTER_Y + (+Math.cos(radAngle) * r1);
                     points.add(new Point(x, y));
                     radAngle += radAngleStep;
                 }
-                double r3 = (SERIES.isWithWrapping()) ? (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(0).getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE)) : (CENTER_Y - (CENTER_Y - OFFSET - ((SERIES.getItems().get(NO_OF_SECTORS - 1).getValue() - LOWER_BOUND_Y) / DATA_RANGE) * RANGE));
+                double r3 = (SERIES.getItems().get(NO_OF_SECTORS - 1).getValue() - LOWER_BOUND_Y) / DATA_RANGE;
+                r3 = Math.max(0.0, r3);
+                double r4 = (SERIES.getItems().get(0).getValue() - LOWER_BOUND_Y) / DATA_RANGE;
+                r4 = Math.max(0.0, r4);
+                r3 = (SERIES.isWithWrapping()) ? (CENTER_Y - (CENTER_Y - OFFSET - r4 * RANGE)) : (CENTER_Y - (CENTER_Y - OFFSET - r3 * RANGE));
                 x = CENTER_X + (-Math.sin(radAngle) * r3);
                 y = CENTER_Y + (+Math.cos(radAngle) * r3);
                 points.add(new Point(x, y));
 
-                Point[] interpolatedPoints = (SERIES.isWithWrapping())?Helper.subdividePointsRadial(points.toArray(new Point[0]), 16):Helper.subdividePoints(points.toArray(new Point[0]), 16);
-
+                Point[] interpolatedPoints = (SERIES.isWithWrapping()) ?
+                        Helper.subdividePointsRadial(points.toArray(new Point[0]), 16) :
+                        Helper.subdividePoints(points.toArray(new Point[0]), 16);
                 ctx.beginPath();
                 ctx.moveTo(interpolatedPoints[0].getX(), interpolatedPoints[0].getY());
-                for (int i = 0 ; i < interpolatedPoints.length - 1 ; i++) {
+                for (int i = 0; i < interpolatedPoints.length - 1; i++) {
                     Point point = interpolatedPoints[i];
                     ctx.lineTo(point.getX(), point.getY());
                 }
                 ctx.lineTo(interpolatedPoints[interpolatedPoints.length - 1].getX(), interpolatedPoints[interpolatedPoints.length - 1].getY());
                 ctx.closePath();
-
                 ctx.fill();
                 ctx.stroke();
-                break;
-            case RADAR_SECTOR:
+            }
+            case RADAR_SECTOR -> {
                 Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -90);
                 SERIES.getItems().forEach(item -> {
                     double r1 = (item.getValue() - LOWER_BOUND_Y) / DATA_RANGE;
@@ -488,8 +548,9 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
                     Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
                 });
-                break;
+            }
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
         ctx.restore();
     }
 
@@ -499,14 +560,15 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
         final double CIRCLE_SIZE = 0.90 * size;
         final double DATA_RANGE  = getRangeY();
         final double MIN_VALUE   = listOfSeries.stream().mapToDouble(YSeries::getMinY).min().getAsDouble();
-        final double RANGE       = 0.35714 * CIRCLE_SIZE;
-        final double OFFSET      = 0.14286 * CIRCLE_SIZE;
+        final double RANGE       = (0.5 - _offset) * CIRCLE_SIZE;
+        final double OFFSET      = _offset * CIRCLE_SIZE;
         final double angleStep   = 360.0 / NO_OF_SECTORS;
 
         // draw concentric rings
         ctx.setLineWidth(1);
         ctx.setStroke(Color.GRAY);
-        double ringStepSize = size / 20.0;
+        double ringRange = CIRCLE_SIZE - (OFFSET * 2);
+        double ringStepSize = ringRange / 20.0;
         double pos          = 0.5 * (size - CIRCLE_SIZE);
         double ringSize     = CIRCLE_SIZE;
         for (int i = 0 ; i < 11 ; i++) {
@@ -517,10 +579,12 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
         // draw star lines
         ctx.save();
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
         for (int i = 0 ; i < NO_OF_SECTORS ; i++) {
             ctx.strokeLine(CENTER_X, 0.05 * size, CENTER_X, 0.5 * size);
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
         ctx.restore();
 
         // draw threshold line
@@ -534,6 +598,8 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
 
         // prerotate if sectormode
         ctx.save();
+
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, _originAngle);
 
         if (ChartType.RADAR_SECTOR == TYPE) {
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep * 0.5);
@@ -551,22 +617,28 @@ public class YPane<T extends ValueItem> extends Region implements ChartArea {
             index = NO_OF_SECTORS;
         }
 
+
         for (int i = 0 ; i < index ; i++) {
             ctx.fillText(categories.get(i).getName(), CENTER_X, size * 0.03);
             Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
         }
+        Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -_originAngle);
+
         ctx.restore();
 
         ctx.restore();
 
         // draw min and max Text
-        Font   font         = Fonts.latoRegular(0.025 * size);
+        double fSize = 0.025 * size;
+        Font   font         = Fonts.latoRegular(fSize);
         String minValueText = String.format(Locale.US, "%.0f", getLowerBoundY());
         String maxValueText = String.format(Locale.US, "%.0f", getUpperBoundY());
+        String midValueText = String.format(Locale.US, "%.0f", getLowerBoundY() + (getUpperBoundY()-getLowerBoundY()) * 0.5);
         ctx.save();
         ctx.setFont(font);
-        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - size * 0.018);
-        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, CENTER_Y - CIRCLE_SIZE * 0.48);
+        Helper.drawTextWithBackground(ctx, minValueText, font, Color.WHITE, Color.BLACK, CENTER_X, (CENTER_Y - OFFSET) - (ringRange * 0.0) + (fSize * FONTSCALE));
+        Helper.drawTextWithBackground(ctx, midValueText, font, Color.WHITE, Color.BLACK, CENTER_X, (CENTER_Y - OFFSET) - (ringRange * 0.25) + (fSize * FONTSCALE));
+        Helper.drawTextWithBackground(ctx, maxValueText, font, Color.WHITE, Color.BLACK, CENTER_X, (CENTER_Y - OFFSET) - (ringRange * 0.5) + (fSize * FONTSCALE));
         ctx.restore();
     }
 
