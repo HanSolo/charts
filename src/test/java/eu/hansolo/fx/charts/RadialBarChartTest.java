@@ -18,6 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.SectorChart;
+import eu.hansolo.fx.charts.SectorChartBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
@@ -38,9 +40,9 @@ import java.util.Random;
 
 
 public class RadialBarChartTest extends Application {
-    private static final Random         RND = new Random();
-    private              SectorChart    chart;
-    private              long           lastTimerCall;
+    private static final Random      RND = new Random();
+    private              SectorChart chart;
+    private              long        lastTimerCall;
     private              AnimationTimer timer;
 
 

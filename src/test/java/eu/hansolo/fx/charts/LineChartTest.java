@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2018 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,7 +38,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
 import javafx.util.StringConverter;
 
-import java.time.LocalDate;
 import java.time.Month;
 import java.util.Locale;
 import java.util.Random;
@@ -66,11 +67,11 @@ public class LineChartTest extends Application {
     private              XYChartItem          p11;
     private              XYChartItem          p12;
     private              XYSeries             xySeries1;
-    private              XYSeries             xySeries2;
-    private              Axis                 xAxisBottom;
-    private              Axis                 yAxisLeft;
-    private              XYChart<XYChartItem> lineChart;
-    private              long                 lastTimerCalled;
+    private XYSeries             xySeries2;
+    private Axis                 xAxisBottom;
+    private Axis                 yAxisLeft;
+    private XYChart<XYChartItem> lineChart;
+    private long                 lastTimerCalled;
     private              AnimationTimer       timer;
 
 

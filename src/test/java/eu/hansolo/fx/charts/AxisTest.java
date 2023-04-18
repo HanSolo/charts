@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +18,7 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.toolbox.unit.Converter;
 import javafx.application.Application;
@@ -37,8 +40,8 @@ import static eu.hansolo.toolbox.unit.UnitDefinition.FAHRENHEIT;
 public class AxisTest extends Application {
     private static final double AXIS_WIDTH  = 20;
     private static final double AXIS_HEIGHT = 20;
-    private Axis xAxisBottom;
-    private Axis xAxisTop;
+    private              Axis   xAxisBottom;
+    private              Axis   xAxisTop;
     private Axis yAxisLeft;
     private Axis yAxisRight;
 

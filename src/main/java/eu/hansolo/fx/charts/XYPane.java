@@ -755,6 +755,7 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
                     case AREA                -> drawArea(series, SHOW_POINTS);
                     case SMOOTH_AREA         -> drawSmoothArea(series, SHOW_POINTS);
                     case SCATTER             -> drawScatter(series);
+                    case POINCARE            -> drawPoincare(series);
                     case HORIZON             -> drawHorizon(series, false);
                     case RIDGE_LINE          -> drawRidgeLine(series);
                     case SMOOTHED_HORIZON    -> drawHorizon(series, true);
@@ -881,6 +882,36 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (T item : SERIES.getItems()) {
             double x = (item.getX() - LOWER_BOUND_X) * scaleX;
             double y = height - (item.getY() - LOWER_BOUND_Y) * scaleY;
+
+            Symbol itemSymbol = item.getSymbol();
+            if (Symbol.NONE == itemSymbol) {
+                drawSymbol(x, y, symbolFill, symbolStroke, seriesSymbol, size);
+            } else {
+                drawSymbol(x, y, item.getFill(), item.getStroke(), itemSymbol, size);
+            }
+        }
+    }
+
+    private void drawPoincare(final XYSeries<T> SERIES) {
+        if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
+        final double LOWER_BOUND_X = getLowerBoundY();
+        final double LOWER_BOUND_Y = getLowerBoundY();
+        ctx.setStroke(Color.TRANSPARENT);
+        ctx.setFill(Color.TRANSPARENT);
+
+        Symbol seriesSymbol = SERIES.getSymbol();
+        Paint  symbolFill   = SERIES.getSymbolFill();
+        Paint  symbolStroke = SERIES.getSymbolStroke();
+        double size         = SERIES.getSymbolSize() > -1 ? SERIES.getSymbolSize() : symbolSize;
+
+        for (int i = 0 ; i < SERIES.getItems().size() - 2 ; i++) {
+            final T item     = SERIES.getItems().get(i);
+            final T nextItem = SERIES.getItems().get(i + 1);
+
+
+
+            double x = item.getY() * scaleX;
+            double y = (getUpperBoundY() - nextItem.getY() + getLowerBoundY()) * scaleY;
 
             Symbol itemSymbol = item.getSymbol();
             if (Symbol.NONE == itemSymbol) {

@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2022 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.CubeChart;
+import eu.hansolo.fx.charts.CubeChartBuilder;
 import javafx.animation.AnimationTimer;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -38,9 +40,9 @@ import java.util.Random;
 
 
 public class CubeChartTest extends Application {
-    private static final Random RND = new Random();
-    private CubeChart      chart1;
-    private CubeChart      chart2;
+    private static final Random    RND = new Random();
+    private              CubeChart chart1;
+    private              CubeChart chart2;
     private CubeChart      chart3;
     private CubeChart      chart4;
     private long           lastTimerCall;

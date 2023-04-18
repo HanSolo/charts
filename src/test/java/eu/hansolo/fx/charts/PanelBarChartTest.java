@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2021 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.PanelBarChart;
+import eu.hansolo.fx.charts.PanelBarChartBuilder;
 import eu.hansolo.fx.charts.data.Categories;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
@@ -41,9 +43,9 @@ import java.util.Random;
 
 
 public class PanelBarChartTest extends Application {
-    private static final Random RND = new Random();
-    private PanelBarChart       chart1;
-    private PanelBarChart       chart2;
+    private static final Random        RND = new Random();
+    private              PanelBarChart chart1;
+    private              PanelBarChart chart2;
 
 
     @Override public void init() {

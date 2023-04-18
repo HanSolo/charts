@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2022 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,13 @@
 package eu.hansolo.fx.charts;
 
 
+import eu.hansolo.fx.charts.Axis;
+import eu.hansolo.fx.charts.CandleChart;
+import eu.hansolo.fx.charts.CandleChartBuilder;
+import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Grid;
+import eu.hansolo.fx.charts.XYChart;
+import eu.hansolo.fx.charts.XYPane;
 import eu.hansolo.fx.charts.data.CandleChartItem;
 import eu.hansolo.fx.charts.data.CandleChartItemBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
@@ -69,9 +76,9 @@ public class CandleChartTest extends Application {
     private              XYSeries<TYChartItem>      ma5Series;
     private              XYSeries<TYChartItem>      ma10Series;
     private              XYSeries<TYChartItem>      ma20Series;
-    private              XYSeries<TYChartItem>      ma60Series;
-    private              XYChart<TYChartItem>       ma5Chart;
-    private              XYChart<TYChartItem>       ma10Chart;
+    private              XYSeries<TYChartItem> ma60Series;
+    private              XYChart<TYChartItem>  ma5Chart;
+    private              XYChart<TYChartItem>  ma10Chart;
     private              XYChart<TYChartItem>       ma20Chart;
     private              XYChart<TYChartItem>       ma60Chart;
 

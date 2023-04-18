@@ -39,7 +39,7 @@ dependencies {
     implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-swing:${javafxVersion}:$platform"
-    implementation "eu.hansolo:toolbox:17.0.41" // "eu.hansolo:toolbox:17.0.41"
+    implementation "eu.hansolo:toolbox:17.0.43"
     implementation "eu.hansolo:toolboxfx:17.0.33"
     implementation "eu.hansolo.fx:heatmap:17.0.12"
     implementation "eu.hansolo.fx:countries:17.0.23"
@@ -159,17 +159,25 @@ publishing {
         maven {
             name = "OSSRH"
             url  = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            credentials {
-                username = null == ciOssrhUsername ? ossrhUsername : ciOssrhUsername
-                password = null == ciOssrhPassword ? ossrhPassword : ciOssrhPassword
+            try {
+                credentials {
+                    username = null == ciOssrhUsername ? ossrhUsername : ciOssrhUsername
+                    password = null == ciOssrhPassword ? ossrhPassword : ciOssrhPassword
+                }
+            } catch (Exception e) {
+
             }
         }
         maven {
             name = "GitHubPackages"
             url  = "https://maven.pkg.github.com/HanSolo/charts"
-            credentials {
-                username = null == ciGHUser ? ghUser : ciGHUser
-                password = null == ciGHToken ? ghToken : ciGHToken
+            try {
+                credentials {
+                    username = null == ciGHUser ? ghUser : ciGHUser
+                    password = null == ciGHToken ? ghToken : ciGHToken
+                }
+            } catch (Exception e) {
+
             }
         }
     }

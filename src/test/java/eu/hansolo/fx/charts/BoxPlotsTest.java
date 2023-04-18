@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2022 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis;
+import eu.hansolo.fx.charts.BoxPlots;
+import eu.hansolo.fx.charts.BoxPlotsBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
@@ -37,9 +40,9 @@ import java.util.List;
 
 
 public class BoxPlotsTest extends Application {
-    private static final double INSET = 20;
-    private BoxPlots boxPlots;
-    private Axis     yAxisLeft;
+    private static final double   INSET = 20;
+    private              BoxPlots boxPlots;
+    private              Axis     yAxisLeft;
 
 
     @Override public void init() {

@@ -610,6 +610,12 @@ public class Axis extends Region {
         return position;
     }
 
+    public void setForegroundColor(final Color COLOR) {
+        setAxisColor(COLOR);
+        setTickMarkColor(COLOR);
+        setTickLabelColor(COLOR);
+    }
+
     public Color getAxisBackgroundColor() { return null == axisBackgroundColor ? _axisBackgroundColor : axisBackgroundColor.get(); }
     public void setAxisBackgroundColor(final Color COLOR) {
         if (null == axisBackgroundColor) {

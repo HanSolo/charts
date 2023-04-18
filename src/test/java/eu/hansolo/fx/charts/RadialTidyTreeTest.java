@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2022 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 package eu.hansolo.fx.charts;
 
 
+import eu.hansolo.fx.charts.RadialTidyTree;
+import eu.hansolo.fx.charts.RadialTidyTreeBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.TreeNode;
 import eu.hansolo.fx.charts.tools.VisibleData;
@@ -49,7 +51,7 @@ public class RadialTidyTreeTest extends Application {
 
     private static       int           noOfNodes = 0;
 
-    private RadialTidyTree      radialTidyTree;
+    private RadialTidyTree radialTidyTree;
 
     @Override public void init() {
         TreeNode<ChartItem> tree = new TreeNode<>(new ChartItem(Year.now().toString(), Color.BLACK));

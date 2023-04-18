@@ -25,6 +25,8 @@ import eu.hansolo.toolboxfx.geom.Bounds;
 import javafx.beans.DefaultProperty;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
 import javafx.collections.FXCollections;
@@ -39,6 +41,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +66,7 @@ public class XYChart<T extends XYItem> extends Region {
     private static final double                    MAXIMUM_HEIGHT   = 4096;
     private              double                    width;
     private              double                    height;
+    private              double                    size;
     private              ObservableList<XYPane<T>> xyPanes;
     private              ObservableList<Axis>      axis;
     private              Canvas                    markerCanvas;
@@ -87,6 +92,10 @@ public class XYChart<T extends XYItem> extends Region {
     private              StringProperty            title;
     private              String                    _subTitle;
     private              StringProperty            subTitle;
+    private              Color                     _titleColor;
+    private              ObjectProperty<Color>     titleColor;
+    private              Color                     _subTitleColor;
+    private              ObjectProperty<Color>     subTitleColor;
     private              AnchorPane                pane;
     private              BooleanBinding            showing;
     private              EvtObserver<ChartEvt>     axisObserver;
@@ -116,6 +125,8 @@ public class XYChart<T extends XYItem> extends Region {
         axisObserver   = evt -> adjustChartRange();
         updateObserver = evt -> drawMarkerCanvas();
         markers        = new ArrayList<>();
+        _title         = "";
+        _subTitle      = "";
         XY_PANES.forEach(xyPane -> xyPane.addChartEvtObserver(ChartEvt.UPDATE, updateObserver));
         checkReferenceZero();
         initGraphics();
@@ -153,7 +164,7 @@ public class XYChart<T extends XYItem> extends Region {
 
         markerCanvas.setMouseTransparent(true);
 
-        pane.getChildren().add(markerCanvas);
+        pane.getChildren().addAll(markerCanvas);
 
         getChildren().setAll(pane);
     }
@@ -219,7 +230,7 @@ public class XYChart<T extends XYItem> extends Region {
     public void setTitle(final String TITLE) {
         if (null == title) {
             _title = TITLE;
-            xyPanes.forEach(xyPane -> xyPane.redraw());
+            refresh();
         } else {
             title.set(TITLE);
         }
@@ -227,7 +238,7 @@ public class XYChart<T extends XYItem> extends Region {
     public StringProperty titleProperty() {
         if (null == title) {
             title = new StringPropertyBase(_title) {
-                @Override protected void invalidated() { xyPanes.forEach(xyPane -> xyPane.redraw()); }
+                @Override protected void invalidated() { refresh(); }
                 @Override public Object getBean() { return XYChart.this; }
                 @Override public String getName() { return "title"; }
             };
@@ -255,6 +266,48 @@ public class XYChart<T extends XYItem> extends Region {
             _subTitle = null;
         }
         return subTitle;
+    }
+
+    public Color getTitleColor() { return null == titleColor ? _titleColor : titleColor.get(); }
+    public void setTitleColor(final Color TITLE_COLOR) {
+        if (null == titleColor) {
+            _titleColor = TITLE_COLOR;
+            refresh();
+        } else {
+            titleColor.set(TITLE_COLOR);
+        }
+    }
+    public ObjectProperty<Color> titleColorProperty() {
+        if (null == titleColor) {
+            titleColor = new ObjectPropertyBase<Color>(_titleColor) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "titleColor"; }
+            };
+            _titleColor = null;
+        }
+        return titleColor;
+    }
+
+    public Color getSubTitleColor() { return null == subTitleColor ? _subTitleColor : subTitleColor.get(); }
+    public void setSubTitleColor(final Color SUB_TITLE_COLOR) {
+        if (null == subTitleColor) {
+            _subTitleColor = SUB_TITLE_COLOR;
+            refresh();
+        } else {
+            subTitleColor.set(SUB_TITLE_COLOR);
+        }
+    }
+    public ObjectProperty<Color> subTitleColorProperty() {
+        if (null == subTitleColor) {
+            subTitleColor = new ObjectPropertyBase<>(_subTitleColor) {
+                @Override protected void invalidated() { refresh(); }
+                @Override public Object getBean() { return XYChart.this; }
+                @Override public String getName() { return "subTitleColor"; }
+            };
+            _subTitleColor = null;
+        }
+        return subTitleColor;
     }
 
     public boolean isReferenceZero() {
@@ -350,6 +403,16 @@ public class XYChart<T extends XYItem> extends Region {
             }
             markerCtx.restore();
         });
+
+        markerCtx.setFill(getTitleColor());
+        markerCtx.setFont(Font.font(size * 0.035));
+        markerCtx.setTextAlign(TextAlignment.CENTER);
+        markerCtx.setTextBaseline(VPos.CENTER);
+        markerCtx.fillText(getTitle(), width * 0.5, height * 0.1, width);
+
+        markerCtx.setFill(getSubTitleColor());
+        markerCtx.setFont(Font.font(size * 0.0175));
+        markerCtx.fillText(getSubTitle(), width * 0.5, height * 0.1 + size * 0.035 * 1.25, width);
     }
 
     private void checkForAxis() {
@@ -527,6 +590,7 @@ public class XYChart<T extends XYItem> extends Region {
     private void resize() {
         width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
         height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+        size   = width > height ? width : height;
 
         if (width > 0 && height > 0) {
             pane.setMaxSize(width, height);

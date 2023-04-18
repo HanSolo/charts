@@ -147,6 +147,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
         return (B)this;
     }
 
+    public final B foregroundColor(final Color COLOR) {
+        properties.put("foregroundColor", new SimpleObjectProperty<>(COLOR));
+        return (B)this;
+    }
+
     public final B axisBackgroundColor(final Color COLOR) {
         properties.put("axisBackgroundColor", new SimpleObjectProperty<>(COLOR));
         return (B)this;
@@ -460,6 +465,11 @@ public class AxisBuilder<B extends AxisBuilder<B>> {
                 case "autoScale"                       -> axis.setAutoScale(((BooleanProperty) properties.get(key)).get());
                 case "title"                           -> axis.setTitle(((StringProperty) properties.get(key)).get());
                 case "unit"                            -> axis.setUnit(((StringProperty) properties.get(key)).get());
+                case "foregroundColor"                 -> {
+                    axis.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    axis.setTickMarkColor(((ObjectProperty<Color>) properties.get(key)).get());
+                    axis.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());
+                }
                 case "axisBackgroundColor"             -> axis.setAxisBackgroundColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "axisColor"                       -> axis.setAxisColor(((ObjectProperty<Color>) properties.get(key)).get());
                 case "tickLabelColor"                  -> axis.setTickLabelColor(((ObjectProperty<Color>) properties.get(key)).get());

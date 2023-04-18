@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2021 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Axis;
+import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.Grid;
+import eu.hansolo.fx.charts.XYChart;
+import eu.hansolo.fx.charts.XYPane;
 import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.data.XYZChartItem;

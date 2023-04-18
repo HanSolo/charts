@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2021 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.SectorChart;
+import eu.hansolo.fx.charts.SectorChartBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
@@ -34,9 +36,9 @@ import java.util.Random;
 
 
 public class SectorChartTest extends Application {
-    private static final Random RND = new Random();
-    private SectorChart    chart;
-    private long           lastTimerCall;
+    private static final Random      RND = new Random();
+    private              SectorChart chart;
+    private              long        lastTimerCall;
     private AnimationTimer timer;
 
 

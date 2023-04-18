@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +18,10 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.Category;
+import eu.hansolo.fx.charts.ChartType;
+import eu.hansolo.fx.charts.YChart;
+import eu.hansolo.fx.charts.YPane;
 import eu.hansolo.fx.charts.data.ValueChartItem;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.animation.AnimationTimer;

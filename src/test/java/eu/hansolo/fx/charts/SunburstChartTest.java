@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2017 by Gerrit Grunwald
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.SunburstChart;
+import eu.hansolo.fx.charts.SunburstChartBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.TreeNode;
 import eu.hansolo.fx.charts.event.TreeNodeEvt;
@@ -55,9 +59,9 @@ public class SunburstChartTest extends Application {
 
     private static       int           noOfNodes = 0;
 
-    private TreeNode<ChartItem>      tree;
-    private SunburstChart nonInteractiveSunburstChart;
-    private SunburstChart interactiveSunburstChart;
+    private TreeNode<ChartItem> tree;
+    private SunburstChart       nonInteractiveSunburstChart;
+    private SunburstChart       interactiveSunburstChart;
 
     @Override public void init() {
         tree            = new TreeNode<>(new ChartItem("ROOT"));

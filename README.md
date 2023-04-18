@@ -181,3 +181,7 @@ related to imports, required modules etc.
 
 ## RadialBarChart
 ![RadialBarChart](https://i.ibb.co/Fzbp1Cx/Radial-Bar-Chart.png)
+
+
+## PoincarePlot
+![PoincarePlot](https://i.ibb.co/khtVqJ5/poincareplot.png)

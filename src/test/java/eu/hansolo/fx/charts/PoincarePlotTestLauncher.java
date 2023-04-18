@@ -18,6 +18,6 @@
 
 package eu.hansolo.fx.charts;
 
-public class SingleChartTestLauncher {
-    public static void main(String[] args) { SingleChartTest.main(args); }
+public class PoincarePlotTestLauncher {
+    public static void main(String[] args) { PoincarePlotTest.main(args); }
 }

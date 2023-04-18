@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2021 Gerrit Grunwald.
+ * Copyright 2016-2023 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 package eu.hansolo.fx.charts;
 
 
+import eu.hansolo.fx.charts.BubbleGridChart;
+import eu.hansolo.fx.charts.BubbleGridChartBuilder;
 import eu.hansolo.fx.charts.data.BubbleGridChartItem;
 import eu.hansolo.fx.charts.data.BubbleGridChartItemBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
@@ -45,7 +47,7 @@ import java.util.Random;
 public class BubbleGridChartTest extends Application {
     private static final Random RND = new Random();
 
-    private BubbleGridChart bubbleGridChart;
+    private BubbleGridChart     bubbleGridChart;
     private BubbleGridChartItem peaches1;
     private BubbleGridChartItem peaches2;
     private BubbleGridChartItem peaches3;
