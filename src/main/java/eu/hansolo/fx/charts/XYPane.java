@@ -894,8 +894,6 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
 
     private void drawPoincare(final XYSeries<T> SERIES) {
         if (null == SERIES || !SERIES.isVisible() || SERIES.getItems().isEmpty()) { return; }
-        final double LOWER_BOUND_X = getLowerBoundY();
-        final double LOWER_BOUND_Y = getLowerBoundY();
         ctx.setStroke(Color.TRANSPARENT);
         ctx.setFill(Color.TRANSPARENT);
 
@@ -907,8 +905,6 @@ public class XYPane<T extends XYItem> extends Region implements ChartArea {
         for (int i = 0 ; i < SERIES.getItems().size() - 2 ; i++) {
             final T item     = SERIES.getItems().get(i);
             final T nextItem = SERIES.getItems().get(i + 1);
-
-
 
             double x = item.getY() * scaleX;
             double y = (getUpperBoundY() - nextItem.getY() + getLowerBoundY()) * scaleY;

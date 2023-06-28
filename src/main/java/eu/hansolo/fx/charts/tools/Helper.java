@@ -23,6 +23,7 @@ import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.charts.data.XYChartItem;
+import eu.hansolo.toolbox.Constants;
 import eu.hansolo.toolboxfx.geom.Bounds;
 import eu.hansolo.toolboxfx.geom.CatmullRom;
 import eu.hansolo.toolboxfx.geom.CornerRadii;
@@ -55,8 +56,10 @@ import javafx.scene.text.TextAlignment;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,7 +76,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 public class Helper {
@@ -1330,6 +1335,19 @@ public class Helper {
         }
     }
 
+    public static final void saveTextFileToUserFolder(final String filename, final String text) {
+        if (null == text || text.isEmpty()) { return; }
+
+        final File existingFile = new File(filename);
+        if (existingFile.exists()) { existingFile.delete(); }
+
+        try {
+            Files.write(Paths.get(Constants.HOME_FOLDER + filename), text.getBytes());
+        } catch (IOException e) {
+            System.out.println("Error writing text file: " + filename);
+        }
+    }
+
     private static final NavigableMap<Long, String> SUFFIXES = new TreeMap<>(Map.of(1_000L, "k",
                                                                                     1_000_000L, "M",
                                                                                     1_000_000_000L, "G",
@@ -1360,5 +1378,26 @@ public class Helper {
     public static final P2d angleToVector(final double deg) { return angleToVector(deg, 1.0); }
     public static final P2d angleToVector(final double deg, final double len) {
         return new P2d(Math.cos(Math.toRadians(deg - 90)) * len, Math.sin(Math.toRadians(deg - 90)) * len);
+    }
+
+    public static final boolean isFileReadable(final String filename) {
+        if (null == filename || filename.isEmpty()) { return false; }
+        try {
+            return new File(filename).canRead();
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    public static final boolean check4KLAFormat(final String filename) {
+        try {
+            Path path = Path.of(filename);
+            String content = Files.readString(path);
+            boolean isWafer = content.contains("SampleType WAFER");
+            boolean hasLotId = content.contains("LotID");
+            return isWafer && hasLotId;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
