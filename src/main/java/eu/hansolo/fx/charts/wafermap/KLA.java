@@ -249,7 +249,8 @@ public final class KLA {
     public void setDefects(final List<Defect> defects) { this.defects = defects; }
 
     public Map<String, Die> getDies() { return dies; }
-    public void setDies(final Map<String, Die> dies) { this.dies = dies; }
+
+
 
     public void createDieMap() {
         // Offset between xy and uv coordinate system

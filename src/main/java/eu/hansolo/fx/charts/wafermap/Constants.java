@@ -60,7 +60,11 @@ public class Constants {
 
     public static final Color       DEFAULT_WAFERMAP_FILL              = Color.rgb(230, 230, 230);
     public static final Color       DEFAULT_WAFERMAP_STROKE            = Color.rgb(128, 128, 128);
+    public static final Color       DEFAULT_NOTCH_FILL                 = Color.BLACK;
+    public static final Color       DEFAULT_DEFECT_FILL                = Color.BLACK;
+    public static final Color       DEFAULT_DEFECT_STROKE              = Color.TRANSPARENT;
     public static final Color       DEFAULT_DIE_LABEL_FILL             = Color.rgb(150, 150, 150);
+    public static final Color       DEFAULT_SELECTION_COLOR            = Color.rgb(0, 0, 255);
     public static final List<Color> DEFAULT_DEFECT_DENSITY_COLORS      = List.of(Color.TRANSPARENT,
                                                                                  Color.rgb(151, 196, 232),
                                                                                  Color.rgb(128, 255, 128),

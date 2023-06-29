@@ -19,12 +19,21 @@
  package eu.hansolo.fx.charts.wafermap;
 
  import eu.hansolo.fx.charts.tools.Helper;
+ import eu.hansolo.fx.geometry.Rectangle;
  import javafx.beans.DefaultProperty;
  import javafx.beans.property.BooleanProperty;
  import javafx.beans.property.BooleanPropertyBase;
  import javafx.beans.property.ObjectProperty;
  import javafx.beans.property.ObjectPropertyBase;
+ import javafx.beans.property.ReadOnlyObjectProperty;
+ import javafx.beans.property.SimpleObjectProperty;
+ import javafx.collections.FXCollections;
+ import javafx.collections.MapChangeListener;
  import javafx.collections.ObservableList;
+ import javafx.collections.ObservableMap;
+ import javafx.event.Event;
+ import javafx.event.EventHandler;
+ import javafx.event.EventType;
  import javafx.geometry.VPos;
  import javafx.scene.Node;
  import javafx.scene.canvas.Canvas;
@@ -35,6 +44,7 @@
  import javafx.scene.text.Font;
  import javafx.scene.text.TextAlignment;
 
+ import java.util.HashMap;
  import java.util.List;
  import java.util.Map;
  import java.util.Optional;
@@ -42,32 +52,44 @@
 
  @DefaultProperty("children")
  public class Wafermap extends Region {
-     private static final double                PREFERRED_WIDTH  = 300;
-     private static final double                PREFERRED_HEIGHT = 300;
-     private static final double                MINIMUM_WIDTH    = 50;
-     private static final double                MINIMUM_HEIGHT   = 50;
-     private static final double                MAXIMUM_WIDTH    = 2048;
-     private static final double                MAXIMUM_HEIGHT   = 2048;
-     private              double                size;
-     private              double                width;
-     private              double                height;
-     private              Canvas                canvas;
-     private              GraphicsContext       ctx;
-     private              KLA                   kla;
-     private              double                factor;
-     private              double                defectSize;
-     private              double                halfDefectSize;
-     private              Color                 _wafermapFill;
-     private              ObjectProperty<Color> wafermapFill;
-     private              Color                 _wafermapStroke;
-     private              ObjectProperty<Color> wafermapStroke;
-     private              Color                 _dieLabelFill;
-     private              ObjectProperty<Color> dieLabelFill;
-     private              List<Color>           defectDensityColors;
-     private              boolean               _dieLabelsVisible;
-     private              BooleanProperty       dieLabelsVisible;
-     private              boolean               _densityColorsVisible;
-     private              BooleanProperty       densityColorsVisible;
+     private static final double                              PREFERRED_WIDTH  = 300;
+     private static final double                              PREFERRED_HEIGHT = 300;
+     private static final double                              MINIMUM_WIDTH    = 50;
+     private static final double                              MINIMUM_HEIGHT   = 50;
+     private static final double                              MAXIMUM_WIDTH    = 2048;
+     private static final double                              MAXIMUM_HEIGHT   = 2048;
+     private              double                              size;
+     private              double                              width;
+     private              double                              height;
+     private              Canvas                              canvas;
+     private              GraphicsContext                     ctx;
+     private              KLA                                 kla;
+     private              double                              factor;
+     private              double                              defectSize;
+     private              double                              halfDefectSize;
+     private              Color                               _wafermapFill;
+     private              ObjectProperty<Color>               wafermapFill;
+     private              Color                               _wafermapStroke;
+     private              ObjectProperty<Color>               wafermapStroke;
+     private              Color                               _notchFill;
+     private              ObjectProperty<Color>               notchFill;
+     private              Color                               _defectFill;
+     private              ObjectProperty<Color>               defectFill;
+     private              Color                               _defectStroke;
+     private              ObjectProperty<Color>               defectStroke;
+     private              Color                               _dieLabelFill;
+     private              ObjectProperty<Color>               dieLabelFill;
+     private              Color                               _selectionColor;
+     private              ObjectProperty<Color>               selectionColor;
+     private              List<Color>                         defectDensityColors;
+     private              boolean                             _dieLabelsVisible;
+     private              BooleanProperty                     dieLabelsVisible;
+     private              boolean                             _densityColorsVisible;
+     private              BooleanProperty                     densityColorsVisible;
+     private              ObservableMap<Integer, ClassConfig> classConfigMap;
+     private              ObjectProperty<Die>                 selectedDie;
+     private              Map<String, Rectangle>              dieMap;
+     private              EventHandler<MouseEvent>            mouseHandler;
 
 
      // ******************** Constructors **************************************
@@ -85,10 +107,35 @@
 
          _wafermapFill         = Constants.DEFAULT_WAFERMAP_FILL;
          _wafermapStroke       = Constants.DEFAULT_WAFERMAP_STROKE;
+         _notchFill            = Constants.DEFAULT_NOTCH_FILL;
+         _defectFill           = Constants.DEFAULT_DEFECT_FILL;
+         _defectStroke         = Constants.DEFAULT_DEFECT_STROKE;
          _dieLabelFill         = Constants.DEFAULT_DIE_LABEL_FILL;
+         _selectionColor       = Constants.DEFAULT_SELECTION_COLOR;
          defectDensityColors   = Constants.DEFAULT_DEFECT_DENSITY_COLORS;
          _dieLabelsVisible     = false;
          _densityColorsVisible = false;
+         classConfigMap        = FXCollections.observableHashMap();
+         selectedDie           = new SimpleObjectProperty<>(null);
+         dieMap                = new HashMap<>();
+         mouseHandler          = e -> {
+             EventType<? extends Event> type = e.getEventType();
+             if (MouseEvent.MOUSE_PRESSED.equals(type)) {
+                 Optional<Rectangle> optRect = dieMap.values().stream().filter(rect -> rect.contains(e.getX(), e.getY())).findFirst();
+                 if (optRect.isPresent()) {
+                     Optional<String> optDieName = Helper.getKeysByValue(dieMap, optRect.get()).stream().findFirst();
+                     if (optDieName.isPresent()) {
+                         final Die selected = kla.getDies().get(optDieName.get());
+                         if (null == selectedDie.get()) {
+                             selectedDie.set(selected);
+                         } else {
+                             selectedDie.set(selectedDie.get().equals(selected) ? null : selected);
+                         }
+                         redraw();
+                     }
+                 }
+             }
+         };
 
          initGraphics();
          registerListeners();
@@ -114,9 +161,8 @@
      private void registerListeners() {
          widthProperty().addListener(o -> resize());
          heightProperty().addListener(o -> resize());
-         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> {
-
-         });
+         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+         classConfigMap.addListener((MapChangeListener<Integer, ClassConfig>) change -> redraw());
      }
 
 
@@ -179,6 +225,69 @@
          return wafermapStroke;
      }
 
+     public Color getNotchFill() { return null == notchFill ? _notchFill : notchFill.get(); }
+     public void setNotchFill(final Color notchFill) {
+         if (null == this.notchFill) {
+             _notchFill = notchFill;
+             redraw();
+         } else {
+             this.notchFill.set(notchFill);
+         }
+     }
+     public ObjectProperty<Color> notchFillProperty() {
+         if (null == notchFill) {
+             notchFill = new ObjectPropertyBase<>(_notchFill) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public String getName() { return "notchFill"; }
+             };
+             _notchFill = null;
+         }
+         return notchFill;
+     }
+
+     public Color getDefectFill() { return null == defectFill ? _defectFill : defectFill.get(); }
+     public void setDefectFill(final Color defectFill) {
+         if (null == this.defectFill) {
+             _defectFill = defectFill;
+             redraw();
+         } else {
+             this.defectFill.set(defectFill);
+         }
+     }
+     public ObjectProperty<Color> defectFillProperty() {
+         if (null == defectFill) {
+             defectFill = new ObjectPropertyBase<>(_defectFill) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public String getName() { return "defectFill"; }
+             };
+             _defectFill = null;
+         }
+         return defectFill;
+     }
+
+     public Color getDefectStroke() { return null == defectStroke ? _defectStroke : defectStroke.get(); }
+     public void setDefectStroke(final Color defectStroke) {
+         if (null == this.defectStroke) {
+             _defectStroke = defectStroke;
+             redraw();
+         } else {
+             this.defectStroke.set(defectStroke);
+         }
+     }
+     public ObjectProperty<Color> defectStrokeProperty() {
+         if (null == defectStroke) {
+             defectStroke = new ObjectPropertyBase<>(_defectStroke) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public String getName() { return "defectStroke"; }
+             };
+             _defectStroke = null;
+         }
+         return defectStroke;
+     }
+
      public Color getDieLabelFill() { return null == dieLabelFill ? _dieLabelFill : dieLabelFill.get(); }
      public void setDieLabelFill(final Color dieLabelFill) {
          if (null == this.dieLabelFill) {
@@ -198,6 +307,27 @@
              _dieLabelFill = null;
          }
          return dieLabelFill;
+     }
+
+     public Color getSelectionColor() { return null == selectionColor ? _selectionColor : selectionColor.get(); }
+     public void setSelectionColor(final Color selectionColor) {
+         if (null == this.selectionColor) {
+             _selectionColor = selectionColor;
+             redraw();
+         } else {
+             this.selectionColor.set(selectionColor);
+         }
+     }
+     public ObjectProperty<Color> selectionColorProperty() {
+         if (null == selectionColor) {
+             selectionColor = new ObjectPropertyBase<>(_selectionColor) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public String getName() { return "selectionColor"; }
+             };
+             _selectionColor = null;
+         }
+         return selectionColor;
      }
 
      public boolean getDieLabelsVisible() { return null == dieLabelsVisible ? _dieLabelsVisible : dieLabelsVisible.get(); }
@@ -240,6 +370,32 @@
          return densityColorsVisible;
      }
 
+     public void setClassConfigMap(final Map<Integer, ClassConfig> classConfigMap) {
+         this.classConfigMap.clear();
+         classConfigMap.putAll(classConfigMap);
+     }
+     public void setClassConfig(final int classNumber, final ClassConfig classConfig) {
+         if (classNumber < 0) { throw new IllegalArgumentException("ClassNumber cannot be smaller than 0"); }
+         classConfigMap.put(classNumber, classConfig);
+     }
+     public void removeClassConfig(final int classNumber) {
+         if (classConfigMap.containsKey(classNumber)) {
+             classConfigMap.remove(classNumber);
+         }
+     }
+     public void clearClassConfig() {
+         classConfigMap.clear();
+         redraw();
+     }
+
+     public Die getSelectedDie() { return selectedDie.get(); }
+     public ReadOnlyObjectProperty<Die> selectedDieProperty() { return selectedDie; }
+
+
+     public void dispose() {
+         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+     }
+
 
      // ******************** Layout *******************************************
      @Override public void layoutChildren() {
@@ -264,14 +420,12 @@
      }
 
      private void redraw() {
+         dieMap.clear();
+
          ctx.clearRect(0, 0, width, height);
 
-         int maxDefectsPerDie = kla.getMaxDefectsPerDie();
-         double densityFactor = maxDefectsPerDie == 0 ? 1 : 100 / maxDefectsPerDie;
-
-         double centerX = size * 0.5;
-         double centerY = size * 0.5;
-
+         double centerX  = size * 0.5;
+         double centerY  = size * 0.5;
          double diameter = kla.getSampleSize() * factor;
 
          Color waferFill   = getWafermapFill();
@@ -288,19 +442,19 @@
          final double notchSize = diameter / 200;
          switch (kla.getOrientationMarkLocation()) {
              case UP    -> {
-                 ctx.setFill(Color.BLACK);
+                 ctx.setFill(getNotchFill());
                  ctx.fillOval(centerX - notchSize, notchSize * 1.5, notchSize * 1.5, notchSize * 3);
              }
              case RIGHT -> {
-                 ctx.setFill(Color.BLACK);
+                 ctx.setFill(getNotchFill());
                  ctx.fillOval(diameter - notchSize * 1.5, centerY - notchSize, notchSize * 3, notchSize * 1.5);
              }
              case DOWN  -> {
-                 ctx.setFill(Color.BLACK);
+                 ctx.setFill(getNotchFill());
                  ctx.fillOval(centerX - notchSize, diameter - notchSize * 1.5, notchSize * 1.5, notchSize * 3);
              }
              case LEFT  -> {
-                 ctx.setFill(Color.BLACK);
+                 ctx.setFill(getNotchFill());
                  ctx.fillOval(notchSize * 1.5, centerY - notchSize, notchSize * 3, notchSize * 1.5);
              }
              default -> {
@@ -344,20 +498,51 @@
              ctx.setStroke(waferStroke);
              ctx.strokeRect(x, y, w, h);
 
+             dieMap.put(die.getName(), new Rectangle(x, y, w, h));
+
              if (getDieLabelsVisible()) {
                  ctx.setFill(getDieLabelFill());
                  ctx.fillText(name, x + w * 0.5, y + h * 0.5, w);
              }
          });
 
+         // Draw selected die
+         if (null != getSelectedDie()) {
+             ctx.save();
+             ctx.setLineWidth(1);
+             Rectangle selectionRect = dieMap.get(getSelectedDie().getName());
+             ctx.setStroke(getSelectionColor());
+             ctx.strokeRect(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height);
+             ctx.restore();
+         }
+
          // Draw defects
-         ctx.setFill(Color.BLACK);
+         boolean drawDefect;
          for (Die die : kla.getDies().values()) {
              for (Defect defect : die.getDefects()) {
-                 if (kla.getClasses().stream().filter(clazz -> clazz.getId() == defect.getClassNumber()).count() > 0) {
-                     double tmpXAbsolute = (die.getOriginX() + ((die.getSizeX() * die.getXIndex() + defect.getXRel())) / 1000) * factor;
-                     double tmpYAbsolute = (die.getOriginY() + ((die.getSizeY() * die.getYIndex() + defect.getYRel())) / 1000) * factor;
-                     ctx.fillOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                 if (classConfigMap.isEmpty()) {
+                     ctx.setFill(getDefectFill());
+                     ctx.setStroke(getDefectStroke());
+                     drawDefect = true;
+                 } else {
+                     int classNumber = defect.getClassNumber();
+                     if (classConfigMap.containsKey(classNumber)) {
+                        drawDefect = classConfigMap.get(classNumber).isVisible();
+                        ctx.setFill(classConfigMap.get(classNumber).getFill());
+                        ctx.setStroke(classConfigMap.get(classNumber).getStroke());
+                     } else {
+                         drawDefect = false;
+                         ctx.setFill(getDefectFill());
+                         ctx.setStroke(getDefectStroke());
+                     }
+                 }
+                 if (drawDefect) {
+                     if (kla.getClasses().stream().filter(clazz -> clazz.getId() == defect.getClassNumber()).count() > 0) {
+                         double tmpXAbsolute = (die.getOriginX() + ((die.getSizeX() * die.getXIndex() + defect.getXRel())) / 1000) * factor;
+                         double tmpYAbsolute = (die.getOriginY() + ((die.getSizeY() * die.getYIndex() + defect.getYRel())) / 1000) * factor;
+                         ctx.fillOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                         ctx.strokeOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                     }
                  }
              }
          }

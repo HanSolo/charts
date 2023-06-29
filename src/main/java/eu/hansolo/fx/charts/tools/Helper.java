@@ -75,9 +75,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -1399,5 +1402,13 @@ public class Helper {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public static final <T, E> Set<T> getKeysByValue(final Map<T, E> map, final E value) {
+        return map.entrySet()
+                  .stream()
+                  .filter(entry -> Objects.equals(entry.getValue(), value))
+                  .map(Map.Entry::getKey)
+                  .collect(Collectors.toSet());
     }
 }

@@ -18,17 +18,18 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.wafermap.ClassConfig;
 import eu.hansolo.fx.charts.wafermap.KLA;
 import eu.hansolo.fx.charts.wafermap.KLAParser;
 import eu.hansolo.fx.charts.wafermap.Wafermap;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Optional;
-import java.util.Random;
 
 
 public class WafermapTest extends Application {
@@ -45,6 +46,7 @@ public class WafermapTest extends Application {
         wafermap.setWafermapFill(Color.rgb(240, 240, 240));
         wafermap.setWafermapStroke(Color.GRAY);
         wafermap.setDieLabelFill(Color.DARKGRAY);
+        wafermap.setClassConfig(20, new ClassConfig(Color.RED));
 
         if (klaOpt.isPresent()) {
             wafermap.setKla(klaOpt.get());
@@ -66,6 +68,8 @@ public class WafermapTest extends Application {
     }
 
     @Override public void stop() {
+        wafermap.dispose();
+        Platform.exit();
         System.exit(0);
     }
 
