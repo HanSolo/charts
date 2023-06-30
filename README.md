@@ -185,3 +185,8 @@ related to imports, required modules etc.
 
 ## PoincarePlot
 ![PoincarePlot](https://i.ibb.co/khtVqJ5/poincareplot.png)
+
+
+## Wafermap
+![WaferMap](https://i.ibb.co/gmtxPY0/wafermap.png)
+
