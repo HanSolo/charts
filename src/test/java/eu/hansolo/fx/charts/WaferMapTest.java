@@ -18,14 +18,16 @@
 
 package eu.hansolo.fx.charts;
 
+import eu.hansolo.fx.charts.DieMap.DieMap;
 import eu.hansolo.fx.charts.wafermap.KLA;
 import eu.hansolo.fx.charts.wafermap.KLAParser;
-import eu.hansolo.fx.charts.wafermap.Wafermap;
-import eu.hansolo.fx.charts.wafermap.WafermapBuilder;
+import eu.hansolo.fx.charts.wafermap.WaferMap;
+import eu.hansolo.fx.charts.wafermap.WaferMapBuilder;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -33,37 +35,45 @@ import java.util.Optional;
 import java.util.Random;
 
 
-public class WafermapTest extends Application {
+public class WaferMapTest extends Application {
     private static final Random   RND = new Random();
-    private              Wafermap wafermap;
+    private              WaferMap wafermap;
+    private              DieMap   dieMap;
+
 
 
     @Override public void init() {
-        String        filename = WafermapTest.class.getResource("12.KLA").toString().replace("file:", "");
+        String        filename = WaferMapTest.class.getResource("12.KLA").toString().replace("file:", "");
         Optional<KLA> klaOpt   = KLAParser.INSTANCE.parse(filename);
 
-        wafermap = WafermapBuilder.create()
+        wafermap = WaferMapBuilder.create()
                                   .kla(klaOpt.get())
                                   .dieTextVisible(true)
                                   .densityColorsVisible(true)
-                                  .wafermapFill(Color.rgb(240, 240, 240))
-                                  .wafermapStroke(Color.GRAY)
+                                  .waferFill(Color.rgb(240, 240, 240))
+                                  .waferStroke(Color.GRAY)
                                   .dieTextFill(Color.BLACK)
                                   .build();
 
-        registerListener();
-    }
+        dieMap = new DieMap();
+        //dieMap.setDieFill(Color.LIGHTBLUE);
+        dieMap.setDieTextFill(Color.LIGHTGRAY);
+        dieMap.setDieTextVisible(true);
+        dieMap.setDensityColorsVisible(true);
 
-    private void registerListener() {
-
+        wafermap.selectedDieProperty().addListener(o -> {
+            Platform.runLater(() -> dieMap.setDie(wafermap.getSelectedDie()));
+        });
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane  = new StackPane(wafermap);
+        HBox pane  = new HBox(20, wafermap, dieMap);
+        pane.setPadding(new Insets(10));
         Scene     scene = new Scene(pane);
 
         stage.setTitle("Wafermap");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 

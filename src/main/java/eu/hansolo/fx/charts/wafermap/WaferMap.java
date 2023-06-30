@@ -51,7 +51,7 @@
 
 
  @DefaultProperty("children")
- public class Wafermap extends Region {
+ public class WaferMap extends Region {
      private static final double                              PREFERRED_WIDTH  = 500;
      private static final double                              PREFERRED_HEIGHT = 500;
      private static final double                              MINIMUM_WIDTH    = 50;
@@ -67,10 +67,10 @@
      private              double                              factor;
      private              double                              defectSize;
      private              double                              halfDefectSize;
-     private              Color                               _wafermapFill;
-     private              ObjectProperty<Color>               wafermapFill;
-     private              Color                               _wafermapStroke;
-     private              ObjectProperty<Color>               wafermapStroke;
+     private              Color                               _waferFill;
+     private              ObjectProperty<Color>               waferFill;
+     private              Color                               _waferStroke;
+     private              ObjectProperty<Color>               waferStroke;
      private              Color                               _notchFill;
      private              ObjectProperty<Color>               notchFill;
      private              Color                               _defectFill;
@@ -95,10 +95,10 @@
 
 
      // ******************** Constructors **************************************
-     public Wafermap() {
+     public WaferMap() {
          this("");
      }
-     public Wafermap(final String filename) {
+     public WaferMap(final String filename) {
          if (null != filename && !filename.isEmpty()) {
              Optional<KLA> klaOpt = KLAParser.INSTANCE.parse(filename);
              this.kla = klaOpt.isPresent() ? klaOpt.get() : new KLA();
@@ -107,21 +107,21 @@
          }
          this.kla.createDieMap();
 
-         _wafermapFill         = Constants.DEFAULT_WAFERMAP_FILL;
-         _wafermapStroke       = Constants.DEFAULT_WAFERMAP_STROKE;
-         _notchFill            = Constants.DEFAULT_NOTCH_FILL;
-         _defectFill           = Constants.DEFAULT_DEFECT_FILL;
-         _defectStroke   = Constants.DEFAULT_DEFECT_STROKE;
-         _dieTextFill    = Constants.DEFAULT_DIE_LABEL_FILL;
-         _selectionColor = Constants.DEFAULT_SELECTION_COLOR;
-         defectDensityColors   = Constants.DEFAULT_DEFECT_DENSITY_COLORS;
-         _dieTextVisible       = false;
-         _densityColorsVisible = false;
-         _legendVisible        = false;
-         classConfigMap        = FXCollections.observableHashMap();
-         selectedDie           = new SimpleObjectProperty<>(null);
-         dieMap                = new HashMap<>();
-         mouseHandler          = e -> {
+         this._waferFill            = Constants.DEFAULT_WAFER_FILL;
+         this._waferStroke          = Constants.DEFAULT_WAFER_STROKE;
+         this._notchFill            = Constants.DEFAULT_NOTCH_FILL;
+         this._defectFill           = Constants.DEFAULT_DEFECT_FILL;
+         this._defectStroke         = Constants.DEFAULT_DEFECT_STROKE;
+         this._dieTextFill          = Constants.DEFAULT_DIE_LABEL_FILL;
+         this._selectionColor       = Constants.DEFAULT_SELECTION_COLOR;
+         this.defectDensityColors   = Constants.DEFAULT_DEFECT_DENSITY_COLORS;
+         this._dieTextVisible       = false;
+         this._densityColorsVisible = false;
+         this._legendVisible        = false;
+         this.classConfigMap        = FXCollections.observableHashMap();
+         this.selectedDie           = new SimpleObjectProperty<>(null);
+         this.dieMap                = new HashMap<>();
+         this.mouseHandler          = e -> {
              EventType<? extends Event> type = e.getEventType();
              if (MouseEvent.MOUSE_PRESSED.equals(type)) {
                  Optional<Rectangle> optRect = dieMap.values().stream().filter(rect -> rect.contains(e.getX(), e.getY())).findFirst();
@@ -186,46 +186,46 @@
          redraw();
      }
 
-     public Color getWafermapFill() { return null == wafermapFill ? _wafermapFill : wafermapFill.get(); }
-     public void setWafermapFill(final Color wafermapFill) {
-         if (null == this.wafermapFill) {
-             _wafermapFill = wafermapFill;
+     public Color getWaferFill() { return null == waferFill ? _waferFill : waferFill.get(); }
+     public void setWaferFill(final Color waferFill) {
+         if (null == this.waferFill) {
+             _waferFill = waferFill;
              redraw();
          } else {
-             this.wafermapFill.set(wafermapFill);
+             this.waferFill.set(waferFill);
          }
      }
-     public ObjectProperty<Color> wafermapFillProperty() {
-         if (null == wafermapFill) {
-             wafermapFill = new ObjectPropertyBase<>(_wafermapFill) {
+     public ObjectProperty<Color> waferFillProperty() {
+         if (null == waferFill) {
+             waferFill  = new ObjectPropertyBase<>(_waferFill) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
-                 @Override public String getName() { return "wafermapFill"; }
+                 @Override public Object getBean() { return WaferMap.this; }
+                 @Override public String getName() { return "waferdsFill"; }
              };
-             _wafermapFill = null;
+             _waferFill = null;
          }
-         return wafermapFill;
+         return waferFill;
      }
 
-     public Color getWafermapStroke() { return null == wafermapStroke ? _wafermapStroke : wafermapStroke.get(); }
-     public void setWafermapStroke(final Color wafermapStroke) {
-         if (null == this.wafermapStroke) {
-             _wafermapStroke = wafermapStroke;
+     public Color getWaferStroke() { return null == waferStroke ? _waferStroke : waferStroke.get(); }
+     public void setWaferStroke(final Color waferStroke) {
+         if (null == this.waferStroke) {
+             _waferStroke = waferStroke;
              redraw();
          } else {
-             this.wafermapStroke.set(wafermapStroke);
+             this.waferStroke.set(waferStroke);
          }
      }
-     public ObjectProperty<Color> wafermapStrokeProperty() {
-         if (null == wafermapStroke) {
-             wafermapStroke = new ObjectPropertyBase<>(_wafermapStroke) {
+     public ObjectProperty<Color> waferStrokeProperty() {
+         if (null == waferStroke) {
+             waferStroke  = new ObjectPropertyBase<>(_waferStroke) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
-                 @Override public String getName() { return "wafermapStroke"; }
+                 @Override public Object getBean() { return WaferMap.this; }
+                 @Override public String getName() { return "waferStroke"; }
              };
-             _wafermapStroke = null;
+             _waferStroke = null;
          }
-         return wafermapStroke;
+         return waferStroke;
      }
 
      public Color getNotchFill() { return null == notchFill ? _notchFill : notchFill.get(); }
@@ -241,7 +241,7 @@
          if (null == notchFill) {
              notchFill = new ObjectPropertyBase<>(_notchFill) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "notchFill"; }
              };
              _notchFill = null;
@@ -262,7 +262,7 @@
          if (null == defectFill) {
              defectFill = new ObjectPropertyBase<>(_defectFill) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "defectFill"; }
              };
              _defectFill = null;
@@ -283,7 +283,7 @@
          if (null == defectStroke) {
              defectStroke = new ObjectPropertyBase<>(_defectStroke) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "defectStroke"; }
              };
              _defectStroke = null;
@@ -304,7 +304,7 @@
          if (null == dieTextFill) {
              dieTextFill  = new ObjectPropertyBase<>(_dieTextFill) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "dieLabelFill"; }
              };
              _dieTextFill = null;
@@ -325,7 +325,7 @@
          if (null == selectionColor) {
              selectionColor = new ObjectPropertyBase<>(_selectionColor) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "selectionColor"; }
              };
              _selectionColor = null;
@@ -346,7 +346,7 @@
          if (null == dieTextVisible) {
              dieTextVisible = new BooleanPropertyBase(_dieTextVisible) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "dieLabelsVisible"; }
              };
          }
@@ -366,7 +366,7 @@
          if (null == densityColorsVisible) {
              densityColorsVisible = new BooleanPropertyBase(_densityColorsVisible) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "densityColorsVisible"; }
              };
          }
@@ -386,7 +386,7 @@
          if (null == legendVisible) {
              legendVisible = new BooleanPropertyBase(_legendVisible) {
                  @Override protected void invalidated() { redraw(); }
-                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public Object getBean() { return WaferMap.this; }
                  @Override public String getName() { return "legendVisible"; }
              };
          }
@@ -451,13 +451,13 @@
          double centerY  = size * 0.5;
          double diameter = kla.getSampleSize() * factor;
 
-         Color waferFill   = getWafermapFill();
-         Color waferStroke = getWafermapStroke();
+         Color waferFill   = getWaferFill();
+         Color waferStroke = getWaferStroke();
 
          // Draw wafer
          ctx.setLineWidth(0.5);
          ctx.setFill(waferFill);
-         ctx.setStroke(Color.GRAY);
+         ctx.setStroke(waferStroke);
          ctx.fillOval(0, 0, diameter, diameter);
          ctx.strokeOval(0, 0, diameter, diameter);
 

@@ -18,9 +18,7 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.wafermap.Wafermap;
-
 
 public class WafermapTestLauncher {
-    public static void main(String[] args) { WafermapTest.main(args); }
+    public static void main(String[] args) { WaferMapTest.main(args); }
 }

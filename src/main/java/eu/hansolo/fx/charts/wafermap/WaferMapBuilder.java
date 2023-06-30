@@ -35,17 +35,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class WafermapBuilder <B extends WafermapBuilder<B>> {
+public class WaferMapBuilder<B extends WaferMapBuilder<B>> {
     private HashMap<String, Property> properties = new HashMap<>();
 
 
     // ******************** Constructors **************************************
-    protected WafermapBuilder() { }
+    protected WaferMapBuilder() { }
 
 
     // ******************** Methods *******************************************
-    public static final WafermapBuilder create() {
-        return new WafermapBuilder();
+    public static final WaferMapBuilder create() {
+        return new WaferMapBuilder();
     }
 
 
@@ -59,13 +59,13 @@ public class WafermapBuilder <B extends WafermapBuilder<B>> {
         return (B)this;
     }
 
-    public final B wafermapFill(final Color wafermapFill) {
-        properties.put("wafermapFill", new SimpleObjectProperty<>(wafermapFill));
+    public final B waferFill(final Color waferFill) {
+        properties.put("waferFill", new SimpleObjectProperty<>(waferFill));
         return (B)this;
     }
 
-    public final B wafermapStroke(final Color wafermapStroke) {
-        properties.put("wafermapStroke", new SimpleObjectProperty<>(wafermapStroke));
+    public final B waferStroke(final Color waferStroke) {
+        properties.put("waferStroke", new SimpleObjectProperty<>(waferStroke));
         return (B)this;
     }
 
@@ -189,13 +189,13 @@ public class WafermapBuilder <B extends WafermapBuilder<B>> {
     }
 
 
-    public final Wafermap build() {
-        final Wafermap wafermap;
+    public final WaferMap build() {
+        final WaferMap wafermap;
         if (properties.keySet().contains("filename")) {
             final String filename = ((StringProperty) properties.get("filename")).get();
-            wafermap = new Wafermap(filename);
+            wafermap = new WaferMap(filename);
         } else {
-            wafermap = new Wafermap();
+            wafermap = new WaferMap();
         }
 
         if (properties.keySet().contains("kla")) { wafermap.setKla(((ObjectProperty<KLA>) properties.get("kla")).get()); }
@@ -228,8 +228,8 @@ public class WafermapBuilder <B extends WafermapBuilder<B>> {
                 case "translateY"           -> wafermap.setTranslateY(((DoubleProperty) properties.get(key)).get());
                 case "padding"              -> wafermap.setPadding(((ObjectProperty<Insets>) properties.get(key)).get());
 
-                case "wafermapFill"         -> wafermap.setWafermapFill(((ObjectProperty<Color>) properties.get(key)).get());
-                case "wafermapStroke"       -> wafermap.setWafermapStroke(((ObjectProperty<Color>) properties.get(key)).get());
+                case "waferFill"            -> wafermap.setWaferFill(((ObjectProperty<Color>) properties.get(key)).get());
+                case "waferStroke"          -> wafermap.setWaferStroke(((ObjectProperty<Color>) properties.get(key)).get());
                 case "notchFill"            -> wafermap.setNotchFill(((ObjectProperty<Color>) properties.get(key)).get());
                 case "defectFill"           -> wafermap.setDefectFill(((ObjectProperty<Color>) properties.get(key)).get());
                 case "defectStroke"         -> wafermap.setDefectStroke(((ObjectProperty<Color>) properties.get(key)).get());
