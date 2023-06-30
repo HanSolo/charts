@@ -21,38 +21,4 @@ package eu.hansolo.fx.charts.wafermap;
 import javafx.scene.paint.Color;
 
 
-public class ClassConfig {
-    private Color   fill;
-    private Color   stroke;
-    private boolean visible;
-
-
-    // ******************** Constructors **************************************
-    public ClassConfig(final Color fill) {
-        this(fill, Color.TRANSPARENT, true);
-    }
-    public ClassConfig(final Color fill, final Color stroke, final boolean visible) {
-        if (null == fill) { throw new IllegalArgumentException("Fill cannot be null"); }
-        if (null == stroke) { throw new IllegalArgumentException("Stroke cannot be null"); }
-        this.fill    = fill;
-        this.stroke  = stroke;
-        this.visible = visible;
-    }
-
-
-    // ******************** Methods *******************************************
-    public Color getFill() { return this.fill; }
-    public void setFill(final Color fill) {
-        if (null == fill) { throw new IllegalArgumentException("Fill cannot be null"); }
-        this.fill = fill;
-    }
-
-    public Color getStroke() { return this.stroke; }
-    public void setStroke(final Color stroke) {
-        if (null == stroke) { throw new IllegalArgumentException("Stroke cannot be null"); }
-        this.stroke = stroke;
-    }
-
-    public Boolean isVisible() { return this.visible; }
-    public void setVisible(final boolean visible) { this.visible = visible; }
-}
+public record ClassConfig (Color fill, Color stroke, boolean visible) {}

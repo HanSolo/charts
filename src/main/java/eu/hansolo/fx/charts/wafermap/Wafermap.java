@@ -52,8 +52,8 @@
 
  @DefaultProperty("children")
  public class Wafermap extends Region {
-     private static final double                              PREFERRED_WIDTH  = 300;
-     private static final double                              PREFERRED_HEIGHT = 300;
+     private static final double                              PREFERRED_WIDTH  = 500;
+     private static final double                              PREFERRED_HEIGHT = 500;
      private static final double                              MINIMUM_WIDTH    = 50;
      private static final double                              MINIMUM_HEIGHT   = 50;
      private static final double                              MAXIMUM_WIDTH    = 2048;
@@ -77,15 +77,17 @@
      private              ObjectProperty<Color>               defectFill;
      private              Color                               _defectStroke;
      private              ObjectProperty<Color>               defectStroke;
-     private              Color                               _dieLabelFill;
-     private              ObjectProperty<Color>               dieLabelFill;
+     private              Color                               _dieTextFill;
+     private              ObjectProperty<Color>               dieTextFill;
      private              Color                               _selectionColor;
      private              ObjectProperty<Color>               selectionColor;
      private              List<Color>                         defectDensityColors;
-     private              boolean                             _dieLabelsVisible;
-     private              BooleanProperty                     dieLabelsVisible;
+     private              boolean                             _dieTextVisible;
+     private              BooleanProperty                     dieTextVisible;
      private              boolean                             _densityColorsVisible;
      private              BooleanProperty                     densityColorsVisible;
+     private              boolean                             _legendVisible;
+     private              BooleanProperty                     legendVisible;
      private              ObservableMap<Integer, ClassConfig> classConfigMap;
      private              ObjectProperty<Die>                 selectedDie;
      private              Map<String, Rectangle>              dieMap;
@@ -109,12 +111,13 @@
          _wafermapStroke       = Constants.DEFAULT_WAFERMAP_STROKE;
          _notchFill            = Constants.DEFAULT_NOTCH_FILL;
          _defectFill           = Constants.DEFAULT_DEFECT_FILL;
-         _defectStroke         = Constants.DEFAULT_DEFECT_STROKE;
-         _dieLabelFill         = Constants.DEFAULT_DIE_LABEL_FILL;
-         _selectionColor       = Constants.DEFAULT_SELECTION_COLOR;
+         _defectStroke   = Constants.DEFAULT_DEFECT_STROKE;
+         _dieTextFill    = Constants.DEFAULT_DIE_LABEL_FILL;
+         _selectionColor = Constants.DEFAULT_SELECTION_COLOR;
          defectDensityColors   = Constants.DEFAULT_DEFECT_DENSITY_COLORS;
-         _dieLabelsVisible     = false;
+         _dieTextVisible       = false;
          _densityColorsVisible = false;
+         _legendVisible        = false;
          classConfigMap        = FXCollections.observableHashMap();
          selectedDie           = new SimpleObjectProperty<>(null);
          dieMap                = new HashMap<>();
@@ -288,25 +291,25 @@
          return defectStroke;
      }
 
-     public Color getDieLabelFill() { return null == dieLabelFill ? _dieLabelFill : dieLabelFill.get(); }
-     public void setDieLabelFill(final Color dieLabelFill) {
-         if (null == this.dieLabelFill) {
-             _dieLabelFill = dieLabelFill;
+     public Color getDieTextFill() { return null == dieTextFill ? _dieTextFill : dieTextFill.get(); }
+     public void setDieTextFill(final Color dieTextFill) {
+         if (null == this.dieTextFill) {
+             _dieTextFill = dieTextFill;
              redraw();
          } else {
-             this.dieLabelFill.set(dieLabelFill);
+             this.dieTextFill.set(dieTextFill);
          }
      }
-     public ObjectProperty<Color> dieLabelFillProperty() {
-         if (null == dieLabelFill) {
-             dieLabelFill = new ObjectPropertyBase<>(_dieLabelFill) {
+     public ObjectProperty<Color> dieTextFillProperty() {
+         if (null == dieTextFill) {
+             dieTextFill  = new ObjectPropertyBase<>(_dieTextFill) {
                  @Override protected void invalidated() { redraw(); }
                  @Override public Object getBean() { return Wafermap.this; }
                  @Override public String getName() { return "dieLabelFill"; }
              };
-             _dieLabelFill = null;
+             _dieTextFill = null;
          }
-         return dieLabelFill;
+         return dieTextFill;
      }
 
      public Color getSelectionColor() { return null == selectionColor ? _selectionColor : selectionColor.get(); }
@@ -330,24 +333,24 @@
          return selectionColor;
      }
 
-     public boolean getDieLabelsVisible() { return null == dieLabelsVisible ? _dieLabelsVisible : dieLabelsVisible.get(); }
-     public void setDieLabelsVisible(final boolean dieLabelsVisible) {
-         if (null == this.dieLabelsVisible) {
-             _dieLabelsVisible = dieLabelsVisible;
+     public boolean getDieTextVisible() { return null == dieTextVisible ? _dieTextVisible : dieTextVisible.get(); }
+     public void setDieTextVisible(final boolean dieTextVisible) {
+         if (null == this.dieTextVisible) {
+             _dieTextVisible = dieTextVisible;
              redraw();
          } else {
-             this.dieLabelsVisible.set(dieLabelsVisible);
+             this.dieTextVisible.set(dieTextVisible);
          }
      }
-     public BooleanProperty dieLabelsVisibleProperty() {
-         if (null == dieLabelsVisible) {
-             dieLabelsVisible = new BooleanPropertyBase(_dieLabelsVisible) {
+     public BooleanProperty dieTextVisibleProperty() {
+         if (null == dieTextVisible) {
+             dieTextVisible = new BooleanPropertyBase(_dieTextVisible) {
                  @Override protected void invalidated() { redraw(); }
                  @Override public Object getBean() { return Wafermap.this; }
                  @Override public String getName() { return "dieLabelsVisible"; }
              };
          }
-         return dieLabelsVisible;
+         return dieTextVisible;
      }
 
      public boolean getDensityColorsVisible() { return null == densityColorsVisible ? _densityColorsVisible : densityColorsVisible.get(); }
@@ -370,9 +373,29 @@
          return densityColorsVisible;
      }
 
+     public boolean getLegendVisible() { return null == legendVisible ? _legendVisible : legendVisible.get(); }
+     public void setLegendVisible(final boolean legendVisible) {
+         if (null == this.legendVisible) {
+             _legendVisible = legendVisible;
+             redraw();
+         } else {
+             this.legendVisible.set(legendVisible);
+         }
+     }
+     public BooleanProperty legendVisibleProperty() {
+         if (null == legendVisible) {
+             legendVisible = new BooleanPropertyBase(_legendVisible) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return Wafermap.this; }
+                 @Override public String getName() { return "legendVisible"; }
+             };
+         }
+         return legendVisible;
+     }
+
      public void setClassConfigMap(final Map<Integer, ClassConfig> classConfigMap) {
          this.classConfigMap.clear();
-         classConfigMap.putAll(classConfigMap);
+         this.classConfigMap.putAll(classConfigMap);
      }
      public void setClassConfig(final int classNumber, final ClassConfig classConfig) {
          if (classNumber < 0) { throw new IllegalArgumentException("ClassNumber cannot be smaller than 0"); }
@@ -500,8 +523,8 @@
 
              dieMap.put(die.getName(), new Rectangle(x, y, w, h));
 
-             if (getDieLabelsVisible()) {
-                 ctx.setFill(getDieLabelFill());
+             if (getDieTextVisible()) {
+                 ctx.setFill(getDieTextFill());
                  ctx.fillText(name, x + w * 0.5, y + h * 0.5, w);
              }
          });
@@ -527,9 +550,9 @@
                  } else {
                      int classNumber = defect.getClassNumber();
                      if (classConfigMap.containsKey(classNumber)) {
-                        drawDefect = classConfigMap.get(classNumber).isVisible();
-                        ctx.setFill(classConfigMap.get(classNumber).getFill());
-                        ctx.setStroke(classConfigMap.get(classNumber).getStroke());
+                        drawDefect = classConfigMap.get(classNumber).visible();
+                        ctx.setFill(classConfigMap.get(classNumber).fill());
+                        ctx.setStroke(classConfigMap.get(classNumber).stroke());
                      } else {
                          drawDefect = false;
                          ctx.setFill(getDefectFill());
@@ -543,6 +566,25 @@
                          ctx.fillOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
                          ctx.strokeOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
                      }
+                 }
+             }
+         }
+
+         // Draw legend
+         if (size > 320 && getLegendVisible()) {
+             double boxSize = 10.0 / 500.0 * size;
+             for (int i = 6; i > 0; i--) {
+                 double y = size - 10 - i * (boxSize + 5);
+                 ctx.setFill(defectDensityColors.get(i));
+                 ctx.fillRect(10, y, boxSize, boxSize);
+                 ctx.setFill(Color.BLACK);
+                 switch (i) {
+                     case 6 -> ctx.fillText(" > 100", 3 * boxSize, y + boxSize * 0.5);
+                     case 5 -> ctx.fillText(" >  60", 3 * boxSize, y + boxSize * 0.5);
+                     case 4 -> ctx.fillText(" >  40", 3 * boxSize, y + boxSize * 0.5);
+                     case 3 -> ctx.fillText(" >  20", 3 * boxSize, y + boxSize * 0.5);
+                     case 2 -> ctx.fillText(" >  10", 3 * boxSize, y + boxSize * 0.5);
+                     case 1 -> ctx.fillText(" >   0", 3 * boxSize, y + boxSize * 0.5);
                  }
              }
          }

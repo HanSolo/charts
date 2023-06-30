@@ -18,10 +18,10 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.wafermap.ClassConfig;
 import eu.hansolo.fx.charts.wafermap.KLA;
 import eu.hansolo.fx.charts.wafermap.KLAParser;
 import eu.hansolo.fx.charts.wafermap.Wafermap;
+import eu.hansolo.fx.charts.wafermap.WafermapBuilder;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -30,27 +30,27 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Optional;
+import java.util.Random;
 
 
 public class WafermapTest extends Application {
-    private Wafermap wafermap;
+    private static final Random   RND = new Random();
+    private              Wafermap wafermap;
 
 
     @Override public void init() {
         String        filename = WafermapTest.class.getResource("12.KLA").toString().replace("file:", "");
         Optional<KLA> klaOpt   = KLAParser.INSTANCE.parse(filename);
 
-        wafermap = new Wafermap();
-        wafermap.setDieLabelsVisible(true);
-        wafermap.setDensityColorsVisible(true);
-        wafermap.setWafermapFill(Color.rgb(240, 240, 240));
-        wafermap.setWafermapStroke(Color.GRAY);
-        wafermap.setDieLabelFill(Color.DARKGRAY);
-        wafermap.setClassConfig(20, new ClassConfig(Color.RED));
+        wafermap = WafermapBuilder.create()
+                                  .kla(klaOpt.get())
+                                  .dieTextVisible(true)
+                                  .densityColorsVisible(true)
+                                  .wafermapFill(Color.rgb(240, 240, 240))
+                                  .wafermapStroke(Color.GRAY)
+                                  .dieTextFill(Color.BLACK)
+                                  .build();
 
-        if (klaOpt.isPresent()) {
-            wafermap.setKla(klaOpt.get());
-        }
         registerListener();
     }
 
