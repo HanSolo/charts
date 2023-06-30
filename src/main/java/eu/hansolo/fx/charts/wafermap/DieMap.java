@@ -16,21 +16,14 @@
  * limitations under the License.
  */
 
-package eu.hansolo.fx.charts.DieMap;
+package eu.hansolo.fx.charts.wafermap;
 
 import eu.hansolo.fx.charts.tools.Helper;
-import eu.hansolo.fx.charts.wafermap.ClassConfig;
-import eu.hansolo.fx.charts.wafermap.Constants;
-import eu.hansolo.fx.charts.wafermap.Defect;
-import eu.hansolo.fx.charts.wafermap.Die;
-import eu.hansolo.fx.charts.wafermap.WaferMap;
-import eu.hansolo.fx.geometry.Rectangle;
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -38,13 +31,11 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

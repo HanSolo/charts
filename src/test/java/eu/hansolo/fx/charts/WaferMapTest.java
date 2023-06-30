@@ -18,7 +18,8 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.DieMap.DieMap;
+import eu.hansolo.fx.charts.wafermap.DieMap;
+import eu.hansolo.fx.charts.wafermap.DieMapBuilder;
 import eu.hansolo.fx.charts.wafermap.KLA;
 import eu.hansolo.fx.charts.wafermap.KLAParser;
 import eu.hansolo.fx.charts.wafermap.WaferMap;
@@ -32,14 +33,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.Optional;
-import java.util.Random;
 
 
 public class WaferMapTest extends Application {
-    private static final Random   RND = new Random();
     private              WaferMap wafermap;
     private              DieMap   dieMap;
-
 
 
     @Override public void init() {
@@ -55,15 +53,13 @@ public class WaferMapTest extends Application {
                                   .dieTextFill(Color.BLACK)
                                   .build();
 
-        dieMap = new DieMap();
-        //dieMap.setDieFill(Color.LIGHTBLUE);
-        dieMap.setDieTextFill(Color.LIGHTGRAY);
-        dieMap.setDieTextVisible(true);
-        dieMap.setDensityColorsVisible(true);
+        dieMap = DieMapBuilder.create()
+                              .dieTextFill(Color.LIGHTGRAY)
+                              .dieTextVisible(true)
+                              .densityColorsVisible(true)
+                              .build();
 
-        wafermap.selectedDieProperty().addListener(o -> {
-            Platform.runLater(() -> dieMap.setDie(wafermap.getSelectedDie()));
-        });
+        wafermap.selectedDieProperty().addListener(o -> Platform.runLater(() -> dieMap.setDie(wafermap.getSelectedDie())));
     }
 
     @Override public void start(Stage stage) {
