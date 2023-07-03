@@ -26,9 +26,12 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -62,7 +65,7 @@ public enum KLAParser {
     private static final Pattern           SAMPLE_PATTERN                       = Pattern.compile("^\\s+(\\-?\\d+)\\s+(\\-?\\d+);?$");
     private static final Pattern           AREA_PER_TEST_PATTERN                = Pattern.compile("^(AreaPerTest)\\s+(\\d+\\.\\d*(e[+|-|-][0-9]+)?);");
     private static final Pattern           DEFECT_RECORD_SPEC_PATTERN           = Pattern.compile("^(DefectRecordSpec)\\s+(.*);");
-    private static final Pattern           DEFECT_PATTERN                       = Pattern.compile("^\\s+([0-9]+)\\s+(\\d+\\.\\d*(e[+|-][0-9]+)?)\\s+(\\d+\\.\\d*(e[+|-][0-9]+)?)\\s+(\\-?[0-9]+)\\s+(\\-?[0-9]+)\\s+(\\d+\\.\\d*)\\s+(\\d+\\.\\d*)\\s+(\\d+\\.\\d*)\\s+(\\d+\\.\\d*(e[+|-][0-9]+)?)\\s+(\\-?[0-9]+)\\s+(\\-?[0-9]+)\\s+(\\-?[0-9]+)\\s+(\\-?[0-9]+)\\s+(\\-?[0-9]+);?");
+    private static       Pattern           defectPattern;
     private static final Pattern           SUMMARY_SPEC_PATTERN                 = Pattern.compile("^(SummarySpec)\\s+(.*);");
     private static final Pattern           SUMMARY_PATTERN                      = Pattern.compile("^\\s([0-9]+)\\s+([0-9]+)\\s+(\\d+.\\d*)\\s+([0-9]+)\\s+([0-9]+);");
     private static final Pattern           WAFER_STATUS_PATTERN                 = Pattern.compile("^(WaferStatus)\\s+(.*);");
@@ -88,15 +91,17 @@ public enum KLAParser {
     private static final Matcher           SAMPLE_MATCHER                       = SAMPLE_PATTERN.matcher("");
     private static final Matcher           AREA_PER_TEST_MATCHER                = AREA_PER_TEST_PATTERN.matcher("");
     private static final Matcher           DEFECT_RECORD_SPEC_MATCHER           = DEFECT_RECORD_SPEC_PATTERN.matcher("");
-    private static final Matcher           DEFECT_MATCHER                       = DEFECT_PATTERN.matcher("");
+    private static       Matcher           defectMatcher;
     private static final Matcher           SUMMARY_SPEC_MATCHER                 = SUMMARY_SPEC_PATTERN.matcher("");
     private static final Matcher           SUMMARY_MATCHER                      = SUMMARY_PATTERN.matcher("");
     private static final Matcher           WAFER_STATUS_MATCHER                 = WAFER_STATUS_PATTERN.matcher("");
+    private static final Map<DefectRecordField, Integer> groupOffsets   = new HashMap<>();
 
 
     public Optional<KLA> parse(final String filename) {
         if (null == filename || filename.isEmpty()) { return Optional.empty(); }
         if (Helper.isFileReadable(filename) && Helper.check4KLAFormat(filename)) {
+            groupOffsets.clear();
             final KLA               kla            = new KLA();
             final List<DefectClass> classes        = new LinkedList<>();
             final List<SampleTest>  sampleTestPlan = new LinkedList<>();
@@ -317,30 +322,82 @@ public enum KLAParser {
                     DEFECT_RECORD_SPEC_MATCHER.reset(line);
                     while (DEFECT_RECORD_SPEC_MATCHER.find()) {
                         final String defectRecordSpec = DEFECT_RECORD_SPEC_MATCHER.group(2);
-                        kla.setDefectRecordSpec(defectRecordSpec);
+                        Map<Integer, DefectRecordField> defectFieldMap = new HashMap<>();
+                        AtomicInteger                   currentOffset  = new AtomicInteger(1);
+                        DefectRecordField.getAsList() .forEach(field -> {
+                            int index = defectRecordSpec.indexOf(field.name);
+                            if (index != -1) { defectFieldMap.put(index, field); }
+                        });
+                        StringBuilder patternBuilder = new StringBuilder();
+                        patternBuilder.append("^");
+                        defectFieldMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
+                            patternBuilder.append("\\s+").append(entry.getValue().pattern);
+                            groupOffsets.put(entry.getValue(), currentOffset.get());
+                            currentOffset.set(currentOffset.get() + entry.getValue().groups);
+                        });
+                        patternBuilder.append(";?");
+                        defectPattern = Pattern.compile(patternBuilder.toString());
+                        defectMatcher = defectPattern.matcher("");
                     }
                     if (DEFECT_RECORD_SPEC_MATCHER.matches()) { return; }
 
                     // Defects
-                    DEFECT_MATCHER.reset(line);
-                    while (DEFECT_MATCHER.find()) {
-                        final int    defectID      = Integer.parseInt(DEFECT_MATCHER.group(1));
-                        final double xRel          = Double.parseDouble(DEFECT_MATCHER.group(2));
-                        final double yRel          = Double.parseDouble(DEFECT_MATCHER.group(4));
-                        final int    indexX        = Integer.parseInt(DEFECT_MATCHER.group(6));
-                        final int    indexY        = Integer.parseInt(DEFECT_MATCHER.group(7));
-                        final double sizeX         = Double.parseDouble(DEFECT_MATCHER.group(8));
-                        final double sizeY         = Double.parseDouble(DEFECT_MATCHER.group(9));
-                        final double defectArea    = Double.parseDouble(DEFECT_MATCHER.group(10));
-                        final double sizeD         = Double.parseDouble(DEFECT_MATCHER.group(11));
-                        final int    classNumber   = Integer.parseInt(DEFECT_MATCHER.group(13));
-                        final int    fineBinNumber = Integer.parseInt(DEFECT_MATCHER.group(14));
-                        final int    test          = Integer.parseInt(DEFECT_MATCHER.group(15));
-                        final int    clusterNumber = Integer.parseInt(DEFECT_MATCHER.group(16));
-                        final int    imageCount    = Integer.parseInt(DEFECT_MATCHER.group(17));
-                        defects.add(new Defect(defectID, xRel, yRel, indexX, indexY, sizeX, sizeY, defectArea, sizeD, classNumber, fineBinNumber, test, clusterNumber, imageCount, ""));
+                    if (null != defectMatcher) {
+                        defectMatcher.reset(line);
+                        while (defectMatcher.find()) {
+                            final int defectID = Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.DEFECT_ID)));
+
+                            DefectBuilder defectBuilder = DefectBuilder.create(defectID);
+                            if (groupOffsets.containsKey(DefectRecordField.X_REL)) {
+                                defectBuilder.relX(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.X_REL))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.Y_REL)) {
+                                defectBuilder.relY(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_REL))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.X_INDEX)) {
+                                defectBuilder.indexX(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.X_INDEX))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.Y_INDEX)) {
+                                defectBuilder.indexY(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_INDEX))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.X_SIZE)) {
+                                defectBuilder.sizeX(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.X_SIZE))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.Y_SIZE)) {
+                                defectBuilder.sizeY(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_SIZE))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.DEFECT_AREA)) {
+                                defectBuilder.defectArea(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.DEFECT_AREA))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.D_SIZE)) {
+                                defectBuilder.sizeD(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.D_SIZE))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.CLASS_NUMBER)) {
+                                defectBuilder.classNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.CLASS_NUMBER))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.ROUGH_BIN_NUMBER)) {
+                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.ROUGH_BIN_NUMBER))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.FINE_BIN_NUMBER)) {
+                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.FINE_BIN_NUMBER))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.TEST)) {
+                                defectBuilder.test(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.TEST))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.CLUSTER_NUMBER)) {
+                                defectBuilder.clusterNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.CLUSTER_NUMBER))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.IMAGE_COUNT)) {
+                                defectBuilder.imageCount(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.IMAGE_COUNT))));
+                            }
+                            if (groupOffsets.containsKey(DefectRecordField.IMAGE_LIST)) {
+                                defectBuilder.imageList(defectMatcher.group(groupOffsets.get(DefectRecordField.IMAGE_LIST)).split("\\s+"));
+                            }
+                            Defect defect = defectBuilder.build();
+                            defects.add(defect);
+                        }
+                        if (defectMatcher.matches()) { return; }
                     }
-                    if (CLASS_MATCHER.matches()) { return; }
 
                     // SummarySpec
                     SUMMARY_SPEC_MATCHER.reset(line);

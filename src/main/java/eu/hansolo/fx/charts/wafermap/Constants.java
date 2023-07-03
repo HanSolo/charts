@@ -57,6 +57,11 @@ public class Constants {
     public static final String      FIELD_INSPECTION_TEST              = "InspectionTest";
     public static final String      FIELD_WAFER_STATUS                 = "WaferStatus";
 
+    public static final String      INT_PATTERN                        = "(\\-?[0-9]+)";
+    public static final String      DOUBLE_PATTERN                     = "(\\d+\\.\\d*)";
+    public static final String      DOUBLE_SCIENTIFIC_PATTERN          = "(\\d+\\.\\d*(e[+|-][0-9]+)?)";
+    public static final String      ALL_PATTERN                        = "(.*)";
+
     public static final Color       DEFAULT_WAFER_FILL                 = Color.rgb(230, 230, 230);
     public static final Color       DEFAULT_WAFER_STROKE               = Color.rgb(128, 128, 128);
     public static final Color       DEFAULT_NOTCH_FILL                 = Color.BLACK;
