@@ -83,6 +83,8 @@ public final class KLA {
 
     private int                       maxDefectsPerDie;
 
+    private Map<Integer, DefectRecordField> defectFieldMap;
+
 
     // ******************** Constructor ***************************************
     public KLA() {
@@ -124,12 +126,13 @@ public final class KLA {
         this.classes                   = new LinkedList<>();
         this.sampleTestPlan            = new LinkedList<>();
         this.defects                   = new ArrayList<>();
-        this.diesMinX                  = 0;
-        this.diesMaxX                  = 0;
-        this.diesMinY                  = 0;
-        this.diesMaxY                  = 0;
+        this.diesMinX                  = -1;
+        this.diesMaxX                  = -1;
+        this.diesMinY                  = -1;
+        this.diesMaxY                  = -1;
         this.dies                      = new HashMap<>();
         this.maxDefectsPerDie          = -1;
+        this.defectFieldMap            = new HashMap<>();
     }
 
 
@@ -339,8 +342,21 @@ public final class KLA {
 
     public int getMaxDefectsPerDie() { return this.maxDefectsPerDie; }
 
+    public void setDefectFieldMap(final Map<Integer, DefectRecordField> defectFieldMap) {
+        this.defectFieldMap.clear();
+        this.defectFieldMap.putAll(defectFieldMap);
+    }
+
 
     @Override public String toString() {
+        StringBuilder defectRecordSpecBuilder = new StringBuilder();
+        defectRecordSpecBuilder.append(Constants.FIELD_DEFECT_RECORD_SPEC).append(Constants.SPACE).append(this.defectFieldMap.size()).append(Constants.SPACE);
+        defectFieldMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
+            defectRecordSpecBuilder.append(entry.getValue().name).append(Constants.SPACE);
+        });
+        defectRecordSpecBuilder.setLength(defectRecordSpecBuilder.length() - 1);
+        defectRecordSpecBuilder.append(Constants.SEMICOLON);
+
         StringBuilder msgBuilder = new StringBuilder();
         msgBuilder.append(Constants.FIELD_FILE_VERSION).append(Constants.SPACE).append(this.fileVersionMajor).append(Constants.SPACE).append(this.fileVersionMinor).append(Constants.SEMICOLON).append(NEW_LINE)
                   .append(Constants.FIELD_FILE_TIME_STAMP).append(Constants.SPACE).append(DTF.format(this.fileTimestamp)).append(Constants.SEMICOLON).append(NEW_LINE)
@@ -368,10 +384,10 @@ public final class KLA {
         msgBuilder.setLength(msgBuilder.length() - 1);
         msgBuilder.append(Constants.SEMICOLON).append(NEW_LINE)
                   .append(Constants.FIELD_AREA_PER_TEST).append(Constants.SPACE).append(String.format(Locale.US, "%.10e", this.areaPerTest)).append(Constants.SEMICOLON).append(NEW_LINE)
-                  .append(Constants.FIELD_DEFECT_RECORD_SPEC).append(Constants.SPACE).append(this.defectRecordSpec).append(Constants.SEMICOLON).append(NEW_LINE)
+                  .append(defectRecordSpecBuilder).append(NEW_LINE)
                   .append(Constants.FIELD_DEFECT_LIST).append(NEW_LINE);
         defects.forEach(defect -> msgBuilder.append(defect.toString()).append(NEW_LINE));
-        msgBuilder.setLength(msgBuilder.length() - 1);
+        msgBuilder.setLength(msgBuilder.length() - 2);
         msgBuilder.append(Constants.SEMICOLON).append(NEW_LINE)
                   .append(Constants.FIELD_SUMMARY_SPEC).append(Constants.SPACE).append(this.summarySpec).append(Constants.SEMICOLON).append(NEW_LINE)
                   .append(Constants.FIELD_SUMMARY_LIST).append(NEW_LINE)

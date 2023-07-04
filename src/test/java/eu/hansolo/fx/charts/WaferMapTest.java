@@ -44,6 +44,8 @@ public class WaferMapTest extends Application {
         String        filename = WaferMapTest.class.getResource("12.KLA").toString().replace("file:", "");
         Optional<KLA> klaOpt   = KLAParser.INSTANCE.parse(filename);
 
+        System.out.println(klaOpt.get());
+
         wafermap = WaferMapBuilder.create()
                                   .kla(klaOpt.get())
                                   .dieTextVisible(true)

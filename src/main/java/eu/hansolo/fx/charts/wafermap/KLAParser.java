@@ -95,13 +95,15 @@ public enum KLAParser {
     private static final Matcher           SUMMARY_SPEC_MATCHER                 = SUMMARY_SPEC_PATTERN.matcher("");
     private static final Matcher           SUMMARY_MATCHER                      = SUMMARY_PATTERN.matcher("");
     private static final Matcher           WAFER_STATUS_MATCHER                 = WAFER_STATUS_PATTERN.matcher("");
-    private static final Map<DefectRecordField, Integer> groupOffsets   = new HashMap<>();
+
+    private static final Map<DefectRecordField, Integer> GROUP_OFFSETS          = new HashMap<>();
+    private static final Map<Integer, DefectRecordField> DEFECT_FIELD_MAP       = new HashMap<>();
 
 
     public Optional<KLA> parse(final String filename) {
         if (null == filename || filename.isEmpty()) { return Optional.empty(); }
         if (Helper.isFileReadable(filename) && Helper.check4KLAFormat(filename)) {
-            groupOffsets.clear();
+            GROUP_OFFSETS.clear();
             final KLA               kla            = new KLA();
             final List<DefectClass> classes        = new LinkedList<>();
             final List<SampleTest>  sampleTestPlan = new LinkedList<>();
@@ -322,19 +324,20 @@ public enum KLAParser {
                     DEFECT_RECORD_SPEC_MATCHER.reset(line);
                     while (DEFECT_RECORD_SPEC_MATCHER.find()) {
                         final String defectRecordSpec = DEFECT_RECORD_SPEC_MATCHER.group(2);
-                        Map<Integer, DefectRecordField> defectFieldMap = new HashMap<>();
+                        DEFECT_FIELD_MAP.clear();
                         AtomicInteger                   currentOffset  = new AtomicInteger(1);
                         DefectRecordField.getAsList() .forEach(field -> {
                             int index = defectRecordSpec.indexOf(field.name);
-                            if (index != -1) { defectFieldMap.put(index, field); }
+                            if (index != -1) { DEFECT_FIELD_MAP.put(index, field); }
                         });
                         StringBuilder patternBuilder = new StringBuilder();
                         patternBuilder.append("^");
-                        defectFieldMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
+                        DEFECT_FIELD_MAP.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
                             patternBuilder.append("\\s+").append(entry.getValue().pattern);
-                            groupOffsets.put(entry.getValue(), currentOffset.get());
+                            GROUP_OFFSETS.put(entry.getValue(), currentOffset.get());
                             currentOffset.set(currentOffset.get() + entry.getValue().groups);
                         });
+                        kla.setDefectFieldMap(DEFECT_FIELD_MAP);
                         patternBuilder.append(";?");
                         defectPattern = Pattern.compile(patternBuilder.toString());
                         defectMatcher = defectPattern.matcher("");
@@ -345,53 +348,53 @@ public enum KLAParser {
                     if (null != defectMatcher) {
                         defectMatcher.reset(line);
                         while (defectMatcher.find()) {
-                            final int defectID = Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.DEFECT_ID)));
+                            final int defectID = Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.DEFECT_ID)));
 
                             DefectBuilder defectBuilder = DefectBuilder.create(defectID);
-                            if (groupOffsets.containsKey(DefectRecordField.X_REL)) {
-                                defectBuilder.relX(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.X_REL))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.X_REL)) {
+                                defectBuilder.relX(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.X_REL))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.Y_REL)) {
-                                defectBuilder.relY(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_REL))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.Y_REL)) {
+                                defectBuilder.relY(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.Y_REL))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.X_INDEX)) {
-                                defectBuilder.indexX(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.X_INDEX))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.X_INDEX)) {
+                                defectBuilder.indexX(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.X_INDEX))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.Y_INDEX)) {
-                                defectBuilder.indexY(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_INDEX))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.Y_INDEX)) {
+                                defectBuilder.indexY(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.Y_INDEX))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.X_SIZE)) {
-                                defectBuilder.sizeX(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.X_SIZE))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.X_SIZE)) {
+                                defectBuilder.sizeX(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.X_SIZE))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.Y_SIZE)) {
-                                defectBuilder.sizeY(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.Y_SIZE))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.Y_SIZE)) {
+                                defectBuilder.sizeY(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.Y_SIZE))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.DEFECT_AREA)) {
-                                defectBuilder.defectArea(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.DEFECT_AREA))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.DEFECT_AREA)) {
+                                defectBuilder.defectArea(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.DEFECT_AREA))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.D_SIZE)) {
-                                defectBuilder.sizeD(Double.parseDouble(defectMatcher.group(groupOffsets.get(DefectRecordField.D_SIZE))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.D_SIZE)) {
+                                defectBuilder.sizeD(Double.parseDouble(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.D_SIZE))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.CLASS_NUMBER)) {
-                                defectBuilder.classNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.CLASS_NUMBER))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.CLASS_NUMBER)) {
+                                defectBuilder.classNumber(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.CLASS_NUMBER))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.ROUGH_BIN_NUMBER)) {
-                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.ROUGH_BIN_NUMBER))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.ROUGH_BIN_NUMBER)) {
+                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.ROUGH_BIN_NUMBER))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.FINE_BIN_NUMBER)) {
-                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.FINE_BIN_NUMBER))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.FINE_BIN_NUMBER)) {
+                                defectBuilder.fineBinNumber(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.FINE_BIN_NUMBER))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.TEST)) {
-                                defectBuilder.test(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.TEST))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.TEST)) {
+                                defectBuilder.test(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.TEST))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.CLUSTER_NUMBER)) {
-                                defectBuilder.clusterNumber(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.CLUSTER_NUMBER))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.CLUSTER_NUMBER)) {
+                                defectBuilder.clusterNumber(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.CLUSTER_NUMBER))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.IMAGE_COUNT)) {
-                                defectBuilder.imageCount(Integer.parseInt(defectMatcher.group(groupOffsets.get(DefectRecordField.IMAGE_COUNT))));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.IMAGE_COUNT)) {
+                                defectBuilder.imageCount(Integer.parseInt(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.IMAGE_COUNT))));
                             }
-                            if (groupOffsets.containsKey(DefectRecordField.IMAGE_LIST)) {
-                                defectBuilder.imageList(defectMatcher.group(groupOffsets.get(DefectRecordField.IMAGE_LIST)).split("\\s+"));
+                            if (GROUP_OFFSETS.containsKey(DefectRecordField.IMAGE_LIST)) {
+                                defectBuilder.imageList(defectMatcher.group(GROUP_OFFSETS.get(DefectRecordField.IMAGE_LIST)).split("\\s+"));
                             }
                             Defect defect = defectBuilder.build();
                             defects.add(defect);
