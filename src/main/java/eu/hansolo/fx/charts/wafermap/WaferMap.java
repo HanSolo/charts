@@ -20,7 +20,11 @@
 
  import eu.hansolo.fx.charts.tools.Helper;
  import eu.hansolo.fx.geometry.Rectangle;
+ import eu.hansolo.toolboxfx.geom.Bounds;
+ import eu.hansolo.toolboxfx.geom.Dimension;
+ import eu.hansolo.toolboxfx.geom.Point;
  import javafx.beans.DefaultProperty;
+ import javafx.beans.binding.BooleanBinding;
  import javafx.beans.property.BooleanProperty;
  import javafx.beans.property.BooleanPropertyBase;
  import javafx.beans.property.ObjectProperty;
@@ -35,10 +39,13 @@
  import javafx.event.EventHandler;
  import javafx.event.EventType;
  import javafx.geometry.VPos;
+ import javafx.scene.Cursor;
  import javafx.scene.Node;
+ import javafx.scene.Scene;
  import javafx.scene.canvas.Canvas;
  import javafx.scene.canvas.GraphicsContext;
  import javafx.scene.input.MouseEvent;
+ import javafx.scene.input.ScrollEvent;
  import javafx.scene.layout.Region;
  import javafx.scene.paint.Color;
  import javafx.scene.text.Font;
@@ -92,6 +99,21 @@
      private              ObjectProperty<Die>                 selectedDie;
      private              Map<String, Rectangle>              dieMap;
      private              EventHandler<MouseEvent>            mouseHandler;
+     private              EventHandler<ScrollEvent>           scrollHandler;
+     private              Bounds                              viewport;
+     private              double                              scale;
+     private              double                              minScale;
+     private              double                              scaledWidth;
+     private              double                              scaledHeight;
+     private              boolean                             zoomIn;
+     private              Point                               zoomInP1;
+     private              Point                               zoomInP2;
+     private              double                              x;
+     private              double                              y;
+     private              double                              lastX;
+     private              double                              lastY;
+     private              double                              originX;
+     private              double                              originY;
 
 
      // ******************** Constructors **************************************
@@ -124,21 +146,33 @@
          this.mouseHandler          = e -> {
              EventType<? extends Event> type = e.getEventType();
              if (MouseEvent.MOUSE_PRESSED.equals(type)) {
-                 Optional<Rectangle> optRect = dieMap.values().stream().filter(rect -> rect.contains(e.getX(), e.getY())).findFirst();
-                 if (optRect.isPresent()) {
-                     Optional<String> optDieName = Helper.getKeysByValue(dieMap, optRect.get()).stream().findFirst();
-                     if (optDieName.isPresent()) {
-                         final Die selected = kla.getDies().get(optDieName.get());
-                         if (null == selectedDie.get()) {
-                             selectedDie.set(selected);
-                         } else {
-                             selectedDie.set(selectedDie.get().equals(selected) ? null : selected);
-                         }
-                         redraw();
-                     }
-                 }
+                 mousePressed(e);
+             } else if (MouseEvent.MOUSE_ENTERED.equals(type)) {
+                 mouseEntered(e);
+             } else if (MouseEvent.MOUSE_EXITED.equals(type)) {
+                 mouseExited(e);
              }
          };
+         this.scrollHandler         = e -> {
+             double zoom = 1 / Helper.clamp(Math.min(10 / viewport.getWidth(), 10 / viewport.getHeight()),
+                                            Math.max(width / viewport.getWidth(), height / viewport.getHeight()),
+                                            Math.pow(1.01, e.getDeltaY()));
+             zoomAround(e.getSceneX(), e.getSceneY(), zoom);
+             redraw();
+             e.consume();
+         };
+         this.scale                 = 1.0;
+         this.minScale              = 1.0;
+         this.scaledWidth           = PREFERRED_WIDTH;
+         this.scaledHeight          = PREFERRED_HEIGHT;
+         this.viewport              = new Bounds(0.0, 0.0, PREFERRED_WIDTH, PREFERRED_HEIGHT);
+         this.zoomIn                = false;
+         this.zoomInP1              = new Point(-1, -1);
+         this.zoomInP2              = new Point(-1, -1);
+         this.x                     = 0;
+         this.y                     = 0;
+         this.originX               = 0;
+         this.originY               = 0;
 
          initGraphics();
          registerListeners();
@@ -164,7 +198,14 @@
      private void registerListeners() {
          widthProperty().addListener(o -> resize());
          heightProperty().addListener(o -> resize());
-         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_MOVED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_ENTERED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_EXITED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_DRAGGED, mouseHandler);
+         canvas.addEventFilter(MouseEvent.MOUSE_RELEASED, mouseHandler);
+         canvas.addEventFilter(ScrollEvent.SCROLL, scrollHandler);
+
          classConfigMap.addListener((MapChangeListener<Integer, ClassConfig>) change -> redraw());
      }
 
@@ -414,10 +455,83 @@
      public Die getSelectedDie() { return selectedDie.get(); }
      public ReadOnlyObjectProperty<Die> selectedDieProperty() { return selectedDie; }
 
-
      public void dispose() {
-         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mouseHandler);
+         canvas.removeEventFilter(MouseEvent.MOUSE_ENTERED, mouseHandler);
+         canvas.removeEventFilter(MouseEvent.MOUSE_EXITED, mouseHandler);
+         canvas.removeEventFilter(MouseEvent.MOUSE_PRESSED, mouseHandler);
+         canvas.removeEventFilter(ScrollEvent.SCROLL, scrollHandler);
      }
+
+
+     private void mouseEntered(final MouseEvent e) {
+         Scene scene = getScene();
+         if (null == scene) return;
+         scene.setCursor(Cursor.CROSSHAIR);
+     }
+     private void mousePressed(final MouseEvent e) {
+         if (scale > 1) { return; }
+         Optional<Rectangle> optRect = dieMap.values().stream().filter(rect -> rect.contains(e.getX(), e.getY())).findFirst();
+         if (optRect.isPresent()) {
+             Optional<String> optDieName = Helper.getKeysByValue(dieMap, optRect.get()).stream().findFirst();
+             if (optDieName.isPresent()) {
+                 final Die selected = kla.getDies().get(optDieName.get());
+                 if (null == selectedDie.get()) {
+                     selectedDie.set(selected);
+                 } else {
+                     selectedDie.set(selectedDie.get().equals(selected) ? null : selected);
+                 }
+                 redraw();
+             }
+         }
+     }
+     private void mouseExited(final MouseEvent e) {
+         Scene scene = getScene();
+         if (null == scene) return;
+         scene.setCursor(Cursor.DEFAULT);
+     }
+
+     private void zoom(final Point p1, final Point p2) {
+         double minX = p1.getX() < p2.getX() ? p1.getX() : p2.getX();
+         double minY = p1.getY() < p2.getY() ? p1.getY() : p2.getY();
+         double maxX = p1.getX() > p2.getX() ? p1.getX() : p2.getX();
+         double maxY = p1.getY() > p2.getY() ? p1.getY() : p2.getY();
+         zoom(minX, minY, maxX, maxY);
+     }
+     private void zoom(final double minX, final double minY, final double maxX, final double maxY) {
+         double scaleX = viewport.getWidth() / (maxX - minX);
+         double scaleY = viewport.getHeight() / (maxY - minY);
+         this.scale = Math.min(scaleX, scaleY);
+
+         updateViewport(minX, minY, maxX, maxY);
+
+         ctx.translate(minX, minY);
+         ctx.scale(scale, scale);
+         ctx.translate(-minX, -minY);
+
+         zoomInP1.set(-1, -1);
+         zoomInP2.set(-1, -1);
+
+         redraw();
+     }
+
+     private void zoomAround(final double x, final double y, final double zoom) {
+         ctx.translate(originX, originY);
+
+         originX -= x / (scale * zoom) - x / scale;
+         originY -= y / (scale * zoom) - y / scale;
+
+         ctx.scale(zoom, zoom);
+         ctx.translate(-originX, -originY);
+
+         scale *= zoom;
+
+         updateViewport(originX, originY, originX + width / scale, originY + height / scale);
+     }
+
+     private void updateViewport(final double minX, final double minY, final double maxX, final double maxY) {
+         viewport.set(minX, minY, maxX, maxY);
+     }
+
 
 
      // ******************** Layout *******************************************
@@ -439,6 +553,18 @@
              canvas.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
 
              redraw();
+
+             double scale           = 1.0;
+             double newScaledWidth  = width * scale;
+             double newScaledHeight = height * scale;
+
+             scaledWidth  = newScaledWidth;
+             scaledHeight = newScaledHeight;
+
+             updateViewport(viewport.getMinX(), viewport.getMinY(), viewport.getMinX() + scaledWidth, viewport.getMinY() + scaledHeight);
+
+             canvas.setWidth(scaledWidth);
+             canvas.setHeight(scaledHeight);
          }
      }
 
@@ -486,7 +612,9 @@
          }
 
          // Draw dies
-         ctx.setFont(Font.font(3 * factor));
+         double minDieSize = Math.min(kla.getDiePitchX(), kla.getDiePitchY()) / 2000;
+         double fontSize = minDieSize * factor;
+         ctx.setFont(Font.font(fontSize));
          ctx.setTextAlign(TextAlignment.CENTER);
          ctx.setTextBaseline(VPos.CENTER);
          kla.getDies().entrySet().forEach(entry -> {
@@ -523,7 +651,7 @@
 
              dieMap.put(die.getName(), new Rectangle(x, y, w, h));
 
-             if (getDieTextVisible()) {
+             if ((fontSize > 5 || scale > 6)  && getDieTextVisible()) {
                  ctx.setFill(getDieTextFill());
                  ctx.fillText(name, x + w * 0.5, y + h * 0.5, w);
              }
