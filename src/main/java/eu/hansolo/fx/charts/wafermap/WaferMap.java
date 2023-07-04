@@ -74,6 +74,12 @@
      private              double                              factor;
      private              double                              defectSize;
      private              double                              halfDefectSize;
+     private              double                              centerX;
+     private              double                              centerY;
+     private              double                              diameter;
+     private              double                              notchSize;
+     private              double                              minDieSize;
+     private              double                              fontSize;
      private              Color                               _waferFill;
      private              ObjectProperty<Color>               waferFill;
      private              Color                               _waferStroke;
@@ -583,6 +589,12 @@
              factor         = size / kla.getSampleSize();
              defectSize     = Helper.clamp(1, 3, size / 150);
              halfDefectSize = defectSize * 0.5;
+             centerX        = size * 0.5;
+             centerY        = size * 0.5;
+             diameter       = kla.getSampleSize() * factor;
+             notchSize      = diameter / 200;
+             minDieSize     = Math.min(kla.getDiePitchX(), kla.getDiePitchY()) / 2000;
+             fontSize       = minDieSize * factor;
 
              canvas.setWidth(size);
              canvas.setHeight(size);
@@ -613,10 +625,6 @@
 
          ctx.clearRect(0, 0, width, height);
 
-         double centerX  = size * 0.5;
-         double centerY  = size * 0.5;
-         double diameter = kla.getSampleSize() * factor;
-
          Color waferFill   = getWaferFill();
          Color waferStroke = getWaferStroke();
 
@@ -628,7 +636,6 @@
          ctx.strokeOval(0, 0, diameter, diameter);
 
          // Draw notch
-         final double notchSize = diameter / 200;
          switch (kla.getOrientationMarkLocation()) {
              case UP    -> {
                  ctx.setFill(getNotchFill());
@@ -652,8 +659,6 @@
          }
 
          // Draw dies
-         double minDieSize = Math.min(kla.getDiePitchX(), kla.getDiePitchY()) / 2000;
-         double fontSize = minDieSize * factor;
          ctx.setFont(Font.font(fontSize));
          ctx.setTextAlign(TextAlignment.CENTER);
          ctx.setTextBaseline(VPos.CENTER);
