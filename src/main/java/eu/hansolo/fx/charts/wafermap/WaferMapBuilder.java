@@ -114,6 +114,11 @@ public class WaferMapBuilder<B extends WaferMapBuilder<B>> {
         return (B)this;
     }
 
+    public final B zoomEnabled(final boolean zoomEnabled) {
+        properties.put("zoomEnabled", new SimpleBooleanProperty(zoomEnabled));
+        return (B)this;
+    }
+
 
     // General properties
     public final B prefSize(final double width, final double height) {
@@ -239,6 +244,7 @@ public class WaferMapBuilder<B extends WaferMapBuilder<B>> {
                 case "densityColorsVisible" -> wafermap.setDensityColorsVisible(((BooleanProperty) properties.get(key)).get());
                 case "legendVisible"        -> wafermap.setLegendVisible(((BooleanProperty) properties.get(key)).get());
                 case "classConfigMap"       -> wafermap.setClassConfigMap(((ObjectProperty<Map<Integer, ClassConfig>>) properties.get(key)).get());
+                case "zoomEnabled"          -> wafermap.setZoomEnabled(((BooleanProperty) properties.get(key)).get());
             }
         }
         return wafermap;

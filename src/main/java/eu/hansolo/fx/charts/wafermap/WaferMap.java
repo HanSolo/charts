@@ -100,18 +100,16 @@
      private              Map<String, Rectangle>              dieMap;
      private              EventHandler<MouseEvent>            mouseHandler;
      private              EventHandler<ScrollEvent>           scrollHandler;
+     private              boolean                             _zoomEnabled;
+     private              BooleanProperty                     zoomEnabled;
      private              Bounds                              viewport;
      private              double                              scale;
-     private              double                              minScale;
      private              double                              scaledWidth;
      private              double                              scaledHeight;
-     private              boolean                             zoomIn;
      private              Point                               zoomInP1;
      private              Point                               zoomInP2;
      private              double                              x;
      private              double                              y;
-     private              double                              lastX;
-     private              double                              lastY;
      private              double                              originX;
      private              double                              originY;
 
@@ -153,20 +151,12 @@
                  mouseExited(e);
              }
          };
-         this.scrollHandler         = e -> {
-             double zoom = 1 / Helper.clamp(Math.min(10 / viewport.getWidth(), 10 / viewport.getHeight()),
-                                            Math.max(width / viewport.getWidth(), height / viewport.getHeight()),
-                                            Math.pow(1.01, e.getDeltaY()));
-             zoomAround(e.getSceneX(), e.getSceneY(), zoom);
-             redraw();
-             e.consume();
-         };
+         this.scrollHandler         = e -> scroll(e);
+         this._zoomEnabled          = false;
          this.scale                 = 1.0;
-         this.minScale              = 1.0;
          this.scaledWidth           = PREFERRED_WIDTH;
          this.scaledHeight          = PREFERRED_HEIGHT;
          this.viewport              = new Bounds(0.0, 0.0, PREFERRED_WIDTH, PREFERRED_HEIGHT);
-         this.zoomIn                = false;
          this.zoomInP1              = new Point(-1, -1);
          this.zoomInP2              = new Point(-1, -1);
          this.x                     = 0;
@@ -455,6 +445,34 @@
      public Die getSelectedDie() { return selectedDie.get(); }
      public ReadOnlyObjectProperty<Die> selectedDieProperty() { return selectedDie; }
 
+     public boolean isZoomEnabled() { return null == zoomEnabled ? _zoomEnabled : zoomEnabled.get(); }
+     public void setZoomEnabled(final boolean zoomEnabled) {
+         if (null == this.zoomEnabled) {
+             _zoomEnabled = zoomEnabled;
+             if (!zoomEnabled) {
+                 scale = 1.0;
+                 redraw();
+             }
+         } else {
+             this.zoomEnabled.set(zoomEnabled);
+         }
+     }
+     public BooleanProperty zoomEnabledProperty() {
+         if (null == zoomEnabled) {
+             zoomEnabled = new BooleanPropertyBase(_zoomEnabled) {
+                 @Override protected void invalidated() {
+                     if (!get()) {
+                         scale = 1.0;
+                         redraw();
+                     }
+                 }
+                 @Override public Object getBean() { return WaferMap.this; }
+                 @Override public String getName() { return "zoomEnabled"; }
+             };
+         }
+         return zoomEnabled;
+     }
+
      public void dispose() {
          canvas.removeEventFilter(MouseEvent.MOUSE_ENTERED, mouseHandler);
          canvas.removeEventFilter(MouseEvent.MOUSE_EXITED, mouseHandler);
@@ -464,12 +482,16 @@
 
 
      private void mouseEntered(final MouseEvent e) {
-         Scene scene = getScene();
-         if (null == scene) return;
-         scene.setCursor(Cursor.CROSSHAIR);
+         if (isZoomEnabled()) {
+             Scene scene = getScene();
+             if (null == scene) return;
+             scene.setCursor(Cursor.CROSSHAIR);
+         }
      }
      private void mousePressed(final MouseEvent e) {
-         if (scale > 1) { return; }
+         if (isZoomEnabled()) {
+             if (scale > 1) { return; }
+         }
          Optional<Rectangle> optRect = dieMap.values().stream().filter(rect -> rect.contains(e.getX(), e.getY())).findFirst();
          if (optRect.isPresent()) {
              Optional<String> optDieName = Helper.getKeysByValue(dieMap, optRect.get()).stream().findFirst();
@@ -485,9 +507,20 @@
          }
      }
      private void mouseExited(final MouseEvent e) {
-         Scene scene = getScene();
-         if (null == scene) return;
-         scene.setCursor(Cursor.DEFAULT);
+         if (isZoomEnabled()) {
+             Scene scene = getScene();
+             if (null == scene) return;
+             scene.setCursor(Cursor.DEFAULT);
+         }
+     }
+
+     private void scroll(final ScrollEvent e) {
+         if (isZoomEnabled()) {
+             double zoom = 1 / Helper.clamp(Math.min(10 / viewport.getWidth(), 10 / viewport.getHeight()), Math.max(width / viewport.getWidth(), height / viewport.getHeight()), Math.pow(1.01, e.getDeltaY()));
+             zoomAround(e.getSceneX(), e.getSceneY(), zoom);
+             redraw();
+             e.consume();
+         }
      }
 
      private void zoom(final Point p1, final Point p2) {
@@ -498,20 +531,22 @@
          zoom(minX, minY, maxX, maxY);
      }
      private void zoom(final double minX, final double minY, final double maxX, final double maxY) {
-         double scaleX = viewport.getWidth() / (maxX - minX);
-         double scaleY = viewport.getHeight() / (maxY - minY);
-         this.scale = Math.min(scaleX, scaleY);
+         if (isZoomEnabled()) {
+             double scaleX = viewport.getWidth() / (maxX - minX);
+             double scaleY = viewport.getHeight() / (maxY - minY);
+             this.scale = Math.min(scaleX, scaleY);
 
-         updateViewport(minX, minY, maxX, maxY);
+             updateViewport(minX, minY, maxX, maxY);
 
-         ctx.translate(minX, minY);
-         ctx.scale(scale, scale);
-         ctx.translate(-minX, -minY);
+             ctx.translate(minX, minY);
+             ctx.scale(scale, scale);
+             ctx.translate(-minX, -minY);
 
-         zoomInP1.set(-1, -1);
-         zoomInP2.set(-1, -1);
+             zoomInP1.set(-1, -1);
+             zoomInP2.set(-1, -1);
 
-         redraw();
+             redraw();
+         }
      }
 
      private void zoomAround(final double x, final double y, final double zoom) {
@@ -548,23 +583,28 @@
              factor         = size / kla.getSampleSize();
              defectSize     = Helper.clamp(1, 3, size / 150);
              halfDefectSize = defectSize * 0.5;
+
              canvas.setWidth(size);
              canvas.setHeight(size);
              canvas.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
 
+             if (isZoomEnabled()) {
+                 double scale           = 1.0;
+                 double newScaledWidth  = width * scale;
+                 double newScaledHeight = height * scale;
+
+                 scaledWidth  = newScaledWidth;
+                 scaledHeight = newScaledHeight;
+
+                 updateViewport(viewport.getMinX(), viewport.getMinY(), viewport.getMinX() + scaledWidth, viewport.getMinY() + scaledHeight);
+
+                 canvas.setWidth(scaledWidth);
+                 canvas.setHeight(scaledHeight);
+             } else {
+                 canvas.setWidth(size);
+                 canvas.setHeight(size);
+             }
              redraw();
-
-             double scale           = 1.0;
-             double newScaledWidth  = width * scale;
-             double newScaledHeight = height * scale;
-
-             scaledWidth  = newScaledWidth;
-             scaledHeight = newScaledHeight;
-
-             updateViewport(viewport.getMinX(), viewport.getMinY(), viewport.getMinX() + scaledWidth, viewport.getMinY() + scaledHeight);
-
-             canvas.setWidth(scaledWidth);
-             canvas.setHeight(scaledHeight);
          }
      }
 

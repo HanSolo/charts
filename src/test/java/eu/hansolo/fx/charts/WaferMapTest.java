@@ -53,6 +53,7 @@ public class WaferMapTest extends Application {
                                   .waferFill(Color.rgb(240, 240, 240))
                                   .waferStroke(Color.GRAY)
                                   .dieTextFill(Color.BLACK)
+                                  .zoomEnabled(true)
                                   .build();
 
         dieMap = DieMapBuilder.create()
