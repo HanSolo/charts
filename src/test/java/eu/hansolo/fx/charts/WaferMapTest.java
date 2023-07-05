@@ -49,23 +49,22 @@ public class WaferMapTest extends Application {
 
         wafermap = WaferMapBuilder.create()
                                   .kla(klaOpt.get())
-                                  .dieTextVisible(false)
-                                  .densityColorsVisible(false)
-                                  .defectsVisible(false)
+                                  .dieTextVisible(true)
+                                  .densityColorsVisible(true)
+                                  .defectsVisible(true)
                                   .heatmapVisible(true)
                                   .heatmapColorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
-                                  .heatmapSpotRadius(5)
-                                  .heatmapOpacity(0.5)
-                                  .waferFill(Color.rgb(240, 240, 240))
-                                  .waferStroke(Color.GRAY)
+                                  .heatmapSpotRadius(7)
+                                  .heatmapOpacity(0.75)
+                                  .waferFill(Color.LIGHTGRAY)
+                                  .waferStroke(Color.BLACK)
                                   .dieTextFill(Color.BLACK)
-                                  .zoomEnabled(false)
                                   .build();
 
         dieMap = DieMapBuilder.create()
                               .dieTextFill(Color.LIGHTGRAY)
                               .dieTextVisible(true)
-                              .densityColorsVisible(true)
+                              .densityColorsVisible(false)
                               .build();
 
         wafermap.selectedDieProperty().addListener(o -> Platform.runLater(() -> dieMap.setDie(wafermap.getSelectedDie())));
@@ -74,7 +73,7 @@ public class WaferMapTest extends Application {
     @Override public void start(Stage stage) {
         HBox pane  = new HBox(20, wafermap, dieMap);
         pane.setPadding(new Insets(10));
-        Scene     scene = new Scene(pane);
+        Scene scene = new Scene(pane, Color.DARKGRAY);
 
         stage.setTitle("Wafermap");
         stage.setScene(scene);
