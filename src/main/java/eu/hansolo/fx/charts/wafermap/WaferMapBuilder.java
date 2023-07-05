@@ -18,6 +18,7 @@
 
 package eu.hansolo.fx.charts.wafermap;
 
+import eu.hansolo.fx.heatmap.ColorMapping;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -106,6 +107,31 @@ public class WaferMapBuilder<B extends WaferMapBuilder<B>> {
 
     public final B legendVisible(final boolean legendVisible) {
         properties.put("legendVisible", new SimpleBooleanProperty(legendVisible));
+        return (B)this;
+    }
+
+    public final B defectsVisible(final boolean defectsVisible) {
+        properties.put("defectsVisible", new SimpleBooleanProperty(defectsVisible));
+        return (B)this;
+    }
+
+    public final B heatmapVisible(final boolean heatmapVisible) {
+        properties.put("heatmapVisible", new SimpleBooleanProperty(heatmapVisible));
+        return (B)this;
+    }
+
+    public final B heatmapColorMapping(final ColorMapping colorMapping) {
+        properties.put("heatmapColorMapping", new SimpleObjectProperty<>(colorMapping));
+        return (B)this;
+    }
+
+    public final B heatmapSpotRadius(final double spotRadius) {
+        properties.put("heatmapSpotRadius", new SimpleDoubleProperty(spotRadius));
+        return (B)this;
+    }
+
+    public final B heatmapOpacity(final double opacity) {
+        properties.put("heatmapOpacity", new SimpleDoubleProperty(opacity));
         return (B)this;
     }
 
@@ -243,6 +269,11 @@ public class WaferMapBuilder<B extends WaferMapBuilder<B>> {
                 case "dieTextVisible"       -> wafermap.setDieTextVisible(((BooleanProperty) properties.get(key)).get());
                 case "densityColorsVisible" -> wafermap.setDensityColorsVisible(((BooleanProperty) properties.get(key)).get());
                 case "legendVisible"        -> wafermap.setLegendVisible(((BooleanProperty) properties.get(key)).get());
+                case "defectsVisible"       -> wafermap.setDefectsVisible(((BooleanProperty) properties.get(key)).get());
+                case "heatmapVisible"       -> wafermap.setHeatmapVisible(((BooleanProperty) properties.get(key)).get());
+                case "heatmapColorMapping"  -> wafermap.setHeatmapColorMapping(((ObjectProperty<ColorMapping>) properties.get(key)).get());
+                case "heatmapSpotRadius"    -> wafermap.setHeatmapSpotRadius(((DoubleProperty) properties.get(key)).get());
+                case "heatmapOpacity"       -> wafermap.setHeatmapOpacity(((DoubleProperty) properties.get(key)).get());
                 case "classConfigMap"       -> wafermap.setClassConfigMap(((ObjectProperty<Map<Integer, ClassConfig>>) properties.get(key)).get());
                 case "zoomEnabled"          -> wafermap.setZoomEnabled(((BooleanProperty) properties.get(key)).get());
             }

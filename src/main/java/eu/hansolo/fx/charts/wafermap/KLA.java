@@ -254,7 +254,6 @@ public final class KLA {
     public Map<String, Die> getDies() { return dies; }
 
 
-
     public void createDieMap() {
         // Offset between xy and uv coordinate system
         final double offsetX = getSampleCenterLocationX() / 1_000.0;

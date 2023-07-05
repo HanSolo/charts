@@ -20,13 +20,16 @@
 
  import eu.hansolo.fx.charts.tools.Helper;
  import eu.hansolo.fx.geometry.Rectangle;
+ import eu.hansolo.fx.heatmap.ColorMapping;
+ import eu.hansolo.fx.heatmap.HeatMap;
+ import eu.hansolo.fx.heatmap.HeatMapBuilder;
+ import eu.hansolo.fx.heatmap.OpacityDistribution;
  import eu.hansolo.toolboxfx.geom.Bounds;
- import eu.hansolo.toolboxfx.geom.Dimension;
  import eu.hansolo.toolboxfx.geom.Point;
  import javafx.beans.DefaultProperty;
- import javafx.beans.binding.BooleanBinding;
  import javafx.beans.property.BooleanProperty;
  import javafx.beans.property.BooleanPropertyBase;
+ import javafx.beans.property.DoubleProperty;
  import javafx.beans.property.ObjectProperty;
  import javafx.beans.property.ObjectPropertyBase;
  import javafx.beans.property.ReadOnlyObjectProperty;
@@ -47,10 +50,12 @@
  import javafx.scene.input.MouseEvent;
  import javafx.scene.input.ScrollEvent;
  import javafx.scene.layout.Region;
+ import javafx.scene.layout.StackPane;
  import javafx.scene.paint.Color;
  import javafx.scene.text.Font;
  import javafx.scene.text.TextAlignment;
 
+ import java.util.ArrayList;
  import java.util.HashMap;
  import java.util.List;
  import java.util.Map;
@@ -70,6 +75,8 @@
      private              double                              height;
      private              Canvas                              canvas;
      private              GraphicsContext                     ctx;
+     private              HeatMap                             heatmap;
+     private              StackPane                           pane;
      private              KLA                                 kla;
      private              double                              factor;
      private              double                              defectSize;
@@ -101,6 +108,10 @@
      private              BooleanProperty                     densityColorsVisible;
      private              boolean                             _legendVisible;
      private              BooleanProperty                     legendVisible;
+     private              boolean                             _defectsVisible;
+     private              BooleanProperty                     defectsVisible;
+     private              boolean                             _heatmapVisible;
+     private              BooleanProperty                     heatmapVisible;
      private              ObservableMap<Integer, ClassConfig> classConfigMap;
      private              ObjectProperty<Die>                 selectedDie;
      private              Map<String, Rectangle>              dieMap;
@@ -114,8 +125,6 @@
      private              double                              scaledHeight;
      private              Point                               zoomInP1;
      private              Point                               zoomInP2;
-     private              double                              x;
-     private              double                              y;
      private              double                              originX;
      private              double                              originY;
 
@@ -144,6 +153,8 @@
          this._dieTextVisible       = false;
          this._densityColorsVisible = false;
          this._legendVisible        = false;
+         this._defectsVisible       = true;
+         this._heatmapVisible       = false;
          this.classConfigMap        = FXCollections.observableHashMap();
          this.selectedDie           = new SimpleObjectProperty<>(null);
          this.dieMap                = new HashMap<>();
@@ -165,8 +176,6 @@
          this.viewport              = new Bounds(0.0, 0.0, PREFERRED_WIDTH, PREFERRED_HEIGHT);
          this.zoomInP1              = new Point(-1, -1);
          this.zoomInP2              = new Point(-1, -1);
-         this.x                     = 0;
-         this.y                     = 0;
          this.originX               = 0;
          this.originY               = 0;
 
@@ -188,7 +197,21 @@
          canvas = new Canvas(PREFERRED_WIDTH, PREFERRED_HEIGHT);
          ctx    = canvas.getGraphicsContext2D();
 
-         getChildren().setAll(canvas);
+         heatmap  = HeatMapBuilder.create()
+                                  .prefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT)
+                                  .colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
+                                  .spotRadius(10)
+                                  .fadeColors(true)
+                                  .opacityDistribution(OpacityDistribution.LINEAR)
+                                  .heatMapOpacity(0.75)
+                                  .build();
+         heatmap.setVisible(false);
+         heatmap.setManaged(false);
+         heatmap.setMouseTransparent(true);
+
+         pane = new StackPane(canvas, heatmap);
+
+         getChildren().setAll(pane);
      }
 
      private void registerListeners() {
@@ -217,6 +240,7 @@
      @Override public ObservableList<Node> getChildren()              { return super.getChildren(); }
 
      public void setKla(final KLA kla) {
+         this.heatmap.clearHeatMap();
          this.kla = kla;
          this.kla.createDieMap();
          resize();
@@ -430,6 +454,79 @@
          return legendVisible;
      }
 
+     public boolean getDefectsVisible() { return null == defectsVisible ? _defectsVisible : defectsVisible.get(); }
+     public void setDefectsVisible(final boolean defectsVisible) {
+         if (null == this.defectsVisible) {
+             _defectsVisible = defectsVisible;
+             redraw();
+         } else {
+             this.defectsVisible.set(defectsVisible);
+         }
+     }
+     public BooleanProperty defectsVisibleProperty() {
+         if (null == defectsVisible) {
+             defectsVisible = new BooleanPropertyBase(_defectsVisible) {
+                 @Override protected void invalidated() { redraw(); }
+                 @Override public Object getBean() { return WaferMap.this; }
+                 @Override public String getName() { return "defectsVisible"; }
+             };
+         }
+         return defectsVisible;
+     }
+
+     public boolean getHeatmapVisible() { return null == heatmapVisible ? _heatmapVisible : heatmapVisible.get(); }
+     public void setHeatmapVisible(final boolean heatmapVisible) {
+         if (null == this.heatmapVisible) {
+             _heatmapVisible = heatmapVisible;
+             this.heatmap.setVisible(heatmapVisible);
+             this.heatmap.setManaged(heatmapVisible);
+             if (heatmapVisible) {
+                 this.heatmap.clearHeatMap();
+                 resize();
+             }
+             resize();
+         } else {
+             this.heatmapVisible.set(heatmapVisible);
+         }
+     }
+     public BooleanProperty heatmapVisibleProperty() {
+         if (null == heatmapVisible) {
+             heatmapVisible = new BooleanPropertyBase(_heatmapVisible) {
+                 @Override protected void invalidated() {
+                     heatmap.setVisible(get());
+                     heatmap.setManaged(get());
+                     if (get()) {
+                         heatmap.clearHeatMap();
+                         resize();
+                     }
+                 }
+                 @Override public Object getBean() { return WaferMap.this; }
+                 @Override public String getName() { return "heatmapVisible"; }
+             };
+         }
+         return heatmapVisible;
+     }
+
+     public void setHeatmapColorMapping(final ColorMapping colorMapping) {
+         heatmap.setColorMapping(colorMapping);
+         if (getHeatmapVisible()) {
+             heatmap.clearHeatMap();
+             resize();
+         }
+     }
+
+     public void setHeatmapSpotRadius(final double spotRadius) {
+         heatmap.setSpotRadius(Helper.clamp(1, 20, spotRadius));
+         if (getHeatmapVisible()) {
+             heatmap.clearHeatMap();
+             resize();
+         }
+     }
+
+     public void setHeatmapOpacity(final double opacity) {
+         heatmap.setOpacity(Helper.clamp(0.0, 1.0, opacity));
+     }
+
      public void setClassConfigMap(final Map<Integer, ClassConfig> classConfigMap) {
          this.classConfigMap.clear();
          this.classConfigMap.putAll(classConfigMap);
@@ -486,6 +583,19 @@
          canvas.removeEventFilter(ScrollEvent.SCROLL, scrollHandler);
      }
 
+
+     private void createHeatmap() {
+         heatmap.clearHeatMap();
+         List<Point> spots = new ArrayList<>();
+         for (Die die : kla.getDies().values()) {
+             for (Defect defect : die.getDefects()) {
+                 double tmpXAbsolute = (die.getOriginX() + ((die.getSizeX() * die.getXIndex() + defect.getXRel())) / 1000) * factor;
+                 double tmpYAbsolute = (die.getOriginY() + ((die.getSizeY() * die.getYIndex() + defect.getYRel())) / 1000) * factor;
+                 spots.add(new Point(tmpXAbsolute, tmpYAbsolute));
+             }
+         }
+         heatmap.setSpots(spots);
+     }
 
      private void mouseEntered(final MouseEvent e) {
          if (isZoomEnabled()) {
@@ -600,7 +710,17 @@
              canvas.setHeight(size);
              canvas.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
 
+             heatmap.setFitWidth(size);
+             heatmap.setFitHeight(size);
+             heatmap.relocate((getWidth() - canvas.getWidth()) * 0.5, (getHeight() - canvas.getHeight()) * 0.5);
+
+             pane.setPrefSize(size, size);
+             pane.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
+
              if (isZoomEnabled()) {
+                 heatmap.setVisible(false);
+                 heatmap.setManaged(false);
+
                  double scale           = 1.0;
                  double newScaledWidth  = width * scale;
                  double newScaledHeight = height * scale;
@@ -613,9 +733,15 @@
                  canvas.setWidth(scaledWidth);
                  canvas.setHeight(scaledHeight);
              } else {
+                 heatmap.setManaged(true);
+                 heatmap.setVisible(true);
+
                  canvas.setWidth(size);
                  canvas.setHeight(size);
              }
+
+             if (getHeatmapVisible() && heatmap.getSpots().isEmpty()) { createHeatmap(); }
+
              redraw();
          }
      }
@@ -713,31 +839,33 @@
          }
 
          // Draw defects
-         boolean drawDefect;
-         for (Die die : kla.getDies().values()) {
-             for (Defect defect : die.getDefects()) {
-                 if (classConfigMap.isEmpty()) {
-                     ctx.setFill(getDefectFill());
-                     ctx.setStroke(getDefectStroke());
-                     drawDefect = true;
-                 } else {
-                     int classNumber = defect.getClassNumber();
-                     if (classConfigMap.containsKey(classNumber)) {
-                        drawDefect = classConfigMap.get(classNumber).visible();
-                        ctx.setFill(classConfigMap.get(classNumber).fill());
-                        ctx.setStroke(classConfigMap.get(classNumber).stroke());
-                     } else {
-                         drawDefect = false;
+         if (getDefectsVisible()) {
+             boolean drawDefect;
+             for (Die die : kla.getDies().values()) {
+                 for (Defect defect : die.getDefects()) {
+                     if (classConfigMap.isEmpty()) {
                          ctx.setFill(getDefectFill());
                          ctx.setStroke(getDefectStroke());
+                         drawDefect = true;
+                     } else {
+                         int classNumber = defect.getClassNumber();
+                         if (classConfigMap.containsKey(classNumber)) {
+                             drawDefect = classConfigMap.get(classNumber).visible();
+                             ctx.setFill(classConfigMap.get(classNumber).fill());
+                             ctx.setStroke(classConfigMap.get(classNumber).stroke());
+                         } else {
+                             drawDefect = false;
+                             ctx.setFill(getDefectFill());
+                             ctx.setStroke(getDefectStroke());
+                         }
                      }
-                 }
-                 if (drawDefect) {
-                     if (kla.getClasses().stream().filter(clazz -> clazz.getId() == defect.getClassNumber()).count() > 0) {
-                         double tmpXAbsolute = (die.getOriginX() + ((die.getSizeX() * die.getXIndex() + defect.getXRel())) / 1000) * factor;
-                         double tmpYAbsolute = (die.getOriginY() + ((die.getSizeY() * die.getYIndex() + defect.getYRel())) / 1000) * factor;
-                         ctx.fillOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
-                         ctx.strokeOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                     if (drawDefect) {
+                         if (kla.getClasses().stream().filter(clazz -> clazz.getId() == defect.getClassNumber()).count() > 0) {
+                             double tmpXAbsolute = (die.getOriginX() + ((die.getSizeX() * die.getXIndex() + defect.getXRel())) / 1000) * factor;
+                             double tmpYAbsolute = (die.getOriginY() + ((die.getSizeY() * die.getYIndex() + defect.getYRel())) / 1000) * factor;
+                             ctx.fillOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                             ctx.strokeOval(tmpXAbsolute - halfDefectSize, tmpYAbsolute - halfDefectSize, defectSize, defectSize);
+                         }
                      }
                  }
              }

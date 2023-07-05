@@ -24,6 +24,7 @@ import eu.hansolo.fx.charts.wafermap.KLA;
 import eu.hansolo.fx.charts.wafermap.KLAParser;
 import eu.hansolo.fx.charts.wafermap.WaferMap;
 import eu.hansolo.fx.charts.wafermap.WaferMapBuilder;
+import eu.hansolo.fx.heatmap.ColorMapping;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -44,16 +45,21 @@ public class WaferMapTest extends Application {
         String        filename = WaferMapTest.class.getResource("12.KLA").toString().replace("file:", "");
         Optional<KLA> klaOpt   = KLAParser.INSTANCE.parse(filename);
 
-        System.out.println(klaOpt.get());
+        //System.out.println(klaOpt.get());
 
         wafermap = WaferMapBuilder.create()
                                   .kla(klaOpt.get())
-                                  .dieTextVisible(true)
-                                  .densityColorsVisible(true)
+                                  .dieTextVisible(false)
+                                  .densityColorsVisible(false)
+                                  .defectsVisible(false)
+                                  .heatmapVisible(true)
+                                  .heatmapColorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
+                                  .heatmapSpotRadius(5)
+                                  .heatmapOpacity(0.5)
                                   .waferFill(Color.rgb(240, 240, 240))
                                   .waferStroke(Color.GRAY)
                                   .dieTextFill(Color.BLACK)
-                                  .zoomEnabled(true)
+                                  .zoomEnabled(false)
                                   .build();
 
         dieMap = DieMapBuilder.create()
