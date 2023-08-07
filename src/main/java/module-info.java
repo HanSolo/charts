@@ -11,7 +11,7 @@ module eu.hansolo.fx.charts {
     requires transitive javafx.swing;
 
     // 3rd party
-    requires logback.classic;
+    requires ch.qos.logback.classic;
     requires org.slf4j;
     requires transitive eu.hansolo.toolbox;
     requires transitive eu.hansolo.toolboxfx;
