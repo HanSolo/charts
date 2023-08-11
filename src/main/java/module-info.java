@@ -32,6 +32,7 @@ module eu.hansolo.fx.charts {
     opens eu.hansolo.fx.charts.tools to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
     opens eu.hansolo.fx.charts.world to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
     opens eu.hansolo.fx.charts.voronoi to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.wafermap to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
 
     exports eu.hansolo.fx.geometry;
     exports eu.hansolo.fx.geometry.tools;
@@ -48,5 +49,5 @@ module eu.hansolo.fx.charts {
     exports eu.hansolo.fx.charts.world;
     exports eu.hansolo.fx.charts.voronoi;
     exports eu.hansolo.fx.charts.wafermap;
-    opens eu.hansolo.fx.charts.wafermap to eu.hansolo.fx.countries, eu.hansolo.fx.heatmap, eu.hansolo.toolbox, eu.hansolo.toolboxfx;
+
 }
