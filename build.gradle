@@ -15,10 +15,11 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 description   = 'Charts is a JavaFX library containing different kind of charts'
-mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
+mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo" // Deprecated: Old Gradle 6.4 Syntax
 
 Date buildTimeAndDate = new Date()
 ext {
+    moduleName      = 'eu.hansolo.fx.charts'
     buildDate       = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
     buildTime       = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
     platform        = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
@@ -47,6 +48,16 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+}
+
+application {
+    mainClass = "eu.hansolo.fx.charts.Demo"
+    mainModule = moduleName
+}
+
+java {
+    // Set to false per https://github.com/java9-modularity/gradle-modules-plugin
+    modularity.inferModulePath.set(false)
 }
 
 jar {
