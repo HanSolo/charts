@@ -85,7 +85,7 @@ jar {
                 'Implementation-Version': project.version,
                 'Bundle-Name'           : project.name,
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
-                'Bundle-Description'    : description,
+                'Bundle-Description'    : project.description,
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
                 'Export-Package'        : 'eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform, eu.hansolo.fx.charts, eu.hansolo.fx.charts.areaheatmap, eu.hansolo.fx.charts.color, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.forcedirectedgraph, eu.hansolo.fx.charts.pareto, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.charts.world, eu.hansolo.fx.charts.voronoi, eu.hansolo.fx.charts.wafermap',
                 'Class-Path'            : "${project.name}-${project.version}.jar",
