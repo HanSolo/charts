@@ -18,7 +18,6 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 description   = 'Charts is a JavaFX library containing different kind of charts'
-mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo" // Deprecated: Old Gradle 6.4 Syntax
 
 Date buildTimeAndDate = new Date()
 ext {
