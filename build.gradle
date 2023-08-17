@@ -1,3 +1,6 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 import java.text.SimpleDateFormat
 
 plugins {
@@ -15,10 +18,11 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 description   = 'Charts is a JavaFX library containing different kind of charts'
-mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo"
+mainClassName = "$moduleName/eu.hansolo.fx.charts.Demo" // Deprecated: Old Gradle 6.4 Syntax
 
 Date buildTimeAndDate = new Date()
 ext {
+    moduleName      = 'eu.hansolo.fx.charts'
     buildDate       = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
     buildTime       = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
     platform        = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
@@ -49,6 +53,16 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 }
 
+application {
+    mainClass = "eu.hansolo.fx.charts.Launcher"
+    mainModule = moduleName
+}
+
+java {
+    // Set to false per https://github.com/java9-modularity/gradle-modules-plugin
+    modularity.inferModulePath.set(false)
+}
+
 jar {
     from {
         //duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -75,7 +89,7 @@ jar {
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
                 'Export-Package'        : 'eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform, eu.hansolo.fx.charts, eu.hansolo.fx.charts.areaheatmap, eu.hansolo.fx.charts.color, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.forcedirectedgraph, eu.hansolo.fx.charts.pareto, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.charts.world, eu.hansolo.fx.charts.voronoi, eu.hansolo.fx.charts.wafermap',
                 'Class-Path'            : "${project.name}-${project.version}.jar",
-                'Main-Class'            : 'eu.hansolo.fx.charts.Launcher'
+                'Main-Class'            : application.mainClass
         )
     }
 }
@@ -121,6 +135,24 @@ signing {
 
     sign configurations.archives
     sign publishing.publications
+}
+
+// Remove 'thirdPartyCompatibility' from JavaFX runtimeElements variant
+// Otherwise it locks Gradle Module Metadata (GMM) to the publishing OS
+tasks.withType(GenerateModuleMetadata).configureEach {
+    doLast { _ ->
+        def gmmFile = it.outputFile.get().asFile
+        def inJson = new JsonSlurper().parseText(gmmFile.text)
+        def filteredVariant = inJson.variants.findAll { it.name == configurations.runtimeElements.name }
+        // remove "thirdPartyCompatibility" from GMM
+        filteredVariant.dependencies.first().each {
+            if (it.group == 'org.openjfx') {
+                it.remove('thirdPartyCompatibility')
+            }
+        }
+        def outJson = JsonOutput.toJson(inJson)
+        gmmFile.write(JsonOutput.prettyPrint(outJson))
+    }
 }
 
 publishing {
