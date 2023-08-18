@@ -5,34 +5,31 @@ module eu.hansolo.fx.charts {
     requires java.logging;
 
     // Java-FX
-    requires transitive javafx.base;
-    requires transitive javafx.graphics;
-    requires transitive javafx.controls;
-    requires transitive javafx.swing;
+    requires javafx.base;
+    requires javafx.graphics;
+    requires javafx.controls;
+    requires javafx.swing;
 
     // 3rd party
     requires ch.qos.logback.classic;
     requires org.slf4j;
-    requires transitive eu.hansolo.toolbox;
-    requires transitive eu.hansolo.toolboxfx;
-    requires transitive eu.hansolo.fx.heatmap;
     requires transitive eu.hansolo.fx.countries;
 
-    opens eu.hansolo.fx.geometry to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.geometry.tools to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.geometry.transform to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.areaheatmap to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.color to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.data to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.event to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.forcedirectedgraph to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.pareto to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.series to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.tools to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.world to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.voronoi to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
-    opens eu.hansolo.fx.charts.wafermap to eu.hansolo.toolbox, eu.hansolo.toolboxfx, eu.hansolo.fx.heatmap, eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.geometry to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.geometry.tools to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.geometry.transform to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.areaheatmap to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.color to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.data to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.event to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.forcedirectedgraph to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.pareto to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.series to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.tools to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.world to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.voronoi to eu.hansolo.fx.countries;
+    opens eu.hansolo.fx.charts.wafermap to eu.hansolo.fx.countries;
 
     exports eu.hansolo.fx.geometry;
     exports eu.hansolo.fx.geometry.tools;
