@@ -4,6 +4,8 @@
 
 [![GitHub license](https://badgen.net/github/license/HanSolo/charts)](https://github.com/HanSolo/charts/blob/master/LICENSE)
 
+[![JFXCentral](https://img.shields.io/badge/Find_me_on-JFXCentral-blue?logo=googlechrome&logoColor=white)](https://www.jfx-central.com/libraries/charts)
+
 <br>
 A library for scientific charts in JavaFX. 
 
