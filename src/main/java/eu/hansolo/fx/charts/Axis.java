@@ -306,6 +306,7 @@ public class Axis extends Region {
         _titleFontSize                    = 10;
         _zoneId                           = ZoneId.systemDefault();
         _dateTimeFormatPattern            = "dd.MM.YY HH:mm:ss";
+	axisBounds                        = new Bounds();
         currentInterval                   = Interval.SECOND_1;
         dateTimeFormatter                 = DateTimeFormatter.ofPattern(_dateTimeFormatPattern, _locale);
         tickLabelFormatString             = new StringBuilder("%.").append(Integer.toString(_decimals)).append("f").toString();
