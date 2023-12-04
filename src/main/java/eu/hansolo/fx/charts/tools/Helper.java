@@ -19,6 +19,7 @@ package eu.hansolo.fx.charts.tools;
 import eu.hansolo.fx.charts.Axis;
 import eu.hansolo.fx.charts.AxisBuilder;
 import eu.hansolo.fx.charts.Position;
+import eu.hansolo.fx.charts.SankeyPlot;
 import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
@@ -31,9 +32,11 @@ import eu.hansolo.toolboxfx.geom.Dimension;
 import eu.hansolo.toolboxfx.geom.Point;
 import javafx.animation.Interpolator;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
@@ -44,6 +47,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
@@ -52,8 +58,11 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import javax.imageio.ImageIO;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -1410,5 +1419,43 @@ public class Helper {
                   .filter(entry -> Objects.equals(entry.getValue(), value))
                   .map(Map.Entry::getKey)
                   .collect(Collectors.toSet());
+    }
+
+    /**
+     * A method to save a given node to an image in PNG format. The given JavaFX node will be added to a StackPane that
+     * comes with a padding of 5px on each side and a transparent background.
+     * @param node The JavaFX node that should be rendered to an image
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param filename The path and name of the file e.g. /Users/hansolo/Desktop/sankeyplot.png
+     * @return
+     */
+    public static final boolean renderToImage(final Node node, final int width, final int height, final String filename) {
+        final int           w;
+        final int           h;
+        if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
+        if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
+        final String        name          = filename.toLowerCase().endsWith(".png") ? filename : filename + ".png";
+        final File          file          = new File(name);
+        final WritableImage writableImage = new WritableImage(w, h);
+        final StackPane     pane          = new StackPane(node);
+        pane.setPadding(new Insets(5));
+        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
+        Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+        Stage stage = new Stage();
+        stage.centerOnScreen();
+        stage.setScene(scene);
+        stage.initStyle(StageStyle.TRANSPARENT);
+
+        pane.snapshot(null, writableImage);
+        final RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+        try {
+            ImageIO.write(renderedImage, "png", file);
+            stage.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

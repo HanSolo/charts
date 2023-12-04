@@ -444,6 +444,17 @@ public class CubeChart extends Region {
     public void setRightText(final String rightText) { this.rightText.set(rightText); }
     public StringProperty rightTextProperty() { return rightText; }
 
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return True if the procedure was successful, otherwise false
+     */
+    public boolean renderToImage(final String filename, final int width, final int height) {
+        return Helper.renderToImage(CubeChart.this, width, height, filename);
+    }
+
     private void wrapText(final GraphicsContext ctx, final String text, final double x, final double y, final double maxWidth, final double lineHeight, final int maxNoOfLines) {
         double        tx          = x;
         double        ty          = y;

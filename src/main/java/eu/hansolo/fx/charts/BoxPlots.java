@@ -608,6 +608,17 @@ public class BoxPlots<T extends ChartItem> extends Region {
         redraw();
     }
 
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return True if the procedure was successful, otherwise false
+     */
+    public boolean renderToImage(final String filename, final int width, final int height) {
+        return Helper.renderToImage(BoxPlots.this, width, height, filename);
+    }
+
 
     // ******************** Layout ********************************************
     private void resize() {

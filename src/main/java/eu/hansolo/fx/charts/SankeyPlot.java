@@ -39,11 +39,16 @@ import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -51,6 +56,7 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -721,6 +727,17 @@ public class SankeyPlot extends Region {
             checksum += isPlotItemValid(item) ? 0 : 1;
         }
         return checksum == 0;
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return True if the procedure was successful, otherwise false
+     */
+    public boolean renderToImage(final String filename, final int width, final int height) {
+        return Helper.renderToImage(SankeyPlot.this, width, height, filename);
     }
 
     private void sortIncomingByOutgoingOrder(final List<PlotItem> INCOMING, final List<PlotItem> OUTGOING) {

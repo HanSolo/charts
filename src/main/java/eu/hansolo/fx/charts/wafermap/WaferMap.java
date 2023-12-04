@@ -18,6 +18,8 @@
 
  package eu.hansolo.fx.charts.wafermap;
 
+ import eu.hansolo.fx.charts.SankeyPlot;
+ import eu.hansolo.fx.charts.XYChart;
  import eu.hansolo.fx.charts.tools.Helper;
  import eu.hansolo.fx.geometry.Rectangle;
  import eu.hansolo.fx.heatmap.ColorMapping;
@@ -524,6 +526,17 @@
 
      public Die getSelectedDie() { return selectedDie.get(); }
      public ReadOnlyObjectProperty<Die> selectedDieProperty() { return selectedDie; }
+
+     /**
+      * Calling this method will render this chart/plot to a png given of the given width and height
+      * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+      * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+      * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+      * @return True if the procedure was successful, otherwise false
+      */
+     public boolean renderToImage(final String filename, final int width, final int height) {
+         return Helper.renderToImage(WaferMap.this, width, height, filename);
+     }
 
      public void dispose() {
          canvas.removeEventFilter(MouseEvent.MOUSE_PRESSED, mouseHandler);

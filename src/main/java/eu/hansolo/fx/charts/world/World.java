@@ -16,6 +16,7 @@
 
 package eu.hansolo.fx.charts.world;
 
+import eu.hansolo.fx.charts.SankeyPlot;
 import eu.hansolo.fx.charts.data.MapConnection;
 import eu.hansolo.fx.charts.data.WeightedMapPoints;
 import eu.hansolo.fx.charts.voronoi.Triangulation;
@@ -837,6 +838,17 @@ public class World extends Region {
         double x = (LONGITUDE + 180) * (PREFERRED_WIDTH / 360) + MAP_OFFSET_X;
         double y = (PREFERRED_HEIGHT / 2) - (PREFERRED_WIDTH * (Math.log(Math.tan((Math.PI / 4) + (Math.toRadians(LATITUDE) / 2)))) / (2 * Math.PI)) + MAP_OFFSET_Y;
         return new double[]{ x, y };
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return True if the procedure was successful, otherwise false
+     */
+    public boolean renderToImage(final String filename, final int width, final int height) {
+        return Helper.renderToImage(World.this, width, height, filename);
     }
 
     private double[] getBounds(final Country... COUNTRIES) { return getBounds(Arrays.asList(COUNTRIES)); }
