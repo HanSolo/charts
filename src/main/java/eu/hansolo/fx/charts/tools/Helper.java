@@ -19,7 +19,6 @@ package eu.hansolo.fx.charts.tools;
 import eu.hansolo.fx.charts.Axis;
 import eu.hansolo.fx.charts.AxisBuilder;
 import eu.hansolo.fx.charts.Position;
-import eu.hansolo.fx.charts.SankeyPlot;
 import eu.hansolo.fx.charts.TickLabelOrientation;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.DataPoint;
@@ -31,6 +30,7 @@ import eu.hansolo.toolboxfx.geom.CornerRadii;
 import eu.hansolo.toolboxfx.geom.Dimension;
 import eu.hansolo.toolboxfx.geom.Point;
 import javafx.animation.Interpolator;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -66,7 +66,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -88,10 +87,10 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class Helper {
@@ -1432,32 +1431,47 @@ public class Helper {
      * @return true if the image was successfully saved
      */
     public static final boolean renderToImage(final Node node, final int width, final int height, final String filename) {
-        final int           w;
-        final int           h;
+        final int w;
+        final int h;
         if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
         if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
         final String        name          = filename.toLowerCase().endsWith(".png") ? filename : filename + ".png";
         final File          file          = new File(name);
-        final WritableImage writableImage = new WritableImage(w, h);
-        final StackPane     pane          = new StackPane(node);
-        pane.setPadding(new Insets(5));
-        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
-        final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
-        final Stage stage = new Stage();
-        stage.centerOnScreen();
-        stage.setScene(scene);
-        stage.initStyle(StageStyle.TRANSPARENT);
 
-        pane.snapshot(null, writableImage);
-        final RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+        Runnable action = () -> {
+            final WritableImage writableImage = new WritableImage(w, h);
+            final StackPane     pane          = new StackPane(node);
+            pane.setPadding(new Insets(5));
+            pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
+            final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+            final Stage stage = new Stage();
+            stage.centerOnScreen();
+            stage.setScene(scene);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            pane.snapshot(null, writableImage);
+            RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+            try {
+                ImageIO.write(renderedImage, "png", file);
+                stage.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+        final CountDownLatch doneLatch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                action.run();
+            } finally {
+                doneLatch.countDown();
+            }
+        });
         try {
-            ImageIO.write(renderedImage, "png", file);
-            stage.close();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            doneLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+        return (file.exists() && file.length() > 0);
     }
 
     /**
@@ -1473,18 +1487,39 @@ public class Helper {
         final int           h;
         if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
         if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
-        final WritableImage writableImage = new WritableImage(w, h);
-        final StackPane     pane          = new StackPane(node);
-        pane.setPadding(new Insets(5));
-        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
-        final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
-        final Stage stage = new Stage();
-        stage.centerOnScreen();
-        stage.setScene(scene);
-        stage.initStyle(StageStyle.TRANSPARENT);
+        AtomicReference<BufferedImage> bufferedImageRef = new AtomicReference<>();
 
-        pane.snapshot(null, writableImage);
-        final BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
-        return bufferedImage;
+        Runnable action = () -> {
+            final WritableImage writableImage = new WritableImage(w, h);
+            final StackPane     pane          = new StackPane(node);
+            pane.setPadding(new Insets(5));
+            pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
+            final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+            final Stage stage = new Stage();
+            stage.centerOnScreen();
+            stage.setScene(scene);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            pane.snapshot(null, writableImage);
+            bufferedImageRef.set(SwingFXUtils.fromFXImage(writableImage, null));
+        };
+
+        final CountDownLatch doneLatch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                action.run();
+            } finally {
+                doneLatch.countDown();
+            }
+        });
+        try {
+            doneLatch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return bufferedImageRef.get();
+    }
+
+    public static final void initFXPlatform() {
+        Platform.startup(() -> {});
     }
 }
