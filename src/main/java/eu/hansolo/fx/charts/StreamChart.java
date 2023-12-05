@@ -48,6 +48,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+import java.awt.image.BufferedImage;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -742,6 +743,16 @@ public class StreamChart extends Region {
      */
     public boolean renderToImage(final String filename, final int width, final int height) {
         return Helper.renderToImage(StreamChart.this, width, height, filename);
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return A BufferedImage of this chart in the given dimension
+     */
+    public BufferedImage renderToImage(final int width, final int height) {
+        return Helper.renderToImage(StreamChart.this, width, height);
     }
 
     private void prepareData() {

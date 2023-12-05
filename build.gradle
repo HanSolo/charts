@@ -127,10 +127,10 @@ artifacts {
 signing {
     if (gpgkey && gpgpassphrase) {
         useInMemoryPgpKeys(gpgkey, gpgpassphrase)
-    }
 
-    sign configurations.archives
-    sign publishing.publications
+        sign configurations.archives
+        sign publishing.publications
+    }
 }
 
 // Remove 'thirdPartyCompatibility' from JavaFX runtimeElements variant

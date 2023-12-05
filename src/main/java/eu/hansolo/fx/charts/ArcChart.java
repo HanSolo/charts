@@ -48,6 +48,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.TextAlignment;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -547,6 +548,16 @@ public class ArcChart extends Region {
      */
     public boolean renderToImage(final String filename, final int width, final int height) {
         return Helper.renderToImage(ArcChart.this, width, height, filename);
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return A BufferedImage of this chart in the given dimension
+     */
+    public BufferedImage renderToImage(final int width, final int height) {
+        return Helper.renderToImage(ArcChart.this, width, height);
     }
 
     private void validateData() {

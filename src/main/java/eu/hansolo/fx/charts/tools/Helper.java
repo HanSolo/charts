@@ -62,6 +62,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -1428,7 +1429,7 @@ public class Helper {
      * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
      * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
      * @param filename The path and name of the file e.g. /Users/hansolo/Desktop/sankeyplot.png
-     * @return
+     * @return true if the image was successfully saved
      */
     public static final boolean renderToImage(final Node node, final int width, final int height, final String filename) {
         final int           w;
@@ -1441,8 +1442,8 @@ public class Helper {
         final StackPane     pane          = new StackPane(node);
         pane.setPadding(new Insets(5));
         pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
-        Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
-        Stage stage = new Stage();
+        final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+        final Stage stage = new Stage();
         stage.centerOnScreen();
         stage.setScene(scene);
         stage.initStyle(StageStyle.TRANSPARENT);
@@ -1457,5 +1458,33 @@ public class Helper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * A method to save a given node to an image in PNG format. The given JavaFX node will be added to a StackPane that
+     * comes with a padding of 5px on each side and a transparent background.
+     * @param node The JavaFX node that should be rendered to an image
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return a buffered image of the given node with the given dimensions
+     */
+    public static final BufferedImage renderToImage(final Node node, final int width, final int height) {
+        final int           w;
+        final int           h;
+        if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
+        if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
+        final WritableImage writableImage = new WritableImage(w, h);
+        final StackPane     pane          = new StackPane(node);
+        pane.setPadding(new Insets(5));
+        pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
+        final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+        final Stage stage = new Stage();
+        stage.centerOnScreen();
+        stage.setScene(scene);
+        stage.initStyle(StageStyle.TRANSPARENT);
+
+        pane.snapshot(null, writableImage);
+        final BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+        return bufferedImage;
     }
 }

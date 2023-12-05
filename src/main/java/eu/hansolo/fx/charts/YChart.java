@@ -26,6 +26,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 
@@ -143,6 +144,16 @@ public class YChart<T extends ValueItem> extends Region {
      */
     public boolean renderToImage(final String filename, final int width, final int height) {
         return Helper.renderToImage(YChart.this, width, height, filename);
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @return A BufferedImage of this chart in the given dimension
+     */
+    public BufferedImage renderToImage(final int width, final int height) {
+        return Helper.renderToImage(YChart.this, width, height);
     }
 
     public void refresh() { yPane.redraw(); }
