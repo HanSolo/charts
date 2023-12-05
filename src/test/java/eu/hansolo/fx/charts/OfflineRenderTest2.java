@@ -57,6 +57,7 @@ public class OfflineRenderTest2 {
         Helper.initFXPlatform();
         init();
 
+        //testRenderToFile();
         testRenderToBufferedImage();
     }
 
@@ -188,12 +189,12 @@ public class OfflineRenderTest2 {
     }
 
     private void testRenderToFile() {
-        sankeyPlot.renderToImage("sankeyplot", 800, 500);
+        sankeyPlot.renderToImage("sankeyplot", 800, 600);
         stop();
     }
 
     private void testRenderToBufferedImage() {
-        BufferedImage bufferedImage = sankeyPlot.renderToImage(800, 500);
+        BufferedImage bufferedImage = sankeyPlot.renderToImage(800, 600);
         System.out.println(bufferedImage.getWidth() + " x " + bufferedImage.getHeight());
         stop();
     }

@@ -87,7 +87,10 @@ import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -1435,43 +1438,39 @@ public class Helper {
         final int h;
         if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
         if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
-        final String        name          = filename.toLowerCase().endsWith(".png") ? filename : filename + ".png";
-        final File          file          = new File(name);
-
-        Runnable action = () -> {
-            final WritableImage writableImage = new WritableImage(w, h);
-            final StackPane     pane          = new StackPane(node);
-            pane.setPadding(new Insets(5));
-            pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
-            final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
-            final Stage stage = new Stage();
-            stage.centerOnScreen();
-            stage.setScene(scene);
-            stage.initStyle(StageStyle.TRANSPARENT);
-            pane.snapshot(null, writableImage);
-            RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
-            try {
-                ImageIO.write(renderedImage, "png", file);
-                stage.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-
-        final CountDownLatch doneLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                action.run();
-            } finally {
-                doneLatch.countDown();
+        final FutureTask<Boolean> task = new FutureTask<>(new Callable<Boolean>() {
+            @Override public Boolean call() throws Exception {
+                final String        name          = filename.toLowerCase().endsWith(".png") ? filename : filename + ".png";
+                final File          file          = new File(name);
+                final WritableImage writableImage = new WritableImage(w, h);
+                final StackPane     pane          = new StackPane(node);
+                pane.setPadding(new Insets(5));
+                pane.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, javafx.scene.layout.CornerRadii.EMPTY, Insets.EMPTY)));
+                final Scene scene = new Scene(pane, w, h, Color.TRANSPARENT);
+                final Stage stage = new Stage();
+                stage.centerOnScreen();
+                stage.setScene(scene);
+                stage.initStyle(StageStyle.TRANSPARENT);
+                pane.snapshot(null, writableImage);
+                RenderedImage renderedImage = SwingFXUtils.fromFXImage(writableImage, null);
+                try {
+                    ImageIO.write(renderedImage, "png", file);
+                    stage.close();
+                    return Boolean.TRUE;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return Boolean.FALSE;
+                }
             }
         });
+        Platform.runLater(task);
         try {
-            doneLatch.await();
+            return task.get();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return (file.exists() && file.length() > 0);
     }
 
     /**
@@ -1487,9 +1486,7 @@ public class Helper {
         final int           h;
         if (width  < 0) { w = 400; } else if (width  > 4096) { w = 4096; } else { w = width; }
         if (height < 0) { h = 400; } else if (height > 4096) { h = 4096; } else { h = height; }
-        AtomicReference<BufferedImage> bufferedImageRef = new AtomicReference<>();
-
-        Runnable action = () -> {
+        final FutureTask<BufferedImage> task = new FutureTask<>(() -> {
             final WritableImage writableImage = new WritableImage(w, h);
             final StackPane     pane          = new StackPane(node);
             pane.setPadding(new Insets(5));
@@ -1500,23 +1497,17 @@ public class Helper {
             stage.setScene(scene);
             stage.initStyle(StageStyle.TRANSPARENT);
             pane.snapshot(null, writableImage);
-            bufferedImageRef.set(SwingFXUtils.fromFXImage(writableImage, null));
-        };
-
-        final CountDownLatch doneLatch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                action.run();
-            } finally {
-                doneLatch.countDown();
-            }
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+            return bufferedImage;
         });
+        Platform.runLater(task);
         try {
-            doneLatch.await();
+            return task.get();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
-        return bufferedImageRef.get();
     }
 
     public static final void initFXPlatform() {
