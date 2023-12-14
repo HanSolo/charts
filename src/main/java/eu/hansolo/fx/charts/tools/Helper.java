@@ -1428,8 +1428,8 @@ public class Helper {
      * A method to save a given node to an image in PNG format. The given JavaFX node will be added to a StackPane that
      * comes with a padding of 5px on each side and a transparent background.
      * @param node The JavaFX node that should be rendered to an image
-     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
-     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param width The width of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @param height The height of the final image in pixels (if &lt; 0 then 400 and if &lgt; 4096 then 4096)
      * @param filename The path and name of the file e.g. /Users/hansolo/Desktop/sankeyplot.png
      * @return true if the image was successfully saved
      */
@@ -1477,8 +1477,8 @@ public class Helper {
      * A method to save a given node to an image in PNG format. The given JavaFX node will be added to a StackPane that
      * comes with a padding of 5px on each side and a transparent background.
      * @param node The JavaFX node that should be rendered to an image
-     * @param width The width of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
-     * @param height The height of the final image in pixels (if < 0 then 400 and if > 4096 then 4096)
+     * @param width The width of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @param height The height of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
      * @return a buffered image of the given node with the given dimensions
      */
     public static final BufferedImage renderToImage(final Node node, final int width, final int height) {
