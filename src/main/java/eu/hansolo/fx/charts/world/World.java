@@ -943,9 +943,8 @@ public class World extends Region {
     }
 
     private Properties readProperties(final String FILE_NAME) {
-        final ClassLoader LOADER     = Thread.currentThread().getContextClassLoader();
         final Properties  PROPERTIES = new Properties();
-        try(InputStream resourceStream = LOADER.getResourceAsStream(FILE_NAME)) {
+        try(InputStream resourceStream = this.getClass().getModule().getResourceAsStream("/"+FILE_NAME)) {
             PROPERTIES.load(resourceStream);
         } catch (IOException exception) {
             System.out.println(exception);
