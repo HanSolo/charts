@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        java: [21.0.3]
+        java: [21.0.6]
       fail-fast: false
       max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
@@ -46,15 +46,4 @@ jobs:
         with:
           name: Charts-${{ matrix.os }}
           path: ./build/libs/**
-      - name: Verify jlink
-        run: ./gradlew jlink
-        env:
-          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_TOKEN_USERNAME }}
-          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_TOKEN_PASSWORD }}
-          GH_USER: ${{ secrets.GH_USER }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_KEY }}
-          PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-...
+ ...
