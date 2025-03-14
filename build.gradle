@@ -1,6 +1,3 @@
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
 import java.text.SimpleDateFormat
 
 plugins {
@@ -10,18 +7,25 @@ plugins {
     id 'signing'
     id 'com.google.osdetector'           version '1.7.3'
     id 'org.javamodularity.moduleplugin' version '1.8.15'
-    id 'org.beryx.jlink'                 version '3.0.1'
     id 'net.nemerosa.versioning'         version '3.1.0'
 }
 
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-description   = 'Charts is a JavaFX library containing different kind of charts'
+normalization {
+    runtimeClasspath {
+        ignore('/META-INF/MANIFEST.MF')
+    }
+}
+
+repositories {
+    mavenCentral()
+}
 
 Date buildTimeAndDate = new Date()
 ext {
-    moduleName      = 'eu.hansolo.fx.charts'
+    //moduleName      = 'eu.hansolo.fx.charts'
     buildDate       = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)
     buildTime       = new SimpleDateFormat('HH:mm:ss.SSSZ').format(buildTimeAndDate)
     platform        = osdetector.os == 'osx' ? osdetector.arch == 'aarch_64' ? 'mac-aarch64' : 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os == 'linux' ? osdetector.arch == 'aarch_64' ? 'linux-aarch64' : 'linux' : osdetector.os
@@ -33,41 +37,31 @@ ext {
     gpgpassphrase   = System.getenv("PASSPHRASE")
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api "eu.hansolo.fx:countries:21.0.19"
     implementation "org.openjfx:javafx-base:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
     implementation "org.openjfx:javafx-swing:${javafxVersion}:${platform}"
-    implementation "ch.qos.logback:logback-classic:1.3.9"
+    implementation "ch.qos.logback:logback-classic:1.5.17"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
 }
 
-application {
-    mainClass = "eu.hansolo.fx.charts.Launcher"
-    mainModule = moduleName
-}
-
-java {
-    // Set to false per https://github.com/java9-modularity/gradle-modules-plugin
-    modularity.inferModulePath.set(false)
-}
+description = 'Charts is a JavaFX library containing different kind of charts'
 
 jar {
+
     from {
-        //duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        //configurations.runtimeClasspath.collect {  it.isDirectory() ? it : zipTree(it)  }
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations.runtimeClasspath.collect {  it.isDirectory() ? it : zipTree(it)  }
     } {
         exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
+
     manifest {
         attributes(
                 'Built-By'              : System.properties['user.name'],
@@ -80,29 +74,27 @@ jar {
                 'Implementation-Title'  : project.name,
                 'Implementation-Version': project.version,
                 'Bundle-Name'           : project.name,
-                'Bundle-Version'        : project.version,
                 'Bundle-License'        : 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
-                'Bundle-Description'    : project.description,
+                'Bundle-Description'    : description,
+                'Bundle-Version'        : project.version,
                 'Bundle-SymbolicName'   : 'eu.hansolo.fx.charts',
                 'Export-Package'        : 'eu.hansolo.fx.geometry, eu.hansolo.fx.geometry.tools, eu.hansolo.fx.geometry.transform, eu.hansolo.fx.charts, eu.hansolo.fx.charts.areaheatmap, eu.hansolo.fx.charts.color, eu.hansolo.fx.charts.data, eu.hansolo.fx.charts.event, eu.hansolo.fx.charts.forcedirectedgraph, eu.hansolo.fx.charts.pareto, eu.hansolo.fx.charts.series, eu.hansolo.fx.charts.tools, eu.hansolo.fx.charts.world, eu.hansolo.fx.charts.voronoi, eu.hansolo.fx.charts.wafermap',
-                'Class-Path'            : "${project.name}-${project.version}.jar",
-                'Main-Class'            : application.mainClass
+                'Class-Path'            : '${project.name}-${project.version}.jar',
+                'Main-Class'            : 'eu.hansolo.fx.charts.Launcher'
         )
     }
 }
 
-
-if (JavaVersion.current().isJava8Compatible()) {
-    allprojects {
-        tasks.withType(Javadoc) {
-            options.addStringOption('Xdoclint:none', '-quiet')
-        }
-    }
+java {
+    // Set to false per https://github.com/java9-modularity/gradle-modules-plugin
+    modularity.inferModulePath.set(false)
 }
 
 
-task Demo(type: JavaExec) {
-    mainClass = 'eu.hansolo.fx.charts.DemoLauncher'
+
+
+tasks.register('Demo', JavaExec) {
+    mainClass = "eu.hansolo.fx.charts.DemoLauncher"
     classpath = sourceSets.main.runtimeClasspath
 }
 
@@ -131,24 +123,6 @@ signing {
 
         sign configurations.archives
         sign publishing.publications
-    }
-}
-
-// Remove 'thirdPartyCompatibility' from JavaFX runtimeElements variant
-// Otherwise it locks Gradle Module Metadata (GMM) to the publishing OS
-tasks.withType(GenerateModuleMetadata).configureEach {
-    doLast { _ ->
-        def gmmFile = it.outputFile.get().asFile
-        def inJson = new JsonSlurper().parseText(gmmFile.text)
-        def filteredVariant = inJson.variants.findAll { it.name == configurations.runtimeElements.name }
-        // remove "thirdPartyCompatibility" from GMM
-        filteredVariant.dependencies.first().each {
-            if (it.group == 'org.openjfx') {
-                it.remove('thirdPartyCompatibility')
-            }
-        }
-        def outJson = JsonOutput.toJson(inJson)
-        gmmFile.write(JsonOutput.prettyPrint(outJson))
     }
 }
 
