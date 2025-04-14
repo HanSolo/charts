@@ -154,7 +154,7 @@ public class SectorChart extends Region {
             angleStep = 360.0 / getNoOfSectors();
             redraw();
         };
-        itemListListener = c -> {
+        itemListListener         = c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     c.getAddedSubList().forEach(item -> item.addChartEvtObserver(ChartEvt.ANY, itemObserver));
@@ -163,17 +163,21 @@ public class SectorChart extends Region {
                 }
             }
         };
-        itemObserver     = e -> redraw();
-        mouseHandler     = e -> {
-            Optional<Entry<Sector, ChartItem>> optionalSector = sectorMap.entrySet()
-                                                                         .parallelStream()
-                                                                         .filter(entry -> Helper.isInSector(e.getX(), e.getY(), centerX,centerY, entry.getKey().radius, entry.getKey().startAngle, entry.getKey().segmentAngle))
-                                                                         .findFirst();
-            if (optionalSector.isPresent()) {
-                popup.setX(e.getScreenX());
-                popup.setY(e.getScreenY() - popup.getHeight());
-                popup.update(optionalSector.get().getValue());
-                popup.animatedShow(getScene().getWindow());
+        itemObserver             = e -> redraw();
+        mouseHandler             = e -> {
+            Optional<Entry<Sector, ChartItem>> optionalSector =
+            sectorMap.entrySet().parallelStream().filter(entry -> Helper.isInSector(e.getX(), e.getY(), centerX, centerY, entry.getKey().radius, entry.getKey().startAngle, entry.getKey().segmentAngle)).findFirst();
+            if (e.isSecondaryButtonDown()) {
+                if (optionalSector.isPresent()) {
+                    fireChartEvt(new ChartEvt(optionalSector.get().getValue(), ChartEvt.ITEM_SELECTED));
+                }
+            } else {
+                if (optionalSector.isPresent()) {
+                    popup.setX(e.getScreenX());
+                    popup.setY(e.getScreenY() - popup.getHeight());
+                    popup.update(optionalSector.get().getValue());
+                    popup.animatedShow(getScene().getWindow());
+                }
             }
         };
 
@@ -613,6 +617,8 @@ public class SectorChart extends Region {
         final double  itemWidthFactor    = 0.75;
         final boolean radialBarChartMode = getRadialBarChartMode();
 
+        // Clear sectormap
+        sectorMap.clear();
 
         // clear the canvas
         ctx.clearRect(0, 0, size, size);
@@ -645,7 +651,6 @@ public class SectorChart extends Region {
             }
             ctx.restore();
         }
-
 
         // Pre-Rotate for actual item sectors
         ctx.translate(centerX, centerY);
@@ -684,7 +689,7 @@ public class SectorChart extends Region {
                 ctx.translate(centerX, centerY);
                 ctx.rotate(angleStep);
                 ctx.translate(-centerX, -centerY);
-                sectorMap.put(new Sector(this.centerX, this.centerY, radius, currentAngle, angleStep), item);
+                sectorMap.put(new Sector(this.centerX, this.centerY, circleOuterRadius, currentAngle, angleStep), item);
                 currentAngle += angleStep;
             }
         }

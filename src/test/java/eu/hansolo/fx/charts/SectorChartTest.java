@@ -22,6 +22,7 @@ import eu.hansolo.fx.charts.SectorChart;
 import eu.hansolo.fx.charts.SectorChartBuilder;
 import eu.hansolo.fx.charts.data.ChartItem;
 import eu.hansolo.fx.charts.data.ChartItemBuilder;
+import eu.hansolo.fx.charts.event.ChartEvt;
 import eu.hansolo.fx.charts.series.ChartItemSeries;
 import eu.hansolo.fx.charts.series.ChartItemSeriesBuilder;
 import javafx.animation.AnimationTimer;
@@ -98,7 +99,7 @@ public class SectorChartTest extends Application {
         lastTimerCall = System.nanoTime();
         timer         = new AnimationTimer() {
             @Override public void handle(final long now) {
-                if (now > lastTimerCall + 200_000_000l) {
+                if (now > lastTimerCall + 1_000_000_000l) {
                     porsche.getItems().forEach(item -> item.setValue(RND.nextDouble() * 100));
                     ferrari.getItems().forEach(item -> item.setValue(RND.nextDouble() * 100));
                     lamborghini.getItems().forEach(item -> item.setValue(RND.nextDouble() * 100));
@@ -112,7 +113,11 @@ public class SectorChartTest extends Application {
     }
 
     private void registerListener() {
-
+        chart.addChartEvtObserver(ChartEvt.ITEM_SELECTED, e -> {
+            if (e.getSource() instanceof ChartItem chartItem) {
+                System.out.println(chartItem.getName() + ": " + chartItem.getValue());
+            }
+        });
     }
 
     @Override public void start(Stage stage) {
