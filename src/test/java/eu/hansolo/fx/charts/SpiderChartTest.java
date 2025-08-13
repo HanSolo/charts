@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  *
- * Copyright 2016-2023 Gerrit Grunwald.
+ * Copyright 2016-2025 Gerrit Grunwald.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,6 @@
 
 package eu.hansolo.fx.charts;
 
-import eu.hansolo.fx.charts.ChartType;
-import eu.hansolo.fx.charts.PolarChart;
-import eu.hansolo.fx.charts.Symbol;
-import eu.hansolo.fx.charts.XYPane;
 import eu.hansolo.fx.charts.data.XYChartItem;
 import eu.hansolo.fx.charts.series.XYSeries;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -40,12 +36,12 @@ import java.util.List;
 import java.util.Random;
 
 
-public class PolarChartTest extends Application {
-    private static final Random  RND             = new Random();
-    private static final long    UPDATE_INTERVAL = 2_000_000_000l;
-    private XYSeries<XYChartItem> xySeries1;
+public class SpiderChartTest extends Application {
+    private static final Random                RND             = new Random();
+    private static final long                  UPDATE_INTERVAL = 2_000_000_000l;
+    private              XYSeries<XYChartItem> xySeries1;
 
-    private PolarChart<XYChartItem> polarChart;
+    private SpiderChart<XYChartItem> spiderChart;
 
     private long           lastTimerCall;
     private AnimationTimer timer;
@@ -53,29 +49,29 @@ public class PolarChartTest extends Application {
 
     @Override public void init() {
         List<XYChartItem> xyItems1 = new ArrayList<>();
-        xyItems1.add(new XYChartItem(0.0, 85.0, "Uphill"));
-        xyItems1.add(new XYChartItem(72.0, 62.0, "Range"));
-        xyItems1.add(new XYChartItem(144.0, 80.0, "Equipment"));
-        xyItems1.add(new XYChartItem(216.0, 90.0, "Downhill"));
-        xyItems1.add(new XYChartItem(288.0, 85.0, "Playfulness"));
+        xyItems1.add(new XYChartItem(0.0, 70.0, "Uphill"));
+        xyItems1.add(new XYChartItem(72.0, 41.0, "Range"));
+        xyItems1.add(new XYChartItem(144.0, 61.0, "Equipment"));
+        xyItems1.add(new XYChartItem(216.0, 80.0, "Downhill"));
+        xyItems1.add(new XYChartItem(288.0, 70.0, "Playfulness"));
 
         Helper.orderXYChartItemsByX(xyItems1, Order.ASCENDING);
 
-        xySeries1 = new XYSeries(xyItems1, ChartType.POLAR, Color.rgb(255, 0, 0, 0.5), Color.RED);
-        //xySeries1.setShowPoints(false);
-        xySeries1.setStroke(Color.rgb(90, 90, 90));
+        xySeries1 = new XYSeries(xyItems1, ChartType.SPIDER, Color.rgb(0, 0, 128, 0.25), Color.RED);
+        xySeries1.setStroke(Color.TRANSPARENT);
         xySeries1.setSymbolStroke(Color.LIME);
         xySeries1.setSymbolFill(Color.GREEN);
         xySeries1.setSymbol(Symbol.SQUARE);
+        xySeries1.setSymbolsVisible(false);
 
-        XYPane polarPane = new XYPane(xySeries1);
-        polarPane.setLowerBoundY(polarPane.getDataMinY());
-        polarPane.setUpperBoundY(polarPane.getDataMaxY());
-        polarPane.setPolarTickStep(PolarTickStep.SEVENTY_TWO);
-        polarPane.setCategories("Uphill", "Range", "Equipment", "Downhill", "Playfulness");
-        polarPane.setCategoryTextVisible(false);
+        XYPane spiderPane = new XYPane(xySeries1);
+        spiderPane.setLowerBoundY(spiderPane.getDataMinY());
+        spiderPane.setUpperBoundY(spiderPane.getDataMaxY());
+        spiderPane.setPolarTickStep(PolarTickStep.SEVENTY_TWO);
+        spiderPane.setCategories("Uphill", "Range", "Equipment", "Downhill", "Playfulness");
+        spiderPane.setCategoryTextVisible(true);
 
-        polarChart = new PolarChart<>(polarPane);
+        spiderChart = new SpiderChart<>(spiderPane);
 
         lastTimerCall = System.nanoTime();
         timer = new AnimationTimer() {
@@ -96,7 +92,7 @@ public class PolarChartTest extends Application {
 
                     // Useful to refresh the chart if it contains more than one series to avoid
                     // multiple redraws
-                    polarChart.refresh();
+                    spiderChart.refresh();
 
                     lastTimerCall = now;
                 }
@@ -105,12 +101,12 @@ public class PolarChartTest extends Application {
     }
 
     @Override public void start(Stage stage) {
-        StackPane pane = new StackPane(polarChart);
+        StackPane pane = new StackPane(spiderChart);
         pane.setPadding(new Insets(10));
 
         Scene scene = new Scene(new StackPane(pane));
 
-        stage.setTitle("Polar Chart");
+        stage.setTitle("Spider Chart");
         stage.setScene(scene);
         stage.show();
 

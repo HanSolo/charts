@@ -16,8 +16,6 @@
 
 package eu.hansolo.fx.charts.areaheatmap;
 
-import eu.hansolo.fx.charts.SankeyPlot;
-import eu.hansolo.fx.charts.XYChart;
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.toolboxfx.font.Fonts;
 import eu.hansolo.fx.charts.tools.Helper;
@@ -32,6 +30,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.IntegerPropertyBase;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
@@ -54,17 +53,26 @@ import java.util.List;
 @DefaultProperty("children")
 public class AreaHeatMap extends Region {
     public enum Quality {
-        FINE(2), BETTER(4), NORMAL(8), POOR(16), RAW(32);
+        EXCELLENT(2, 4),
+        REFINED(3, 6),
+        GODD(4, 8),
+        STANDARD(5, 10),
+        BASIC(8, 16),
+        POOR(16, 32),
+        RAW(32, 64);
 
-        private final int FACTOR;
+        private final int    factor;
+        private final double pixelSize;
 
-        Quality(final int FACTOR) {
-            this.FACTOR = FACTOR;
+        Quality(final int factor, final double pixelSize) {
+            this.factor    = factor;
+            this.pixelSize = pixelSize;
         }
 
-        public int getFactor() { return FACTOR; }
-    }
+        public int getFactor() { return factor; }
 
+        public double getPixelSize() { return pixelSize; }
+    }
 
     private static final double                  PREFERRED_WIDTH  = 250;
     private static final double                  PREFERRED_HEIGHT = 250;
@@ -72,6 +80,7 @@ public class AreaHeatMap extends Region {
     private static final double                  MINIMUM_HEIGHT   = 50;
     private static final double                  MAXIMUM_WIDTH    = 1024;
     private static final double                  MAXIMUM_HEIGHT   = 1024;
+    private static final Color                   HALF_WHITE       = Color.rgb(255, 255, 255, 0.5);
     private              double                  size;
     private              double                  width;
     private              double                  height;
@@ -79,8 +88,8 @@ public class AreaHeatMap extends Region {
     private              GraphicsContext         ctx;
     private              List<DataPoint>         points;
     private              List<DataPoint>         polygon;
-    private              int                     _quality;
-    private              IntegerProperty         quality;
+    private              Quality                 _quality;
+    private              ObjectProperty<Quality> quality;
     private              int                     _noOfCloserInfluentPoints;
     private              IntegerProperty         noOfCloserInfluentPoints;
     private              double                  _heatMapOpacity;
@@ -102,19 +111,16 @@ public class AreaHeatMap extends Region {
 
     // ******************** Constructors **************************************
     public AreaHeatMap() {
-        this(5, Quality.BETTER.getFactor());
+        this(5, Quality.STANDARD);
     }
-    public AreaHeatMap(final Quality QUALITY) {
-        this(5, QUALITY.getFactor());
+    public AreaHeatMap(final Quality quality) {
+        this(5, quality);
     }
-    public AreaHeatMap(final int QUALITY) {
-        this(5, QUALITY);
-    }
-    public AreaHeatMap(final int NO_OF_CLOSER_INFLUENT_POINTS, final int QUALITY) {
+    public AreaHeatMap(final int noOfCloserInfluentPoints, final Quality quality) {
         points                    = new ArrayList<>();
         polygon                   = new ArrayList<>();
-        _quality                  = QUALITY;
-        _noOfCloserInfluentPoints = NO_OF_CLOSER_INFLUENT_POINTS;
+        _quality                  = quality;
+        _noOfCloserInfluentPoints = noOfCloserInfluentPoints;
         _heatMapOpacity           = 0.5;
         _dataPointsVisible        = false;
         _discreteColors           = false;
@@ -155,46 +161,44 @@ public class AreaHeatMap extends Region {
 
 
     // ******************** Methods *******************************************
-    @Override protected double computeMinWidth(final double HEIGHT) { return MINIMUM_WIDTH; }
-    @Override protected double computeMinHeight(final double WIDTH) { return MINIMUM_HEIGHT; }
-    @Override protected double computePrefWidth(final double HEIGHT) { return super.computePrefWidth(HEIGHT); }
-    @Override protected double computePrefHeight(final double WIDTH) { return super.computePrefHeight(WIDTH); }
-    @Override protected double computeMaxWidth(final double HEIGHT) { return MAXIMUM_WIDTH; }
-    @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
+    @Override protected double computeMinWidth(final double height) { return MINIMUM_WIDTH; }
+    @Override protected double computeMinHeight(final double width) { return MINIMUM_HEIGHT; }
+    @Override protected double computePrefWidth(final double height) { return super.computePrefWidth(height); }
+    @Override protected double computePrefHeight(final double width) { return super.computePrefHeight(width); }
+    @Override protected double computeMaxWidth(final double height) { return MAXIMUM_WIDTH; }
+    @Override protected double computeMaxHeight(final double width) { return MAXIMUM_HEIGHT; }
 
     @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
 
-    public int getQuality() { return null == quality ? _quality : quality.get(); }
-    public void setQuality(final Quality QUALITY) { setQuality(QUALITY.getFactor()); }
-    public void setQuality(final int QUALITY) {
-        if (null == quality) {
-            _quality = Helper.clamp(2, 32, QUALITY);
+    public Quality getQuality() { return null == quality ? _quality : quality.get(); }
+    public void setQuality(final Quality quality) {
+        if (null == this.quality) {
+            this._quality = quality;
             redraw();
         } else {
-            quality.set(QUALITY);
+            this.quality.set(quality);
         }
     }
-    public IntegerProperty qualityProperty() {
-        if (null == quality) {
-            quality = new IntegerPropertyBase(_quality) {
-                @Override protected void invalidated() {
-                    set(Helper.clamp(2, 32, get()));
-                    redraw();
-                }
+    public ObjectProperty<Quality> qualityProperty() {
+        if (null == this.quality) {
+            this.quality = new ObjectPropertyBase<>(_quality) {
+                @Override protected void invalidated() { redraw(); }
                 @Override public Object getBean() { return AreaHeatMap.this; }
                 @Override public String getName() { return "quality"; }
             };
+            this._quality = null;
         }
+
         return quality;
     }
 
     public int getNoOfCloserInfluentPoints() { return null == noOfCloserInfluentPoints ? _noOfCloserInfluentPoints : noOfCloserInfluentPoints.get(); }
-    public void setNoOfCloserInfluentialPoints(final int NUMBER_OF_POINTS) {
+    public void setNoOfCloserInfluentialPoints(final int numberOfPoints) {
         if (null == noOfCloserInfluentPoints) {
-            _noOfCloserInfluentPoints = Helper.clamp(1, 10, NUMBER_OF_POINTS);
+            _noOfCloserInfluentPoints = Helper.clamp(1, 10, numberOfPoints);
             redraw();
         } else {
-            noOfCloserInfluentPoints.set(NUMBER_OF_POINTS);
+            noOfCloserInfluentPoints.set(numberOfPoints);
         }
     }
     public IntegerProperty noOfCloserInfluentPointsProperty() {
@@ -212,12 +216,12 @@ public class AreaHeatMap extends Region {
     }
 
     public double getHeatMapOpacity() { return null == heatMapOpacity ? _heatMapOpacity : heatMapOpacity.get(); }
-    public void setHeatMapOpacity(final double OPACITY) {
+    public void setHeatMapOpacity(final double opacity) {
         if (null == heatMapOpacity) {
-            _heatMapOpacity = Helper.clamp(0, 1, OPACITY);
+            _heatMapOpacity = Helper.clamp(0, 1, opacity);
             redraw();
         } else {
-            heatMapOpacity.set(OPACITY);
+            heatMapOpacity.set(opacity);
         }
     }
     public DoubleProperty heatMapOpacityProperty() {
@@ -235,12 +239,12 @@ public class AreaHeatMap extends Region {
     }
 
     public boolean getShowDataPoints() { return null == dataPointsVisible ? _dataPointsVisible : dataPointsVisible.get(); }
-    public void setDataPointsVisible(final boolean VISIBLE) {
+    public void setDataPointsVisible(final boolean visible) {
         if (null == dataPointsVisible) {
-            _dataPointsVisible = VISIBLE;
+            _dataPointsVisible = visible;
             redraw();
         } else {
-            dataPointsVisible.set(VISIBLE);
+            dataPointsVisible.set(visible);
         }
     }
     public BooleanProperty dataPointsVisibleProperty() {
@@ -255,13 +259,13 @@ public class AreaHeatMap extends Region {
     }
 
     public boolean isSmoothedHull() { return null == smoothedHull ? _smoothedHull : smoothedHull.get(); }
-    public void setSmoothedHull(final boolean SMOOTHED) {
+    public void setSmoothedHull(final boolean smoothed) {
         if (null == smoothedHull) {
-            _smoothedHull = SMOOTHED;
+            _smoothedHull = smoothed;
             createHullPolygon();
             redraw();
         } else {
-            smoothedHull.set(SMOOTHED);
+            smoothedHull.set(smoothed);
         }
     }
     public BooleanProperty smoothedHullProperty() {
@@ -279,12 +283,12 @@ public class AreaHeatMap extends Region {
     }
 
     public boolean isDiscreteColors() { return null == discreteColors ? _discreteColors : discreteColors.get(); }
-    public void setDiscreteColors(final boolean DISCRETE) {
+    public void setDiscreteColors(final boolean discrete) {
         if (null == discreteColors) {
-            _discreteColors = DISCRETE;
+            _discreteColors = discrete;
             redraw();
         } else {
-            discreteColors.set(DISCRETE);
+            discreteColors.set(discrete);
         }
     }
     public BooleanProperty discreteColorsProperty() {
@@ -299,12 +303,12 @@ public class AreaHeatMap extends Region {
     }
 
     public Mapping getMapping() { return null == mapping ? _mapping : mapping.get(); }
-    public void setColorMapping(final Mapping MAPPING) {
-        if (null == mapping) {
-            _mapping = MAPPING;
+    public void setColorMapping(final Mapping mapping) {
+        if (null == this.mapping) {
+            _mapping = mapping;
             redraw();
         } else {
-            mapping.set(MAPPING);
+            this.mapping.set(mapping);
         }
     }
     public ObjectProperty<Mapping> mappingProperty() {
@@ -320,12 +324,12 @@ public class AreaHeatMap extends Region {
     }
 
     public boolean getUseColorMapping() { return null == useColorMapping ? _useColorMapping : useColorMapping.get(); }
-    public void setUseColorMapping(final boolean USE) {
+    public void setUseColorMapping(final boolean use) {
         if (null == useColorMapping) {
-            _useColorMapping = USE;
+            _useColorMapping = use;
             redraw();
         } else {
-            useColorMapping.set(USE);
+            useColorMapping.set(use);
         }
     }
     public BooleanProperty useColorMapping() {
@@ -374,22 +378,22 @@ public class AreaHeatMap extends Region {
         return Helper.renderToImage(AreaHeatMap.this, width, height);
     }
 
-    private Color getColorForValue(final double VALUE, final boolean LEVELS) {
-        double limit  = 0.55;
-        double min    = -30;
-        double max    = 50;
-        double delta  = max - min;
-        double levels = 25;
-        double value  = Helper.clamp(min, max, VALUE);
-        double tmp    = 1 - (1 - limit) - (((value - min) * limit) / delta);
-        if (LEVELS) {
-            tmp = Math.round(tmp * levels) / levels;
+    private Color getColorForValue(final double value, final boolean levels) {
+        double limit     = 0.55;
+        double min       = -30;
+        double max       = 50;
+        double delta     = max - min;
+        double newLevels = 25;
+        double newValue  = Helper.clamp(min, max, value);
+        double tmp       = 1 - (1 - limit) - (((newValue - min) * limit) / delta);
+        if (levels) {
+            tmp = Math.round(tmp * newLevels) / newLevels;
         }
         return Helper.hslToRGB(tmp, 1, 0.5);
     }
-    private Color getColorForValue(final double VALUE) { return getColorForValue(VALUE, getHeatMapOpacity()); }
-    private Color getColorForValue(final double VALUE, final double OPACITY) {
-        return Helper.getColorWithOpacityAt(getMapping().getGradient(), ((VALUE - minValue) / range), OPACITY);
+    private Color getColorForValue(final double value) { return getColorForValue(value, getHeatMapOpacity()); }
+    private Color getColorForValue(final double value, final double opacity) {
+        return Helper.getColorWithOpacityAt(getMapping().getGradient(), ((value - minValue) / range), opacity);
     }
 
     private void createHullPolygon() {
@@ -402,19 +406,19 @@ public class AreaHeatMap extends Region {
         }
     }
 
-    private double getValueAt(final int LIMIT, final double X , final double Y) {
+    private double getValueAt(final int limit, final double x , final double y) {
         List<Number[]> arr = new ArrayList<>();
         double         t   = 0.0;
         double         b   = 0.0;
-        if(Helper.isInPolygon(X, Y, polygon)) {
+        if(Helper.isInPolygon(x, y, polygon)) {
             for (int counter = 0 ; counter < points.size() ; counter++) {
                 DataPoint point = points.get(counter);
-                double distance = Helper.squareDistance(X, Y, point.getX(), point.getY());
+                double distance = Helper.squareDistance(x, y, point.getX(), point.getY());
                 if (Double.compare(distance, 0) == 0) { return point.getValue(); }
                 arr.add(counter, new Number[] { distance, counter });
             }
             arr.sort(Comparator.comparingInt(n -> n[0].intValue()));
-            for (int counter = 0 ; counter < LIMIT ; counter++) {
+            for (int counter = 0 ; counter < limit ; counter++) {
                 Number[] ptr = arr.get(counter);
                 double inv = 1 / Math.pow(ptr[0].intValue(), 2);
                 t = t + inv * points.get(ptr[1].intValue()).getValue();
@@ -426,23 +430,27 @@ public class AreaHeatMap extends Region {
         }
     }
 
-    private void draw(final int LIMIT, final double RESOLUTION) {
-        int limit        = LIMIT > points.size() ? points.size() : LIMIT + 1;
-        double pixelSize = 2 * RESOLUTION;
-
+    private void draw(final int limit, final double resolution, final double pixelSize) {
+        final int    newLimit         = limit > points.size() ? points.size() : limit + 1;
+        final double heatMapOpacity   = getHeatMapOpacity();
+        final boolean useColorMapping = getUseColorMapping();
         ctx.clearRect(0, 0, width, height);
-
-        for (double y = 0 ; y < height ; y += RESOLUTION) {
-            for (double x = 0 ; x < width ; x += RESOLUTION) {
-                double value = getValueAt(limit, x, y);
+        for (double y = 0 ; y < height ; y += resolution) {
+            for (double x = 0 ; x < width ; x += resolution) {
+                double value = getValueAt(newLimit, x, y);
                 if (value != -255) {
-                    Color          color    = getUseColorMapping() ? getColorForValue(value) : getColorForValue(value, isDiscreteColors());
-                    RadialGradient gradient = new RadialGradient(0, 0, x, y, RESOLUTION,
-                                                                 false, CycleMethod.NO_CYCLE,
-                                                                 new Stop(0, Color.color(color.getRed(), color.getGreen(), color.getBlue(), getHeatMapOpacity())),
-                                                                 new Stop(1, Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.0)));
+                    final Color          color    = useColorMapping ? getColorForValue(value) : getColorForValue(value, isDiscreteColors());
+                    final double         red      = color.getRed();
+                    final double         green    = color.getGreen();
+                    final double         blue     = color.getBlue();
+
+                    final RadialGradient gradient = new RadialGradient(0, 0, x, y, resolution,
+                                                                       false, CycleMethod.NO_CYCLE,
+                                                                       new Stop(0, Color.color(red, green, blue, heatMapOpacity)),
+                                                                       new Stop(1, Color.color(red, green, blue, 0.0)));
                     ctx.setFill(gradient);
-                    ctx.fillOval(x - RESOLUTION, y - RESOLUTION, pixelSize, pixelSize);
+
+                    ctx.fillOval(x - resolution, y - resolution, pixelSize, pixelSize);
                 }
             }
         }
@@ -452,20 +460,21 @@ public class AreaHeatMap extends Region {
         ctx.setTextAlign(TextAlignment.CENTER);
         ctx.setTextBaseline(VPos.CENTER);
         ctx.setFont(Fonts.opensansRegular(size * 0.0175));
+        ctx.setStroke(Color.BLACK);
 
-        for (int i = 0 ; i < points.size() ; i++) {
-            DataPoint point = points.get(i);
+        points.stream().forEach(point -> {
+            final double centerX = point.getX() - 8;
+            final double centerY = point.getY() - 8;
 
-            ctx.setFill(Color.rgb(255, 255, 255, 0.5));
-            ctx.fillOval(point.getX() - 8, point.getY() - 8, 16, 16);
+            ctx.setFill(HALF_WHITE);
+            ctx.fillOval(centerX, centerY, 16, 16);
 
-            //ctx.setStroke(getUseColorMapping() ? getColorForValue(point.getValue(), 1) : getColorForValue(point.getValue(), isDiscreteColors()));
             ctx.setStroke(Color.BLACK);
-            ctx.strokeOval(point.getX() - 8, point.getY() - 8, 16, 16);
+            ctx.strokeOval(centerX, centerY, 16, 16);
 
             ctx.setFill(Color.BLACK);
             ctx.fillText(Long.toString(Math.round(point.getValue())), point.getX(), point.getY(), 16);
-        }
+        });
     }
 
 
@@ -485,7 +494,7 @@ public class AreaHeatMap extends Region {
     }
 
     private void redraw() {
-        draw(getNoOfCloserInfluentPoints(), getQuality());
+        draw(getNoOfCloserInfluentPoints(), getQuality().getFactor(), getQuality().getPixelSize());
         if (getShowDataPoints()) { drawDataPoints(); }
     }
 }

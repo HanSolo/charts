@@ -24,6 +24,7 @@ import eu.hansolo.fx.charts.areaheatmap.AreaHeatMapBuilder;
 import eu.hansolo.fx.charts.data.DataPoint;
 import eu.hansolo.fx.heatmap.ColorMapping;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
 import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.Scene;
@@ -43,28 +44,39 @@ public class AreaHeatMapTest extends Application {
     private AreaHeatMap areaHeatMap;
 
     @Override public void init() {
-        List<DataPoint> randomPoints = new ArrayList<>(29);
-        //randomPoints.add(new DataPoint(0, 0, 0));
-        //randomPoints.add(new DataPoint(400, 0, 0));
-        //randomPoints.add(new DataPoint(400, 400, 0));
-        //randomPoints.add(new DataPoint(0, 400, 0));
+        final List<DataPoint> randomPoints = new ArrayList<>(29);
         for (int counter = 0 ; counter < 25 ; counter++) {
             double x = RND.nextDouble() * 400;
             double y = RND.nextDouble() * 400;
             double v = RND.nextDouble() * 100 - 50;
             randomPoints.add(new DataPoint(x, y, v));
         }
-
         areaHeatMap = AreaHeatMapBuilder.create()
-                                        .prefSize(400, 400)
-                                        .colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
-                                        .quality(Quality.FINE)
-                                        .heatMapOpacity(0.5)
-                                        .useColorMapping(true)
-                                        .dataPointsVisible(true)
-                                        .noOfCloserInfluentialPoints(5)
-                                        .dataPoints(randomPoints)
-                                        .build();
+                                 .prefSize(400, 400)
+                                 .colorMapping(ColorMapping.BLUE_CYAN_GREEN_YELLOW_RED)
+                                 .quality(Quality.STANDARD)
+                                 .heatMapOpacity(0.5)
+                                 .useColorMapping(true)
+                                 .dataPointsVisible(true)
+                                 .noOfCloserInfluentialPoints(5)
+                                 .dataPoints(randomPoints)
+                                 .discreteColors(false)
+                                 .build();
+
+        registerListeners();
+    }
+
+    private void registerListeners() {
+        areaHeatMap.setOnMousePressed(e -> {
+            final List<DataPoint> randomPoints = new ArrayList<>(29);
+            for (int counter = 0 ; counter < 25 ; counter++) {
+                double x = RND.nextDouble() * 400;
+                double y = RND.nextDouble() * 400;
+                double v = RND.nextDouble() * 100 - 50;
+                randomPoints.add(new DataPoint(x, y, v));
+            }
+            areaHeatMap.setDataPoints(randomPoints);
+        });
     }
 
     @Override public void start(Stage stage) {

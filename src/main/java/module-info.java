@@ -14,6 +14,7 @@ module eu.hansolo.fx.charts {
     requires ch.qos.logback.classic;
     requires org.slf4j;
     requires transitive eu.hansolo.fx.countries;
+    requires java.desktop;
 
     opens eu.hansolo.fx.geometry to eu.hansolo.fx.countries;
     opens eu.hansolo.fx.geometry.tools to eu.hansolo.fx.countries;

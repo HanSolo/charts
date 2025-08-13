@@ -109,6 +109,10 @@ related to imports, required modules etc.
 ![Radar chart](https://i.ibb.co/mJ9JhPD/Radar-Chart-2020-09-04-08-03-50.png)
 
 
+## Spider chart
+![Spider chart](https://i.ibb.co/dwNGW72J/spiderchart.png)
+
+
 ## Ridge line chart
 ![Ridge line chart](https://i.ibb.co/Ycmg6S0/Ridge-Line-Chart-2020-09-04-08-04-10.png)
 

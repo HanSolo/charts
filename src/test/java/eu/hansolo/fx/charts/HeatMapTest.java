@@ -67,6 +67,7 @@ public class HeatMapTest extends Application {
 
         stage.setTitle("HeatMap (move mouse over pane)");
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 

@@ -1,0 +1,177 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright 2016-2025 Gerrit Grunwald.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package eu.hansolo.fx.charts;
+
+import eu.hansolo.fx.charts.data.XYItem;
+import eu.hansolo.fx.charts.tools.Helper;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.StringPropertyBase;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
+
+import java.awt.image.BufferedImage;
+
+
+public class SpiderChart<T extends XYItem> extends Region {
+    private static final double         PREFERRED_WIDTH  = 400;
+    private static final double         PREFERRED_HEIGHT = 400;
+    private static final double         MINIMUM_WIDTH    = 50;
+    private static final double         MINIMUM_HEIGHT   = 50;
+    private static final double         MAXIMUM_WIDTH    = 4096;
+    private static final double         MAXIMUM_HEIGHT   = 4096;
+    private              double         size;
+    private              double         width;
+    private              double         height;
+    private              XYPane<T>      xyPane;
+    private              String         _title;
+    private              StringProperty title;
+    private              String         _subTitle;
+    private              StringProperty subTitle;
+    private              AnchorPane     pane;
+
+
+    // ******************** Constructors **************************************
+    public SpiderChart(final XYPane<T> XY_PANE) {
+        if (null == XY_PANE) { throw new IllegalArgumentException("XYPane has not to be null"); }
+        if (!XY_PANE.containsSpiderChart()) { throw new IllegalArgumentException("No Spider chart in XYPane"); }
+        xyPane = XY_PANE;
+        width  = PREFERRED_WIDTH;
+        height = PREFERRED_HEIGHT;
+        initGraphics();
+        registerListeners();
+    }
+
+
+    // ******************** Initialization ************************************
+    private void initGraphics() {
+        if (Double.compare(getPrefWidth(), 0.0) <= 0 || Double.compare(getPrefHeight(), 0.0) <= 0 || Double.compare(getWidth(), 0.0) <= 0 ||
+            Double.compare(getHeight(), 0.0) <= 0) {
+            if (getPrefWidth() > 0 && getPrefHeight() > 0) {
+                setPrefSize(getPrefWidth(), getPrefHeight());
+            } else {
+                setPrefSize(PREFERRED_WIDTH, PREFERRED_HEIGHT);
+            }
+        }
+
+        pane = new AnchorPane(xyPane);
+
+        getChildren().setAll(pane);
+    }
+
+    private void registerListeners() {
+        widthProperty().addListener(o -> resize());
+        heightProperty().addListener(o -> resize());
+    }
+
+
+    // ******************** Methods *******************************************
+    @Override protected double computeMinWidth(final double HEIGHT) { return MINIMUM_WIDTH; }
+    @Override protected double computeMinHeight(final double WIDTH) { return MINIMUM_HEIGHT; }
+    @Override protected double computePrefWidth(final double HEIGHT) { return super.computePrefWidth(HEIGHT); }
+    @Override protected double computePrefHeight(final double WIDTH) { return super.computePrefHeight(WIDTH); }
+    @Override protected double computeMaxWidth(final double HEIGHT) { return MAXIMUM_WIDTH; }
+    @Override protected double computeMaxHeight(final double WIDTH) { return MAXIMUM_HEIGHT; }
+
+    @Override public ObservableList<Node> getChildren() { return super.getChildren(); }
+
+    public String getTitle() { return null == title ? _title : title.get(); }
+    public void setTitle(final String TITLE) {
+        if (null == title) {
+            _title = TITLE;
+            xyPane.redraw();
+        } else {
+            title.set(TITLE);
+        }
+    }
+    public StringProperty titleProperty() {
+        if (null == title) {
+            title = new StringPropertyBase(_title) {
+                @Override protected void invalidated() { xyPane.redraw(); }
+                @Override public Object getBean() { return SpiderChart.this; }
+                @Override public String getName() { return "title"; }
+            };
+            _title = null;
+        }
+        return title;
+    }
+
+    public String getSubTitle() { return null == subTitle ? _subTitle : subTitle.get(); }
+    public void setSubTitle(final String SUB_TITLE) {
+        if (null == subTitle) {
+            _subTitle = SUB_TITLE;
+            xyPane.redraw();
+        } else {
+            subTitle.set(SUB_TITLE);
+        }
+    }
+    public StringProperty subTitleProperty() {
+        if (null == subTitle) {
+            subTitle = new StringPropertyBase(_subTitle) {
+                @Override protected void invalidated() { xyPane.redraw(); }
+                @Override public Object getBean() { return SpiderChart.this; }
+                @Override public String getName() { return "subTitle"; }
+            };
+            _subTitle = null;
+        }
+        return subTitle;
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param filename The path and name of the file  /Users/hansolo/Desktop/plot.png
+     * @param width The width of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @param height The height of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @return True if the procedure was successful, otherwise false
+     */
+    public boolean renderToImage(final String filename, final int width, final int height) {
+        return Helper.renderToImage(SpiderChart.this, width, height, filename);
+    }
+
+    /**
+     * Calling this method will render this chart/plot to a png given of the given width and height
+     * @param width The width of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @param height The height of the final image in pixels (if &lt; 0 then 400 and if &gt; 4096 then 4096)
+     * @return A BufferedImage of this chart in the given dimension
+     */
+    public BufferedImage renderToImage(final int width, final int height) {
+        return Helper.renderToImage(SpiderChart.this, width, height);
+    }
+
+    public XYPane<T> getXYPane() { return xyPane; }
+
+    public void refresh() { xyPane.redraw(); }
+
+
+    // ******************** Resizing ******************************************
+    private void resize() {
+        width  = getWidth() - getInsets().getLeft() - getInsets().getRight();
+        height = getHeight() - getInsets().getTop() - getInsets().getBottom();
+        size   = width < height ? width : height;
+
+        if (width > 0 && height > 0) {
+            pane.setMaxSize(size, size);
+            pane.setPrefSize(size, size);
+            pane.relocate((getWidth() - size) * 0.5, (getHeight() - size) * 0.5);
+            xyPane.setMaxSize(size, size);
+            xyPane.setPrefSize(size, size);
+        }
+    }
+}
