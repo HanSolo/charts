@@ -11,7 +11,7 @@ module eu.hansolo.fx.charts {
     requires javafx.swing;
 
     // 3rd party
-    requires ch.qos.logback.classic;
+    requires static ch.qos.logback.classic;
     requires org.slf4j;
     requires transitive eu.hansolo.fx.countries;
     requires java.desktop;
